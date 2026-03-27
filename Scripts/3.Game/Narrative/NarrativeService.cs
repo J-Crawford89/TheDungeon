@@ -63,18 +63,18 @@ public sealed class NarrativeService
 		};
 	}
 
-    public string ForMoveDownFloor(ExplorationServiceResult result)
-    {
-        if (result.Success && result.DestinationAfterMove is { } destination && result.FloorAfterMove is { } floor)
-            return $"You descend to level {floor}. You are in room {destination}.";
+	public string ForMoveDownFloor(ExplorationServiceResult result)
+	{
+		if (result.Success && result.DestinationAfterMove is { } destination && result.FloorAfterMove is { } floor)
+			return $"You descend to level {floor}. You are in room {destination}.";
 
-        return result.ErrorCode switch
-        {
-            _ => "You cannot go that way."
-        };
-    }
+		return result.ErrorCode switch
+		{
+			_ => "You cannot go that way."
+		};
+	}
 
-    private static string FormatInspectRoom(InspectRoomData data)
+	private static string FormatInspectRoom(InspectRoomData data)
 	{
 		var description = new StringBuilder();
 		description.Append("Exits: ");

@@ -15,7 +15,7 @@ public static class TreasureLibrary
 		Id = "health_potion",
 		Name = "A health potion",
 		GrantKind = TreasureKind.InventoryItem,
-		InventoryItemId = InventoryConstants.HealthPotionItemId
+		InventoryItemId = InventoryIds.HealthPotionItemId
 	};
 
 	public static IReadOnlyList<TreasureDefinition> All => new[] { CopperCoins, HealthPotion };

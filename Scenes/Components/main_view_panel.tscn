@@ -105,10 +105,10 @@ texture = ExtResource("3_5xurg")
 
 [node name="FeatureCenter" type="CenterContainer" parent="MainViewMargin/MainViewContent/ViewArea/Stage" unique_id=617893030]
 layout_mode = 0
-offset_left = 357.0
-offset_top = 296.0
-offset_right = 397.0
-offset_bottom = 336.0
+offset_left = 138.0
+offset_top = 247.0
+offset_right = 621.0
+offset_bottom = 387.0
 
 [node name="FeatureContainer" type="HBoxContainer" parent="MainViewMargin/MainViewContent/ViewArea/Stage/FeatureCenter" unique_id=1931287618]
 layout_mode = 2

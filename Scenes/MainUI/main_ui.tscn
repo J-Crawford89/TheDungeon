@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" uid="uid://cfx2hqwl75vnx" path="res://Scenes/MainUI/MainUi.cs" id="1_rfgyb"]
 [ext_resource type="PackedScene" uid="uid://bx0fd15n0csbl" path="res://Scenes/Components/main_view_panel.tscn" id="2_jr3w4"]
-[ext_resource type="Script" uid="uid://bvpxqc0grgt5d" path="res://Scenes/MainUI/CharacterPanel.cs" id="3_day7x"]
-[ext_resource type="Script" uid="uid://d180hc28fc442" path="res://Scenes/MainUI/CommandPanel.cs" id="4_j28lw"]
-[ext_resource type="Script" uid="uid://cfjrg080ks7r" path="res://Scenes/MainUI/LogPanel.cs" id="5_gx3yi"]
-[ext_resource type="Script" uid="uid://bmaaavgl3e2yc" path="res://Scenes/MainUI/MapPanel.cs" id="5_ksueo"]
+[ext_resource type="Script" uid="uid://pxiuss8lti0r" path="res://Scenes/MainUI/CharacterPanel.cs" id="3_day7x"]
+[ext_resource type="Script" uid="uid://bue4b5pexspxg" path="res://Scenes/MainUI/CommandPanel.cs" id="4_j28lw"]
+[ext_resource type="Script" uid="uid://ctv0hvnb2hsny" path="res://Scenes/MainUI/LogPanel.cs" id="5_gx3yi"]
+[ext_resource type="Script" uid="uid://c027v8qr0q08n" path="res://Scenes/MainUI/MapPanel.cs" id="5_ksueo"]
 [ext_resource type="Script" uid="uid://t7duod6dlknd" path="res://Scenes/Components/MapView.cs" id="6_jr3w4"]
 [ext_resource type="PackedScene" uid="uid://btjn7k3t3388k" path="res://Scenes/Components/LogEntryControl.tscn" id="8_jr3w4"]
 

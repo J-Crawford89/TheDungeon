@@ -45,6 +45,8 @@ public partial class MainUi : Control
 
 	public override void _Ready()
 	{
+		LogArchive.FileWriter = new GodotLogFileWriter();
+		
 		Position = new Vector2(0,0);
 		Size = GetViewportRect().Size;
 		GetViewport().SizeChanged += () => Size = GetViewportRect().Size;
