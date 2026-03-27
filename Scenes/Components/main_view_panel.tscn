@@ -1,0 +1,114 @@
+[gd_scene format=3 uid="uid://bx0fd15n0csbl"]
+
+[ext_resource type="Script" uid="uid://c4nl6ciqji17a" path="res://Scenes/Components/MainViewPanel.cs" id="1_hh1ju"]
+[ext_resource type="Texture2D" uid="uid://dl3mwhc4s5xxk" path="res://Assets/PrototypeAssets/Background.png" id="2_ydaod"]
+[ext_resource type="Texture2D" uid="uid://dgdid3wsi11hc" path="res://Assets/PrototypeAssets/Door.png" id="3_5xurg"]
+[ext_resource type="Texture2D" uid="uid://d0f0ygfinohfb" path="res://Assets/PrototypeAssets/Passage.png" id="4_yj4sx"]
+[ext_resource type="Texture2D" uid="uid://brgtdq2ffhcug" path="res://Assets/PrototypeAssets/Rat.png" id="5_ghlj3"]
+[ext_resource type="Texture2D" uid="uid://bq7fkrinl6s1c" path="res://Assets/PrototypeAssets/GiantRat.png" id="6_htkoi"]
+[ext_resource type="Texture2D" uid="uid://b3n8mh18joiyc" path="res://Assets/PrototypeAssets/RatKing.png" id="7_ewaih"]
+[ext_resource type="Texture2D" uid="uid://ttxdxm54rnj4" path="res://Assets/PrototypeAssets/Coins.png" id="8_d2fe7"]
+[ext_resource type="Texture2D" uid="uid://cen40agknmvhr" path="res://Assets/PrototypeAssets/HealthPotion.png" id="9_wl637"]
+[ext_resource type="Texture2D" uid="uid://lx02hh3b4jrr" path="res://Assets/PrototypeAssets/Lore.png" id="10_jce2p"]
+[ext_resource type="Texture2D" uid="uid://ct2knpbbjq75l" path="res://Assets/PrototypeAssets/NPC.png" id="11_fv5g4"]
+[ext_resource type="Texture2D" uid="uid://4s2xtg0vthh4" path="res://Assets/PrototypeAssets/Trap.png" id="12_cffhd"]
+[ext_resource type="Texture2D" uid="uid://dstbbjkmh1imt" path="res://Assets/PrototypeAssets/Stairs.png" id="13_pjnii"]
+[ext_resource type="Texture2D" uid="uid://dtc0xg1xqd70b" path="res://Assets/PrototypeAssets/Hole.png" id="14_ha37f"]
+[ext_resource type="Texture2D" uid="uid://bshjebxlomxb6" path="res://Assets/PrototypeAssets/Ladder.png" id="15_15r8l"]
+
+[node name="MainViewPanel" type="PanelContainer" unique_id=1544386070 node_paths=PackedStringArray("_viewArea", "_stage", "_mainViewTitle", "_backgroundRect", "_leftWallRect", "_backWallRect", "_rightWallRect", "_featureContainer")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hh1ju")
+_viewArea = NodePath("MainViewMargin/MainViewContent/ViewArea")
+_stage = NodePath("MainViewMargin/MainViewContent/ViewArea/Stage")
+_mainViewTitle = NodePath("MainViewMargin/MainViewContent/MainViewTitle")
+_backgroundRect = NodePath("MainViewMargin/MainViewContent/ViewArea/Stage/BackgroundRect")
+_leftWallRect = NodePath("MainViewMargin/MainViewContent/ViewArea/Stage/LeftWallRect")
+_backWallRect = NodePath("MainViewMargin/MainViewContent/ViewArea/Stage/BackWallRect")
+_rightWallRect = NodePath("MainViewMargin/MainViewContent/ViewArea/Stage/RightWallRect")
+_featureContainer = NodePath("MainViewMargin/MainViewContent/ViewArea/Stage/FeatureCenter/FeatureContainer")
+_backgroundTexture = ExtResource("2_ydaod")
+_doorTexture = ExtResource("3_5xurg")
+_passageTexture = ExtResource("4_yj4sx")
+_ratTexture = ExtResource("5_ghlj3")
+_giantRatTexture = ExtResource("6_htkoi")
+_ratKingTexture = ExtResource("7_ewaih")
+_coinsTexture = ExtResource("8_d2fe7")
+_healthPotionTexture = ExtResource("9_wl637")
+_loreTexture = ExtResource("10_jce2p")
+_npcTexture = ExtResource("11_fv5g4")
+_trapTexture = ExtResource("12_cffhd")
+_stairsTexture = ExtResource("13_pjnii")
+_holeTexture = ExtResource("14_ha37f")
+_ladderTexture = ExtResource("15_15r8l")
+
+[node name="MainViewMargin" type="MarginContainer" parent="." unique_id=1190998000]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="MainViewContent" type="VBoxContainer" parent="MainViewMargin" unique_id=634303958]
+layout_mode = 2
+
+[node name="MainViewTitle" type="Label" parent="MainViewMargin/MainViewContent" unique_id=96927404]
+layout_mode = 2
+text = "Main View"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ViewArea" type="Control" parent="MainViewMargin/MainViewContent" unique_id=531416092]
+clip_contents = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Stage" type="Control" parent="MainViewMargin/MainViewContent/ViewArea" unique_id=1564715423]
+anchors_preset = 0
+offset_right = 744.0
+offset_bottom = 404.0
+
+[node name="BackgroundRect" type="TextureRect" parent="MainViewMargin/MainViewContent/ViewArea/Stage" unique_id=2021149292]
+layout_mode = 0
+offset_right = 744.0
+offset_bottom = 404.0
+texture = ExtResource("2_ydaod")
+
+[node name="LeftWallRect" type="TextureRect" parent="MainViewMargin/MainViewContent/ViewArea/Stage" unique_id=1585095492]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 97.0
+offset_right = 185.0
+offset_bottom = 310.0
+texture = ExtResource("3_5xurg")
+stretch_mode = 3
+
+[node name="BackWallRect" type="TextureRect" parent="MainViewMargin/MainViewContent/ViewArea/Stage" unique_id=234835082]
+layout_mode = 0
+offset_left = 308.0
+offset_top = 57.0
+offset_right = 443.0
+offset_bottom = 270.0
+texture = ExtResource("3_5xurg")
+
+[node name="RightWallRect" type="TextureRect" parent="MainViewMargin/MainViewContent/ViewArea/Stage" unique_id=414179867]
+layout_mode = 0
+offset_left = 574.0
+offset_top = 110.0
+offset_right = 709.0
+offset_bottom = 323.0
+texture = ExtResource("3_5xurg")
+
+[node name="FeatureCenter" type="CenterContainer" parent="MainViewMargin/MainViewContent/ViewArea/Stage" unique_id=617893030]
+layout_mode = 0
+offset_left = 357.0
+offset_top = 296.0
+offset_right = 397.0
+offset_bottom = 336.0
+
+[node name="FeatureContainer" type="HBoxContainer" parent="MainViewMargin/MainViewContent/ViewArea/Stage/FeatureCenter" unique_id=1931287618]
+layout_mode = 2

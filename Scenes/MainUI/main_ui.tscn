@@ -1,0 +1,248 @@
+[gd_scene format=3 uid="uid://bc2475eo0k8hf"]
+
+[ext_resource type="Script" uid="uid://cfx2hqwl75vnx" path="res://Scenes/MainUI/MainUi.cs" id="1_rfgyb"]
+[ext_resource type="PackedScene" uid="uid://bx0fd15n0csbl" path="res://Scenes/Components/main_view_panel.tscn" id="2_jr3w4"]
+[ext_resource type="Script" uid="uid://bvpxqc0grgt5d" path="res://Scenes/MainUI/CharacterPanel.cs" id="3_day7x"]
+[ext_resource type="Script" uid="uid://d180hc28fc442" path="res://Scenes/MainUI/CommandPanel.cs" id="4_j28lw"]
+[ext_resource type="Script" uid="uid://cfjrg080ks7r" path="res://Scenes/MainUI/LogPanel.cs" id="5_gx3yi"]
+[ext_resource type="Script" uid="uid://bmaaavgl3e2yc" path="res://Scenes/MainUI/MapPanel.cs" id="5_ksueo"]
+[ext_resource type="Script" uid="uid://t7duod6dlknd" path="res://Scenes/Components/MapView.cs" id="6_jr3w4"]
+[ext_resource type="PackedScene" uid="uid://btjn7k3t3388k" path="res://Scenes/Components/LogEntryControl.tscn" id="8_jr3w4"]
+
+[node name="MainUI" type="Control" unique_id=1749426459 node_paths=PackedStringArray("_mainViewPanel", "_characterPanel", "_commandPanel", "_logPanel", "_mapPanel")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_rfgyb")
+_mainViewPanel = NodePath("RootMargin/MainVBox/Row1/MainViewPanel")
+_characterPanel = NodePath("RootMargin/MainVBox/Row1/CharacterPanel")
+_commandPanel = NodePath("RootMargin/MainVBox/Row2/CommandPanel")
+_logPanel = NodePath("RootMargin/MainVBox/Row2/LogPanel")
+_mapPanel = NodePath("RootMargin/MainVBox/Row2/MapPanel")
+CaptureDebugDiagnostics = true
+
+[node name="RootMargin" type="MarginContainer" parent="." unique_id=864533212]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="MainVBox" type="VBoxContainer" parent="RootMargin" unique_id=916642082]
+layout_mode = 2
+
+[node name="Row1" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=1781028955]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="MainViewPanel" parent="RootMargin/MainVBox/Row1" unique_id=1544386070 instance=ExtResource("2_jr3w4")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
+
+[node name="CharacterPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row1" unique_id=308191709 node_paths=PackedStringArray("_hpLabel", "_levelLabel", "_goldLabel", "_equipmentLabel")]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_day7x")
+_hpLabel = NodePath("CharacterMargin/CharacterContent/HpLabel")
+_levelLabel = NodePath("CharacterMargin/CharacterContent/LevelLabel")
+_goldLabel = NodePath("CharacterMargin/CharacterContent/GoldLabel")
+_equipmentLabel = NodePath("CharacterMargin/CharacterContent/EquipmentLabel")
+
+[node name="CharacterMargin" type="MarginContainer" parent="RootMargin/MainVBox/Row1/CharacterPanel" unique_id=974340699]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="CharacterContent" type="VBoxContainer" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin" unique_id=1687298504]
+layout_mode = 2
+
+[node name="CharacterTitle" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=892829756]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "CHARACTER"
+horizontal_alignment = 1
+
+[node name="CharacterNameLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1906269824]
+layout_mode = 2
+text = "NAME: Testy McTestface"
+
+[node name="HpLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=693056844]
+layout_mode = 2
+text = "HP: 10/10"
+
+[node name="LevelLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1023744068]
+layout_mode = 2
+text = "Level: 1"
+
+[node name="EquipmentLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1702742806]
+layout_mode = 2
+text = "Items: None"
+
+[node name="GoldLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1278620353]
+layout_mode = 2
+text = "Gold: 0"
+
+[node name="Row2" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=1152348812]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CommandPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row2" unique_id=786944443 node_paths=PackedStringArray("_forwardButton", "_backwardButton", "_leftButton", "_rightButton", "_inspectButton", "_floorUpButton", "_floorDownButton", "_attackButton", "_fleeButton", "_takeButton", "_potionButton")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.2
+script = ExtResource("4_j28lw")
+_forwardButton = NodePath("CommandMargin/CommandContent/ButtonGrid/ForwardButton")
+_backwardButton = NodePath("CommandMargin/CommandContent/ButtonGrid/BackwardButton")
+_leftButton = NodePath("CommandMargin/CommandContent/ButtonGrid/LeftButton")
+_rightButton = NodePath("CommandMargin/CommandContent/ButtonGrid/RightButton")
+_inspectButton = NodePath("CommandMargin/CommandContent/ButtonGrid/InspectButton")
+_floorUpButton = NodePath("CommandMargin/CommandContent/ButtonGrid/FloorUpButton")
+_floorDownButton = NodePath("CommandMargin/CommandContent/ButtonGrid/FloorDownButton")
+_attackButton = NodePath("CommandMargin/CommandContent/ButtonGrid/AttackButton")
+_fleeButton = NodePath("CommandMargin/CommandContent/ButtonGrid/FleeButton")
+_takeButton = NodePath("CommandMargin/CommandContent/ButtonGrid/TakeButton")
+_potionButton = NodePath("CommandMargin/CommandContent/ButtonGrid/PotionButton")
+
+[node name="CommandMargin" type="MarginContainer" parent="RootMargin/MainVBox/Row2/CommandPanel" unique_id=1719189521]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="CommandContent" type="VBoxContainer" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin" unique_id=1778583737]
+layout_mode = 2
+
+[node name="CommandTitle" type="Label" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent" unique_id=1533325081]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "COMMAND"
+horizontal_alignment = 1
+
+[node name="ButtonGrid" type="GridContainer" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent" unique_id=1234738609]
+layout_mode = 2
+columns = 2
+
+[node name="ForwardButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=321784280]
+layout_mode = 2
+text = "Move Forward"
+
+[node name="BackwardButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=20410519]
+layout_mode = 2
+text = "Turn Around"
+
+[node name="LeftButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=1255745802]
+layout_mode = 2
+text = "Turn Left"
+
+[node name="RightButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=1718776760]
+layout_mode = 2
+text = "Turn Right"
+
+[node name="InspectButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=1775105188]
+layout_mode = 2
+text = "Inspect"
+
+[node name="FloorUpButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=753505196]
+layout_mode = 2
+text = "Go Up a Floor"
+
+[node name="FloorDownButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=2089135985]
+layout_mode = 2
+text = "Go Down a Floor"
+
+[node name="AttackButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=804351715]
+layout_mode = 2
+text = "Attack"
+
+[node name="FleeButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=323273513]
+layout_mode = 2
+text = "Flee"
+
+[node name="TakeButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=373204308]
+layout_mode = 2
+text = "Take"
+
+[node name="PotionButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=942607446]
+layout_mode = 2
+text = "Potion"
+
+[node name="MapPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row2" unique_id=1329682580 node_paths=PackedStringArray("_mapView")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.8
+script = ExtResource("5_ksueo")
+_mapView = NodePath("MapMargin/MapContent/MapView")
+
+[node name="MapMargin" type="MarginContainer" parent="RootMargin/MainVBox/Row2/MapPanel" unique_id=1536957609]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="MapContent" type="VBoxContainer" parent="RootMargin/MainVBox/Row2/MapPanel/MapMargin" unique_id=1576017114]
+layout_mode = 2
+
+[node name="MapTitle" type="Label" parent="RootMargin/MainVBox/Row2/MapPanel/MapMargin/MapContent" unique_id=1493131742]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "MAP"
+horizontal_alignment = 1
+
+[node name="MapView" type="Control" parent="RootMargin/MainVBox/Row2/MapPanel/MapMargin/MapContent" unique_id=986129245]
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("6_jr3w4")
+
+[node name="LogPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row2" unique_id=1424470012 node_paths=PackedStringArray("_logEntriesContainer")]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("5_gx3yi")
+_logEntriesContainer = NodePath("LogMargin/LogContent/LogScrollContainer/LogEntriesContainer")
+_logEntryScene = ExtResource("8_jr3w4")
+
+[node name="LogMargin" type="MarginContainer" parent="RootMargin/MainVBox/Row2/LogPanel" unique_id=1943077346]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="LogContent" type="VBoxContainer" parent="RootMargin/MainVBox/Row2/LogPanel/LogMargin" unique_id=1969442363]
+layout_mode = 2
+
+[node name="LogTitle" type="Label" parent="RootMargin/MainVBox/Row2/LogPanel/LogMargin/LogContent" unique_id=169784215]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "LOG"
+horizontal_alignment = 1
+
+[node name="LogText" type="RichTextLabel" parent="RootMargin/MainVBox/Row2/LogPanel/LogMargin/LogContent" unique_id=2081386032]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+text = "You enter the dungeon."
+scroll_following = true
+
+[node name="LogScrollContainer" type="ScrollContainer" parent="RootMargin/MainVBox/Row2/LogPanel/LogMargin/LogContent" unique_id=1567130083]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LogEntriesContainer" type="VBoxContainer" parent="RootMargin/MainVBox/Row2/LogPanel/LogMargin/LogContent/LogScrollContainer" unique_id=1118602101]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4

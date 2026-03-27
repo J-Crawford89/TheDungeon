@@ -1,0 +1,73 @@
+# Default: normalize line endings to LF in the repo; checkout uses native or LF per Git config.
+* text=auto eol=lf
+
+# Windows scripts: keep CRLF where tools expect it
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Shell / Unix scripts
+*.sh text eol=lf
+
+# C# / solution
+*.cs text diff=csharp
+*.csproj text
+*.sln text
+*.props text
+*.targets text
+
+# Godot text formats
+*.tscn text
+*.tres text
+*.gd text
+*.gdshader text
+*.shader text
+*.import text
+*.uid text
+*.godot text
+
+# Config / docs
+*.json text
+*.xml text
+*.yml text
+*.yaml text
+*.txt text
+*.md text
+
+# -----------------------------------------------------------------------------
+# Binary assets (do not apply text/CRLF normalization)
+# -----------------------------------------------------------------------------
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.bmp binary
+*.ico binary
+*.tif binary
+*.tiff binary
+*.tga binary
+*.dds binary
+*.ktx binary
+*.ktx2 binary
+*.basis binary
+
+*.wav binary
+*.ogg binary
+*.mp3 binary
+*.flac binary
+
+*.glb binary
+*.gltf binary
+*.obj binary
+*.fbx binary
+*.dae binary
+*.blend binary
+
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+
+*.exr binary
+*.hdr binary
