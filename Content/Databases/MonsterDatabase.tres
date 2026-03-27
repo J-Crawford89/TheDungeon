@@ -2,8 +2,10 @@
 
 [ext_resource type="Script" uid="uid://h3kt4eef0b3n" path="res://Resources/MonsterResource.cs" id="1_gkvmy"]
 [ext_resource type="Resource" uid="uid://bp7nvkbjuavh1" path="res://Content/Monsters/Rat.tres" id="2_wgopk"]
+[ext_resource type="Resource" uid="uid://bhplrng7sf8ix" path="res://Content/Monsters/GiantRat.tres" id="3_2a706"]
 [ext_resource type="Script" uid="uid://biy5vuuaenii1" path="res://Resources/Databases/MonsterResourceDatabase.cs" id="3_v1wqr"]
+[ext_resource type="Resource" uid="uid://8xwnbf8nrx4k" path="res://Content/Monsters/RatKing.tres" id="4_4etrl"]
 
 [resource]
 script = ExtResource("3_v1wqr")
-Monsters = Array[ExtResource("1_gkvmy")]([ExtResource("2_wgopk")])
+Monsters = Array[ExtResource("1_gkvmy")]([ExtResource("2_wgopk"), ExtResource("3_2a706"), ExtResource("4_4etrl")])

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="TrapResourceDatabase" format=3 uid="uid://bmla6ethc6nmo"]
+
+[ext_resource type="Script" uid="uid://bmvsqkv3o05c4" path="res://Resources/TrapResource.cs" id="1_rgna1"]
+[ext_resource type="Script" uid="uid://csa5kdrlj6hk3" path="res://Resources/Databases/TrapResourceDatabase.cs" id="2_bwxvr"]
+[ext_resource type="Resource" uid="uid://nk1sow88pe05" path="res://Content/Traps/Snare.tres" id="2_m6nyr"]
+
+[resource]
+script = ExtResource("2_bwxvr")
+Traps = Array[ExtResource("1_rgna1")]([ExtResource("2_m6nyr")])

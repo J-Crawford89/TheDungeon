@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="MonsterResource" format=3 uid="uid://8xwnbf8nrx4k"]
+
+[ext_resource type="Script" uid="uid://h3kt4eef0b3n" path="res://Resources/MonsterResource.cs" id="1_u437f"]
+
+[resource]
+script = ExtResource("1_u437f")
+Id = "rat_king"
+Name = "Rat King"
+MaxHp = 25
+Attack = 5
+Defense = 13
+IsBoss = true
+RandomizerWeight = 5

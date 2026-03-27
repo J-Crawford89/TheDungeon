@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="LoreResourceDatabase" format=3 uid="uid://ct4psy1ri1xjn"]
+
+[ext_resource type="Script" uid="uid://b1ox3330uhj23" path="res://Resources/LoreResource.cs" id="1_syo42"]
+[ext_resource type="Resource" uid="uid://bp1itaho3irs8" path="res://Content/Lore/StoneTablet.tres" id="2_gxdoy"]
+[ext_resource type="Script" uid="uid://d1bo7wms32tkg" path="res://Resources/Databases/LoreResourceDatabase.cs" id="2_u4pn4"]
+
+[resource]
+script = ExtResource("2_u4pn4")
+LoreEntries = Array[ExtResource("1_syo42")]([ExtResource("2_gxdoy")])

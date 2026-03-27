@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="NpcResource" format=3 uid="uid://cc1dh5y2gpnse"]
+
+[ext_resource type="Script" uid="uid://ecdkf5eapvgl" path="res://Resources/NpcResource.cs" id="1_urp32"]
+
+[resource]
+script = ExtResource("1_urp32")
+Id = "weary_traveler"
+Name = "Weary traveler"

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="TrapResource" format=3 uid="uid://nk1sow88pe05"]
+
+[ext_resource type="Script" uid="uid://bmvsqkv3o05c4" path="res://Resources/TrapResource.cs" id="1_pjoa2"]
+
+[resource]
+script = ExtResource("1_pjoa2")
+Id = "snare"
+Name = "Snare Trap"
+DiscoverDc = 11
+DisarmDc = 10
+Damage = 3

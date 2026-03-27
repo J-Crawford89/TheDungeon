@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="NpcResourceDatabase" format=3 uid="uid://3u2elb0lgi1c"]
+
+[ext_resource type="Script" uid="uid://ecdkf5eapvgl" path="res://Resources/NpcResource.cs" id="1_cqt16"]
+[ext_resource type="Resource" uid="uid://cc1dh5y2gpnse" path="res://Content/NPCs/WearyTraveler.tres" id="2_ak37l"]
+[ext_resource type="Script" uid="uid://ctgha46fyi00m" path="res://Resources/Databases/NpcResourceDatabase.cs" id="2_ocl1v"]
+
+[resource]
+script = ExtResource("2_ocl1v")
+Npcs = Array[ExtResource("1_cqt16")]([ExtResource("2_ak37l")])
