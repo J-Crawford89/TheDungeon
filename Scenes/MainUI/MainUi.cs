@@ -1,34 +1,51 @@
+#nullable enable
 using Godot;
 using System;
 
 public partial class MainUi : Control
 {
-	[Export] private MainViewPanel _mainViewPanel;
-	[Export] private CharacterPanel _characterPanel;
-	[Export] private CommandPanel _commandPanel;
-	[Export] private LogPanel _logPanel;
-	[Export] private MapPanel _mapPanel;
+	[Export] private MainViewPanel _mainViewPanel = null!;
+	[Export] private CharacterPanel _characterPanel = null!;
+	[Export] private CommandPanel _commandPanel = null!;
+	[Export] private LogPanel _logPanel = null!;
+	[Export] private MapPanel _mapPanel = null!;
+
+	[Export] public MonsterResourceDatabase? MonsterDatabase { get; set; }
+	[Export] public TrapResourceDatabase? TrapDatabase { get; set; }
+	[Export] public TreasureResourceDatabase? TreasureDatabase { get; set; }
+	[Export] public NpcResourceDatabase? NpcDatabase { get; set; }
+	[Export] public LoreResourceDatabase? LoreDatabase { get; set; }
 
 	[Export] public bool CaptureDebugDiagnostics { get; set; }
 
 	private readonly GameSessionState _session = new();
 	private readonly Random _random = new();
-	private readonly RoomFeaturePopulationService _roomFeaturePopulation = new();
-	private readonly DungeonBootstrap _dungeonBootstrap;
-	private readonly ExplorationService _explorationService;
 	private readonly NarrativeService _narrativeService = new();
-	private readonly DiceRollService _diceRollService;
-	private readonly ResolutionService _resolutionService;
-	private readonly TreasurePickupService _treasurePickupService;
-	private readonly CombatService _combatService;
-	private readonly PlayerDefeatService _playerDefeatService;
+
+	private RoomFeaturePopulationService _roomFeaturePopulation = null!;
+	private DungeonBootstrap _dungeonBootstrap = null!;
+	private ExplorationService _explorationService = null!;
+	private DiceRollService _diceRollService = null!;
+	private ResolutionService _resolutionService = null!;
+	private TreasurePickupService _treasurePickupService = null!;
+	private CombatService _combatService = null!;
+	private PlayerDefeatService _playerDefeatService = null!;
 
 	private ExplorationUiPresenter _explorationPresenter = null!;
 	private CombatUiPresenter _combatPresenter = null!;
 	private GameUiCoordinator _coordinator = null!;
 
-	public MainUi()
+	public override void _Ready()
 	{
+		LogArchive.FileWriter = new GodotLogFileWriter();
+
+		var monsterRepo = new GodotMonsterDefinitionRepository(MonsterDatabase);
+		var trapRepo = new GodotTrapDefinitionRepository(TrapDatabase);
+		var treasureRepo = new GodotTreasureDefinitionRepository(TreasureDatabase);
+		var npcRepo = new GodotNpcDefinitionRepository(NpcDatabase);
+		var loreRepo = new GodotLoreDefinitionRepository(LoreDatabase);
+
+		_roomFeaturePopulation = new RoomFeaturePopulationService(monsterRepo, trapRepo, treasureRepo, npcRepo, loreRepo);
 		_dungeonBootstrap = new DungeonBootstrap(_roomFeaturePopulation);
 		_explorationService = new ExplorationService(_roomFeaturePopulation);
 		_diceRollService = new DiceRollService(_random);
@@ -41,13 +58,8 @@ public partial class MainUi : Control
 			_narrativeService,
 			_playerDefeatService,
 			_treasurePickupService);
-	}
 
-	public override void _Ready()
-	{
-		LogArchive.FileWriter = new GodotLogFileWriter();
-		
-		Position = new Vector2(0,0);
+		Position = new Vector2(0, 0);
 		Size = GetViewportRect().Size;
 		GetViewport().SizeChanged += () => Size = GetViewportRect().Size;
 

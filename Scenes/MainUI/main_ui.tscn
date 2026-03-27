@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cfx2hqwl75vnx" path="res://Scenes/MainUI/MainUi.cs" id="1_rfgyb"]
 [ext_resource type="PackedScene" uid="uid://bx0fd15n0csbl" path="res://Scenes/Components/main_view_panel.tscn" id="2_jr3w4"]
+[ext_resource type="Resource" uid="uid://r1g7e32020f2" path="res://Content/Databases/MonsterDatabase.tres" id="2_ljsn2"]
 [ext_resource type="Script" uid="uid://pxiuss8lti0r" path="res://Scenes/MainUI/CharacterPanel.cs" id="3_day7x"]
 [ext_resource type="Script" uid="uid://bue4b5pexspxg" path="res://Scenes/MainUI/CommandPanel.cs" id="4_j28lw"]
 [ext_resource type="Script" uid="uid://ctv0hvnb2hsny" path="res://Scenes/MainUI/LogPanel.cs" id="5_gx3yi"]
@@ -22,6 +23,7 @@ _characterPanel = NodePath("RootMargin/MainVBox/Row1/CharacterPanel")
 _commandPanel = NodePath("RootMargin/MainVBox/Row2/CommandPanel")
 _logPanel = NodePath("RootMargin/MainVBox/Row2/LogPanel")
 _mapPanel = NodePath("RootMargin/MainVBox/Row2/MapPanel")
+MonsterDatabase = ExtResource("2_ljsn2")
 CaptureDebugDiagnostics = true
 
 [node name="RootMargin" type="MarginContainer" parent="." unique_id=864533212]

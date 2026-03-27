@@ -6,7 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="Scripts\0.Core\TheDungeon.Core.csproj" />
-    <ProjectReference Include="Scripts\1.Content\TheDungeon.Content.csproj" />
     <ProjectReference Include="Scripts\2.State\TheDungeon.State.csproj" />
     <ProjectReference Include="Scripts\3.Game.Contracts\TheDungeon.Game.Contracts.csproj" />
     <ProjectReference Include="Scripts\3.Game\TheDungeon.Game.csproj" />

@@ -4,6 +4,26 @@ using System.Linq;
 
 public sealed class RoomFeaturePopulationService
 {
+	private readonly IMonsterDefinitionRepository _monsters;
+	private readonly ITrapDefinitionRepository _traps;
+	private readonly ITreasureDefinitionRepository _treasures;
+	private readonly INpcDefinitionRepository _npcs;
+	private readonly ILoreDefinitionRepository _lore;
+
+	public RoomFeaturePopulationService(
+		IMonsterDefinitionRepository monsters,
+		ITrapDefinitionRepository traps,
+		ITreasureDefinitionRepository treasures,
+		INpcDefinitionRepository npcs,
+		ILoreDefinitionRepository lore)
+	{
+		_monsters = monsters;
+		_traps = traps;
+		_treasures = treasures;
+		_npcs = npcs;
+		_lore = lore;
+	}
+
 	public void Populate(
 		DungeonFloor floor,
 		RoomFeaturePopulationParameters parameters,
@@ -86,7 +106,7 @@ public sealed class RoomFeaturePopulationService
 		return candidates[0];
 	}
 
-	private static bool TryPickAndAdd(
+	private bool TryPickAndAdd(
 		DungeonRoom room,
 		RoomFeaturePopulationParameters parameters,
 		Dictionary<PopulateableFeatureKind, FeatureTypeRule> rulesByKind,
@@ -173,7 +193,7 @@ public sealed class RoomFeaturePopulationService
 			_ => null
 		};
 
-	private static RoomFeature CreateFeature(PopulateableFeatureKind kind, Random random) =>
+	private RoomFeature CreateFeature(PopulateableFeatureKind kind, Random random) =>
 		kind switch
 		{
 			PopulateableFeatureKind.Monster => CreateMonsterFeature(random),
@@ -184,66 +204,38 @@ public sealed class RoomFeaturePopulationService
 			_ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
 		};
 
-	private static MonsterFeature CreateMonsterFeature(Random random)
+	private MonsterFeature CreateMonsterFeature(Random random)
 	{
-		var weighted = MonsterLibrary.All.Select(d => (d, (double)d.RandomizerWeight)).ToList();
+		var weighted = _monsters.All.Select(d => (d, (double)d.RandomizerWeight)).ToList();
 		var def = WeightedRandomSelection.Pick(random, weighted);
-		return new MonsterFeature
-		{
-			Monsters = new List<MonsterInstance>
-			{
-				new() { Definition = def, CurrentHp = def.MaxHp }
-			}
-		};
+		return RoomFeatureFactories.CreateMonsterFeature(def);
 	}
 
-	private static TrapFeature CreateTrapFeature(Random random)
+	private TrapFeature CreateTrapFeature(Random random)
 	{
-		var weighted = TrapLibrary.All.Select(t => (t, 1.0)).ToList();
+		var weighted = _traps.All.Select(t => (t, 1.0)).ToList();
 		var def = WeightedRandomSelection.Pick(random, weighted);
-		return new TrapFeature
-		{
-			Traps = new List<TrapInstance>
-			{
-				new() { Definition = def, CurrentHp = 1 }
-			}
-		};
+		return RoomFeatureFactories.CreateTrapFeature(def);
 	}
 
-	private static TreasureFeature CreateTreasureFeature(Random random)
+	private TreasureFeature CreateTreasureFeature(Random random)
 	{
-		var weighted = TreasureLibrary.All.Select(t => (t, 1.0)).ToList();
+		var weighted = _treasures.All.Select(t => (t, 1.0)).ToList();
 		var def = WeightedRandomSelection.Pick(random, weighted);
-		return new TreasureFeature
-		{
-			RemoveFeatureWhenEmpty = true,
-			TreasureItems = new List<TreasureInstance> { new() { Definition = def } }
-		};
+		return RoomFeatureFactories.CreateTreasureFeature(def);
 	}
 
-	private static NpcFeature CreateNpcFeature(Random random)
+	private NpcFeature CreateNpcFeature(Random random)
 	{
-		var weighted = NpcLibrary.All.Select(n => (n, 1.0)).ToList();
+		var weighted = _npcs.All.Select(n => (n, 1.0)).ToList();
 		var def = WeightedRandomSelection.Pick(random, weighted);
-		return new NpcFeature
-		{
-			NPCs = new List<NpcInstance>
-			{
-				new() { Definition = def, CurrentHp = 10 }
-			}
-		};
+		return RoomFeatureFactories.CreateNpcFeature(def);
 	}
 
-	private static LoreFeature CreateLoreFeature(Random random)
+	private LoreFeature CreateLoreFeature(Random random)
 	{
-		var weighted = LoreLibrary.All.Select(l => (l, 1.0)).ToList();
+		var weighted = _lore.All.Select(l => (l, 1.0)).ToList();
 		var def = WeightedRandomSelection.Pick(random, weighted);
-		return new LoreFeature
-		{
-			Lore = new List<LoreInstance>
-			{
-				new() { Definition = def, CurrentHp = 0 }
-			}
-		};
+		return RoomFeatureFactories.CreateLoreFeature(def);
 	}
 }

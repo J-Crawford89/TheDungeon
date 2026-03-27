@@ -95,9 +95,9 @@ public static class MainViewPresentationBuilder
 
 	private static MainViewFeatureIconKind? MapTreasure(TreasureDefinition def)
 	{
-		if (def.Id == TreasureLibrary.CopperCoins.Id || def.GrantKind == TreasureKind.Gold)
+		if (def.Id == TreasureIds.CopperCoins || def.GrantKind == TreasureKind.Gold)
 			return MainViewFeatureIconKind.Coins;
-		if (def.Id == TreasureLibrary.HealthPotion.Id || def.InventoryItemId == InventoryConstants.HealthPotionItemId)
+		if (def.Id == TreasureIds.HealthPotion || def.InventoryItemId == InventoryConstants.HealthPotionItemId)
 			return MainViewFeatureIconKind.HealthPotion;
 		return null;
 	}
