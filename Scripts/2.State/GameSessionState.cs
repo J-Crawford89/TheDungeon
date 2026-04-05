@@ -10,7 +10,31 @@ public sealed class GameSessionState
 	public CombatState? Combat { get; set; }
 	public List<LogEntry> LogEntries { get; } = new();
 
+	public GamePlayPhase Phase { get; set; } = GamePlayPhase.InProgress;
+	public FallenAdventurerRecord? LastFallenAdventurer { get; set; }
+	public string? GameOverTitle { get; set; }
+	public string? GameOverBody { get; set; }
+
 	public int LogContentRevision { get; private set; }
+
+	/// <summary>
+	/// Clears dungeon, combat, log, and resets the player for a new run. Preserves <see cref="LastFallenAdventurer"/> for future same-layout corpse placement.
+	/// </summary>
+	public void ResetForNewRunPreservingFallenRecord()
+	{
+		Phase = GamePlayPhase.InProgress;
+		GameOverTitle = null;
+		GameOverBody = null;
+		Combat = null;
+		Player.ResetToNewAdventurer();
+		Dungeon.Floors.Clear();
+		Dungeon.DiscoveredRoomsByFloor.Clear();
+		Dungeon.CurrentFloor = null;
+		Dungeon.PlayerCoord = default;
+		Dungeon.DungeonMode = DungeonMode.Exploration;
+		LogEntries.Clear();
+		LogContentRevision++;
+	}
 
 	public void AppendGameLog(string line)
 	{

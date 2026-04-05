@@ -36,7 +36,7 @@ public sealed class ExplorationUiPresenter
 		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
 			return;
 		_treasurePickup.TakeAllFromCurrentRoom(_session);
-		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command);
+		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
 
 	public void BootstrapDungeon()

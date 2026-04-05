@@ -9,6 +9,7 @@ public partial class MainUi : Control
 	[Export] private CommandPanel _commandPanel = null!;
 	[Export] private LogPanel _logPanel = null!;
 	[Export] private MapPanel _mapPanel = null!;
+	[Export] private GameOverOverlay _gameOverOverlay = null!;
 
 	[Export] public MonsterResourceDatabase? MonsterDatabase { get; set; }
 	[Export] public TrapResourceDatabase? TrapDatabase { get; set; }
@@ -28,8 +29,10 @@ public partial class MainUi : Control
 	private DiceRollService _diceRollService = null!;
 	private ResolutionService _resolutionService = null!;
 	private TreasurePickupService _treasurePickupService = null!;
+	private PlayerVitalsService _vitalsService = null!;
+	private GameOverDownedHandler _gameOverDownedHandler = null!;
+	private PlayerDownedResolutionService _playerDownedResolutionService = null!;
 	private CombatService _combatService = null!;
-	private PlayerDefeatService _playerDefeatService = null!;
 
 	private ExplorationUiPresenter _explorationPresenter = null!;
 	private CombatUiPresenter _combatPresenter = null!;
@@ -50,13 +53,16 @@ public partial class MainUi : Control
 		_explorationService = new ExplorationService(_roomFeaturePopulation);
 		_diceRollService = new DiceRollService(_random);
 		_resolutionService = new ResolutionService(_diceRollService);
-		_playerDefeatService = new PlayerDefeatService(_narrativeService);
 		_treasurePickupService = new TreasurePickupService(_narrativeService);
+		_vitalsService = new PlayerVitalsService();
+		_gameOverDownedHandler = new GameOverDownedHandler(_narrativeService);
+		_playerDownedResolutionService = new PlayerDownedResolutionService(new IPlayerDownedOutcomeHandler[] { _gameOverDownedHandler });
 		_combatService = new CombatService(
 			_diceRollService,
 			_resolutionService,
 			_narrativeService,
-			_playerDefeatService,
+			_vitalsService,
+			_playerDownedResolutionService,
 			_treasurePickupService);
 
 		Position = new Vector2(0, 0);
@@ -66,6 +72,12 @@ public partial class MainUi : Control
 		_session.Debug.IsCaptureEnabled = CaptureDebugDiagnostics;
 
 		GameUiCoordinator? coordinator = null;
+		void RefreshHudAndGameOver(UiRefreshFlags flags)
+		{
+			coordinator!.RefreshHud(flags);
+			UpdateGameOverPanel();
+		}
+
 		_explorationPresenter = new ExplorationUiPresenter(
 			_session,
 			_explorationService,
@@ -73,8 +85,8 @@ public partial class MainUi : Control
 			_combatService,
 			_treasurePickupService,
 			_dungeonBootstrap,
-			f => coordinator!.RefreshHud(f));
-		_combatPresenter = new CombatUiPresenter(_session, _combatService, f => coordinator!.RefreshHud(f));
+			RefreshHudAndGameOver);
+		_combatPresenter = new CombatUiPresenter(_session, _combatService, RefreshHudAndGameOver);
 		coordinator = new GameUiCoordinator(
 			_session,
 			_explorationPresenter,
@@ -98,6 +110,35 @@ public partial class MainUi : Control
 		_commandPanel.TakePressed += () => _coordinator.OnTakePressed();
 		_commandPanel.PotionPressed += () => _coordinator.OnPotionPressed();
 
+		_gameOverOverlay.ReturnToMenuPressed += () => StartNewRunFromGameOver();
+		_gameOverOverlay.QuitPressed += () => OnQuitPressed();
+
 		_explorationPresenter.BootstrapDungeon();
+	}
+
+	private void UpdateGameOverPanel()
+	{
+		if (_gameOverOverlay == null)
+			return;
+		if (_session.Phase == GamePlayPhase.GameOver &&
+			_session.GameOverTitle is { } title &&
+			_session.GameOverBody is { } body)
+			_gameOverOverlay.ShowPanel(title, body);
+		else
+			_gameOverOverlay.HidePanel();
+	}
+
+	private void StartNewRunFromGameOver()
+	{
+		_gameOverOverlay?.HidePanel();
+		_session.ResetForNewRunPreservingFallenRecord();
+		_explorationPresenter.BootstrapDungeon();
+		_coordinator.RefreshHud(UiRefreshFlags.All);
+		UpdateGameOverPanel();
+	}
+
+	private void OnQuitPressed()
+	{
+		GetTree().Quit();
 	}
 }

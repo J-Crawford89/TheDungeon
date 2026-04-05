@@ -7,25 +7,30 @@ public sealed class CombatService
 	private readonly DiceRollService _dice;
 	private readonly ResolutionService _resolution;
 	private readonly NarrativeService _narrative;
-	private readonly PlayerDefeatService _playerDefeat;
+	private readonly PlayerVitalsService _vitals;
+	private readonly PlayerDownedResolutionService _playerDowned;
 	private readonly TreasurePickupService _treasurePickup;
 
 	public CombatService(
 		DiceRollService dice,
 		ResolutionService resolution,
 		NarrativeService narrative,
-		PlayerDefeatService playerDefeat,
+		PlayerVitalsService vitals,
+		PlayerDownedResolutionService playerDowned,
 		TreasurePickupService treasurePickup)
 	{
 		_dice = dice;
 		_resolution = resolution;
 		_narrative = narrative;
-		_playerDefeat = playerDefeat;
+		_vitals = vitals;
+		_playerDowned = playerDowned;
 		_treasurePickup = treasurePickup;
 	}
 
 	public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel)
 	{
+		if (session.Phase != GamePlayPhase.InProgress)
+			return false;
 		if (session.Dungeon.DungeonMode == DungeonMode.Combat)
 			return false;
 		if (session.Dungeon.CurrentRoom is not { } room)
@@ -77,7 +82,6 @@ public sealed class CombatService
 		{
 			if (feature.Monsters[i].CurrentHp <= 0)
 				continue;
-			// Until MonsterDefinition carries Agility, treat monster initiative modifier as 0 (ties broken by list order).
 			var monsterAgi = 0;
 			var mRoll = _dice.RollD20Plus($"Initiative ({feature.Monsters[i].Definition.Name})", monsterAgi, "Agility");
 			session.AppendLog(new LogEntry { Kind = LogEntryKind.Roll, Text = _narrative.ForCombatInitiativeRoll(feature.Monsters[i].Definition.Name, mRoll) });
@@ -93,6 +97,8 @@ public sealed class CombatService
 
 	public bool IsAwaitingPlayerAction(GameSessionState session)
 	{
+		if (session.Phase != GamePlayPhase.InProgress)
+			return false;
 		if (session.Combat is not { } c || session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return false;
 		if (c.TurnOrder.Count == 0)
@@ -261,7 +267,7 @@ public sealed class CombatService
 
 	private void ProcessAutomaticMonsterTurns(GameSessionState session)
 	{
-		while (session.Dungeon.DungeonMode == DungeonMode.Combat && session.Combat is { } c && c.TurnOrder.Count > 0)
+		while (session.Phase == GamePlayPhase.InProgress && session.Dungeon.DungeonMode == DungeonMode.Combat && session.Combat is { } c && c.TurnOrder.Count > 0)
 		{
 			var slot = c.TurnOrder[c.CurrentTurnIndex];
 			if (slot.IsPlayer)
@@ -281,13 +287,10 @@ public sealed class CombatService
 			}
 
 			ExecuteMonsterTurn(session, feature, slot.MonsterIndex);
+			if (session.Phase != GamePlayPhase.InProgress)
+				return;
 			if (session.Dungeon.DungeonMode != DungeonMode.Combat)
 				return;
-			if (session.Player.CurrentHp <= 0)
-			{
-				_playerDefeat.ReturnToDungeonEntrance(session);
-				return;
-			}
 
 			PruneDeadMonstersFromTurnOrder(session, feature);
 			if (CheckVictory(session, feature))
@@ -333,8 +336,22 @@ public sealed class CombatService
 		{
 			if (result.Outcome == ResolutionOutcome.CriticalSuccess)
 				atk *= 2;
-			session.Player.CurrentHp -= atk;
-			session.AppendGameLog(_narrative.ForMonsterHitPlayer(name, atk, session.Player.CurrentHp));
+			var source = new PlayerDamageSource
+			{
+				Type = DamageSourceType.Monster,
+				DisplayName = name,
+				DefinitionId = monster.Definition.Id,
+			};
+			var vitals = _vitals.ApplyDamage(session.Player, atk);
+			session.AppendGameLog(_narrative.ForMonsterHitPlayer(name, atk, vitals.HpAfterClamped));
+			if (vitals.HpAfterClamped <= 0)
+			{
+				_playerDowned.Resolve(session, new PlayerDownedContext
+				{
+					Vitals = vitals,
+					DamageSource = source,
+				});
+			}
 		}
 		else
 			session.AppendGameLog(_narrative.ForAttackMiss(name, "you"));

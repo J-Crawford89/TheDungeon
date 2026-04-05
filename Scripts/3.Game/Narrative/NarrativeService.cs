@@ -174,7 +174,18 @@ public sealed class NarrativeService
 
 	public string ForCombatVictory() => "You are victorious! The threats here are finished.";
 
-	public string ForPlayerDefeated() => "You fall unconscious. The dungeon goes dark…";
+	public string ForGameOverTitle() => "Game Over";
+
+	public string ForGameOverBody(PlayerDamageSource source)
+	{
+		return source.Type switch
+		{
+			DamageSourceType.Monster => $"You were slain by {source.DisplayName}. Over the coming days, it continues to feast on your corpse.",
+			DamageSourceType.Trap => $"You succumb to {source.DisplayName}. Your belongings lie scattered in the dark.",
+			DamageSourceType.Environmental => $"You are undone by {source.DisplayName}. Nothing remains but silence.",
+			_ => "Your adventure ends here.",
+		};
+	}
 
 	public string ForTakeNothingHere() => "There is nothing here to take.";
 

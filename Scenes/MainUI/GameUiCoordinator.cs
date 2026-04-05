@@ -38,6 +38,14 @@ public sealed class GameUiCoordinator
 
 	public void RefreshHud(UiRefreshFlags flags)
 	{
+		if (flags.HasFlag(UiRefreshFlags.Command) && _session.Phase == GamePlayPhase.GameOver)
+		{
+			_commandPanel.SetAllCommandButtonsDisabled(true);
+			_commandPanel.HideAllGameplayCommands();
+		}
+		else if (flags.HasFlag(UiRefreshFlags.Command))
+			_commandPanel.SetAllCommandButtonsDisabled(false);
+
 		if (flags.HasFlag(UiRefreshFlags.MainView))
 		{
 			var verticalConnection = FloorConnectionType.None;
@@ -53,7 +61,7 @@ public sealed class GameUiCoordinator
 		if (flags.HasFlag(UiRefreshFlags.Log))
 			_logPanel.SyncFromSession(_session);
 
-		if (flags.HasFlag(UiRefreshFlags.Command))
+		if (flags.HasFlag(UiRefreshFlags.Command) && _session.Phase == GamePlayPhase.InProgress)
 		{
 			_commandPanel.ApplyDungeonMode(_session.Dungeon.DungeonMode);
 			var mode = _session.Dungeon.DungeonMode;
@@ -71,6 +79,8 @@ public sealed class GameUiCoordinator
 
 	public void OnForwardPressed()
 	{
+		if (_session.Phase != GamePlayPhase.InProgress)
+			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
 			return;
 		_exploration.OnForwardPressed();
@@ -78,6 +88,8 @@ public sealed class GameUiCoordinator
 
 	public void OnBackwardPressed()
 	{
+		if (_session.Phase != GamePlayPhase.InProgress)
+			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
 			return;
 		_exploration.OnBackwardPressed();
@@ -85,6 +97,8 @@ public sealed class GameUiCoordinator
 
 	public void OnTurn(DirectionTurned direction)
 	{
+		if (_session.Phase != GamePlayPhase.InProgress)
+			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
 			return;
 		_exploration.OnTurn(direction);
@@ -92,6 +106,8 @@ public sealed class GameUiCoordinator
 
 	public void OnInspectPressed()
 	{
+		if (_session.Phase != GamePlayPhase.InProgress)
+			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
 			return;
 		_exploration.OnInspectPressed();
@@ -99,6 +115,8 @@ public sealed class GameUiCoordinator
 
 	public void OnFloorUpPressed()
 	{
+		if (_session.Phase != GamePlayPhase.InProgress)
+			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
 			return;
 		_exploration.OnFloorUpPressed();
@@ -106,6 +124,8 @@ public sealed class GameUiCoordinator
 
 	public void OnFloorDownPressed()
 	{
+		if (_session.Phase != GamePlayPhase.InProgress)
+			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
 			return;
 		_exploration.OnFloorDownPressed();
@@ -113,6 +133,8 @@ public sealed class GameUiCoordinator
 
 	public void OnAttackPressed()
 	{
+		if (_session.Phase != GamePlayPhase.InProgress)
+			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		_combat.OnAttackPressed();
@@ -120,6 +142,8 @@ public sealed class GameUiCoordinator
 
 	public void OnFleePressed()
 	{
+		if (_session.Phase != GamePlayPhase.InProgress)
+			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		_combat.OnFleePressed();
@@ -127,6 +151,8 @@ public sealed class GameUiCoordinator
 
 	public void OnTakePressed()
 	{
+		if (_session.Phase != GamePlayPhase.InProgress)
+			return;
 		if (_session.Dungeon.DungeonMode == DungeonMode.Exploration)
 			_exploration.OnTakePressed();
 		else if (_session.Dungeon.DungeonMode == DungeonMode.Combat)
@@ -135,6 +161,8 @@ public sealed class GameUiCoordinator
 
 	public void OnPotionPressed()
 	{
+		if (_session.Phase != GamePlayPhase.InProgress)
+			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		_combat.OnPotionPressed();

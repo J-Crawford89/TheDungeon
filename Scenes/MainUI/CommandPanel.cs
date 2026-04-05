@@ -67,6 +67,36 @@ public partial class CommandPanel : PanelContainer
 		_takeButton.Visible = visible;
 	}
 
+	public void SetAllCommandButtonsDisabled(bool disabled)
+	{
+		_forwardButton.Disabled = disabled;
+		_backwardButton.Disabled = disabled;
+		_leftButton.Disabled = disabled;
+		_rightButton.Disabled = disabled;
+		_inspectButton.Disabled = disabled;
+		_floorUpButton.Disabled = disabled;
+		_floorDownButton.Disabled = disabled;
+		_attackButton.Disabled = disabled;
+		_fleeButton.Disabled = disabled;
+		_takeButton.Disabled = disabled;
+		_potionButton.Disabled = disabled;
+	}
+
+	public void HideAllGameplayCommands()
+	{
+		_forwardButton.Visible = false;
+		_backwardButton.Visible = false;
+		_leftButton.Visible = false;
+		_rightButton.Visible = false;
+		_inspectButton.Visible = false;
+		_floorUpButton.Visible = false;
+		_floorDownButton.Visible = false;
+		_attackButton.Visible = false;
+		_fleeButton.Visible = false;
+		_takeButton.Visible = false;
+		_potionButton.Visible = false;
+	}
+
 	public void ApplyCombatItemButtons(PlayerState player)
 	{
 		if (_potionButton == null)

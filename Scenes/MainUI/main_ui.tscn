@@ -13,8 +13,31 @@
 [ext_resource type="Script" uid="uid://t7duod6dlknd" path="res://Scenes/Components/MapView.cs" id="6_jr3w4"]
 [ext_resource type="Resource" uid="uid://ct4psy1ri1xjn" path="res://Content/Databases/LoreDatabase.tres" id="6_krt8x"]
 [ext_resource type="PackedScene" uid="uid://btjn7k3t3388k" path="res://Scenes/Components/LogEntryControl.tscn" id="8_jr3w4"]
+[ext_resource type="Script" uid="uid://dhxmgcg1n3vmh" path="res://Scenes/MainUI/GameOverOverlay.cs" id="14_pl31g"]
 
-[node name="MainUI" type="Control" unique_id=1749426459 node_paths=PackedStringArray("_mainViewPanel", "_characterPanel", "_commandPanel", "_logPanel", "_mapPanel")]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4u3ra"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.63529414, 0.63529414, 0.63529414, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_krt8x"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.63375676, 0.6337568, 0.63375676, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="MainUI" type="Control" unique_id=1749426459 node_paths=PackedStringArray("_mainViewPanel", "_characterPanel", "_commandPanel", "_logPanel", "_mapPanel", "_gameOverOverlay")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -27,6 +50,7 @@ _characterPanel = NodePath("RootMargin/MainVBox/Row1/CharacterPanel")
 _commandPanel = NodePath("RootMargin/MainVBox/Row2/CommandPanel")
 _logPanel = NodePath("RootMargin/MainVBox/Row2/LogPanel")
 _mapPanel = NodePath("RootMargin/MainVBox/Row2/MapPanel")
+_gameOverOverlay = NodePath("GameOverOverlay")
 MonsterDatabase = ExtResource("2_ljsn2")
 TrapDatabase = ExtResource("3_oha01")
 TreasureDatabase = ExtResource("4_pl31g")
@@ -249,3 +273,82 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 4
+
+[node name="GameOverOverlay" type="Control" parent="." unique_id=1700814972 node_paths=PackedStringArray("_titleLabel", "_bodyLabel", "_newGameButton", "_quitButton")]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("14_pl31g")
+_titleLabel = NodePath("GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox/GameOverTitle")
+_bodyLabel = NodePath("GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox/GameOverBody")
+_newGameButton = NodePath("GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox/GameOverButtonsHBox/NewGameButton")
+_quitButton = NodePath("GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox/GameOverButtonsHBox/QuitButton")
+
+[node name="GameOverColorRect" type="ColorRect" parent="GameOverOverlay" unique_id=1989777178]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6666667)
+
+[node name="GameOverCenterContainer" type="CenterContainer" parent="GameOverOverlay" unique_id=1413862050]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GameOverPanel" type="PanelContainer" parent="GameOverOverlay/GameOverCenterContainer" unique_id=519475218]
+custom_minimum_size = Vector2(800, 375)
+layout_mode = 2
+
+[node name="GameOverMargin" type="MarginContainer" parent="GameOverOverlay/GameOverCenterContainer/GameOverPanel" unique_id=554800546]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="GameOverVBox" type="VBoxContainer" parent="GameOverOverlay/GameOverCenterContainer/GameOverPanel/GameOverMargin" unique_id=236675617]
+layout_mode = 2
+
+[node name="GameOverTitle" type="Label" parent="GameOverOverlay/GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox" unique_id=552439698]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.21960784, 0.21568628, 1)
+theme_override_font_sizes/font_size = 96
+text = "Game Over"
+horizontal_alignment = 1
+
+[node name="GameOverBody" type="Label" parent="GameOverOverlay/GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox" unique_id=902511005]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 24
+text = "You died. Gee. That sucks."
+horizontal_alignment = 1
+
+[node name="GameOverButtonsHBox" type="HBoxContainer" parent="GameOverOverlay/GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox" unique_id=362721559]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="NewGameButton" type="Button" parent="GameOverOverlay/GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox/GameOverButtonsHBox" unique_id=258823]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.13682553, 0.13682589, 0.13682556, 1)
+theme_override_font_sizes/font_size = 36
+theme_override_styles/normal = SubResource("StyleBoxFlat_4u3ra")
+text = "New Game"
+
+[node name="QuitButton" type="Button" parent="GameOverOverlay/GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox/GameOverButtonsHBox" unique_id=1751805183]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8745098, 0.16862746, 0.2901961, 1)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 36
+theme_override_styles/normal = SubResource("StyleBoxFlat_krt8x")
+text = "Quit Game"
