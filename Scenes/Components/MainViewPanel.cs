@@ -119,7 +119,11 @@ public partial class MainViewPanel : PanelContainer
 		var textureRect = new TextureRect();
 		textureRect.Texture = texture;
 		textureRect.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
+		textureRect.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
+		textureRect.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+		textureRect.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
 		textureRect.CustomMinimumSize = new Vector2(64, 64);
+
 		_featureContainer.AddChild(textureRect);
 	}
 
