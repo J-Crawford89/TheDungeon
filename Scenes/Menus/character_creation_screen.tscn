@@ -1,0 +1,204 @@
+[gd_scene format=3 uid="uid://d31gw0602s1im"]
+
+[ext_resource type="Script" uid="uid://bagqyiiie5t37" path="res://Scenes/Menus/CharacterCreationScreen.cs" id="1_yiiuy"]
+
+[node name="CharacterCreationScreen" type="Control" unique_id=762333957 node_paths=PackedStringArray("_rerollAbilityScoresButton", "_backButton", "_startGameButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_yiiuy")
+_rerollAbilityScoresButton = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/RerollAbilityScoresButton")
+_backButton = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/CharacterCreationButtonsHBox/BackButton")
+_startGameButton = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/CharacterCreationButtonsHBox/StartGameButton")
+
+[node name="CharacterCreationPanel" type="PanelContainer" parent="." unique_id=1640256438]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CharacterCreationMargin" type="MarginContainer" parent="CharacterCreationPanel" unique_id=1163313626]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="CharacterCreationVBox" type="VBoxContainer" parent="CharacterCreationPanel/CharacterCreationMargin" unique_id=1318393729]
+layout_mode = 2
+
+[node name="CharacterCreationTitle" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox" unique_id=1714626987]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Character Creation"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox" unique_id=534849767]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+
+[node name="Row1" type="HBoxContainer" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox" unique_id=45589828]
+layout_mode = 2
+
+[node name="Column1" type="VBoxContainer" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1" unique_id=5513357]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.5
+
+[node name="NameRow" type="HBoxContainer" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=290819168]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/NameRow" unique_id=880755175]
+layout_mode = 2
+text = "Character Name:"
+
+[node name="NameEdit" type="LineEdit" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/NameRow" unique_id=1638626385]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Testy McTestface"
+alignment = 1
+
+[node name="SexRow" type="HBoxContainer" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=15377854]
+layout_mode = 2
+
+[node name="SexLabel" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/SexRow" unique_id=373670868]
+layout_mode = 2
+text = "Sex: "
+
+[node name="SexButton" type="OptionButton" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/SexRow" unique_id=667569423]
+layout_mode = 2
+selected = 0
+item_count = 2
+popup/item_0/text = "Male"
+popup/item_0/id = 0
+popup/item_1/text = "Female"
+popup/item_1/id = 1
+
+[node name="ClassRow" type="HBoxContainer" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=1112538497]
+layout_mode = 2
+
+[node name="ClassLabel" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/ClassRow" unique_id=1699528605]
+layout_mode = 2
+text = "Class: "
+
+[node name="ClassButton" type="OptionButton" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/ClassRow" unique_id=428588637]
+layout_mode = 2
+
+[node name="RaceRow" type="HBoxContainer" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=2044703142]
+layout_mode = 2
+
+[node name="RaceLabel" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/RaceRow" unique_id=581743211]
+layout_mode = 2
+text = "Race: "
+
+[node name="RaceButton" type="OptionButton" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/RaceRow" unique_id=1378231645]
+layout_mode = 2
+
+[node name="BackgroundRow" type="HBoxContainer" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=567411590]
+layout_mode = 2
+
+[node name="BackgroundLabel" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/BackgroundRow" unique_id=2048313447]
+layout_mode = 2
+text = "Background: "
+
+[node name="BackgroundButton" type="OptionButton" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/BackgroundRow" unique_id=458407842]
+layout_mode = 2
+
+[node name="AbilityScoresLabel" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=1807172689]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 18
+text = "Ability Scores"
+
+[node name="MightLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=598853402]
+layout_mode = 2
+text = "Might: 0"
+fit_content = true
+
+[node name="ConstitutionLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=1383536054]
+layout_mode = 2
+text = "Constitution: 0"
+fit_content = true
+
+[node name="DexterityLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=253627830]
+layout_mode = 2
+text = "Dexterity: 0"
+fit_content = true
+
+[node name="AgilityLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=842978577]
+layout_mode = 2
+text = "Agility: 0"
+fit_content = true
+
+[node name="IntelligenceLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=951237399]
+layout_mode = 2
+text = "Intelligence: 0"
+fit_content = true
+
+[node name="WisdomLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=832985420]
+layout_mode = 2
+text = "Wisdom: 0"
+fit_content = true
+
+[node name="GravitasLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=598011871]
+layout_mode = 2
+text = "Gravitas: 0"
+fit_content = true
+
+[node name="LuckLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=878144655]
+layout_mode = 2
+text = "Luck: 0"
+fit_content = true
+
+[node name="RerollAbilityScoresButton" type="Button" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=653180233]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Reroll Ability Scores"
+
+[node name="CharacterCreationButtonsHBox" type="HBoxContainer" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=1595255603]
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/CharacterCreationButtonsHBox" unique_id=1111689048]
+layout_mode = 2
+text = "Back"
+
+[node name="StartGameButton" type="Button" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/CharacterCreationButtonsHBox" unique_id=1275447844]
+layout_mode = 2
+text = "Start Game"
+
+[node name="Column2" type="VBoxContainer" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1" unique_id=1343803877]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Column2Margin" type="MarginContainer" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column2" unique_id=11765598]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+
+[node name="CharacterDescriptionLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column2/Column2Margin" unique_id=365686068]
+layout_mode = 2
+bbcode_enabled = true
+text = "You are Testy McTestface. He/She is a Race, Class who was a Background before becoming an adventurer.
+
+[b]RACE[/b]
+Race are typically blah blah. Here's a description of whatever.
+
+[b]CLASS[/b]
+Class are typically blah blah. Here's a description of whatever.
+
+[b]BACKGROUND[/b]
+Background are typically blah blah. Here's a description of whatever.
+
+[b]HIT POINTS[/b]
+You have 10 hit points.
+
+[b]ABILITIES[/b]
+You have no special abilities.
+
+[b]EQUIPMENT[/b]
+You start with 0 gold and no other equipment."
+fit_content = true

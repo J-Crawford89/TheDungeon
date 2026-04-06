@@ -2,16 +2,11 @@
 
 [ext_resource type="Script" uid="uid://cfx2hqwl75vnx" path="res://Scenes/MainUI/MainUi.cs" id="1_rfgyb"]
 [ext_resource type="PackedScene" uid="uid://bx0fd15n0csbl" path="res://Scenes/Components/main_view_panel.tscn" id="2_jr3w4"]
-[ext_resource type="Resource" uid="uid://r1g7e32020f2" path="res://Content/Databases/MonsterDatabase.tres" id="2_ljsn2"]
 [ext_resource type="Script" uid="uid://pxiuss8lti0r" path="res://Scenes/MainUI/CharacterPanel.cs" id="3_day7x"]
-[ext_resource type="Resource" uid="uid://bmla6ethc6nmo" path="res://Content/Databases/TrapDatabase.tres" id="3_oha01"]
 [ext_resource type="Script" uid="uid://bue4b5pexspxg" path="res://Scenes/MainUI/CommandPanel.cs" id="4_j28lw"]
-[ext_resource type="Resource" uid="uid://dfoopnyl6hx5a" path="res://Content/Databases/TreasureDatabase.tres" id="4_pl31g"]
-[ext_resource type="Resource" uid="uid://3u2elb0lgi1c" path="res://Content/Databases/NpcDatabase.tres" id="5_4u3ra"]
 [ext_resource type="Script" uid="uid://ctv0hvnb2hsny" path="res://Scenes/MainUI/LogPanel.cs" id="5_gx3yi"]
 [ext_resource type="Script" uid="uid://c027v8qr0q08n" path="res://Scenes/MainUI/MapPanel.cs" id="5_ksueo"]
 [ext_resource type="Script" uid="uid://t7duod6dlknd" path="res://Scenes/Components/MapView.cs" id="6_jr3w4"]
-[ext_resource type="Resource" uid="uid://ct4psy1ri1xjn" path="res://Content/Databases/LoreDatabase.tres" id="6_krt8x"]
 [ext_resource type="PackedScene" uid="uid://btjn7k3t3388k" path="res://Scenes/Components/LogEntryControl.tscn" id="8_jr3w4"]
 [ext_resource type="Script" uid="uid://dhxmgcg1n3vmh" path="res://Scenes/MainUI/GameOverOverlay.cs" id="14_pl31g"]
 
@@ -51,12 +46,6 @@ _commandPanel = NodePath("RootMargin/MainVBox/Row2/CommandPanel")
 _logPanel = NodePath("RootMargin/MainVBox/Row2/LogPanel")
 _mapPanel = NodePath("RootMargin/MainVBox/Row2/MapPanel")
 _gameOverOverlay = NodePath("GameOverOverlay")
-MonsterDatabase = ExtResource("2_ljsn2")
-TrapDatabase = ExtResource("3_oha01")
-TreasureDatabase = ExtResource("4_pl31g")
-NpcDatabase = ExtResource("5_4u3ra")
-LoreDatabase = ExtResource("6_krt8x")
-CaptureDebugDiagnostics = true
 
 [node name="RootMargin" type="MarginContainer" parent="." unique_id=864533212]
 layout_mode = 1
@@ -274,7 +263,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 4
 
-[node name="GameOverOverlay" type="Control" parent="." unique_id=1700814972 node_paths=PackedStringArray("_titleLabel", "_bodyLabel", "_newGameButton", "_quitButton")]
+[node name="GameOverOverlay" type="Control" parent="." unique_id=1700814972 node_paths=PackedStringArray("_titleLabel", "_bodyLabel", "_returnToStartMenuButton", "_quitButton")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -285,7 +274,7 @@ grow_vertical = 2
 script = ExtResource("14_pl31g")
 _titleLabel = NodePath("GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox/GameOverTitle")
 _bodyLabel = NodePath("GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox/GameOverBody")
-_newGameButton = NodePath("GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox/GameOverButtonsHBox/NewGameButton")
+_returnToStartMenuButton = NodePath("GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox/GameOverButtonsHBox/ReturnToStartMenu")
 _quitButton = NodePath("GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox/GameOverButtonsHBox/QuitButton")
 
 [node name="GameOverColorRect" type="ColorRect" parent="GameOverOverlay" unique_id=1989777178]
@@ -338,12 +327,12 @@ layout_mode = 2
 theme_override_constants/separation = 20
 alignment = 1
 
-[node name="NewGameButton" type="Button" parent="GameOverOverlay/GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox/GameOverButtonsHBox" unique_id=258823]
+[node name="ReturnToStartMenu" type="Button" parent="GameOverOverlay/GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox/GameOverButtonsHBox" unique_id=258823]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.13682553, 0.13682589, 0.13682556, 1)
 theme_override_font_sizes/font_size = 36
 theme_override_styles/normal = SubResource("StyleBoxFlat_4u3ra")
-text = "New Game"
+text = "Return to Start"
 
 [node name="QuitButton" type="Button" parent="GameOverOverlay/GameOverCenterContainer/GameOverPanel/GameOverMargin/GameOverVBox/GameOverButtonsHBox" unique_id=1751805183]
 layout_mode = 2

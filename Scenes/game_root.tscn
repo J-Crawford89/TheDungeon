@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://fbriuacqtf5l"]
+
+[ext_resource type="Script" uid="uid://dqpipl5d6ska4" path="res://Scenes/GameRoot.cs" id="1_y37ms"]
+[ext_resource type="PackedScene" uid="uid://bcoc51yg5c1cf" path="res://Scenes/Menus/start_menu_screen.tscn" id="2_nrrv6"]
+[ext_resource type="PackedScene" uid="uid://d31gw0602s1im" path="res://Scenes/Menus/character_creation_screen.tscn" id="3_vdlci"]
+[ext_resource type="PackedScene" uid="uid://bc2475eo0k8hf" path="res://Scenes/MainUI/main_ui.tscn" id="4_bborm"]
+[ext_resource type="Resource" uid="uid://r1g7e32020f2" path="res://Content/Databases/MonsterDatabase.tres" id="5_c6sj0"]
+[ext_resource type="Resource" uid="uid://bmla6ethc6nmo" path="res://Content/Databases/TrapDatabase.tres" id="6_lpuel"]
+[ext_resource type="Resource" uid="uid://dfoopnyl6hx5a" path="res://Content/Databases/TreasureDatabase.tres" id="7_hpb24"]
+[ext_resource type="Resource" uid="uid://3u2elb0lgi1c" path="res://Content/Databases/NpcDatabase.tres" id="8_nf18g"]
+[ext_resource type="Resource" uid="uid://ct4psy1ri1xjn" path="res://Content/Databases/LoreDatabase.tres" id="9_svbas"]
+
+[node name="GameRoot" type="Control" unique_id=1615480598 node_paths=PackedStringArray("_screenHost")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_y37ms")
+_screenHost = NodePath("ScreenHost")
+_startMenuScene = ExtResource("2_nrrv6")
+_characterCreationScene = ExtResource("3_vdlci")
+_mainUiScene = ExtResource("4_bborm")
+MonsterDatabase = ExtResource("5_c6sj0")
+TrapDatabase = ExtResource("6_lpuel")
+TreasureDatabase = ExtResource("7_hpb24")
+NpcDatabase = ExtResource("8_nf18g")
+LoreDatabase = ExtResource("9_svbas")
+CaptureDebugDiagnostics = true
+
+[node name="ScreenHost" type="Control" parent="." unique_id=1500174924]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

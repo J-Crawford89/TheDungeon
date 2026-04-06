@@ -1,0 +1,63 @@
+[gd_scene format=3 uid="uid://bcoc51yg5c1cf"]
+
+[ext_resource type="Script" uid="uid://coe8y55oh7y6g" path="res://Scenes/Menus/StartMenuScreen.cs" id="1_5ma8h"]
+
+[node name="StartMenuScreen" type="Control" unique_id=2098329866 node_paths=PackedStringArray("_newGameButton", "_loadGameButton", "_optionsButton", "_quitButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_5ma8h")
+_newGameButton = NodePath("StartMenuPanel/StartMenuCenterContainer/StartMenuMargin/StartMenuVBox/NewGameButton")
+_loadGameButton = NodePath("StartMenuPanel/StartMenuCenterContainer/StartMenuMargin/StartMenuVBox/LoadGameButton")
+_optionsButton = NodePath("StartMenuPanel/StartMenuCenterContainer/StartMenuMargin/StartMenuVBox/OptionsButton")
+_quitButton = NodePath("StartMenuPanel/StartMenuCenterContainer/StartMenuMargin/StartMenuVBox/QuitButton")
+
+[node name="StartMenuPanel" type="PanelContainer" parent="." unique_id=1134515369]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StartMenuCenterContainer" type="CenterContainer" parent="StartMenuPanel" unique_id=45983444]
+layout_mode = 2
+
+[node name="StartMenuMargin" type="MarginContainer" parent="StartMenuPanel/StartMenuCenterContainer" unique_id=908828560]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="StartMenuVBox" type="VBoxContainer" parent="StartMenuPanel/StartMenuCenterContainer/StartMenuMargin" unique_id=1300543040]
+layout_mode = 2
+
+[node name="StartMenuTitle" type="Label" parent="StartMenuPanel/StartMenuCenterContainer/StartMenuMargin/StartMenuVBox" unique_id=1650468955]
+layout_mode = 2
+theme_override_font_sizes/font_size = 96
+text = "The Dungeon"
+horizontal_alignment = 1
+
+[node name="NewGameButton" type="Button" parent="StartMenuPanel/StartMenuCenterContainer/StartMenuMargin/StartMenuVBox" unique_id=1502025076]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "New Game"
+
+[node name="LoadGameButton" type="Button" parent="StartMenuPanel/StartMenuCenterContainer/StartMenuMargin/StartMenuVBox" unique_id=955978244]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Load Game"
+
+[node name="OptionsButton" type="Button" parent="StartMenuPanel/StartMenuCenterContainer/StartMenuMargin/StartMenuVBox" unique_id=813051594]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Options"
+
+[node name="QuitButton" type="Button" parent="StartMenuPanel/StartMenuCenterContainer/StartMenuMargin/StartMenuVBox" unique_id=817986870]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Quit"

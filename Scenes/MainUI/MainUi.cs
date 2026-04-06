@@ -11,65 +11,42 @@ public partial class MainUi : Control
 	[Export] private MapPanel _mapPanel = null!;
 	[Export] private GameOverOverlay _gameOverOverlay = null!;
 
-	[Export] public MonsterResourceDatabase? MonsterDatabase { get; set; }
-	[Export] public TrapResourceDatabase? TrapDatabase { get; set; }
-	[Export] public TreasureResourceDatabase? TreasureDatabase { get; set; }
-	[Export] public NpcResourceDatabase? NpcDatabase { get; set; }
-	[Export] public LoreResourceDatabase? LoreDatabase { get; set; }
+	public event Action? QuitRequested;
+	public event Action? ReturnToStartMenuRequested;
 
-	[Export] public bool CaptureDebugDiagnostics { get; set; }
-
-	private readonly GameSessionState _session = new();
-	private readonly Random _random = new();
-	private readonly NarrativeService _narrativeService = new();
-
-	private RoomFeaturePopulationService _roomFeaturePopulation = null!;
-	private DungeonBootstrap _dungeonBootstrap = null!;
-	private ExplorationService _explorationService = null!;
-	private DiceRollService _diceRollService = null!;
-	private ResolutionService _resolutionService = null!;
-	private TreasurePickupService _treasurePickupService = null!;
-	private PlayerVitalsService _vitalsService = null!;
-	private GameOverDownedHandler _gameOverDownedHandler = null!;
-	private PlayerDownedResolutionService _playerDownedResolutionService = null!;
-	private CombatService _combatService = null!;
+	private GameRunContext? _runContext;
+	private bool _captureDebugDiagnostics;
 
 	private ExplorationUiPresenter _explorationPresenter = null!;
 	private CombatUiPresenter _combatPresenter = null!;
 	private GameUiCoordinator _coordinator = null!;
 
+	public void Initialize(GameRunContext runContext, bool captureDebugDiagnostics)
+	{
+		_runContext = runContext;
+		_captureDebugDiagnostics = captureDebugDiagnostics;
+	}
+
 	public override void _Ready()
 	{
-		LogArchive.FileWriter = new GodotLogFileWriter();
+		if (_runContext == null)
+		{
+			GD.PushError("MainUi.Initialize(GameRunContext, bool) must be called before the node enters the tree.");
+			return;
+		}
 
-		var monsterRepo = new GodotMonsterDefinitionRepository(MonsterDatabase);
-		var trapRepo = new GodotTrapDefinitionRepository(TrapDatabase);
-		var treasureRepo = new GodotTreasureDefinitionRepository(TreasureDatabase);
-		var npcRepo = new GodotNpcDefinitionRepository(NpcDatabase);
-		var loreRepo = new GodotLoreDefinitionRepository(LoreDatabase);
-
-		_roomFeaturePopulation = new RoomFeaturePopulationService(monsterRepo, trapRepo, treasureRepo, npcRepo, loreRepo);
-		_dungeonBootstrap = new DungeonBootstrap(_roomFeaturePopulation);
-		_explorationService = new ExplorationService(_roomFeaturePopulation);
-		_diceRollService = new DiceRollService(_random);
-		_resolutionService = new ResolutionService(_diceRollService);
-		_treasurePickupService = new TreasurePickupService(_narrativeService);
-		_vitalsService = new PlayerVitalsService();
-		_gameOverDownedHandler = new GameOverDownedHandler(_narrativeService);
-		_playerDownedResolutionService = new PlayerDownedResolutionService(new IPlayerDownedOutcomeHandler[] { _gameOverDownedHandler });
-		_combatService = new CombatService(
-			_diceRollService,
-			_resolutionService,
-			_narrativeService,
-			_vitalsService,
-			_playerDownedResolutionService,
-			_treasurePickupService);
+		var session = _runContext.Session;
+		var narrativeService = _runContext.NarrativeService;
+		var explorationService = _runContext.ExplorationService;
+		var combatService = _runContext.CombatService;
+		var treasurePickupService = _runContext.TreasurePickupService;
+		var dungeonBootstrap = _runContext.DungeonBootstrap;
 
 		Position = new Vector2(0, 0);
 		Size = GetViewportRect().Size;
-		GetViewport().SizeChanged += () => Size = GetViewportRect().Size;
+		GetViewport().SizeChanged += OnViewportSizeChanged;
 
-		_session.Debug.IsCaptureEnabled = CaptureDebugDiagnostics;
+		session.Debug.IsCaptureEnabled = _captureDebugDiagnostics;
 
 		GameUiCoordinator? coordinator = null;
 		void RefreshHudAndGameOver(UiRefreshFlags flags)
@@ -79,16 +56,16 @@ public partial class MainUi : Control
 		}
 
 		_explorationPresenter = new ExplorationUiPresenter(
-			_session,
-			_explorationService,
-			_narrativeService,
-			_combatService,
-			_treasurePickupService,
-			_dungeonBootstrap,
+			session,
+			explorationService,
+			narrativeService,
+			combatService,
+			treasurePickupService,
+			dungeonBootstrap,
 			RefreshHudAndGameOver);
-		_combatPresenter = new CombatUiPresenter(_session, _combatService, RefreshHudAndGameOver);
+		_combatPresenter = new CombatUiPresenter(session, combatService, RefreshHudAndGameOver);
 		coordinator = new GameUiCoordinator(
-			_session,
+			session,
 			_explorationPresenter,
 			_combatPresenter,
 			_mainViewPanel,
@@ -98,47 +75,88 @@ public partial class MainUi : Control
 			_mapPanel);
 		_coordinator = coordinator;
 
-		_commandPanel.ForwardPressed += () => _coordinator.OnForwardPressed();
-		_commandPanel.BackwardPressed += () => _coordinator.OnBackwardPressed();
-		_commandPanel.LeftPressed += () => _coordinator.OnTurn(DirectionTurned.Left);
-		_commandPanel.RightPressed += () => _coordinator.OnTurn(DirectionTurned.Right);
-		_commandPanel.InspectPressed += () => _coordinator.OnInspectPressed();
-		_commandPanel.FloorUpPressed += () => _coordinator.OnFloorUpPressed();
-		_commandPanel.FloorDownPressed += () => _coordinator.OnFloorDownPressed();
-		_commandPanel.AttackPressed += () => _coordinator.OnAttackPressed();
-		_commandPanel.FleePressed += () => _coordinator.OnFleePressed();
-		_commandPanel.TakePressed += () => _coordinator.OnTakePressed();
-		_commandPanel.PotionPressed += () => _coordinator.OnPotionPressed();
+		_commandPanel.ForwardPressed += OnCommandForward;
+		_commandPanel.BackwardPressed += OnCommandBackward;
+		_commandPanel.LeftPressed += OnCommandLeft;
+		_commandPanel.RightPressed += OnCommandRight;
+		_commandPanel.InspectPressed += OnCommandInspect;
+		_commandPanel.FloorUpPressed += OnCommandFloorUp;
+		_commandPanel.FloorDownPressed += OnCommandFloorDown;
+		_commandPanel.AttackPressed += OnCommandAttack;
+		_commandPanel.FleePressed += OnCommandFlee;
+		_commandPanel.TakePressed += OnCommandTake;
+		_commandPanel.PotionPressed += OnCommandPotion;
 
-		_gameOverOverlay.ReturnToMenuPressed += () => StartNewRunFromGameOver();
-		_gameOverOverlay.QuitPressed += () => OnQuitPressed();
+		_gameOverOverlay.ReturnToStartMenuPressed += OnGameOverReturnToMenu;
+		_gameOverOverlay.QuitPressed += OnGameOverQuitPressed;
 
 		_explorationPresenter.BootstrapDungeon();
 	}
 
+	private void OnViewportSizeChanged()
+	{
+		Size = GetViewportRect().Size;
+	}
+
+	private void OnCommandForward() => _coordinator.OnForwardPressed();
+	private void OnCommandBackward() => _coordinator.OnBackwardPressed();
+	private void OnCommandLeft() => _coordinator.OnTurn(DirectionTurned.Left);
+	private void OnCommandRight() => _coordinator.OnTurn(DirectionTurned.Right);
+	private void OnCommandInspect() => _coordinator.OnInspectPressed();
+	private void OnCommandFloorUp() => _coordinator.OnFloorUpPressed();
+	private void OnCommandFloorDown() => _coordinator.OnFloorDownPressed();
+	private void OnCommandAttack() => _coordinator.OnAttackPressed();
+	private void OnCommandFlee() => _coordinator.OnFleePressed();
+	private void OnCommandTake() => _coordinator.OnTakePressed();
+	private void OnCommandPotion() => _coordinator.OnPotionPressed();
+
+	private void OnGameOverReturnToMenu() => ReturnToStartMenu();
+
+	private void OnGameOverQuitPressed() => QuitRequested?.Invoke();
+
+	private void ReturnToStartMenu()
+	{
+		_gameOverOverlay?.HidePanel();
+		ReturnToStartMenuRequested?.Invoke();
+	}
+
 	private void UpdateGameOverPanel()
 	{
-		if (_gameOverOverlay == null)
+		if (_gameOverOverlay == null || _runContext == null)
 			return;
-		if (_session.Phase == GamePlayPhase.GameOver &&
-			_session.GameOverTitle is { } title &&
-			_session.GameOverBody is { } body)
+		var session = _runContext.Session;
+		if (session.Phase == GamePlayPhase.GameOver &&
+			session.GameOverTitle is { } title &&
+			session.GameOverBody is { } body)
 			_gameOverOverlay.ShowPanel(title, body);
 		else
 			_gameOverOverlay.HidePanel();
 	}
 
-	private void StartNewRunFromGameOver()
+	public override void _ExitTree()
 	{
-		_gameOverOverlay?.HidePanel();
-		_session.ResetForNewRunPreservingFallenRecord();
-		_explorationPresenter.BootstrapDungeon();
-		_coordinator.RefreshHud(UiRefreshFlags.All);
-		UpdateGameOverPanel();
-	}
+		if (GetViewport() != null)
+			GetViewport().SizeChanged -= OnViewportSizeChanged;
 
-	private void OnQuitPressed()
-	{
-		GetTree().Quit();
+		if (_commandPanel != null)
+		{
+			_commandPanel.ForwardPressed -= OnCommandForward;
+			_commandPanel.BackwardPressed -= OnCommandBackward;
+			_commandPanel.LeftPressed -= OnCommandLeft;
+			_commandPanel.RightPressed -= OnCommandRight;
+			_commandPanel.InspectPressed -= OnCommandInspect;
+			_commandPanel.FloorUpPressed -= OnCommandFloorUp;
+			_commandPanel.FloorDownPressed -= OnCommandFloorDown;
+			_commandPanel.AttackPressed -= OnCommandAttack;
+			_commandPanel.FleePressed -= OnCommandFlee;
+			_commandPanel.TakePressed -= OnCommandTake;
+			_commandPanel.PotionPressed -= OnCommandPotion;
+		}
+
+		if (_gameOverOverlay != null)
+		{
+			_gameOverOverlay.ReturnToStartMenuPressed -= OnGameOverReturnToMenu;
+			_gameOverOverlay.QuitPressed -= OnGameOverQuitPressed;
+		}
 	}
 }
