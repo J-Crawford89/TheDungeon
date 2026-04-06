@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="LevelAbilityGrantResource" format=3 uid="uid://cgrantspellcast1"]
+
+[ext_resource type="Script" uid="uid://rr8vsheybc0y" path="res://Resources/LevelAbilityGrantResource.cs" id="1_gr"]
+
+[resource]
+script = ExtResource("1_gr")
+Level = 1
+AbilityId = "spellcasting"

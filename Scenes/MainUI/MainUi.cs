@@ -66,6 +66,7 @@ public partial class MainUi : Control
 		_combatPresenter = new CombatUiPresenter(session, combatService, RefreshHudAndGameOver);
 		coordinator = new GameUiCoordinator(
 			session,
+			combatService,
 			_explorationPresenter,
 			_combatPresenter,
 			_mainViewPanel,
@@ -86,6 +87,7 @@ public partial class MainUi : Control
 		_commandPanel.FleePressed += OnCommandFlee;
 		_commandPanel.TakePressed += OnCommandTake;
 		_commandPanel.PotionPressed += OnCommandPotion;
+		_commandPanel.DefendPressed += OnCommandDefend;
 
 		_gameOverOverlay.ReturnToStartMenuPressed += OnGameOverReturnToMenu;
 		_gameOverOverlay.QuitPressed += OnGameOverQuitPressed;
@@ -109,6 +111,7 @@ public partial class MainUi : Control
 	private void OnCommandFlee() => _coordinator.OnFleePressed();
 	private void OnCommandTake() => _coordinator.OnTakePressed();
 	private void OnCommandPotion() => _coordinator.OnPotionPressed();
+	private void OnCommandDefend() => _coordinator.OnDefendPressed();
 
 	private void OnGameOverReturnToMenu() => ReturnToStartMenu();
 

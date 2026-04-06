@@ -72,7 +72,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 3.0
 
-[node name="CharacterPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row1" unique_id=308191709 node_paths=PackedStringArray("_hpLabel", "_levelLabel", "_goldLabel", "_equipmentLabel", "_nameLabel")]
+[node name="CharacterPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row1" unique_id=308191709 node_paths=PackedStringArray("_hpLabel", "_levelLabel", "_goldLabel", "_equipmentLabel", "_nameLabel", "_spLabel", "_defendActiveIndicator")]
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("3_day7x")
@@ -81,6 +81,8 @@ _levelLabel = NodePath("CharacterMargin/CharacterContent/LevelLabel")
 _goldLabel = NodePath("CharacterMargin/CharacterContent/GoldLabel")
 _equipmentLabel = NodePath("CharacterMargin/CharacterContent/EquipmentLabel")
 _nameLabel = NodePath("CharacterMargin/CharacterContent/CharacterNameLabel")
+_spLabel = NodePath("CharacterMargin/CharacterContent/SpLabel")
+_defendActiveIndicator = NodePath("CharacterMargin/CharacterContent/DefendPlaceholder")
 
 [node name="CharacterMargin" type="MarginContainer" parent="RootMargin/MainVBox/Row1/CharacterPanel" unique_id=974340699]
 layout_mode = 2
@@ -106,6 +108,10 @@ text = "NAME: Testy McTestface"
 layout_mode = 2
 text = "HP: 10/10"
 
+[node name="SpLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1664566050]
+layout_mode = 2
+text = "SP: 10/10"
+
 [node name="LevelLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1023744068]
 layout_mode = 2
 text = "Level: 1"
@@ -118,11 +124,15 @@ text = "Items: None"
 layout_mode = 2
 text = "Gold: 0"
 
+[node name="DefendPlaceholder" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1487792610]
+layout_mode = 2
+text = "DEFENDING PLACEHOLDER"
+
 [node name="Row2" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=1152348812]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="CommandPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row2" unique_id=786944443 node_paths=PackedStringArray("_forwardButton", "_backwardButton", "_leftButton", "_rightButton", "_inspectButton", "_floorUpButton", "_floorDownButton", "_attackButton", "_fleeButton", "_takeButton", "_potionButton")]
+[node name="CommandPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row2" unique_id=786944443 node_paths=PackedStringArray("_forwardButton", "_backwardButton", "_leftButton", "_rightButton", "_inspectButton", "_floorUpButton", "_floorDownButton", "_attackButton", "_fleeButton", "_takeButton", "_potionButton", "_defendButton")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.2
@@ -138,6 +148,7 @@ _attackButton = NodePath("CommandMargin/CommandContent/ButtonGrid/AttackButton")
 _fleeButton = NodePath("CommandMargin/CommandContent/ButtonGrid/FleeButton")
 _takeButton = NodePath("CommandMargin/CommandContent/ButtonGrid/TakeButton")
 _potionButton = NodePath("CommandMargin/CommandContent/ButtonGrid/PotionButton")
+_defendButton = NodePath("CommandMargin/CommandContent/ButtonGrid/DefendButton")
 
 [node name="CommandMargin" type="MarginContainer" parent="RootMargin/MainVBox/Row2/CommandPanel" unique_id=1719189521]
 layout_mode = 2
@@ -202,6 +213,10 @@ text = "Take"
 [node name="PotionButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=942607446]
 layout_mode = 2
 text = "Potion"
+
+[node name="DefendButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=1656054889]
+layout_mode = 2
+text = "Defend"
 
 [node name="MapPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row2" unique_id=1329682580 node_paths=PackedStringArray("_mapView")]
 layout_mode = 2

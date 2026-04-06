@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="AbilityResourceDatabase" format=3 uid="uid://dw64ti8d4fr4e"]
+
+[ext_resource type="Script" path="res://Resources/Databases/AbilityResourceDatabase.cs" id="1_db"]
+[ext_resource type="Script" uid="uid://dsuic5k4kdpc6" path="res://Resources/AbilityResource.cs" id="2_ab"]
+[ext_resource type="Resource" uid="uid://bd8dcgln2cllc" path="res://Content/Abilities/Defend.tres" id="3_def"]
+[ext_resource type="Resource" uid="uid://cn86n85x2hpki" path="res://Content/Abilities/Spellcasting.tres" id="4_spl"]
+
+[resource]
+script = ExtResource("1_db")
+Abilities = Array[ExtResource("2_ab")]([ExtResource("3_def"), ExtResource("4_spl")])

@@ -1,3 +1,4 @@
+#nullable enable
 using Godot;
 using System;
 
@@ -15,6 +16,7 @@ public partial class CommandPanel : PanelContainer
 	[Export] private Button _fleeButton;
 	[Export] private Button _takeButton;
 	[Export] private Button _potionButton;
+	[Export] private Button? _defendButton;
 
 	public event Action? ForwardPressed;
 	public event Action? BackwardPressed;
@@ -27,6 +29,7 @@ public partial class CommandPanel : PanelContainer
 	public event Action? FleePressed;
 	public event Action? TakePressed;
 	public event Action? PotionPressed;
+	public event Action? DefendPressed;
 
 	public override void _Ready()
 	{
@@ -41,6 +44,8 @@ public partial class CommandPanel : PanelContainer
 		_fleeButton.Pressed += () => FleePressed?.Invoke();
 		_takeButton.Pressed += () => TakePressed?.Invoke();
 		_potionButton.Pressed += () => PotionPressed?.Invoke();
+		if (_defendButton != null)
+			_defendButton.Pressed += () => DefendPressed?.Invoke();
 	}
 
 	public void ApplyDungeonMode(DungeonMode mode)
@@ -60,6 +65,8 @@ public partial class CommandPanel : PanelContainer
 		_attackButton.Visible = combat;
 		_fleeButton.Visible = combat;
 		_potionButton.Visible = combat;
+		if (_defendButton != null)
+			_defendButton.Visible = combat;
 	}
 
 	public void ApplyTakeButtonVisible(bool visible)
@@ -80,6 +87,8 @@ public partial class CommandPanel : PanelContainer
 		_fleeButton.Disabled = disabled;
 		_takeButton.Disabled = disabled;
 		_potionButton.Disabled = disabled;
+		if (_defendButton != null)
+			_defendButton.Disabled = disabled;
 	}
 
 	public void HideAllGameplayCommands()
@@ -95,6 +104,8 @@ public partial class CommandPanel : PanelContainer
 		_fleeButton.Visible = false;
 		_takeButton.Visible = false;
 		_potionButton.Visible = false;
+		if (_defendButton != null)
+			_defendButton.Visible = false;
 	}
 
 	public void ApplyCombatItemButtons(PlayerState player)
@@ -102,6 +113,21 @@ public partial class CommandPanel : PanelContainer
 		if (_potionButton == null)
 			return;
 		_potionButton.Disabled = player.HealthPotionCount <= 0 || player.CurrentHp >= player.MaxHp;
+	}
+
+	public void ApplyCombatAbilityButtons(PlayerState player, GameSessionState session, CombatService combat)
+	{
+		if (_defendButton == null)
+			return;
+		var hasDefend = player.HasAbility(AbilityIds.Defend);
+		_defendButton.Visible = hasDefend;
+		if (!hasDefend)
+			return;
+		var c = session.Combat;
+		var awaiting = combat.IsAwaitingPlayerAction(session);
+		var onCd = c != null && c.AbilityCooldowns.IsOnCooldown(AbilityIds.Defend);
+		var stance = c?.HasDefendStanceActive() == true;
+		_defendButton.Disabled = !awaiting || stance || onCd;
 	}
 
 	public void RenderFloorExitButtons(DungeonRoom? currentRoom)

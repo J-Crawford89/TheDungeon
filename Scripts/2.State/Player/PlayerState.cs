@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 public sealed class PlayerState
 {
 	public string Name { get; set; } = "Testy McTestface";
@@ -10,6 +13,19 @@ public sealed class PlayerState
 	public HorizontalDirection Facing { get; set; } = HorizontalDirection.North;
 	public AbilityScores AbilityScores { get; set; } = new();
 
+	public List<GrantedAbility> GrantedAbilities { get; set; } = new();
+
+	public int? CurrentSpellPoints { get; set; }
+	public int? MaxSpellPoints { get; set; }
+
+	public bool HasAbility(string abilityId)
+	{
+		if (string.IsNullOrWhiteSpace(abilityId))
+			return false;
+		var id = abilityId.Trim();
+		return GrantedAbilities.Any(g => g.AbilityId == id);
+	}
+
 	public void ResetToNewAdventurer()
 	{
 		Name = "Testy McTestface";
@@ -21,5 +37,8 @@ public sealed class PlayerState
 		HealthPotionCount = 0;
 		Facing = HorizontalDirection.North;
 		AbilityScores = new AbilityScores();
+		GrantedAbilities = new List<GrantedAbility>();
+		CurrentSpellPoints = null;
+		MaxSpellPoints = null;
 	}
 }

@@ -201,4 +201,14 @@ public sealed class NarrativeService
 		"You are already at full health; you save the potion for later.";
 
 	public string ForHealthPotionNoneLeft() => "You have no health potions to use.";
+
+	public string ForDefendStance() => "You take a defensive stance, ready to block the next solid blow.";
+
+	public string ForDefendAbsorbedHit() => "Your guard absorbs the hit — you take no damage from that strike.";
+
+	public string ForDefendAlreadyDefending() => "You are already defending; you hold your position.";
+
+	public string ForDefendOnCooldown() => "You are still recovering your footing and cannot defend yet.";
+
+	public string ForDefendCannotUse() => "You cannot use Defend right now.";
 }

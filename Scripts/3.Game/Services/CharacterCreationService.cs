@@ -8,11 +8,16 @@ public sealed class CharacterCreationService
 
 	private readonly DiceRollService _diceRollService;
 	private readonly Random _random;
+	private readonly IAbilityDefinitionRepository _abilityDefinitions;
 
-	public CharacterCreationService(DiceRollService diceRollService, Random random)
+	public CharacterCreationService(
+		DiceRollService diceRollService,
+		Random random,
+		IAbilityDefinitionRepository abilityDefinitions)
 	{
 		_diceRollService = diceRollService;
 		_random = random;
+		_abilityDefinitions = abilityDefinitions;
 	}
 
 	public void RollAndApplyRolledScores(CharacterCreationState state)
@@ -89,8 +94,25 @@ public sealed class CharacterCreationService
 		player.HealthPotionCount = 0;
 		player.Facing = HorizontalDirection.North;
 
+		player.GrantedAbilities = PlayerAbilityGrantBuilder.Build(
+			state.SelectedClass,
+			state.SelectedRace,
+			state.SelectedBackground,
+			player.Level,
+			_abilityDefinitions);
+
+		if (player.HasAbility(AbilityIds.Spellcasting))
+		{
+			player.CurrentSpellPoints = 10;
+			player.MaxSpellPoints = 10;
+		}
+		else
+		{
+			player.CurrentSpellPoints = null;
+			player.MaxSpellPoints = null;
+		}
+
 		// TODO: merge StartingEquipment from class/race/background into inventory when equipment is modeled.
-		// TODO: surface definition Abilities when the ability system is scaffolded for the player.
 	}
 
 	private static int SumAbilities(AbilityScores s) =>

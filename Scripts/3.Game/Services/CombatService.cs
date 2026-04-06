@@ -10,6 +10,7 @@ public sealed class CombatService
 	private readonly PlayerVitalsService _vitals;
 	private readonly PlayerDownedResolutionService _playerDowned;
 	private readonly TreasurePickupService _treasurePickup;
+	private readonly CombatAbilityEffectsRegistry _combatAbilities;
 
 	public CombatService(
 		DiceRollService dice,
@@ -17,7 +18,8 @@ public sealed class CombatService
 		NarrativeService narrative,
 		PlayerVitalsService vitals,
 		PlayerDownedResolutionService playerDowned,
-		TreasurePickupService treasurePickup)
+		TreasurePickupService treasurePickup,
+		CombatAbilityEffectsRegistry combatAbilities)
 	{
 		_dice = dice;
 		_resolution = resolution;
@@ -25,6 +27,7 @@ public sealed class CombatService
 		_vitals = vitals;
 		_playerDowned = playerDowned;
 		_treasurePickup = treasurePickup;
+		_combatAbilities = combatAbilities;
 	}
 
 	public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel)
@@ -254,6 +257,28 @@ public sealed class CombatService
 		ProcessAutomaticMonsterTurns(session);
 	}
 
+	public void ExecutePlayerDefend(GameSessionState session)
+	{
+		if (!IsAwaitingPlayerAction(session))
+			return;
+		if (!session.Player.HasAbility(AbilityIds.Defend))
+			return;
+
+		void Advance() { AdvanceTurn(session); ProcessAutomaticMonsterTurns(session); }
+
+		if (_combatAbilities.TryExecute(AbilityIds.Defend, session, Advance))
+			return;
+
+		if (session.Combat is not { } c)
+			return;
+		if (c.HasDefendStanceActive())
+			session.AppendGameLog(_narrative.ForDefendAlreadyDefending());
+		else if (c.AbilityCooldowns.IsOnCooldown(AbilityIds.Defend))
+			session.AppendGameLog(_narrative.ForDefendOnCooldown());
+		else
+			session.AppendGameLog(_narrative.ForDefendCannotUse());
+	}
+
 	private void RestoreExplorationAfterFlee(GameSessionState session)
 	{
 		var combat = session.Combat!;
@@ -265,13 +290,25 @@ public sealed class CombatService
 		session.Dungeon.DungeonMode = DungeonMode.Exploration;
 	}
 
+	private void NotifyPlayerTurnStarted(GameSessionState session)
+	{
+		if (session.Combat is not { } c)
+			return;
+		if (!IsAwaitingPlayerAction(session))
+			return;
+		c.AbilityCooldowns.OnPlayerTurnStarted();
+	}
+
 	private void ProcessAutomaticMonsterTurns(GameSessionState session)
 	{
 		while (session.Phase == GamePlayPhase.InProgress && session.Dungeon.DungeonMode == DungeonMode.Combat && session.Combat is { } c && c.TurnOrder.Count > 0)
 		{
 			var slot = c.TurnOrder[c.CurrentTurnIndex];
 			if (slot.IsPlayer)
+			{
+				NotifyPlayerTurnStarted(session);
 				return;
+			}
 			var room = session.Dungeon.CurrentRoom;
 			if (room == null)
 			{
@@ -336,14 +373,18 @@ public sealed class CombatService
 		{
 			if (result.Outcome == ResolutionOutcome.CriticalSuccess)
 				atk *= 2;
+			var damage = atk;
+			if (CombatPlayerIncomingDamage.TryApplyDefendNegate(ref damage, session, _narrative))
+				return;
+
 			var source = new PlayerDamageSource
 			{
 				Type = DamageSourceType.Monster,
 				DisplayName = name,
 				DefinitionId = monster.Definition.Id,
 			};
-			var vitals = _vitals.ApplyDamage(session.Player, atk);
-			session.AppendGameLog(_narrative.ForMonsterHitPlayer(name, atk, vitals.HpAfterClamped));
+			var vitals = _vitals.ApplyDamage(session.Player, damage);
+			session.AppendGameLog(_narrative.ForMonsterHitPlayer(name, damage, vitals.HpAfterClamped));
 			if (vitals.HpAfterClamped <= 0)
 			{
 				_playerDowned.Resolve(session, new PlayerDownedContext

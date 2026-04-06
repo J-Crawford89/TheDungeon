@@ -3,6 +3,7 @@ using System;
 public sealed class GameUiCoordinator
 {
 	private readonly GameSessionState _session;
+	private readonly CombatService _combatService;
 	private readonly ExplorationUiPresenter _exploration;
 	private readonly CombatUiPresenter _combat;
 	private readonly MainViewPanel _mainViewPanel;
@@ -13,6 +14,7 @@ public sealed class GameUiCoordinator
 
 	public GameUiCoordinator(
 		GameSessionState session,
+		CombatService combatService,
 		ExplorationUiPresenter exploration,
 		CombatUiPresenter combat,
 		MainViewPanel mainViewPanel,
@@ -22,6 +24,7 @@ public sealed class GameUiCoordinator
 		MapPanel mapPanel)
 	{
 		_session = session;
+		_combatService = combatService;
 		_exploration = exploration;
 		_combat = combat;
 		_mainViewPanel = mainViewPanel;
@@ -56,7 +59,7 @@ public sealed class GameUiCoordinator
 		}
 
 		if (flags.HasFlag(UiRefreshFlags.Character))
-			_characterPanel.Render(_session.Player);
+			_characterPanel.Render(_session.Player, _session);
 
 		if (flags.HasFlag(UiRefreshFlags.Log))
 			_logPanel.SyncFromSession(_session);
@@ -68,7 +71,10 @@ public sealed class GameUiCoordinator
 			if (mode == DungeonMode.Exploration)
 				_commandPanel.RenderFloorExitButtons(_session.Dungeon.CurrentRoom);
 			if (mode == DungeonMode.Combat)
+			{
 				_commandPanel.ApplyCombatItemButtons(_session.Player);
+				_commandPanel.ApplyCombatAbilityButtons(_session.Player, _session, _combatService);
+			}
 			var inPlay = mode == DungeonMode.Exploration || mode == DungeonMode.Combat;
 			_commandPanel.ApplyTakeButtonVisible(inPlay && TreasurePickupService.HasTakeableLootInCurrentRoom(_session));
 		}
@@ -166,6 +172,15 @@ public sealed class GameUiCoordinator
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		_combat.OnPotionPressed();
+	}
+
+	public void OnDefendPressed()
+	{
+		if (_session.Phase != GamePlayPhase.InProgress)
+			return;
+		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
+			return;
+		_combat.OnDefendPressed();
 	}
 
 	private static FloorConnectionType GetExitType(DungeonRoom room)

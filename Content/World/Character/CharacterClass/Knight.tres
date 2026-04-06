@@ -1,6 +1,8 @@
 [gd_resource type="Resource" script_class="CharacterClassResource" format=3 uid="uid://0hi26jifmdqu"]
 
 [ext_resource type="Script" uid="uid://c577agexi465p" path="res://Resources/CharacterClassResource.cs" id="1_svryp"]
+[ext_resource type="Script" uid="uid://rr8vsheybc0y" path="res://Resources/LevelAbilityGrantResource.cs" id="2_grant"]
+[ext_resource type="Resource" uid="uid://bqgryfdepwcj5" path="res://Content/World/Character/AbilityGrants/DefendAt1.tres" id="3_def"]
 
 [resource]
 script = ExtResource("1_svryp")
@@ -8,3 +10,4 @@ Id = "knight"
 Name = "Knight"
 Description = "Knights are heavily armored noble warriors. While they are not the most nimble of classes, they rank among the most powerful combatants."
 BaseHp = 7
+AbilityGrants = Array[ExtResource("2_grant")]([ExtResource("3_def")])

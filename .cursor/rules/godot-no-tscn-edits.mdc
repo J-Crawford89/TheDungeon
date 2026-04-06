@@ -3,8 +3,9 @@ description: Do not edit Godot scene files; instruct user to use Godot Editor GU
 alwaysApply: true
 ---
 
-# Godot scenes (.tscn)
+# Godot scenes and serialized resources
 
-- **Do not** edit `*.tscn` files (or other Godot serialized scene/resource text) in the repo.
-- If the UI or scene tree needs changes (nodes, exports, properties, resources), **describe the steps** for the user to apply in the **Godot Editor** (which nodes to add, which properties to set, export paths, etc.).
-- It is fine to edit **C# scripts** (`.cs`) that attach to scenes; avoid changing serialized scene data on disk.
+- **Do not** edit `*.tscn` files (or other Godot serialized scene text) in the repo.
+- **Do not** edit `*.tres` / other Godot serialized **resource** text on disk unless the user explicitly asks you to change that data.
+- If the UI, scene tree, or resource data needs changes, **describe the steps** for the user to apply in the **Godot Editor** (which nodes to add, which properties to set, export paths, which `.tres` to create or adjust, etc.).
+- It is fine to edit **C# scripts** (`.cs`) that attach to scenes; avoid changing serialized scene/resource data on disk when the user prefers editor-owned content.

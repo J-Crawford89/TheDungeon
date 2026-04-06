@@ -19,6 +19,8 @@ public partial class GameRoot : Control
 	[Export] public CharacterRaceResourceDatabase? CharacterRaceDatabase { get; set; }
 	[Export] public CharacterBackgroundResourceDatabase? CharacterBackgroundDatabase { get; set; }
 
+	[Export] public AbilityResourceDatabase? AbilityDatabase { get; set; }
+
 	[Export] public bool CaptureDebugDiagnostics { get; set; }
 
 	private GameRunContext? _activeRunContext;
@@ -149,6 +151,10 @@ public partial class GameRoot : Control
 		var classRepo = new GodotCharacterClassDefinitionRepository(CharacterClassDatabase);
 		var raceRepo = new GodotCharacterRaceDefinitionRepository(CharacterRaceDatabase);
 		var backgroundRepo = new GodotCharacterBackgroundDefinitionRepository(CharacterBackgroundDatabase);
+		if (AbilityDatabase == null)
+			GD.PushWarning("GameRoot: assign AbilityDatabase (e.g. Content/Databases/AbilityDatabase.tres) on this node so ability grants validate and resolve.");
+
+		var abilityRepo = new GodotAbilityDefinitionRepository(AbilityDatabase);
 
 		var roomFeaturePopulation = new RoomFeaturePopulationService(monsterRepo, trapRepo, treasureRepo, npcRepo, loreRepo);
 		var dungeonBootstrap = new DungeonBootstrap(roomFeaturePopulation);
@@ -159,14 +165,18 @@ public partial class GameRoot : Control
 		var vitalsService = new PlayerVitalsService();
 		var gameOverDownedHandler = new GameOverDownedHandler(narrativeService);
 		var playerDownedResolutionService = new PlayerDownedResolutionService(new IPlayerDownedOutcomeHandler[] { gameOverDownedHandler });
-		var combatService = new CombatService(
+		CombatService combatService = default!;
+		var combatAbilities = new CombatAbilityEffectsRegistry();
+		combatAbilities.Register(new DefendCombatAbilityHandler(narrativeService, s => combatService.IsAwaitingPlayerAction(s)));
+		combatService = new CombatService(
 			diceRollService,
 			resolutionService,
 			narrativeService,
 			vitalsService,
 			playerDownedResolutionService,
-			treasurePickupService);
-		var characterCreation = new CharacterCreationService(diceRollService, random);
+			treasurePickupService,
+			combatAbilities);
+		var characterCreation = new CharacterCreationService(diceRollService, random, abilityRepo);
 
 		return new GameRunContext(
 			session,
@@ -185,6 +195,7 @@ public partial class GameRoot : Control
 			characterCreation,
 			classRepo,
 			raceRepo,
-			backgroundRepo);
+			backgroundRepo,
+			abilityRepo);
 	}
 }

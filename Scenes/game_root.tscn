@@ -12,6 +12,7 @@
 [ext_resource type="Resource" uid="uid://rspr4g5ap677" path="res://Content/Databases/CharacterClassDatabase.tres" id="10_c6sj0"]
 [ext_resource type="Resource" uid="uid://jws44jb7tldt" path="res://Content/Databases/CharacterRaceDatabase.tres" id="11_lpuel"]
 [ext_resource type="Resource" uid="uid://46x1vwpgn0sh" path="res://Content/Databases/CharacterBackgroundDatabase.tres" id="12_hpb24"]
+[ext_resource type="Resource" uid="uid://dw64ti8d4fr4e" path="res://Content/Databases/AbilityDatabase.tres" id="13_lpuel"]
 
 [node name="GameRoot" type="Control" unique_id=1615480598 node_paths=PackedStringArray("_screenHost")]
 layout_mode = 3
@@ -33,6 +34,7 @@ LoreDatabase = ExtResource("9_svbas")
 CharacterClassDatabase = ExtResource("10_c6sj0")
 CharacterRaceDatabase = ExtResource("11_lpuel")
 CharacterBackgroundDatabase = ExtResource("12_hpb24")
+AbilityDatabase = ExtResource("13_lpuel")
 CaptureDebugDiagnostics = true
 
 [node name="ScreenHost" type="Control" parent="." unique_id=1500174924]

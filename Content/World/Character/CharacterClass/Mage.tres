@@ -1,6 +1,8 @@
 [gd_resource type="Resource" script_class="CharacterClassResource" format=3 uid="uid://do7ne3ai6m3ib"]
 
 [ext_resource type="Script" uid="uid://c577agexi465p" path="res://Resources/CharacterClassResource.cs" id="1_wd06d"]
+[ext_resource type="Script" uid="uid://rr8vsheybc0y" path="res://Resources/LevelAbilityGrantResource.cs" id="2_grant"]
+[ext_resource type="Resource" uid="uid://d2vynnkm3kxuu" path="res://Content/World/Character/AbilityGrants/SpellcastingAt1.tres" id="3_spl"]
 
 [resource]
 script = ExtResource("1_wd06d")
@@ -8,3 +10,4 @@ Id = "mage"
 Name = "Mage"
 Description = "Mages are masters of the magical arts. Their power relies on their wits and knowledge rather than brute force."
 BaseHp = 2
+AbilityGrants = Array[ExtResource("2_grant")]([ExtResource("3_spl")])

@@ -52,4 +52,14 @@ public sealed class CombatUiPresenter
 		_combatService.ExecutePlayerUseHealthPotion(_session);
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
 	}
+
+	public void OnDefendPressed()
+	{
+		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
+			return;
+		if (!_combatService.IsAwaitingPlayerAction(_session))
+			return;
+		_combatService.ExecutePlayerDefend(_session);
+		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
+	}
 }

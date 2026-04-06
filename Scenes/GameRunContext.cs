@@ -20,6 +20,7 @@ public sealed class GameRunContext
 	public ICharacterClassDefinitionRepository CharacterClasses { get; }
 	public ICharacterRaceDefinitionRepository CharacterRaces { get; }
 	public ICharacterBackgroundDefinitionRepository CharacterBackgrounds { get; }
+	public IAbilityDefinitionRepository AbilityDefinitions { get; }
 
 	public GameRunContext(
 		GameSessionState session,
@@ -38,7 +39,8 @@ public sealed class GameRunContext
 		CharacterCreationService characterCreation,
 		ICharacterClassDefinitionRepository characterClasses,
 		ICharacterRaceDefinitionRepository characterRaces,
-		ICharacterBackgroundDefinitionRepository characterBackgrounds)
+		ICharacterBackgroundDefinitionRepository characterBackgrounds,
+		IAbilityDefinitionRepository abilityDefinitions)
 	{
 		Session = session;
 		Random = random;
@@ -57,5 +59,6 @@ public sealed class GameRunContext
 		CharacterClasses = characterClasses;
 		CharacterRaces = characterRaces;
 		CharacterBackgrounds = characterBackgrounds;
+		AbilityDefinitions = abilityDefinitions;
 	}
 }
