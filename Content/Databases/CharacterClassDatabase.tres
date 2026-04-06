@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CharacterClassResourceDatabase" format=3 uid="uid://rspr4g5ap677"]
+
+[ext_resource type="Script" uid="uid://c577agexi465p" path="res://Resources/CharacterClassResource.cs" id="1_kfnx6"]
+[ext_resource type="Script" uid="uid://b08hdql0afjfx" path="res://Resources/Databases/CharacterClassResourceDatabase.cs" id="2_b3yu6"]
+[ext_resource type="Resource" uid="uid://0hi26jifmdqu" path="res://Content/World/Character/CharacterClass/Knight.tres" id="2_ujop7"]
+[ext_resource type="Resource" uid="uid://do7ne3ai6m3ib" path="res://Content/World/Character/CharacterClass/Mage.tres" id="3_13wt7"]
+[ext_resource type="Resource" uid="uid://ctp24ao7s5ql8" path="res://Content/World/Character/CharacterClass/Priest.tres" id="4_mkg0v"]
+[ext_resource type="Resource" uid="uid://bkoa0tjwsgbep" path="res://Content/World/Character/CharacterClass/Thief.tres" id="5_n4k3j"]
+[ext_resource type="Resource" uid="uid://ifync0w8y1re" path="res://Content/World/Character/CharacterClass/Warrior.tres" id="6_78jlo"]
+
+[resource]
+script = ExtResource("2_b3yu6")
+CharacterClasses = Array[ExtResource("1_kfnx6")]([ExtResource("2_ujop7"), ExtResource("3_13wt7"), ExtResource("4_mkg0v"), ExtResource("5_n4k3j"), ExtResource("6_78jlo")])

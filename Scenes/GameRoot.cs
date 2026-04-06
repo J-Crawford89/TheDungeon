@@ -15,6 +15,10 @@ public partial class GameRoot : Control
 	[Export] public NpcResourceDatabase? NpcDatabase { get; set; }
 	[Export] public LoreResourceDatabase? LoreDatabase { get; set; }
 
+	[Export] public CharacterClassResourceDatabase? CharacterClassDatabase { get; set; }
+	[Export] public CharacterRaceResourceDatabase? CharacterRaceDatabase { get; set; }
+	[Export] public CharacterBackgroundResourceDatabase? CharacterBackgroundDatabase { get; set; }
+
 	[Export] public bool CaptureDebugDiagnostics { get; set; }
 
 	private GameRunContext? _activeRunContext;
@@ -70,7 +74,7 @@ public partial class GameRoot : Control
 				break;
 			case CharacterCreationScreen cc:
 				cc.BackButtonPressed -= HandleReturnToStartMenu;
-				cc.StartGameButtonPressed -= HandleStartGame;
+				cc.StartGameRequested -= HandleStartGame;
 				break;
 			case MainUi mu:
 				mu.QuitRequested -= HandleQuitGame;
@@ -87,7 +91,7 @@ public partial class GameRoot : Control
 		var cc = _characterCreationScene.Instantiate<CharacterCreationScreen>();
 		cc.Initialize(_activeRunContext, CaptureDebugDiagnostics);
 		cc.BackButtonPressed += HandleReturnToStartMenu;
-		cc.StartGameButtonPressed += HandleStartGame;
+		cc.StartGameRequested += HandleStartGame;
 		_screenHost.AddChild(cc);
 	}
 
@@ -104,13 +108,15 @@ public partial class GameRoot : Control
 		GetTree().Quit();
 	}
 
-	private void HandleStartGame()
+	private void HandleStartGame(CharacterCreationState creation)
 	{
 		if (_activeRunContext == null)
 		{
 			GD.PushError("GameRoot.HandleStartGame: no active run context.");
 			return;
 		}
+
+		_activeRunContext.CharacterCreation.ApplyToPlayer(creation, _activeRunContext.Session.Player);
 
 		ClearScreenHost();
 
@@ -140,6 +146,10 @@ public partial class GameRoot : Control
 		var npcRepo = new GodotNpcDefinitionRepository(NpcDatabase);
 		var loreRepo = new GodotLoreDefinitionRepository(LoreDatabase);
 
+		var classRepo = new GodotCharacterClassDefinitionRepository(CharacterClassDatabase);
+		var raceRepo = new GodotCharacterRaceDefinitionRepository(CharacterRaceDatabase);
+		var backgroundRepo = new GodotCharacterBackgroundDefinitionRepository(CharacterBackgroundDatabase);
+
 		var roomFeaturePopulation = new RoomFeaturePopulationService(monsterRepo, trapRepo, treasureRepo, npcRepo, loreRepo);
 		var dungeonBootstrap = new DungeonBootstrap(roomFeaturePopulation);
 		var explorationService = new ExplorationService(roomFeaturePopulation);
@@ -156,6 +166,7 @@ public partial class GameRoot : Control
 			vitalsService,
 			playerDownedResolutionService,
 			treasurePickupService);
+		var characterCreation = new CharacterCreationService(diceRollService, random);
 
 		return new GameRunContext(
 			session,
@@ -170,6 +181,10 @@ public partial class GameRoot : Control
 			vitalsService,
 			gameOverDownedHandler,
 			playerDownedResolutionService,
-			combatService);
+			combatService,
+			characterCreation,
+			classRepo,
+			raceRepo,
+			backgroundRepo);
 	}
 }

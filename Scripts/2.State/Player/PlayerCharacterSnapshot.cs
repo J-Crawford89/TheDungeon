@@ -19,17 +19,7 @@ public sealed class PlayerCharacterSnapshot
 			Gold = player.Gold,
 			HealthPotionCount = player.HealthPotionCount,
 			Facing = player.Facing,
-			AbilityScores = new AbilityScores
-			{
-				Might = src.Might,
-				Constitution = src.Constitution,
-				Dexterity = src.Dexterity,
-				Agility = src.Agility,
-				Intelligence = src.Intelligence,
-				Wisdom = src.Wisdom,
-				Gravitas = src.Gravitas,
-				Luck = src.Luck,
-			},
+			AbilityScores = AbilityScoresCopy.From(src),
 		};
 	}
 }

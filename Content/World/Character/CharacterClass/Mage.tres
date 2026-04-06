@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharacterClassResource" format=3 uid="uid://do7ne3ai6m3ib"]
+
+[ext_resource type="Script" uid="uid://c577agexi465p" path="res://Resources/CharacterClassResource.cs" id="1_wd06d"]
+
+[resource]
+script = ExtResource("1_wd06d")
+Id = "mage"
+Name = "Mage"
+Description = "Mages are masters of the magical arts. Their power relies on their wits and knowledge rather than brute force."
+BaseHp = 2

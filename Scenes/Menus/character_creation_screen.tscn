@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bagqyiiie5t37" path="res://Scenes/Menus/CharacterCreationScreen.cs" id="1_yiiuy"]
 
-[node name="CharacterCreationScreen" type="Control" unique_id=762333957 node_paths=PackedStringArray("_rerollAbilityScoresButton", "_backButton", "_startGameButton")]
+[node name="CharacterCreationScreen" type="Control" unique_id=762333957 node_paths=PackedStringArray("_nameEdit", "_sexButton", "_classButton", "_raceButton", "_backgroundButton", "_mightLabel", "_constitutionLabel", "_dexterityLabel", "_agilityLabel", "_intelligenceLabel", "_wisdomLabel", "_gravitasLabel", "_luckLabel", "_characterDescriptionLabel", "_rerollAbilityScoresButton", "_backButton", "_startGameButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -10,6 +10,20 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_yiiuy")
+_nameEdit = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/NameRow/NameEdit")
+_sexButton = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/SexRow/SexButton")
+_classButton = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/ClassRow/ClassButton")
+_raceButton = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/RaceRow/RaceButton")
+_backgroundButton = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/BackgroundRow/BackgroundButton")
+_mightLabel = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/MightLabel")
+_constitutionLabel = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/ConstitutionLabel")
+_dexterityLabel = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/DexterityLabel")
+_agilityLabel = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/AgilityLabel")
+_intelligenceLabel = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/IntelligenceLabel")
+_wisdomLabel = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/WisdomLabel")
+_gravitasLabel = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/GravitasLabel")
+_luckLabel = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/LuckLabel")
+_characterDescriptionLabel = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column2/Column2Margin/CharacterDescriptionLabel")
 _rerollAbilityScoresButton = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/RerollAbilityScoresButton")
 _backButton = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/CharacterCreationButtonsHBox/BackButton")
 _startGameButton = NodePath("CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/CharacterCreationButtonsHBox/StartGameButton")
@@ -44,6 +58,7 @@ layout_mode = 2
 
 [node name="Row1" type="HBoxContainer" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox" unique_id=45589828]
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="Column1" type="VBoxContainer" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1" unique_id=5513357]
 layout_mode = 2
@@ -72,12 +87,6 @@ text = "Sex: "
 
 [node name="SexButton" type="OptionButton" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1/SexRow" unique_id=667569423]
 layout_mode = 2
-selected = 0
-item_count = 2
-popup/item_0/text = "Male"
-popup/item_0/id = 0
-popup/item_1/text = "Female"
-popup/item_1/id = 1
 
 [node name="ClassRow" type="HBoxContainer" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=1112538497]
 layout_mode = 2
@@ -115,45 +124,37 @@ size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
 text = "Ability Scores"
 
-[node name="MightLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=598853402]
+[node name="MightLabel" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=1706946606]
 layout_mode = 2
 text = "Might: 0"
-fit_content = true
 
-[node name="ConstitutionLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=1383536054]
+[node name="ConstitutionLabel" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=616576882]
 layout_mode = 2
 text = "Constitution: 0"
-fit_content = true
 
-[node name="DexterityLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=253627830]
+[node name="DexterityLabel" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=1991468666]
 layout_mode = 2
 text = "Dexterity: 0"
-fit_content = true
 
-[node name="AgilityLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=842978577]
+[node name="AgilityLabel" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=1542129139]
 layout_mode = 2
 text = "Agility: 0"
-fit_content = true
 
-[node name="IntelligenceLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=951237399]
+[node name="IntelligenceLabel" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=326655970]
 layout_mode = 2
 text = "Intelligence: 0"
-fit_content = true
 
-[node name="WisdomLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=832985420]
+[node name="WisdomLabel" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=245971724]
 layout_mode = 2
 text = "Wisdom: 0"
-fit_content = true
 
-[node name="GravitasLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=598011871]
+[node name="GravitasLabel" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=487306833]
 layout_mode = 2
 text = "Gravitas: 0"
-fit_content = true
 
-[node name="LuckLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=878144655]
+[node name="LuckLabel" type="Label" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=236407809]
 layout_mode = 2
 text = "Luck: 0"
-fit_content = true
 
 [node name="RerollAbilityScoresButton" type="Button" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column1" unique_id=653180233]
 layout_mode = 2
@@ -177,6 +178,7 @@ size_flags_horizontal = 3
 
 [node name="Column2Margin" type="MarginContainer" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column2" unique_id=11765598]
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/margin_left = 8
 
 [node name="CharacterDescriptionLabel" type="RichTextLabel" parent="CharacterCreationPanel/CharacterCreationMargin/CharacterCreationVBox/Row1/Column2/Column2Margin" unique_id=365686068]
@@ -201,4 +203,3 @@ You have no special abilities.
 
 [b]EQUIPMENT[/b]
 You start with 0 gold and no other equipment."
-fit_content = true

@@ -7,9 +7,11 @@ public partial class CharacterPanel : PanelContainer
 	[Export] private Label _levelLabel;
 	[Export] private Label _goldLabel;
 	[Export] private Label _equipmentLabel;
+	[Export] private Label _nameLabel;
 
 	public void Render(PlayerState player)
 	{
+		_nameLabel.Text = $"Name: {player.Name}";
 		_hpLabel.Text = $"HP: {player.CurrentHp} / {player.MaxHp}";
 		_levelLabel.Text = $"LEVEL: {player.Level}";
 		if (_goldLabel != null)

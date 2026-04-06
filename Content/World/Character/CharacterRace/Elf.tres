@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharacterRaceResource" format=3 uid="uid://bnvp2tqfa6nes"]
+
+[ext_resource type="Script" uid="uid://hayxkj470sdn" path="res://Resources/CharacterRaceResource.cs" id="1_v2adr"]
+
+[resource]
+script = ExtResource("1_v2adr")
+Id = "elf"
+Name = "Elf"
+Description = "Elves are slightly shorter than humans on average, and tend toward the slender side. They are typically dextrous and most elves have some affinity for magic."
+BaseHp = 3

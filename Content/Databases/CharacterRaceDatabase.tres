@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CharacterRaceResourceDatabase" format=3 uid="uid://jws44jb7tldt"]
+
+[ext_resource type="Script" uid="uid://hayxkj470sdn" path="res://Resources/CharacterRaceResource.cs" id="1_oju66"]
+[ext_resource type="Script" uid="uid://c4xs4ybnuxs8d" path="res://Resources/Databases/CharacterRaceResourceDatabase.cs" id="2_76v1h"]
+[ext_resource type="Resource" uid="uid://da5by7i30gjk4" path="res://Content/World/Character/CharacterRace/Dwarf.tres" id="2_pua1f"]
+[ext_resource type="Resource" uid="uid://bnvp2tqfa6nes" path="res://Content/World/Character/CharacterRace/Elf.tres" id="3_u6oqe"]
+[ext_resource type="Resource" uid="uid://uisdvnbh0sgi" path="res://Content/World/Character/CharacterRace/Human.tres" id="4_sawv5"]
+
+[resource]
+script = ExtResource("2_76v1h")
+CharacterRaces = Array[ExtResource("1_oju66")]([ExtResource("2_pua1f"), ExtResource("3_u6oqe"), ExtResource("4_sawv5")])

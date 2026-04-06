@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharacterBackgroundResource" format=3 uid="uid://24xy8l8l5tvr"]
+
+[ext_resource type="Script" uid="uid://dgxwvbumstmik" path="res://Resources/CharacterBackgroundResource.cs" id="1_23k12"]
+
+[resource]
+script = ExtResource("1_23k12")
+Id = "aristocrat"
+Name = "Aristocrat"
+Description = "Aristocrats are the stodgy upper-crest of society. Whether due to boredom, vanity, or some other such motive, you left the life of luxory behind to find adventure out in the world. You are well versed among the high class of society and your name carries weight among those who have heard of you or your family. Additionally, your excessive leisure time growing up allowed you to hone in on a few specialities."
+StartingGold = 36

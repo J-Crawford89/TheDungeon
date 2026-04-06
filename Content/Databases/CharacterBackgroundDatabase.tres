@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CharacterBackgroundResourceDatabase" format=3 uid="uid://46x1vwpgn0sh"]
+
+[ext_resource type="Script" uid="uid://dgxwvbumstmik" path="res://Resources/CharacterBackgroundResource.cs" id="1_h32d6"]
+[ext_resource type="Script" uid="uid://bsuq8c88n4rmr" path="res://Resources/Databases/CharacterBackgroundResourceDatabase.cs" id="2_pepie"]
+[ext_resource type="Resource" uid="uid://24xy8l8l5tvr" path="res://Content/World/Character/CharacterBackground/Aristocrat.tres" id="2_xh7qt"]
+[ext_resource type="Resource" uid="uid://5sbie2v0k2s6" path="res://Content/World/Character/CharacterBackground/Farmboy.tres" id="3_k6be2"]
+[ext_resource type="Resource" uid="uid://d3m50hrnhfov5" path="res://Content/World/Character/CharacterBackground/Squire.tres" id="4_7x4ik"]
+
+[resource]
+script = ExtResource("2_pepie")
+CharacterBackgrounds = Array[ExtResource("1_h32d6")]([ExtResource("2_xh7qt"), ExtResource("3_k6be2"), ExtResource("4_7x4ik")])

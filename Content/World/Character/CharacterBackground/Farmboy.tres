@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharacterBackgroundResource" format=3 uid="uid://5sbie2v0k2s6"]
+
+[ext_resource type="Script" uid="uid://dgxwvbumstmik" path="res://Resources/CharacterBackgroundResource.cs" id="1_ily7t"]
+
+[resource]
+script = ExtResource("1_ily7t")
+Id = "farmboy"
+Name = "Farmboy or Farmgirl"
+Description = "Farmboys and Farmgirls are exactly what they sound like. Before heading off on adventurers, you were a simple farmboy or farmgirl, tending to another's farm, be that your parents or some other employer. Farmboys and Farmgirls are great with animals and agriculture and have a knack for intense physical labor."
+StartingGold = 12

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharacterRaceResource" format=3 uid="uid://uisdvnbh0sgi"]
+
+[ext_resource type="Script" uid="uid://hayxkj470sdn" path="res://Resources/CharacterRaceResource.cs" id="1_s0nqg"]
+
+[resource]
+script = ExtResource("1_s0nqg")
+Id = "human"
+Name = "Human"
+Description = "I assume you know what humans are. Same as they are in our world. You are boring, but versatile."
+BaseHp = 5

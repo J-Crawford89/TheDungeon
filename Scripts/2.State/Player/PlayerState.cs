@@ -1,6 +1,7 @@
 public sealed class PlayerState
 {
 	public string Name { get; set; } = "Testy McTestface";
+	public CharacterSex Sex { get; set; } = CharacterSex.Male;
 	public int CurrentHp { get; set; } = 10;
 	public int MaxHp { get; set; } = 10;
 	public int Level { get; set; } = 1;
@@ -12,6 +13,7 @@ public sealed class PlayerState
 	public void ResetToNewAdventurer()
 	{
 		Name = "Testy McTestface";
+		Sex = CharacterSex.Male;
 		CurrentHp = 10;
 		MaxHp = 10;
 		Level = 1;

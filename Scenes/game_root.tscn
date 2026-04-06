@@ -9,6 +9,9 @@
 [ext_resource type="Resource" uid="uid://dfoopnyl6hx5a" path="res://Content/Databases/TreasureDatabase.tres" id="7_hpb24"]
 [ext_resource type="Resource" uid="uid://3u2elb0lgi1c" path="res://Content/Databases/NpcDatabase.tres" id="8_nf18g"]
 [ext_resource type="Resource" uid="uid://ct4psy1ri1xjn" path="res://Content/Databases/LoreDatabase.tres" id="9_svbas"]
+[ext_resource type="Resource" uid="uid://rspr4g5ap677" path="res://Content/Databases/CharacterClassDatabase.tres" id="10_c6sj0"]
+[ext_resource type="Resource" uid="uid://jws44jb7tldt" path="res://Content/Databases/CharacterRaceDatabase.tres" id="11_lpuel"]
+[ext_resource type="Resource" uid="uid://46x1vwpgn0sh" path="res://Content/Databases/CharacterBackgroundDatabase.tres" id="12_hpb24"]
 
 [node name="GameRoot" type="Control" unique_id=1615480598 node_paths=PackedStringArray("_screenHost")]
 layout_mode = 3
@@ -27,6 +30,9 @@ TrapDatabase = ExtResource("6_lpuel")
 TreasureDatabase = ExtResource("7_hpb24")
 NpcDatabase = ExtResource("8_nf18g")
 LoreDatabase = ExtResource("9_svbas")
+CharacterClassDatabase = ExtResource("10_c6sj0")
+CharacterRaceDatabase = ExtResource("11_lpuel")
+CharacterBackgroundDatabase = ExtResource("12_hpb24")
 CaptureDebugDiagnostics = true
 
 [node name="ScreenHost" type="Control" parent="." unique_id=1500174924]

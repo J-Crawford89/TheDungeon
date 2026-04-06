@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+
 public sealed class GameRunContext
 {
 	public GameSessionState Session { get; }
@@ -15,6 +16,10 @@ public sealed class GameRunContext
 	public GameOverDownedHandler GameOverDownedHandler { get; }
 	public PlayerDownedResolutionService PlayerDownedResolutionService { get; }
 	public CombatService CombatService { get; }
+	public CharacterCreationService CharacterCreation { get; }
+	public ICharacterClassDefinitionRepository CharacterClasses { get; }
+	public ICharacterRaceDefinitionRepository CharacterRaces { get; }
+	public ICharacterBackgroundDefinitionRepository CharacterBackgrounds { get; }
 
 	public GameRunContext(
 		GameSessionState session,
@@ -29,7 +34,11 @@ public sealed class GameRunContext
 		PlayerVitalsService vitalsService,
 		GameOverDownedHandler gameOverDownedHandler,
 		PlayerDownedResolutionService playerDownedResolutionService,
-		CombatService combatService)
+		CombatService combatService,
+		CharacterCreationService characterCreation,
+		ICharacterClassDefinitionRepository characterClasses,
+		ICharacterRaceDefinitionRepository characterRaces,
+		ICharacterBackgroundDefinitionRepository characterBackgrounds)
 	{
 		Session = session;
 		Random = random;
@@ -44,5 +53,9 @@ public sealed class GameRunContext
 		GameOverDownedHandler = gameOverDownedHandler;
 		PlayerDownedResolutionService = playerDownedResolutionService;
 		CombatService = combatService;
+		CharacterCreation = characterCreation;
+		CharacterClasses = characterClasses;
+		CharacterRaces = characterRaces;
+		CharacterBackgrounds = characterBackgrounds;
 	}
 }

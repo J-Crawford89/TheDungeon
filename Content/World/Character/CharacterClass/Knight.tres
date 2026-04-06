@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharacterClassResource" format=3 uid="uid://0hi26jifmdqu"]
+
+[ext_resource type="Script" uid="uid://c577agexi465p" path="res://Resources/CharacterClassResource.cs" id="1_svryp"]
+
+[resource]
+script = ExtResource("1_svryp")
+Id = "knight"
+Name = "Knight"
+Description = "Knights are heavily armored noble warriors. While they are not the most nimble of classes, they rank among the most powerful combatants."
+BaseHp = 7

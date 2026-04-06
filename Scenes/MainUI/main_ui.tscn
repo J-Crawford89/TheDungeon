@@ -72,7 +72,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 3.0
 
-[node name="CharacterPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row1" unique_id=308191709 node_paths=PackedStringArray("_hpLabel", "_levelLabel", "_goldLabel", "_equipmentLabel")]
+[node name="CharacterPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row1" unique_id=308191709 node_paths=PackedStringArray("_hpLabel", "_levelLabel", "_goldLabel", "_equipmentLabel", "_nameLabel")]
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("3_day7x")
@@ -80,6 +80,7 @@ _hpLabel = NodePath("CharacterMargin/CharacterContent/HpLabel")
 _levelLabel = NodePath("CharacterMargin/CharacterContent/LevelLabel")
 _goldLabel = NodePath("CharacterMargin/CharacterContent/GoldLabel")
 _equipmentLabel = NodePath("CharacterMargin/CharacterContent/EquipmentLabel")
+_nameLabel = NodePath("CharacterMargin/CharacterContent/CharacterNameLabel")
 
 [node name="CharacterMargin" type="MarginContainer" parent="RootMargin/MainVBox/Row1/CharacterPanel" unique_id=974340699]
 layout_mode = 2

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharacterBackgroundResource" format=3 uid="uid://d3m50hrnhfov5"]
+
+[ext_resource type="Script" uid="uid://dgxwvbumstmik" path="res://Resources/CharacterBackgroundResource.cs" id="1_wahrs"]
+
+[resource]
+script = ExtResource("1_wahrs")
+Id = "squire"
+Name = "Squire"
+Description = "Squires serve knights, seeing to their arms and armor. You spent time in the employ of one such knight before heading off to adventure on your own. You have better familiarity with arms and armor than most others."
+StartingGold = 10

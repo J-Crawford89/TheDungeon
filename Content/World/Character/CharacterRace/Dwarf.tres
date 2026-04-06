@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharacterRaceResource" format=3 uid="uid://da5by7i30gjk4"]
+
+[ext_resource type="Script" uid="uid://hayxkj470sdn" path="res://Resources/CharacterRaceResource.cs" id="1_ils6r"]
+
+[resource]
+script = ExtResource("1_ils6r")
+Id = "dwarf"
+Name = "Dwarf"
+Description = "Dwarves are short, stout, sturdy, and, usually, more than a little grumpy. They make excellent fighters, though they aren't the most dextrous of races and few hold magic affinity."
+BaseHp = 6

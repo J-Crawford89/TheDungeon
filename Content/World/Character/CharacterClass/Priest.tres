@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharacterClassResource" format=3 uid="uid://ctp24ao7s5ql8"]
+
+[ext_resource type="Script" uid="uid://c577agexi465p" path="res://Resources/CharacterClassResource.cs" id="1_16qcu"]
+
+[resource]
+script = ExtResource("1_16qcu")
+Id = "priest"
+Name = "Priest"
+Description = "Priests rely on holy magic and divine intervention to keep going. They are far from skilled fighters, but can keep themselves in nearly any fight and are particularly effective against the undead and other unholy monsters."
+BaseHp = 4

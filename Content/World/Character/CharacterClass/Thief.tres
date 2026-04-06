@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharacterClassResource" format=3 uid="uid://bkoa0tjwsgbep"]
+
+[ext_resource type="Script" uid="uid://c577agexi465p" path="res://Resources/CharacterClassResource.cs" id="1_dmvnv"]
+
+[resource]
+script = ExtResource("1_dmvnv")
+Id = "thief"
+Name = "Thief"
+Description = "Thieves are quick and nimble. What they lack in survivability they make up for in speed and deadly efficiency."
+BaseHp = 4

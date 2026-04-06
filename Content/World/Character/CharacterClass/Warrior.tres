@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharacterClassResource" format=3 uid="uid://ifync0w8y1re"]
+
+[ext_resource type="Script" uid="uid://c577agexi465p" path="res://Resources/CharacterClassResource.cs" id="1_kl110"]
+
+[resource]
+script = ExtResource("1_kl110")
+Id = "warrior"
+Name = "Warrior"
+Description = "Warriors are as balanced of a fighting class as you can find. They perfectly balance Might and Agility, Constitution and Dexterity. The Warrior forgoes the Knight's heavy armor, but is all the quicker for it."
+BaseHp = 8
