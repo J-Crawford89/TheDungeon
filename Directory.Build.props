@@ -1,0 +1,11 @@
+<Project>
+	<!--
+	  Keeps Godot companion files on disk for the editor but excludes them from default MSBuild globs,
+	  so they typically no longer appear in Visual Studio Solution Explorer.
+	  Does not affect compilation or Godot; .uid/.import are not C# inputs.
+	-->
+	<PropertyGroup>
+		<DefaultItemExcludes>$(DefaultItemExcludes);**/*.uid</DefaultItemExcludes>
+		<DefaultItemExcludes>$(DefaultItemExcludes);**/*.import</DefaultItemExcludes>
+	</PropertyGroup>
+</Project>
