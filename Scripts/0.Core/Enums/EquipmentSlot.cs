@@ -1,0 +1,23 @@
+public enum EquipmentSlot
+{
+    Head,
+    Torso,
+    Legs,
+    Feet,
+    Hands,
+    Shoulders,
+    Arms,
+    Waist,
+    Neck,
+    Ring1,
+    Ring2,
+    Trinket1,
+    Trinket2,
+    Back,
+    BeltSlot1,
+    BeltSlot2,
+    BeltSlot3,
+    BeltSlot4,
+    WeaponMainHand,
+    WeaponOffHand
+}

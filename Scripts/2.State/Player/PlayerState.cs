@@ -18,6 +18,8 @@ public sealed class PlayerState
 	public int? CurrentSpellPoints { get; set; }
 	public int? MaxSpellPoints { get; set; }
 
+	public InventoryState InventoryState { get; set; } = new();
+
 	public bool HasAbility(string abilityId)
 	{
 		if (string.IsNullOrWhiteSpace(abilityId))
