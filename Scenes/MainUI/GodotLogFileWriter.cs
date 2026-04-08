@@ -1,6 +1,7 @@
 #nullable enable
 using System.Collections.Generic;
 using Godot;
+using FileAccess = Godot.FileAccess;
 
 /// <summary>Writes log lines to user://dungeon_log_trace.txt using Godot file access.</summary>
 public sealed class GodotLogFileWriter : ILogFileWriter

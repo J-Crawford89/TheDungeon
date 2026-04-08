@@ -1,10 +1,11 @@
+#nullable enable
 using Godot;
 using System.Collections.Generic;
 
 public partial class LogPanel : PanelContainer
 {
-	[Export] VBoxContainer _logEntriesContainer;
-	[Export] PackedScene _logEntryScene;
+	[Export] private VBoxContainer _logEntriesContainer = null!;
+	[Export] private PackedScene _logEntryScene = null!;
 
 	private int _lastLogContentRevision = -1;
 	private int _renderedCount;

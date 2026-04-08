@@ -3,7 +3,7 @@ using System;
 public sealed class GameUiCoordinator
 {
 	private readonly GameSessionState _session;
-	private readonly CombatService _combatService;
+	private readonly ICombatService _combatService;
 	private readonly ExplorationUiPresenter _exploration;
 	private readonly CombatUiPresenter _combat;
 	private readonly MainViewPanel _mainViewPanel;
@@ -14,7 +14,7 @@ public sealed class GameUiCoordinator
 
 	public GameUiCoordinator(
 		GameSessionState session,
-		CombatService combatService,
+		ICombatService combatService,
 		ExplorationUiPresenter exploration,
 		CombatUiPresenter combat,
 		MainViewPanel mainViewPanel,

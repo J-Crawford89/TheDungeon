@@ -5,9 +5,16 @@ using System.Linq;
 public sealed class ExplorationService
 {
     private readonly RoomFeaturePopulationService _roomFeaturePopulation;
+    private readonly ICombatService _combat;
 
-    public ExplorationService(RoomFeaturePopulationService roomFeaturePopulation) =>
+    public ExplorationService(RoomFeaturePopulationService roomFeaturePopulation, ICombatService combat)
+    {
         _roomFeaturePopulation = roomFeaturePopulation;
+        _combat = combat;
+    }
+
+    public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
+        _combat.TryBeginCombatIfHostile(session, previousCoord, floorLevel);
 
     public ExplorationServiceResult MoveForward(GameSessionState session)
     {

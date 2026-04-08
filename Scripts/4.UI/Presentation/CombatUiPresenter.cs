@@ -3,10 +3,10 @@ using System;
 public sealed class CombatUiPresenter
 {
 	private readonly GameSessionState _session;
-	private readonly CombatService _combatService;
+	private readonly ICombatService _combatService;
 	private readonly Action<UiRefreshFlags> _refreshHud;
 
-	public CombatUiPresenter(GameSessionState session, CombatService combatService, Action<UiRefreshFlags> refreshHud)
+	public CombatUiPresenter(GameSessionState session, ICombatService combatService, Action<UiRefreshFlags> refreshHud)
 	{
 		_session = session;
 		_combatService = combatService;

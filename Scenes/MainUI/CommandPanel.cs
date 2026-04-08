@@ -4,18 +4,18 @@ using System;
 
 public partial class CommandPanel : PanelContainer
 {
-	[Export] private Button _forwardButton;
-	[Export] private Button _backwardButton;
-	[Export] private Button _leftButton;
-	[Export] private Button _rightButton;
-	[Export] private Button _inspectButton;
-	[Export] private Button _floorUpButton;
-	[Export] private Button _floorDownButton;
+	[Export] private Button _forwardButton = null!;
+	[Export] private Button _backwardButton = null!;
+	[Export] private Button _leftButton = null!;
+	[Export] private Button _rightButton = null!;
+	[Export] private Button _inspectButton = null!;
+	[Export] private Button _floorUpButton = null!;
+	[Export] private Button _floorDownButton = null!;
 
-	[Export] private Button _attackButton;
-	[Export] private Button _fleeButton;
-	[Export] private Button _takeButton;
-	[Export] private Button _potionButton;
+	[Export] private Button _attackButton = null!;
+	[Export] private Button _fleeButton = null!;
+	[Export] private Button _takeButton = null!;
+	[Export] private Button _potionButton = null!;
 	[Export] private Button? _defendButton;
 
 	public event Action? ForwardPressed;
@@ -115,7 +115,7 @@ public partial class CommandPanel : PanelContainer
 		_potionButton.Disabled = player.HealthPotionCount <= 0 || player.CurrentHp >= player.MaxHp;
 	}
 
-	public void ApplyCombatAbilityButtons(PlayerState player, GameSessionState session, CombatService combat)
+	public void ApplyCombatAbilityButtons(PlayerState player, GameSessionState session, ICombatService combat)
 	{
 		if (_defendButton == null)
 			return;

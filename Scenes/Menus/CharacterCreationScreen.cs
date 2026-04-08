@@ -30,7 +30,7 @@ public partial class CharacterCreationScreen : Control
 	public event Action? BackButtonPressed;
 	public event Action<CharacterCreationState>? StartGameRequested;
 
-	private GameRunContext? _runContext;
+	private CharacterCreationDependencies? _deps;
 	private bool _captureDebugDiagnostics;
 
 	private readonly CharacterCreationState _state = new();
@@ -41,15 +41,15 @@ public partial class CharacterCreationScreen : Control
 	private bool _blockSelectionHandlers;
 	private bool _ignoreNameCallback;
 
-	public void Initialize(GameRunContext runContext, bool captureDebugDiagnostics)
+	public void Initialize(CharacterCreationDependencies dependencies, bool captureDebugDiagnostics)
 	{
-		_runContext = runContext;
+		_deps = dependencies;
 		_captureDebugDiagnostics = captureDebugDiagnostics;
 	}
 
 	public override void _Ready()
 	{
-		if (_runContext == null)
+		if (_deps == null)
 		{
 			GD.PushError("CharacterCreationScreen.Initialize must be called before entering the tree.");
 			return;
@@ -68,7 +68,7 @@ public partial class CharacterCreationScreen : Control
 		_startGameButton.Pressed += OnStartGamePressed;
 
 		PopulateDropdowns();
-		_runContext.CharacterCreation.RollAndApplyRolledScores(_state);
+		_deps!.CharacterCreation.RollAndApplyRolledScores(_state);
 		SyncInitialSelectionsFromDropdowns();
 
 		RefreshAbilityLabels();
@@ -84,9 +84,9 @@ public partial class CharacterCreationScreen : Control
 		_blockSelectionHandlers = true;
 
 		PopulateSexOptions();
-		PopulateDefinitionOptions(_classButton, _runContext!.CharacterClasses.All, _classesById, d => d.Id, d => d.Name);
-		PopulateDefinitionOptions(_raceButton, _runContext.CharacterRaces.All, _racesById, d => d.Id, d => d.Name);
-		PopulateDefinitionOptions(_backgroundButton, _runContext.CharacterBackgrounds.All, _backgroundsById, d => d.Id, d => d.Name);
+		PopulateDefinitionOptions(_classButton, _deps!.CharacterClasses.All, _classesById, d => d.Id, d => d.Name);
+		PopulateDefinitionOptions(_raceButton, _deps.CharacterRaces.All, _racesById, d => d.Id, d => d.Name);
+		PopulateDefinitionOptions(_backgroundButton, _deps.CharacterBackgrounds.All, _backgroundsById, d => d.Id, d => d.Name);
 
 		if (_classButton.ItemCount == 0)
 			GD.PushWarning("Character creation: no character classes in database; assign CharacterClassDatabase on GameRoot.");
@@ -106,7 +106,7 @@ public partial class CharacterCreationScreen : Control
 		ApplyFirstDefinitionSelection(_raceButton, _racesById, d => _state.SelectedRace = d);
 		ApplyFirstDefinitionSelection(_backgroundButton, _backgroundsById, d => _state.SelectedBackground = d);
 
-		_runContext!.CharacterCreation.RecomputeFinalAbilityScores(_state);
+		_deps!.CharacterCreation.RecomputeFinalAbilityScores(_state);
 	}
 
 	private static void ApplyFirstDefinitionSelection<T>(OptionButton button, Dictionary<string, T> map, Action<T?> assign)
@@ -220,14 +220,14 @@ public partial class CharacterCreationScreen : Control
 			assign(null);
 		else
 			assign(def);
-		_runContext!.CharacterCreation.RecomputeFinalAbilityScores(_state);
+		_deps!.CharacterCreation.RecomputeFinalAbilityScores(_state);
 		RefreshDescription();
 		RefreshStartButton();
 	}
 
 	private void OnRerollPressed()
 	{
-		_runContext!.CharacterCreation.RollAndApplyRolledScores(_state);
+		_deps!.CharacterCreation.RollAndApplyRolledScores(_state);
 		RefreshAbilityLabels();
 		RefreshDescription();
 	}

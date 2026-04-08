@@ -1,8 +1,13 @@
 using System.Collections.Generic;
 
-public sealed class GameSessionState
+public sealed class GameSessionState : IGameLog
 {
 	public const int MaxLogEntries = 3000;
+
+	private readonly ILogFileWriter? _logArchiveWriter;
+
+	public GameSessionState(ILogFileWriter? logArchiveWriter = null) =>
+		_logArchiveWriter = logArchiveWriter;
 
 	public PlayerState Player { get; } = new();
 	public DungeonState Dungeon { get; } = new();
@@ -62,7 +67,7 @@ public sealed class GameSessionState
 		var overflow = LogEntries.Count - MaxLogEntries;
 		var batch = LogEntries.GetRange(0, overflow);
 		LogEntries.RemoveRange(0, overflow);
-		LogArchive.AppendEntries(batch);
+		LogArchive.AppendEntries(batch, _logArchiveWriter);
 		LogContentRevision++;
 	}
 }

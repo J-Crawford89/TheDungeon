@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-public sealed class NarrativeService
+public sealed partial class NarrativeService
 {
 	public string ForEnterDungeon() => "You enter the dungeon.";
 
@@ -130,85 +130,4 @@ public sealed class NarrativeService
 			FloorConnectionType.Hole => "A hole opens in the floor",
 			_ => ""
 		};
-
-	public string ForCombatStarted(IReadOnlyList<string> livingMonsterNames)
-	{
-		if (livingMonsterNames.Count == 0)
-			return "You thought you saw a goblin, but it was your shadow.";
-		var parts = livingMonsterNames
-			.Select((name, i) => (name, i))
-			.GroupBy(x => x.name)
-			.OrderBy(g => g.Min(x => x.i))
-			.Select(g =>
-			{
-				var n = g.Count();
-				return n == 1 ? g.Key : $"{n} {g.Key}";
-			});
-		return $"Combat begins! Facing: {string.Join(", ", parts)}.";
-	}
-
-	public string ForCombatInitiativeRoll(string who, DiceRollResult roll) =>
-		$"{who} initiative: {roll.SummaryText}. {roll.DetailText}".Trim();
-
-	public string ForCombatTurnOrderSummary(IReadOnlyList<string> namesInOrder) =>
-		$"Turn order: {string.Join(" → ", namesInOrder)}.";
-
-	public string ForAttackRoll(string attacker, string target, int totalVsAc, int targetNumber, string detail) =>
-		$"{attacker} vs {target} (need {targetNumber}+): rolled {totalVsAc}. {detail}".Trim();
-
-	public string ForAttackMiss(string attacker, string target) =>
-		$"{attacker} misses {target}.";
-
-	public string ForDamageDealt(string targetName, int damage, int hpRemaining, int d6Face) =>
-		$"You hit {targetName} for {damage} damage (½×d6 from {d6Face}). {targetName} has {hpRemaining} HP left.";
-
-	public string ForMonsterHitPlayer(string monsterName, int damage, int playerHp) =>
-		$"{monsterName} hits you for {damage} damage. You have {playerHp} HP left.";
-
-	public string ForFleeRoll(int total, int fleeDc, string detail) =>
-		$"Flee attempt: {total} vs DC {fleeDc}. {detail}".Trim();
-
-	public string ForFleeSuccess() => "You break away and retreat to the previous room!";
-
-	public string ForFleeFailure() => "You fail to escape!";
-
-	public string ForCombatVictory() => "You are victorious! The threats here are finished.";
-
-	public string ForGameOverTitle() => "Game Over";
-
-	public string ForGameOverBody(PlayerDamageSource source)
-	{
-		return source.Type switch
-		{
-			DamageSourceType.Monster => $"You were slain by {source.DisplayName}. Over the coming days, it continues to feast on your corpse.",
-			DamageSourceType.Trap => $"You succumb to {source.DisplayName}. Your belongings lie scattered in the dark.",
-			DamageSourceType.Environmental => $"You are undone by {source.DisplayName}. Nothing remains but silence.",
-			_ => "Your adventure ends here.",
-		};
-	}
-
-	public string ForTakeNothingHere() => "There is nothing here to take.";
-
-	public string ForTookGold(int amountGp, string treasureName, int totalGoldAfter) =>
-		$"You take {treasureName} and gain {amountGp} gp. You now have {totalGoldAfter} gp.";
-
-	public string ForTookItem(string itemName) => $"You take {itemName}.";
-
-	public string ForUsedHealthPotion(int healed, int hpAfter) =>
-		$"You drink a health potion and recover {healed} HP. You now have {hpAfter} HP.";
-
-	public string ForHealthPotionAtFullHealth() =>
-		"You are already at full health; you save the potion for later.";
-
-	public string ForHealthPotionNoneLeft() => "You have no health potions to use.";
-
-	public string ForDefendStance() => "You take a defensive stance, ready to block the next solid blow.";
-
-	public string ForDefendAbsorbedHit() => "Your guard absorbs the hit — you take no damage from that strike.";
-
-	public string ForDefendAlreadyDefending() => "You are already defending; you hold your position.";
-
-	public string ForDefendOnCooldown() => "You are still recovering your footing and cannot defend yet.";
-
-	public string ForDefendCannotUse() => "You cannot use Defend right now.";
 }

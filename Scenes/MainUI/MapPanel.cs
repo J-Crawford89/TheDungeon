@@ -1,9 +1,10 @@
+#nullable enable
 using Godot;
 using System.Collections.Generic;
 
 public partial class MapPanel : PanelContainer
 {
-	[Export] private MapView _mapView;
+	[Export] private MapView _mapView = null!;
 
 	public void RefreshMap(GameSessionState session)
 	{

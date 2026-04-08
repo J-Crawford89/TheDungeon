@@ -1,10 +1,11 @@
+#nullable enable
 using Godot;
 
 public partial class LogEntryControl : PanelContainer
 {
 	private const string FontColorKey = "font_color";
 
-	[Export] private Label _label;
+	[Export] private Label _label = null!;
 
 	public override void _Ready()
 	{

@@ -7,7 +7,6 @@ public sealed class ExplorationUiPresenter
 	private readonly ExplorationService _explorationService;
 	private readonly NarrativeService _narrativeService;
 	private readonly DungeonBootstrap _dungeonBootstrap;
-	private readonly CombatService _combatService;
 	private readonly TreasurePickupService _treasurePickup;
 	private readonly Action<UiRefreshFlags> _refreshHud;
 
@@ -17,7 +16,6 @@ public sealed class ExplorationUiPresenter
 		GameSessionState session,
 		ExplorationService explorationService,
 		NarrativeService narrativeService,
-		CombatService combatService,
 		TreasurePickupService treasurePickup,
 		DungeonBootstrap dungeonBootstrap,
 		Action<UiRefreshFlags> refreshHud)
@@ -25,7 +23,6 @@ public sealed class ExplorationUiPresenter
 		_session = session;
 		_explorationService = explorationService;
 		_narrativeService = narrativeService;
-		_combatService = combatService;
 		_treasurePickup = treasurePickup;
 		_dungeonBootstrap = dungeonBootstrap;
 		_refreshHud = refreshHud;
@@ -60,7 +57,7 @@ public sealed class ExplorationUiPresenter
 		var result = _explorationService.MoveForward(_session);
 		_session.AppendGameLog(_narrativeService.ForMoveForward(result));
 		if (result.Success)
-			_combatService.TryBeginCombatIfHostile(_session, previousCoord, floorLevel);
+			_explorationService.TryBeginCombatIfHostile(_session, previousCoord, floorLevel);
 		if (!TryReportDiagnosticAndRefreshAll(result))
 			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map);
 	}
@@ -112,8 +109,8 @@ public sealed class ExplorationUiPresenter
 		var previousCoord = _session.Dungeon.PlayerCoord;
 		var result = _explorationService.MoveDownAFloor(_session);
 		_session.AppendGameLog(_narrativeService.ForMoveDownFloor(result));
-		if (result.Success)
-			_combatService.TryBeginCombatIfHostile(_session, previousCoord, (int)result.FloorAfterMove);
+		if (result.Success && result.FloorAfterMove is { } floorLevel)
+			_explorationService.TryBeginCombatIfHostile(_session, previousCoord, floorLevel);
 		if (!TryReportDiagnosticAndRefreshAll(result))
 			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map);
 	}

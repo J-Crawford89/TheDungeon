@@ -6,9 +6,11 @@ public static class LogArchive
 	/// <summary>Set once at startup from the host (Godot) layer.</summary>
 	public static ILogFileWriter? FileWriter { get; set; }
 
-	public static void AppendEntries(IReadOnlyList<LogEntry> entries)
+	/// <param name="writerOverride">When non-null, used instead of <see cref="FileWriter"/> (e.g. tests or alternate sinks).</param>
+	public static void AppendEntries(IReadOnlyList<LogEntry> entries, ILogFileWriter? writerOverride = null)
 	{
-		if (entries.Count == 0 || FileWriter == null)
+		var writer = writerOverride ?? FileWriter;
+		if (entries.Count == 0 || writer == null)
 			return;
 
 		var lines = new List<string>(entries.Count);
@@ -18,6 +20,6 @@ public static class LogArchive
 			lines.Add($"[{DateTime.Now:O}] [{e.Kind}] {e.Text}{detail}");
 		}
 
-		FileWriter.AppendLines(lines);
+		writer.AppendLines(lines);
 	}
 }

@@ -38,7 +38,7 @@ public partial class MainUi : Control
 		var session = _runContext.Session;
 		var narrativeService = _runContext.NarrativeService;
 		var explorationService = _runContext.ExplorationService;
-		var combatService = _runContext.CombatService;
+		var combatService = _runContext.Combat;
 		var treasurePickupService = _runContext.TreasurePickupService;
 		var dungeonBootstrap = _runContext.DungeonBootstrap;
 
@@ -59,7 +59,6 @@ public partial class MainUi : Control
 			session,
 			explorationService,
 			narrativeService,
-			combatService,
 			treasurePickupService,
 			dungeonBootstrap,
 			RefreshHudAndGameOver);

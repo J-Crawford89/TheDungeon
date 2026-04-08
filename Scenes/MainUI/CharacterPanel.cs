@@ -4,11 +4,11 @@ using System;
 
 public partial class CharacterPanel : PanelContainer
 {
-	[Export] private Label _hpLabel;
-	[Export] private Label _levelLabel;
-	[Export] private Label _goldLabel;
-	[Export] private Label _equipmentLabel;
-	[Export] private Label _nameLabel;
+	[Export] private Label _hpLabel = null!;
+	[Export] private Label _levelLabel = null!;
+	[Export] private Label _goldLabel = null!;
+	[Export] private Label _equipmentLabel = null!;
+	[Export] private Label _nameLabel = null!;
 	[Export] private Label? _spLabel;
 	[Export] private Control? _defendActiveIndicator;
 

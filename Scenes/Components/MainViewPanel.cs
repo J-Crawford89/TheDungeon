@@ -1,33 +1,34 @@
+#nullable enable
 using Godot;
 using System.Collections.Generic;
 
 public partial class MainViewPanel : PanelContainer
 {
-	[Export] private Control _viewArea;
-	[Export] private Control _stage;
+	[Export] private Control _viewArea = null!;
+	[Export] private Control _stage = null!;
 
-	[Export] private Label _mainViewTitle;
-	[Export] private TextureRect _backgroundRect;
-	[Export] private TextureRect _leftWallRect;
-	[Export] private TextureRect _backWallRect;
-	[Export] private TextureRect _rightWallRect;
-	[Export] private HBoxContainer _featureContainer;
+	[Export] private Label _mainViewTitle = null!;
+	[Export] private TextureRect _backgroundRect = null!;
+	[Export] private TextureRect _leftWallRect = null!;
+	[Export] private TextureRect _backWallRect = null!;
+	[Export] private TextureRect _rightWallRect = null!;
+	[Export] private HBoxContainer _featureContainer = null!;
 
-	[Export] private Texture2D _backgroundTexture;
-	[Export] private Texture2D _doorTexture;
-	[Export] private Texture2D _passageTexture;
+	[Export] private Texture2D _backgroundTexture = null!;
+	[Export] private Texture2D _doorTexture = null!;
+	[Export] private Texture2D _passageTexture = null!;
 
-	[Export] private Texture2D _ratTexture;
-	[Export] private Texture2D _giantRatTexture;
-	[Export] private Texture2D _ratKingTexture;
-	[Export] private Texture2D _coinsTexture;
-	[Export] private Texture2D _healthPotionTexture;
-	[Export] private Texture2D _loreTexture;
-	[Export] private Texture2D _npcTexture;
-	[Export] private Texture2D _trapTexture;
-	[Export] private Texture2D _stairsTexture;
-	[Export] private Texture2D _holeTexture;
-	[Export] private Texture2D _ladderTexture;
+	[Export] private Texture2D _ratTexture = null!;
+	[Export] private Texture2D _giantRatTexture = null!;
+	[Export] private Texture2D _ratKingTexture = null!;
+	[Export] private Texture2D _coinsTexture = null!;
+	[Export] private Texture2D _healthPotionTexture = null!;
+	[Export] private Texture2D _loreTexture = null!;
+	[Export] private Texture2D _npcTexture = null!;
+	[Export] private Texture2D _trapTexture = null!;
+	[Export] private Texture2D _stairsTexture = null!;
+	[Export] private Texture2D _holeTexture = null!;
+	[Export] private Texture2D _ladderTexture = null!;
 
 	public override void _Ready()
 	{
@@ -64,7 +65,8 @@ public partial class MainViewPanel : PanelContainer
 		foreach (var kind in model.FeatureIcons)
 		{
 			var tex = TextureForFeatureIcon(kind);
-			AddFeatureTexture(tex);
+			if (tex != null)
+				AddFeatureTexture(tex);
 		}
 	}
 
@@ -86,7 +88,7 @@ public partial class MainViewPanel : PanelContainer
 		}
 	}
 
-	private Texture2D TextureForFeatureIcon(MainViewFeatureIconKind kind) =>
+	private Texture2D? TextureForFeatureIcon(MainViewFeatureIconKind kind) =>
 		kind switch
 		{
 			MainViewFeatureIconKind.Rat => _ratTexture,

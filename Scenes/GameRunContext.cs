@@ -15,7 +15,7 @@ public sealed class GameRunContext
 	public PlayerVitalsService VitalsService { get; }
 	public GameOverDownedHandler GameOverDownedHandler { get; }
 	public PlayerDownedResolutionService PlayerDownedResolutionService { get; }
-	public CombatService CombatService { get; }
+	public ICombatService Combat { get; }
 	public CharacterCreationService CharacterCreation { get; }
 	public ICharacterClassDefinitionRepository CharacterClasses { get; }
 	public ICharacterRaceDefinitionRepository CharacterRaces { get; }
@@ -35,7 +35,7 @@ public sealed class GameRunContext
 		PlayerVitalsService vitalsService,
 		GameOverDownedHandler gameOverDownedHandler,
 		PlayerDownedResolutionService playerDownedResolutionService,
-		CombatService combatService,
+		ICombatService combat,
 		CharacterCreationService characterCreation,
 		ICharacterClassDefinitionRepository characterClasses,
 		ICharacterRaceDefinitionRepository characterRaces,
@@ -54,7 +54,7 @@ public sealed class GameRunContext
 		VitalsService = vitalsService;
 		GameOverDownedHandler = gameOverDownedHandler;
 		PlayerDownedResolutionService = playerDownedResolutionService;
-		CombatService = combatService;
+		Combat = combat;
 		CharacterCreation = characterCreation;
 		CharacterClasses = characterClasses;
 		CharacterRaces = characterRaces;

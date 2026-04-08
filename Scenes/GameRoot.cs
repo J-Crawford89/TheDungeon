@@ -91,7 +91,7 @@ public partial class GameRoot : Control
 		ClearScreenHost();
 
 		var cc = _characterCreationScene.Instantiate<CharacterCreationScreen>();
-		cc.Initialize(_activeRunContext, CaptureDebugDiagnostics);
+		cc.Initialize(CharacterCreationDependencies.From(_activeRunContext), CaptureDebugDiagnostics);
 		cc.BackButtonPressed += HandleReturnToStartMenu;
 		cc.StartGameRequested += HandleStartGame;
 		_screenHost.AddChild(cc);
@@ -158,24 +158,20 @@ public partial class GameRoot : Control
 
 		var roomFeaturePopulation = new RoomFeaturePopulationService(monsterRepo, trapRepo, treasureRepo, npcRepo, loreRepo);
 		var dungeonBootstrap = new DungeonBootstrap(roomFeaturePopulation);
-		var explorationService = new ExplorationService(roomFeaturePopulation);
 		var diceRollService = new DiceRollService(random);
 		var resolutionService = new ResolutionService(diceRollService);
 		var treasurePickupService = new TreasurePickupService(narrativeService);
 		var vitalsService = new PlayerVitalsService();
 		var gameOverDownedHandler = new GameOverDownedHandler(narrativeService);
 		var playerDownedResolutionService = new PlayerDownedResolutionService(new IPlayerDownedOutcomeHandler[] { gameOverDownedHandler });
-		CombatService combatService = default!;
-		var combatAbilities = new CombatAbilityEffectsRegistry();
-		combatAbilities.Register(new DefendCombatAbilityHandler(narrativeService, s => combatService.IsAwaitingPlayerAction(s)));
-		combatService = new CombatService(
+		var combatService = new CombatService(
 			diceRollService,
 			resolutionService,
 			narrativeService,
 			vitalsService,
 			playerDownedResolutionService,
-			treasurePickupService,
-			combatAbilities);
+			treasurePickupService);
+		var explorationService = new ExplorationService(roomFeaturePopulation, combatService);
 		var characterCreation = new CharacterCreationService(diceRollService, random, abilityRepo);
 
 		return new GameRunContext(
