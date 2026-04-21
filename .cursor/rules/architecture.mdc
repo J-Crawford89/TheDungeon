@@ -1,0 +1,33 @@
+---
+description: Tiered assemblies, dumb domain/DTOs, DI, UI events, object initializers.
+alwaysApply: true
+---
+
+# Architecture and coding preferences
+
+## Tiered projects (dependency direction)
+
+- **Lower tiers must not reference higher tiers.** Assemblies may only depend **downward** toward shared foundations.
+- **Rough order (low → high):** `Scripts/0.Core` → (`Scripts/2.State` and `Scripts/3.Game.Contracts`, both Core-only) → `Scripts/3.Game` → `Scripts/4.UI`.
+- **`3.Game.Contracts`** holds cross-cutting **DTOs / result types** consumed by Game and possibly UI; keep it free of higher-tier references. Avoid breaking tier rules here; prefer adding small DTOs over pulling Game logic into Contracts.
+- **Godot composition** (e.g. root scene, `GameRunContext` wiring, `Godot*Repository` implementations under `Repositories/`) sits **above** the tiered libraries: instantiate concrete repositories and inject **interfaces** defined in **Core** (or appropriate low tier) into services.
+
+## Domain and DTOs
+
+- **Domain models and DTOs are dumb data:** properties (and trivial structural types). **No business logic** in these types—no meaningful methods beyond accessors or trivial helpers already established in the codebase.
+- Put **behavior** in **services**, **state updates**, or **small helpers**; mutate through explicit operations, not “smart” domain objects.
+
+## Dependency injection
+
+- **Prefer constructor injection** and explicit wiring (e.g. context objects, service constructors) over **static** mutable service locators or hidden globals.
+- **`static`** is fine for **pure helpers** (e.g. math, mapping) where appropriate; avoid static substitutes for injectable services.
+
+## UI and events
+
+- Prefer an **event- or notification-style** flow for UI updates as systems grow: lower layers raise **narrow, meaningful events**; UI (or presenters) **subscribe** and refresh presentation.
+- Treat **direct** “render/update this panel” calls as legacy or for simple cases; migrate toward listeners when multiple services can affect the same UI.
+
+## Object construction (C#)
+
+- **Default:** parameterless constructor plus **object initializer** (`new Type { Prop = value, ... }`) when building instances with several properties.
+- **Exceptions** (use judgment): required validation/invariants, immutability, Godot `_Ready`/`[Export]` patterns, performance-critical hot paths, or existing types that already use rich constructors consistently.
