@@ -9,7 +9,6 @@ public sealed class PlayerState
 	public int MaxHp { get; set; } = 10;
 	public int Level { get; set; } = 1;
 	public int Gold { get; set; }
-	public int HealthPotionCount { get; set; }
 	public HorizontalDirection Facing { get; set; } = HorizontalDirection.North;
 	public AbilityScores AbilityScores { get; set; } = new();
 
@@ -36,11 +35,11 @@ public sealed class PlayerState
 		MaxHp = 10;
 		Level = 1;
 		Gold = 0;
-		HealthPotionCount = 0;
 		Facing = HorizontalDirection.North;
 		AbilityScores = new AbilityScores();
 		GrantedAbilities = new List<GrantedAbility>();
 		CurrentSpellPoints = null;
 		MaxSpellPoints = null;
+		InventoryState = new InventoryState();
 	}
 }

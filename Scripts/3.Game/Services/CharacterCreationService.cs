@@ -91,7 +91,6 @@ public sealed class CharacterCreationService
 
 		player.Gold = state.SelectedBackground?.StartingGold ?? 0;
 		player.Level = 1;
-		player.HealthPotionCount = 0;
 		player.Facing = HorizontalDirection.North;
 
 		player.GrantedAbilities = PlayerAbilityGrantBuilder.Build(
@@ -111,6 +110,8 @@ public sealed class CharacterCreationService
 			player.CurrentSpellPoints = null;
 			player.MaxSpellPoints = null;
 		}
+
+		player.InventoryState = new InventoryState();
 
 		// TODO: merge StartingEquipment from class/race/background into inventory when equipment is modeled.
 	}

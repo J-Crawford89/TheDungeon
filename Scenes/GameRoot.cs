@@ -21,6 +21,8 @@ public partial class GameRoot : Control
 
 	[Export] public AbilityResourceDatabase? AbilityDatabase { get; set; }
 
+	[Export] public ItemResourceDatabase? ItemDatabase { get; set; }
+
 	[Export] public bool CaptureDebugDiagnostics { get; set; }
 
 	private GameRunContext? _activeRunContext;
@@ -153,14 +155,18 @@ public partial class GameRoot : Control
 		var backgroundRepo = new GodotCharacterBackgroundDefinitionRepository(CharacterBackgroundDatabase);
 		if (AbilityDatabase == null)
 			GD.PushWarning("GameRoot: assign AbilityDatabase (e.g. Content/Databases/AbilityDatabase.tres) on this node so ability grants validate and resolve.");
+		if (ItemDatabase == null)
+			GD.PushWarning("GameRoot: assign ItemDatabase (e.g. Content/Databases/ItemDatabase.tres) on this node for item definitions.");
 
 		var abilityRepo = new GodotAbilityDefinitionRepository(AbilityDatabase);
+		var itemRepo = new GodotItemDefinitionRepository(ItemDatabase);
 
 		var roomFeaturePopulation = new RoomFeaturePopulationService(monsterRepo, trapRepo, treasureRepo, npcRepo, loreRepo);
 		var dungeonBootstrap = new DungeonBootstrap(roomFeaturePopulation);
 		var diceRollService = new DiceRollService(random);
 		var resolutionService = new ResolutionService(diceRollService);
-		var treasurePickupService = new TreasurePickupService(narrativeService);
+		var treasurePickupService = new TreasurePickupService(narrativeService, itemRepo);
+		var potionEffectApplicationService = new PotionEffectApplicationService(diceRollService, narrativeService, itemRepo);
 		var vitalsService = new PlayerVitalsService();
 		var gameOverDownedHandler = new GameOverDownedHandler(narrativeService);
 		var playerDownedResolutionService = new PlayerDownedResolutionService(new IPlayerDownedOutcomeHandler[] { gameOverDownedHandler });
@@ -170,7 +176,8 @@ public partial class GameRoot : Control
 			narrativeService,
 			vitalsService,
 			playerDownedResolutionService,
-			treasurePickupService);
+			treasurePickupService,
+			potionEffectApplicationService);
 		var explorationService = new ExplorationService(roomFeaturePopulation, combatService);
 		var characterCreation = new CharacterCreationService(diceRollService, random, abilityRepo);
 
@@ -192,6 +199,8 @@ public partial class GameRoot : Control
 			classRepo,
 			raceRepo,
 			backgroundRepo,
-			abilityRepo);
+			abilityRepo,
+			itemRepo,
+			potionEffectApplicationService);
 	}
 }

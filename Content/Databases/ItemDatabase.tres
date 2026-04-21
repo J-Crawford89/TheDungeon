@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ItemResourceDatabase" format=3 uid="uid://b4nsdqvaj1meg"]
+
+[ext_resource type="Script" uid="uid://2bdywe1406xv" path="res://Resources/ItemResource.cs" id="1_vhtmu"]
+[ext_resource type="Script" uid="uid://bwbvrglbu1prr" path="res://Resources/Databases/ItemResourceDatabase.cs" id="2_guymr"]
+[ext_resource type="Resource" uid="uid://cw2l68qbnjvr4" path="res://Content/Item/HealthPotion.tres" id="2_jdoyd"]
+
+[resource]
+script = ExtResource("2_guymr")
+Items = Array[ExtResource("1_vhtmu")]([ExtResource("2_jdoyd")])
+metadata/_custom_type_script = "uid://bwbvrglbu1prr"

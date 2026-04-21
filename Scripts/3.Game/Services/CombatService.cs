@@ -10,6 +10,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 	private readonly PlayerVitalsService _vitals;
 	private readonly PlayerDownedResolutionService _playerDowned;
 	private readonly TreasurePickupService _treasurePickup;
+	private readonly PotionEffectApplicationService _potionEffects;
 	private readonly CombatAbilityEffectsRegistry _combatAbilities = new();
 	private readonly CombatEncounterLifecycle _lifecycle;
 	private readonly CombatInitiative _initiative;
@@ -22,7 +23,8 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		NarrativeService narrative,
 		PlayerVitalsService vitals,
 		PlayerDownedResolutionService playerDowned,
-		TreasurePickupService treasurePickup)
+		TreasurePickupService treasurePickup,
+		PotionEffectApplicationService potionEffects)
 	{
 		_dice = dice;
 		_resolution = resolution;
@@ -34,7 +36,22 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		_monsterTurn = new CombatMonsterTurn(_resolution, _narrative, _vitals, _playerDowned);
 		_initiative = new CombatInitiative(_dice, _narrative);
 		_turnLoop = new CombatTurnLoop(this, _lifecycle, _monsterTurn);
+		_potionEffects = potionEffects;
 		RegisterCombatAbilityHandlers();
+	}
+
+	private void RunAfterSuccessfulCombatHealthPotion(GameSessionState session)
+	{
+		var room = session.Dungeon.CurrentRoom;
+		if (room != null && RoomFeatureHelper.GetFeature<MonsterFeature>(room) is { } monsterFeature)
+		{
+			_turnLoop.PruneDeadMonstersFromTurnOrder(session, monsterFeature);
+			if (_turnLoop.CheckVictory(session, monsterFeature))
+				return;
+		}
+
+		_turnLoop.AdvanceTurn(session);
+		_turnLoop.ProcessAutomaticMonsterTurns(session);
 	}
 
 	private void RegisterCombatAbilityHandlers()
@@ -206,33 +223,10 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 	{
 		if (!IsAwaitingPlayerAction(session))
 			return;
-		if (session.Player.HealthPotionCount <= 0)
-		{
-			session.AppendGameLog(_narrative.ForHealthPotionNoneLeft());
-			return;
-		}
 
-		if (session.Player.CurrentHp >= session.Player.MaxHp)
-		{
-			session.AppendGameLog(_narrative.ForHealthPotionAtFullHealth());
-			return;
-		}
-
-		session.Player.HealthPotionCount--;
-		var heal = Math.Min(InventoryConstants.HealthPotionHealAmount, session.Player.MaxHp - session.Player.CurrentHp);
-		session.Player.CurrentHp += heal;
-		session.AppendGameLog(_narrative.ForUsedHealthPotion(heal, session.Player.CurrentHp));
-
-		var room = session.Dungeon.CurrentRoom;
-		if (room != null && RoomFeatureHelper.GetFeature<MonsterFeature>(room) is { } monsterFeature)
-		{
-			_turnLoop.PruneDeadMonstersFromTurnOrder(session, monsterFeature);
-			if (_turnLoop.CheckVictory(session, monsterFeature))
-				return;
-		}
-
-		_turnLoop.AdvanceTurn(session);
-		_turnLoop.ProcessAutomaticMonsterTurns(session);
+		var outcome = _potionEffects.TryUseHealthPotion(session);
+		if (outcome == HealthPotionUseOutcome.Applied)
+			RunAfterSuccessfulCombatHealthPotion(session);
 	}
 
 	public void ExecutePlayerDefend(GameSessionState session)

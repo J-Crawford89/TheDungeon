@@ -1,12 +1,15 @@
+#nullable enable
 using System.Linq;
 
 public sealed class TreasurePickupService
 {
 	private readonly NarrativeService _narrative;
+	private readonly IItemDefinitionRepository _items;
 
-	public TreasurePickupService(NarrativeService narrative)
+	public TreasurePickupService(NarrativeService narrative, IItemDefinitionRepository items)
 	{
 		_narrative = narrative;
+		_items = items;
 	}
 
 	public static bool HasTakeableLootInCurrentRoom(GameSessionState session)
@@ -52,13 +55,44 @@ public sealed class TreasurePickupService
 				session.AppendGameLog(_narrative.ForTookGold(def.ValueInGp, def.Name, session.Player.Gold));
 				break;
 			case TreasureKind.InventoryItem:
-				if (def.InventoryItemId == InventoryConstants.HealthPotionItemId)
-				{
-					session.Player.HealthPotionCount++;
-					session.AppendGameLog(_narrative.ForTookItem(def.Name));
-				}
-
+				AddInventoryItem(session, def);
 				break;
 		}
+	}
+
+	private void AddInventoryItem(GameSessionState session, TreasureDefinition treasureDef)
+	{
+		var itemId = treasureDef.InventoryItemId;
+		if (string.IsNullOrWhiteSpace(itemId))
+		{
+			session.AppendGameLog($"You find {treasureDef.Name}, but it has no linked item id.");
+			return;
+		}
+
+		var itemDef = _items.TryGetById(itemId.Trim());
+		if (itemDef == null)
+		{
+			session.AppendGameLog($"You find {treasureDef.Name}, but no item definition exists for '{itemId.Trim()}'.");
+			return;
+		}
+
+		AddOrStackOne(session.Player.InventoryState.Items, itemDef);
+		session.AppendGameLog(_narrative.ForTookItem(treasureDef.Name));
+	}
+
+	private static void AddOrStackOne(System.Collections.Generic.List<ItemInstance> items, ItemDefinition definition)
+	{
+		var existing = items.FirstOrDefault(i => i.Definition.Id == definition.Id);
+		if (existing != null && existing.Quantity < definition.MaxStackSize)
+		{
+			existing.Quantity++;
+			return;
+		}
+
+		items.Add(new ItemInstance
+		{
+			Definition = definition,
+			Quantity = 1
+		});
 	}
 }

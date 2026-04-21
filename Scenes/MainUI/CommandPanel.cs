@@ -112,7 +112,8 @@ public partial class CommandPanel : PanelContainer
 	{
 		if (_potionButton == null)
 			return;
-		_potionButton.Disabled = player.HealthPotionCount <= 0 || player.CurrentHp >= player.MaxHp;
+		var hpQty = player.InventoryState.SumQuantityForDefinitionId(InventoryIds.HealthPotionItemId);
+		_potionButton.Disabled = hpQty <= 0 || player.CurrentHp >= player.MaxHp;
 	}
 
 	public void ApplyCombatAbilityButtons(PlayerState player, GameSessionState session, ICombatService combat)

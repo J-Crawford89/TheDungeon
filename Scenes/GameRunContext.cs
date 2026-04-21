@@ -21,6 +21,8 @@ public sealed class GameRunContext
 	public ICharacterRaceDefinitionRepository CharacterRaces { get; }
 	public ICharacterBackgroundDefinitionRepository CharacterBackgrounds { get; }
 	public IAbilityDefinitionRepository AbilityDefinitions { get; }
+	public IItemDefinitionRepository ItemDefinitions { get; }
+	public PotionEffectApplicationService PotionEffects { get; }
 
 	public GameRunContext(
 		GameSessionState session,
@@ -40,7 +42,9 @@ public sealed class GameRunContext
 		ICharacterClassDefinitionRepository characterClasses,
 		ICharacterRaceDefinitionRepository characterRaces,
 		ICharacterBackgroundDefinitionRepository characterBackgrounds,
-		IAbilityDefinitionRepository abilityDefinitions)
+		IAbilityDefinitionRepository abilityDefinitions,
+		IItemDefinitionRepository itemDefinitions,
+		PotionEffectApplicationService potionEffects)
 	{
 		Session = session;
 		Random = random;
@@ -60,5 +64,7 @@ public sealed class GameRunContext
 		CharacterRaces = characterRaces;
 		CharacterBackgrounds = characterBackgrounds;
 		AbilityDefinitions = abilityDefinitions;
+		ItemDefinitions = itemDefinitions;
+		PotionEffects = potionEffects;
 	}
 }

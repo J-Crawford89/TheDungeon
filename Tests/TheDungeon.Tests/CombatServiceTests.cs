@@ -1,8 +1,19 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 public sealed class CombatServiceTests
 {
+	private sealed class EmptyItemDefinitionRepository : IItemDefinitionRepository
+	{
+		public IReadOnlyList<ItemDefinition> All => [];
+		public ItemDefinition? TryGetById(string id) => null;
+
+		public IReadOnlyList<T> GetDefinitionsOfType<T>() where T : ItemDefinition =>
+			All.OfType<T>().ToArray();
+	}
+
 	private static CombatService CreateCombatService()
 	{
 		var random = new Random(42);
@@ -11,8 +22,10 @@ public sealed class CombatServiceTests
 		var narrative = new NarrativeService();
 		var vitals = new PlayerVitalsService();
 		var downed = new PlayerDownedResolutionService(Array.Empty<IPlayerDownedOutcomeHandler>());
-		var treasure = new TreasurePickupService(narrative);
-		return new CombatService(dice, resolution, narrative, vitals, downed, treasure);
+		var items = new EmptyItemDefinitionRepository();
+		var treasure = new TreasurePickupService(narrative, items);
+		var potionFx = new PotionEffectApplicationService(dice, narrative, items);
+		return new CombatService(dice, resolution, narrative, vitals, downed, treasure, potionFx);
 	}
 
 	[Fact]

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="RestoreHealthEffectResource" format=3 uid="uid://bcre6cnouqkws"]
+
+[ext_resource type="Script" uid="uid://c08x74ttsd8bj" path="res://Resources/RestoreHealthEffectResource.cs" id="1_7ixbr"]
+
+[resource]
+script = ExtResource("1_7ixbr")
+FlatHealAmount = 2
+NumberOfDice = 1
+DiceType = 4
+metadata/_custom_type_script = "uid://c08x74ttsd8bj"

@@ -13,7 +13,6 @@ public sealed class PlayerCharacterSnapshotTests
 			MaxHp = 22,
 			Level = 3,
 			Gold = 40,
-			HealthPotionCount = 2,
 			Facing = HorizontalDirection.East,
 		};
 		player.AbilityScores.Might = 14;
@@ -27,7 +26,6 @@ public sealed class PlayerCharacterSnapshotTests
 		Assert.Equal(22, snap.MaxHp);
 		Assert.Equal(3, snap.Level);
 		Assert.Equal(40, snap.Gold);
-		Assert.Equal(2, snap.HealthPotionCount);
 		Assert.Equal(HorizontalDirection.East, snap.Facing);
 		Assert.Equal(14, snap.AbilityScores.Might);
 		Assert.Equal(

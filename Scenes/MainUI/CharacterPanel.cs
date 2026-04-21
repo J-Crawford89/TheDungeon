@@ -19,9 +19,8 @@ public partial class CharacterPanel : PanelContainer
 		_levelLabel.Text = $"LEVEL: {player.Level}";
 		if (_goldLabel != null)
 			_goldLabel.Text = $"GOLD: {player.Gold}";
-		var itemsLine = player.HealthPotionCount > 0
-			? $"Health Potion ×{player.HealthPotionCount}"
-			: "(none)";
+		var hpQty = player.InventoryState.SumQuantityForDefinitionId(InventoryIds.HealthPotionItemId);
+		var itemsLine = hpQty > 0 ? $"Health Potion ×{hpQty}" : "(none)";
 		_equipmentLabel.Text = $"ITEMS: {itemsLine}";
 
 		if (_spLabel != null)

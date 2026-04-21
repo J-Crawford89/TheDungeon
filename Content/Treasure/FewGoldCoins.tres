@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_6htn4")
-Id = "few_gold_coins"
-Name = "A few gold coins"
-ValueInGp = 3
+Id = "copper_coins"
+Name = "A few copper coins"
+ValueInGp = 2
+InventoryItemId = "copper_coins"
