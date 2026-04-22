@@ -6,11 +6,19 @@ public sealed class ExplorationService
 {
     private readonly RoomFeaturePopulationService _roomFeaturePopulation;
     private readonly ICombatService _combat;
+    private readonly InspectService _inspect;
+    private readonly TrapService _trapService;
 
-    public ExplorationService(RoomFeaturePopulationService roomFeaturePopulation, ICombatService combat)
+    public ExplorationService(
+        RoomFeaturePopulationService roomFeaturePopulation,
+        ICombatService combat,
+        InspectService inspect,
+        TrapService trapService)
     {
         _roomFeaturePopulation = roomFeaturePopulation;
         _combat = combat;
+        _inspect = inspect;
+        _trapService = trapService;
     }
 
     public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
@@ -56,8 +64,12 @@ public sealed class ExplorationService
                     $"fromCoord={dungeon.PlayerCoord}, destinationCoord={destinationCoord}, connectionAhead={connectionAhead}, facing={playerFacing}"));
         }
 
+        var backtrackHorizontal = dungeon.EnteredFromCompass.HasValue && playerFacing == dungeon.EnteredFromCompass.Value;
+        _trapService.ProcessTrapsOnRoomExit(session, currentRoom, backtrackHorizontal);
+
         dungeon.PlayerCoord = destinationCoord;
         dungeon.DiscoveredRoomsByFloor[floor.Level].Add(destinationCoord);
+        dungeon.SetIngressAfterHorizontalEnter(playerFacing);
         return ExplorationServiceResult.OkMoveForward(destinationCoord);
     }
 
@@ -106,6 +118,8 @@ public sealed class ExplorationService
                     "No DungeonRoom exists at the player's coordinate",
                     $"playerCoord={dungeon.PlayerCoord}, roomCount={floor.Rooms.Count}"));
         }
+
+        _inspect.RunInspectDiscovery(session, currentRoom);
 
         var inspectData = BuildInspectRoomData(currentRoom);
         foreach (var roomExit in currentRoom.Exits.All())
@@ -190,6 +204,9 @@ public sealed class ExplorationService
         if (!DungeonNavigationHelper.IsVerticalConnectionTraversable(floorExitFeature, targetExitFeature, traversalContext))
             return ExplorationServiceResult.Fail(ExplorationErrorCode.MoveBlocked);
 
+        var exemptVerticalReturn = dungeon.VerticalIngress == VerticalIngressKind.EnteredFromFloorAbove;
+        _trapService.ProcessTrapsOnRoomExit(session, currentRoom, exemptVerticalReturn);
+
         var wasHole = floorExitFeature.ExitType == FloorConnectionType.Hole;
         var holeAlreadyAnchored = wasHole && (floorExitFeature.RopeAnchored || targetExitFeature.RopeAnchored);
         var consumedRopeForHole = false;
@@ -211,6 +228,8 @@ public sealed class ExplorationService
 
         dungeon.CurrentFloor = floorAbove;
         dungeon.PlayerCoord = targetRoom.Position;
+        dungeon.EnteredFromCompass = null;
+        dungeon.VerticalIngress = VerticalIngressKind.EnteredFromFloorBelow;
         return ExplorationServiceResult.OkChangeFloor(
             floorAbove.Level,
             targetRoom.Position,
@@ -256,6 +275,9 @@ public sealed class ExplorationService
         var traversalContext = BuildFloorTraversalContext(session);
         if (!DungeonNavigationHelper.IsVerticalConnectionTraversable(floorExitFeature, traversalContext))
             return ExplorationServiceResult.Fail(ExplorationErrorCode.MoveBlocked);
+
+        var exemptVerticalReturn = dungeon.VerticalIngress == VerticalIngressKind.EnteredFromFloorBelow;
+        _trapService.ProcessTrapsOnRoomExit(session, currentRoom, exemptVerticalReturn);
 
         var opts = generationOptions ?? new FloorGenerationParameters();
         var parameters = new FloorGenerationParameters
@@ -306,6 +328,8 @@ public sealed class ExplorationService
         dungeon.CurrentFloor = newFloor;
         dungeon.PlayerCoord = DirectionHelper.Origin;
         dungeon.DiscoveredRoomsByFloor.Add(newFloor.Level, new HashSet<RoomCoord>([DirectionHelper.Origin]));
+        dungeon.EnteredFromCompass = null;
+        dungeon.VerticalIngress = VerticalIngressKind.EnteredFromFloorAbove;
         return ExplorationServiceResult.OkChangeFloor(
             newFloor.Level,
             DirectionHelper.Origin,
@@ -333,21 +357,21 @@ public sealed class ExplorationService
 
                     break;
                 case TrapFeature trapFeature:
-                    foreach (var t in trapFeature.Traps)
+                    foreach (var t in trapFeature.Traps.Where(x => x.IsRevealed))
                         inspectData.FeatureLines.Add(new InspectRoomFeatureLine { Text = $"Trap: {t.Definition.Name}" });
                     break;
                 case TreasureFeature treasureFeature:
                     if (treasureFeature.TreasureItems.Count == 0)
                         break;
-                    foreach (var t in treasureFeature.TreasureItems)
+                    foreach (var t in treasureFeature.TreasureItems.Where(x => x.IsRevealed))
                         inspectData.FeatureLines.Add(new InspectRoomFeatureLine { Text = $"Treasure: {t.Definition.Name}" });
                     break;
                 case NpcFeature npcFeature:
-                    foreach (var n in npcFeature.NPCs)
+                    foreach (var n in npcFeature.NPCs.Where(x => x.IsRevealed))
                         inspectData.FeatureLines.Add(new InspectRoomFeatureLine { Text = $"Figure: {n.Definition.Name}" });
                     break;
                 case LoreFeature loreFeature:
-                    foreach (var l in loreFeature.Lore)
+                    foreach (var l in loreFeature.Lore.Where(x => x.IsRevealed))
                     {
                         var line = string.IsNullOrWhiteSpace(l.Definition.Description)
                             ? $"Lore: {l.Definition.Name}"

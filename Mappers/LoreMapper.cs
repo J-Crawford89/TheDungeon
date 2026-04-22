@@ -5,6 +5,7 @@ public static class LoreMapper
 		{
 			Id = resource.Id,
 			Name = resource.Name,
-			Description = resource.Description
+			Description = resource.Description,
+			DiscoverDc = resource.DiscoverDc,
 		};
 }

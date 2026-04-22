@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-public sealed class DiceRollService
+public sealed class DiceRollService : IDiceRollRequestExecutor
 {
     private readonly Random _random;
 

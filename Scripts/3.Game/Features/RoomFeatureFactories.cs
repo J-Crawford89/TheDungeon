@@ -20,15 +20,27 @@ public static class RoomFeatureFactories
 		{
 			Traps = new List<TrapInstance>
 			{
-				new() { Definition = definition, CurrentHp = 1 }
-			}
+				new()
+				{
+					Definition = definition,
+					CurrentHp = 1,
+					IsRevealed = definition.DiscoverDc <= 0,
+				}
+			},
 		};
 
 	public static TreasureFeature CreateTreasureFeature(TreasureDefinition definition) =>
 		new()
 		{
 			RemoveFeatureWhenEmpty = true,
-			TreasureItems = new List<TreasureInstance> { new() { Definition = definition } }
+			TreasureItems = new List<TreasureInstance>
+			{
+				new()
+				{
+					Definition = definition,
+					IsRevealed = definition.DiscoverDc <= 0,
+				},
+			},
 		};
 
 	public static NpcFeature CreateNpcFeature(NpcDefinition definition) =>
@@ -36,8 +48,13 @@ public static class RoomFeatureFactories
 		{
 			NPCs = new List<NpcInstance>
 			{
-				new() { Definition = definition, CurrentHp = 10 }
-			}
+				new()
+				{
+					Definition = definition,
+					CurrentHp = 10,
+					IsRevealed = definition.DiscoverDc <= 0,
+				},
+			},
 		};
 
 	public static LoreFeature CreateLoreFeature(LoreDefinition definition) =>
@@ -45,7 +62,12 @@ public static class RoomFeatureFactories
 		{
 			Lore = new List<LoreInstance>
 			{
-				new() { Definition = definition, CurrentHp = 0 }
-			}
+				new()
+				{
+					Definition = definition,
+					CurrentHp = 0,
+					IsRevealed = definition.DiscoverDc <= 0,
+				},
+			},
 		};
 }

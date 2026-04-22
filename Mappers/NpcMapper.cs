@@ -4,6 +4,7 @@ public static class NpcMapper
 		new()
 		{
 			Id = resource.Id,
-			Name = resource.Name
+			Name = resource.Name,
+			DiscoverDc = resource.DiscoverDc,
 		};
 }

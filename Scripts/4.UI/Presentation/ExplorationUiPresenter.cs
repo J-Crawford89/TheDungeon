@@ -67,6 +67,7 @@ public sealed class ExplorationUiPresenter
 		_session.Dungeon.DiscoveredRoomsByFloor.Add(initialFloor.Level, new HashSet<RoomCoord>([initialFloor.Entrance]));
 		_session.Dungeon.CurrentFloor = initialFloor;
 		_session.Dungeon.PlayerCoord = initialFloor.Entrance;
+		_session.Dungeon.ClearRoomIngress();
 
 		_session.AppendGameLog(_narrativeService.ForEnterDungeon());
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
@@ -115,7 +116,7 @@ public sealed class ExplorationUiPresenter
 		}
 
 		if (!TryReportDiagnosticAndRefreshAll(result))
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Map);
+			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Map | UiRefreshFlags.MainView | UiRefreshFlags.Command);
 	}
 
 	public void OnFloorUpPressed()

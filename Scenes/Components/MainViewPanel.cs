@@ -124,7 +124,7 @@ public partial class MainViewPanel : PanelContainer
 		textureRect.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
 		textureRect.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
 		textureRect.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
-		textureRect.CustomMinimumSize = new Vector2(64, 64);
+		textureRect.CustomMinimumSize = new Vector2(80, 80);
 
 		_featureContainer.AddChild(textureRect);
 	}

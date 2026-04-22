@@ -7,6 +7,7 @@ public static class TreasureMapper
 			Name = resource.Name,
 			GrantKind = resource.GrantKind,
 			ValueInGp = resource.ValueInGp,
-			InventoryItemId = resource.InventoryItemId
+			InventoryItemId = resource.InventoryItemId,
+			DiscoverDc = resource.DiscoverDc,
 		};
 }

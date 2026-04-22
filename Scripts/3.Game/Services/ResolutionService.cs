@@ -1,8 +1,8 @@
 public sealed class ResolutionService
 {
-    private readonly DiceRollService _diceRollService;
+    private readonly IDiceRollRequestExecutor _diceRollService;
 
-    public ResolutionService(DiceRollService diceRollService)
+    public ResolutionService(IDiceRollRequestExecutor diceRollService)
     {
         _diceRollService = diceRollService;
     }
@@ -18,6 +18,10 @@ public sealed class ResolutionService
             Outcome = ParseOutcome(roll, request.TargetNumber)
         };
     }
+
+    /// <summary>Uses the same rules as <see cref="RollAgainstTarget"/> for an existing roll vs a DC.</summary>
+    public ResolutionOutcome ResolveOutcomeAgainstTarget(DiceRollResult roll, int targetNumber) =>
+        ParseOutcome(roll, targetNumber);
 
     private ResolutionOutcome ParseOutcome(DiceRollResult roll, int targetNumber)
     {

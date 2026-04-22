@@ -36,6 +36,7 @@ public sealed class GameSessionState : IGameLog
 		Dungeon.DiscoveredRoomsByFloor.Clear();
 		Dungeon.CurrentFloor = null;
 		Dungeon.PlayerCoord = default;
+		Dungeon.ClearRoomIngress();
 		Dungeon.DungeonMode = DungeonMode.Exploration;
 		LogEntries.Clear();
 		LogContentRevision++;

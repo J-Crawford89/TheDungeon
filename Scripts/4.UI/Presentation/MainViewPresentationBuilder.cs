@@ -55,11 +55,11 @@ public static class MainViewPresentationBuilder
 
 					break;
 				case TrapFeature tf:
-					foreach (var _ in tf.Traps)
+					foreach (var _ in tf.Traps.Where(t => t.IsRevealed))
 						icons.Add(MainViewFeatureIconKind.Trap);
 					break;
 				case TreasureFeature treasure:
-					foreach (var t in treasure.TreasureItems)
+					foreach (var t in treasure.TreasureItems.Where(i => i.IsRevealed))
 					{
 						var k = MapTreasure(t.Definition);
 						if (k.HasValue)
@@ -68,11 +68,11 @@ public static class MainViewPresentationBuilder
 
 					break;
 				case NpcFeature nf:
-					foreach (var _ in nf.NPCs)
+					foreach (var _ in nf.NPCs.Where(n => n.IsRevealed))
 						icons.Add(MainViewFeatureIconKind.Npc);
 					break;
 				case LoreFeature lf:
-					foreach (var _ in lf.Lore)
+					foreach (var _ in lf.Lore.Where(l => l.IsRevealed))
 						icons.Add(MainViewFeatureIconKind.Lore);
 					break;
 				case FloorExitFeature exit:

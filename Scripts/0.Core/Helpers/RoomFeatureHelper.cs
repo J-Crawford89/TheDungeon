@@ -3,12 +3,12 @@ using System.Linq;
 
 public static class RoomFeatureHelper
 {
-	/// <summary>First trap feature in <paramref name="room"/>'s <see cref="DungeonRoom.Features"/> list order.</summary>
+	/// <summary>First trap feature in list order that has at least one <see cref="TrapInstance.IsRevealed"/> trap.</summary>
 	public static TrapFeature? GetFirstTrapFeatureOrdered(DungeonRoom room)
 	{
 		foreach (var feature in room.Features)
 		{
-			if (feature is TrapFeature trapFeature)
+			if (feature is TrapFeature trapFeature && trapFeature.Traps.Any(t => t.IsRevealed))
 				return trapFeature;
 		}
 

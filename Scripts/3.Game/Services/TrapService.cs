@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-/// <summary>Trap disarm checks and outcome application (rolls in <see cref="ResolutionService"/>).</summary>
+/// <summary>Trap disarm checks, tripped-trap resolution, and room-exit tripwires (rolls in <see cref="ResolutionService"/>).</summary>
 public sealed class TrapService
 {
 	private readonly ResolutionService _resolution;
@@ -29,6 +29,52 @@ public sealed class TrapService
 		return RoomFeatureHelper.GetFirstTrapFeatureOrdered(room) != null;
 	}
 
+	/// <summary>When the player leaves a room, every armed trap may fire unless this is a no-trip backtrack move.</summary>
+	public void ProcessTrapsOnRoomExit(GameSessionState session, DungeonRoom room, bool exemptFromTripBecauseBacktracking)
+	{
+		if (exemptFromTripBecauseBacktracking)
+			return;
+
+		foreach (var trapFeature in room.Features.OfType<TrapFeature>().ToList())
+		{
+			foreach (var trapInstance in trapFeature.Traps.Where(t => t.CurrentHp > 0).ToList())
+			{
+				var wasHidden = !trapInstance.IsRevealed;
+				trapInstance.IsRevealed = true;
+				var def = trapInstance.Definition;
+				TripTrap(session, def, TrapTripCause.LeftRoom, wasHidden);
+				RemoveTrapInstanceFromRoomAfterTrip(room, trapFeature, trapInstance);
+			}
+		}
+	}
+
+	/// <summary>Resolves a sprung trap: lead-in from <see cref="TrapTripCause"/>, then damage and effect text from the definition.</summary>
+	public int TripTrap(GameSessionState session, TrapDefinition def, TrapTripCause cause, bool wasHiddenBeforeTrip)
+	{
+		session.AppendGameLog(_narrative.ForTrapTripLeadIn(cause, def.Name, wasHiddenBeforeTrip));
+		return ApplyTrippedTrapEffects(session, def);
+	}
+
+	/// <summary>Applies damage and outcome log lines for a tripped trap (no lead-in).</summary>
+	public int ApplyTrippedTrapEffects(GameSessionState session, TrapDefinition def)
+	{
+		var damageDealt = 0;
+		var dm = def.Damage;
+		if (dm > 0)
+		{
+			var dmg = _vitals.ApplyDamage(session.Player, dm);
+			damageDealt = dmg.HpBefore - dmg.HpAfterClamped;
+			session.AppendGameLog(_narrative.ForTrapTripOutcomeDamage(def.Name, dm, session.Player.CurrentHp));
+		}
+		else
+			session.AppendGameLog(_narrative.ForTrapTripOutcomeNoDamage(def.Name));
+
+		if (!string.IsNullOrWhiteSpace(def.Effect))
+			session.AppendGameLog(_narrative.ForTrapTripEffectLine(def.Name, def.Effect.Trim()));
+
+		return damageDealt;
+	}
+
 	public TrapDisarmResult TryDisarm(GameSessionState session)
 	{
 		if (session.Dungeon.CurrentFloor == null)
@@ -42,8 +88,8 @@ public sealed class TrapService
 			return new TrapDisarmResult { ResultCode = TrapDisarmResultCode.NoTrapPresent };
 
 		var trapInstance =
-			trapFeature.Traps.FirstOrDefault(t => t.CurrentHp > 0) ??
-			trapFeature.Traps.FirstOrDefault();
+			trapFeature.Traps.FirstOrDefault(t => t.IsRevealed && t.CurrentHp > 0) ??
+			trapFeature.Traps.FirstOrDefault(t => t.IsRevealed);
 
 		if (trapInstance == null)
 			return new TrapDisarmResult { ResultCode = TrapDisarmResultCode.NoTrapPresent };
@@ -82,16 +128,7 @@ public sealed class TrapService
 
 	private TrapDisarmResult ApplyFail(GameSessionState session, TrapDefinition trapDef, ResolutionResult resolution)
 	{
-		var damageDealt = 0;
-		var dm = trapDef.Damage;
-		if (dm > 0)
-		{
-			var dmg = _vitals.ApplyDamage(session.Player, dm);
-			damageDealt = dmg.HpBefore - dmg.HpAfterClamped;
-			session.AppendGameLog(_narrative.ForTrapDisarmFailDamage(trapDef.Name, dm, session.Player.CurrentHp));
-		}
-		else
-			session.AppendGameLog(_narrative.ForTrapDisarmFailSafe(trapDef.Name));
+		var damageDealt = TripTrap(session, trapDef, TrapTripCause.DisarmFailed, wasHiddenBeforeTrip: false);
 
 		return new TrapDisarmResult
 		{
@@ -131,6 +168,13 @@ public sealed class TrapService
 			DamageDealtToPlayer = 0,
 			GrantedInventoryItemDefinitionIds = grantedIds,
 		};
+	}
+
+	private static void RemoveTrapInstanceFromRoomAfterTrip(DungeonRoom room, TrapFeature trapFeature, TrapInstance instance)
+	{
+		trapFeature.Traps.Remove(instance);
+		if (trapFeature.Traps.Count == 0)
+			room.Features.Remove(trapFeature);
 	}
 
 	private void AddInventoryItemById(GameSessionState session, string itemId)

@@ -180,7 +180,8 @@ public partial class GameRoot : Control
 			treasurePickupService,
 			potionEffectApplicationService,
 			trapService);
-		var explorationService = new ExplorationService(roomFeaturePopulation, combatService);
+		var inspectService = new InspectService(diceRollService, resolutionService, narrativeService);
+		var explorationService = new ExplorationService(roomFeaturePopulation, combatService, inspectService, trapService);
 		var characterCreation = new CharacterCreationService(diceRollService, random, abilityRepo);
 
 		return new GameRunContext(

@@ -17,7 +17,7 @@ public sealed class TreasurePickupService
 		if (session.Dungeon.CurrentRoom is not { } room)
 			return false;
 		var treasureFeature = RoomFeatureHelper.GetFeature<TreasureFeature>(room);
-		return treasureFeature != null && treasureFeature.TreasureItems.Count > 0;
+		return treasureFeature != null && treasureFeature.TreasureItems.Any(t => t.IsRevealed);
 	}
 
 	public TakeTreasureOutcome TakeAllFromCurrentRoom(GameSessionState session)
@@ -34,10 +34,18 @@ public sealed class TreasurePickupService
 			return TakeTreasureOutcome.NothingToTake;
 		}
 
-		foreach (var instance in treasureFeature.TreasureItems.ToList())
+		var revealed = treasureFeature.TreasureItems.Where(t => t.IsRevealed).ToList();
+		if (revealed.Count == 0)
+		{
+			session.AppendGameLog(_narrative.ForTakeNothingHere());
+			return TakeTreasureOutcome.NothingToTake;
+		}
+
+		foreach (var instance in revealed)
 			ApplyInstance(session, instance);
 
-		treasureFeature.TreasureItems.Clear();
+		foreach (var instance in revealed)
+			treasureFeature.TreasureItems.Remove(instance);
 
 		if (treasureFeature.RemoveFeatureWhenEmpty)
 			room.Features.Remove(treasureFeature);
