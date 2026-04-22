@@ -26,7 +26,8 @@ public sealed class GodotTrapDefinitionRepository : ITrapDefinitionRepository
 				DiscoverDc = 10,
 				DisarmDc = 12,
 				Damage = 2,
-				Effect = "Cord tightens around the ankle."
+				Effect = "Cord tightens around the ankle.",
+				IsRemovedAfterTripped = true,
 			},
 			new TrapDefinition
 			{
@@ -35,7 +36,8 @@ public sealed class GodotTrapDefinitionRepository : ITrapDefinitionRepository
 				DiscoverDc = 12,
 				DisarmDc = 14,
 				Damage = 3,
-				Effect = "A spring-loaded needle jabs out."
+				Effect = "A spring-loaded needle jabs out.",
+				IsRemovedAfterTripped = true,
 			}
 		};
 }

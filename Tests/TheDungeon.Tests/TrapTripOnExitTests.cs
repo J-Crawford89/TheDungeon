@@ -98,6 +98,28 @@ public sealed class TrapTripOnExitTests
 	}
 
 	[Fact]
+	public void ProcessTrapsOnExit_WhenIsRemovedAfterTrippedFalse_TrapStaysInRoom()
+	{
+		var trapService = CreateTrapService();
+		var session = new GameSessionState();
+		session.Player.CurrentHp = 50;
+
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		var trapDef = MakeTrap(damage: 5);
+		trapDef.IsRemovedAfterTripped = false;
+		var inst = new TrapInstance { Definition = trapDef, CurrentHp = 1, IsRevealed = true };
+		var tf = new TrapFeature { Traps = new List<TrapInstance> { inst } };
+		room.Features.Add(tf);
+
+		trapService.ProcessTrapsOnRoomExit(session, room, exemptFromTripBecauseBacktracking: false);
+
+		Assert.Equal(45, session.Player.CurrentHp);
+		Assert.Single(room.Features);
+		Assert.Single(tf.Traps);
+		Assert.Same(inst, tf.Traps[0]);
+	}
+
+	[Fact]
 	public void ProcessTripwires_TwoTraps_BothApply()
 	{
 		var trapService = CreateTrapService();

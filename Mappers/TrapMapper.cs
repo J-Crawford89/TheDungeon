@@ -8,6 +8,7 @@ public static class TrapMapper
 			DiscoverDc = resource.DiscoverDc,
 			DisarmDc = resource.DisarmDc,
 			Damage = resource.Damage,
-			Effect = resource.Effect
+			Effect = resource.Effect,
+			IsRemovedAfterTripped = resource.IsRemovedAfterTripped,
 		};
 }

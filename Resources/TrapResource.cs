@@ -9,4 +9,5 @@ public partial class TrapResource : Resource
 	[Export] public int DisarmDc { get; set; }
 	[Export] public int Damage { get; set; }
 	[Export] public string Effect { get; set; } = string.Empty;
+	[Export] public bool IsRemovedAfterTripped { get; set; } = true;
 }

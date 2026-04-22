@@ -43,7 +43,8 @@ public sealed class TrapService
 				trapInstance.IsRevealed = true;
 				var def = trapInstance.Definition;
 				TripTrap(session, def, TrapTripCause.LeftRoom, wasHidden);
-				RemoveTrapInstanceFromRoomAfterTrip(room, trapFeature, trapInstance);
+				if (def.IsRemovedAfterTripped)
+					RemoveTrapInstanceFromRoomAfterTrip(room, trapFeature, trapInstance);
 			}
 		}
 	}
@@ -121,20 +122,33 @@ public sealed class TrapService
 		var success = resolution.Outcome is ResolutionOutcome.Success or ResolutionOutcome.CriticalSuccess;
 
 		if (!success)
-			return ApplyFail(session, trapDef, resolution);
+			return ApplyFail(session, room, trapFeature, trapInstance, trapDef, resolution);
 
 		return ApplySuccess(session, room, trapFeature, resolution, trapDef);
 	}
 
-	private TrapDisarmResult ApplyFail(GameSessionState session, TrapDefinition trapDef, ResolutionResult resolution)
+	private TrapDisarmResult ApplyFail(
+		GameSessionState session,
+		DungeonRoom room,
+		TrapFeature trapFeature,
+		TrapInstance trapInstance,
+		TrapDefinition trapDef,
+		ResolutionResult resolution)
 	{
 		var damageDealt = TripTrap(session, trapDef, TrapTripCause.DisarmFailed, wasHiddenBeforeTrip: false);
+
+		var trapFeatureRemoved = false;
+		if (trapDef.IsRemovedAfterTripped)
+		{
+			trapFeatureRemoved = trapFeature.Traps.Count == 1;
+			RemoveTrapInstanceFromRoomAfterTrip(room, trapFeature, trapInstance);
+		}
 
 		return new TrapDisarmResult
 		{
 			ResultCode = TrapDisarmResultCode.DisarmCheckResolved,
 			ResolvedCheck = resolution,
-			TrapFeatureRemoved = false,
+			TrapFeatureRemoved = trapFeatureRemoved,
 			DamageDealtToPlayer = damageDealt,
 		};
 	}
