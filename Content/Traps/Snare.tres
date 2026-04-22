@@ -9,3 +9,4 @@ Name = "Snare Trap"
 DiscoverDc = 8
 DisarmDc = 8
 Damage = 2
+Effect = "Snared"
