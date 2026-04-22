@@ -8,6 +8,10 @@ public sealed class ExplorationServiceResult
 	public HorizontalDirection? FacingAfterRotation { get; private init; }
 	public InspectRoomData? InspectData { get; private init; }
 
+	public bool ConsumedRopeForHole { get; private init; }
+
+	public bool HoleWasAlreadyAnchored { get; private init; }
+
 	public static ExplorationServiceResult OkMoveForward(RoomCoord destination) =>
 		new()
 		{
@@ -32,13 +36,19 @@ public sealed class ExplorationServiceResult
 			InspectData = data
 		};
 
-	public static ExplorationServiceResult OkChangeFloor(int level, RoomCoord destination) =>
+	public static ExplorationServiceResult OkChangeFloor(
+		int level,
+		RoomCoord destination,
+		bool consumedRopeForHole = false,
+		bool holeWasAlreadyAnchored = false) =>
 		new()
 		{
 			Success = true,
 			ErrorCode = ExplorationErrorCode.None,
 			FloorAfterMove = level,
-			DestinationAfterMove = destination
+			DestinationAfterMove = destination,
+			ConsumedRopeForHole = consumedRopeForHole,
+			HoleWasAlreadyAnchored = holeWasAlreadyAnchored,
 		};
 
 	public static ExplorationServiceResult Fail(

@@ -132,7 +132,7 @@ text = "DEFENDING PLACEHOLDER"
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="CommandPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row2" unique_id=786944443 node_paths=PackedStringArray("_forwardButton", "_backwardButton", "_leftButton", "_rightButton", "_inspectButton", "_floorUpButton", "_floorDownButton", "_attackButton", "_fleeButton", "_takeButton", "_potionButton", "_defendButton")]
+[node name="CommandPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row2" unique_id=786944443 node_paths=PackedStringArray("_forwardButton", "_backwardButton", "_leftButton", "_rightButton", "_inspectButton", "_floorUpButton", "_floorDownButton", "_attackButton", "_fleeButton", "_takeButton", "_potionButton", "_defendButton", "_disarmButton")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.2
@@ -149,6 +149,7 @@ _fleeButton = NodePath("CommandMargin/CommandContent/ButtonGrid/FleeButton")
 _takeButton = NodePath("CommandMargin/CommandContent/ButtonGrid/TakeButton")
 _potionButton = NodePath("CommandMargin/CommandContent/ButtonGrid/PotionButton")
 _defendButton = NodePath("CommandMargin/CommandContent/ButtonGrid/DefendButton")
+_disarmButton = NodePath("CommandMargin/CommandContent/ButtonGrid/DisarmButton")
 
 [node name="CommandMargin" type="MarginContainer" parent="RootMargin/MainVBox/Row2/CommandPanel" unique_id=1719189521]
 layout_mode = 2
@@ -217,6 +218,10 @@ text = "Potion"
 [node name="DefendButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=1656054889]
 layout_mode = 2
 text = "Defend"
+
+[node name="DisarmButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=693622502]
+layout_mode = 2
+text = "Disarm"
 
 [node name="MapPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row2" unique_id=1329682580 node_paths=PackedStringArray("_mapView")]
 layout_mode = 2

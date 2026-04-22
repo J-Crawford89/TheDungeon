@@ -2,9 +2,7 @@ using Godot;
 using Godot.Collections;
 
 [GlobalClass]
-public partial class PotionResource : ItemResource
+public partial class PotionResource : ConsumableResource
 {
-	[Export] public bool ConsumedOnUse { get; set; } = true;
-
 	[Export] public Array<RestoreHealthEffectResource> RestoreHealthEffects { get; set; } = [];
 }

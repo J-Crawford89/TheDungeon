@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ConsumableResource" format=3 uid="uid://c1oyad26ywhqk"]
+
+[ext_resource type="Script" uid="uid://masii0db56rb" path="res://Resources/ConsumableResource.cs" id="1_0lpa4"]
+
+[resource]
+script = ExtResource("1_0lpa4")
+Id = "rope"
+Name = "Rope"
+ValueInGold = 1
+metadata/_custom_type_script = "uid://masii0db56rb"

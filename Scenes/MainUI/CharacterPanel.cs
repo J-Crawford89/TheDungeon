@@ -1,6 +1,7 @@
 #nullable enable
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class CharacterPanel : PanelContainer
 {
@@ -19,8 +20,14 @@ public partial class CharacterPanel : PanelContainer
 		_levelLabel.Text = $"LEVEL: {player.Level}";
 		if (_goldLabel != null)
 			_goldLabel.Text = $"GOLD: {player.Gold}";
-		var hpQty = player.InventoryState.SumQuantityForDefinitionId(InventoryIds.HealthPotionItemId);
-		var itemsLine = hpQty > 0 ? $"Health Potion ×{hpQty}" : "(none)";
+		var hpQty = player.InventoryState.SumQuantityForDefinitionId(InventoryIds.HealthPotion);
+		var ropeQty = player.InventoryState.SumQuantityForDefinitionId(InventoryIds.Rope);
+		var segments = new List<string>();
+		if (hpQty > 0)
+			segments.Add($"Health Potion ×{hpQty}");
+		if (ropeQty > 0)
+			segments.Add($"Rope ×{ropeQty}");
+		var itemsLine = segments.Count > 0 ? string.Join(", ", segments) : "(none)";
 		_equipmentLabel.Text = $"ITEMS: {itemsLine}";
 
 		if (_spLabel != null)

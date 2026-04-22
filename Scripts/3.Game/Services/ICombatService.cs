@@ -15,4 +15,6 @@ public interface ICombatService
 	void ExecutePlayerUseHealthPotion(GameSessionState session);
 
 	void ExecutePlayerDefend(GameSessionState session);
+
+	void ExecutePlayerDisarmTrap(GameSessionState session);
 }

@@ -69,14 +69,19 @@ public sealed class GameUiCoordinator
 			_commandPanel.ApplyDungeonMode(_session.Dungeon.DungeonMode);
 			var mode = _session.Dungeon.DungeonMode;
 			if (mode == DungeonMode.Exploration)
-				_commandPanel.RenderFloorExitButtons(_session.Dungeon.CurrentRoom);
+			{
+				_commandPanel.RenderFloorExitButtons(_session.Dungeon.CurrentRoom, _session.Player);
+				_commandPanel.ApplyPotionButtonState(_session.Player);
+			}
+
 			if (mode == DungeonMode.Combat)
 			{
-				_commandPanel.ApplyCombatItemButtons(_session.Player);
+				_commandPanel.ApplyPotionButtonState(_session.Player);
 				_commandPanel.ApplyCombatAbilityButtons(_session.Player, _session, _combatService);
 			}
 			var inPlay = mode == DungeonMode.Exploration || mode == DungeonMode.Combat;
 			_commandPanel.ApplyTakeButtonVisible(inPlay && TreasurePickupService.HasTakeableLootInCurrentRoom(_session));
+			_commandPanel.ApplyDisarmButtonVisible(inPlay && TrapService.CurrentRoomHasTrap(_session));
 		}
 
 		if (flags.HasFlag(UiRefreshFlags.Map))
@@ -169,9 +174,10 @@ public sealed class GameUiCoordinator
 	{
 		if (_session.Phase != GamePlayPhase.InProgress)
 			return;
-		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
-			return;
-		_combat.OnPotionPressed();
+		if (_session.Dungeon.DungeonMode == DungeonMode.Exploration)
+			_exploration.OnPotionPressed();
+		else if (_session.Dungeon.DungeonMode == DungeonMode.Combat)
+			_combat.OnPotionPressed();
 	}
 
 	public void OnDefendPressed()
@@ -181,6 +187,16 @@ public sealed class GameUiCoordinator
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		_combat.OnDefendPressed();
+	}
+
+	public void OnDisarmPressed()
+	{
+		if (_session.Phase != GamePlayPhase.InProgress)
+			return;
+		if (_session.Dungeon.DungeonMode == DungeonMode.Exploration)
+			_exploration.OnDisarmPressed();
+		else if (_session.Dungeon.DungeonMode == DungeonMode.Combat)
+			_combat.OnDisarmPressed();
 	}
 
 	private static FloorConnectionType GetExitType(DungeonRoom room)

@@ -11,6 +11,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 	private readonly PlayerDownedResolutionService _playerDowned;
 	private readonly TreasurePickupService _treasurePickup;
 	private readonly PotionEffectApplicationService _potionEffects;
+	private readonly TrapService _trapService;
 	private readonly CombatAbilityEffectsRegistry _combatAbilities = new();
 	private readonly CombatEncounterLifecycle _lifecycle;
 	private readonly CombatInitiative _initiative;
@@ -24,7 +25,8 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		PlayerVitalsService vitals,
 		PlayerDownedResolutionService playerDowned,
 		TreasurePickupService treasurePickup,
-		PotionEffectApplicationService potionEffects)
+		PotionEffectApplicationService potionEffects,
+		TrapService trapService)
 	{
 		_dice = dice;
 		_resolution = resolution;
@@ -32,6 +34,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		_vitals = vitals;
 		_playerDowned = playerDowned;
 		_treasurePickup = treasurePickup;
+		_trapService = trapService;
 		_lifecycle = new CombatEncounterLifecycle(_narrative);
 		_monsterTurn = new CombatMonsterTurn(_resolution, _narrative, _vitals, _playerDowned);
 		_initiative = new CombatInitiative(_dice, _narrative);
@@ -227,6 +230,27 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		var outcome = _potionEffects.TryUseHealthPotion(session);
 		if (outcome == HealthPotionUseOutcome.Applied)
 			RunAfterSuccessfulCombatHealthPotion(session);
+	}
+
+	public void ExecutePlayerDisarmTrap(GameSessionState session)
+	{
+		if (!IsAwaitingPlayerAction(session))
+			return;
+
+		var result = _trapService.TryDisarm(session);
+		if (!result.ShouldAdvanceCombatTurn)
+			return;
+
+		var room = session.Dungeon.CurrentRoom;
+		if (room != null && RoomFeatureHelper.GetFeature<MonsterFeature>(room) is { } monsterFeature)
+		{
+			_turnLoop.PruneDeadMonstersFromTurnOrder(session, monsterFeature);
+			if (_turnLoop.CheckVictory(session, monsterFeature))
+				return;
+		}
+
+		_turnLoop.AdvanceTurn(session);
+		_turnLoop.ProcessAutomaticMonsterTurns(session);
 	}
 
 	public void ExecutePlayerDefend(GameSessionState session)

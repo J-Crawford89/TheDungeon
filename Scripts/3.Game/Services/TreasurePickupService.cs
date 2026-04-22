@@ -76,23 +76,7 @@ public sealed class TreasurePickupService
 			return;
 		}
 
-		AddOrStackOne(session.Player.InventoryState.Items, itemDef);
+		session.Player.InventoryState.AddOrStackOne(itemDef);
 		session.AppendGameLog(_narrative.ForTookItem(treasureDef.Name));
-	}
-
-	private static void AddOrStackOne(System.Collections.Generic.List<ItemInstance> items, ItemDefinition definition)
-	{
-		var existing = items.FirstOrDefault(i => i.Definition.Id == definition.Id);
-		if (existing != null && existing.Quantity < definition.MaxStackSize)
-		{
-			existing.Quantity++;
-			return;
-		}
-
-		items.Add(new ItemInstance
-		{
-			Definition = definition,
-			Quantity = 1
-		});
 	}
 }

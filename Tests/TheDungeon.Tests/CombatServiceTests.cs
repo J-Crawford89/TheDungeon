@@ -25,7 +25,8 @@ public sealed class CombatServiceTests
 		var items = new EmptyItemDefinitionRepository();
 		var treasure = new TreasurePickupService(narrative, items);
 		var potionFx = new PotionEffectApplicationService(dice, narrative, items);
-		return new CombatService(dice, resolution, narrative, vitals, downed, treasure, potionFx);
+		var traps = new TrapService(resolution, narrative, vitals, items);
+		return new CombatService(dice, resolution, narrative, vitals, downed, treasure, potionFx, traps);
 	}
 
 	[Fact]

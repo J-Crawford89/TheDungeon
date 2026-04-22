@@ -31,7 +31,7 @@ public sealed class GodotTreasureDefinitionRepository : ITreasureDefinitionRepos
 				Id = TreasureIds.HealthPotion,
 				Name = "A health potion",
 				GrantKind = TreasureKind.InventoryItem,
-				InventoryItemId = InventoryIds.HealthPotionItemId
+				InventoryItemId = InventoryIds.HealthPotion
 			}
 		};
 }

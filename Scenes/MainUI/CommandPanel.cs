@@ -17,6 +17,7 @@ public partial class CommandPanel : PanelContainer
 	[Export] private Button _takeButton = null!;
 	[Export] private Button _potionButton = null!;
 	[Export] private Button? _defendButton;
+	[Export] private Button? _disarmButton;
 
 	public event Action? ForwardPressed;
 	public event Action? BackwardPressed;
@@ -30,6 +31,7 @@ public partial class CommandPanel : PanelContainer
 	public event Action? TakePressed;
 	public event Action? PotionPressed;
 	public event Action? DefendPressed;
+	public event Action? DisarmPressed;
 
 	public override void _Ready()
 	{
@@ -46,6 +48,8 @@ public partial class CommandPanel : PanelContainer
 		_potionButton.Pressed += () => PotionPressed?.Invoke();
 		if (_defendButton != null)
 			_defendButton.Pressed += () => DefendPressed?.Invoke();
+		if (_disarmButton != null)
+			_disarmButton.Pressed += () => DisarmPressed?.Invoke();
 	}
 
 	public void ApplyDungeonMode(DungeonMode mode)
@@ -64,7 +68,7 @@ public partial class CommandPanel : PanelContainer
 
 		_attackButton.Visible = combat;
 		_fleeButton.Visible = combat;
-		_potionButton.Visible = combat;
+		_potionButton.Visible = exploration || combat;
 		if (_defendButton != null)
 			_defendButton.Visible = combat;
 	}
@@ -72,6 +76,12 @@ public partial class CommandPanel : PanelContainer
 	public void ApplyTakeButtonVisible(bool visible)
 	{
 		_takeButton.Visible = visible;
+	}
+
+	public void ApplyDisarmButtonVisible(bool visible)
+	{
+		if (_disarmButton != null)
+			_disarmButton.Visible = visible;
 	}
 
 	public void SetAllCommandButtonsDisabled(bool disabled)
@@ -89,6 +99,8 @@ public partial class CommandPanel : PanelContainer
 		_potionButton.Disabled = disabled;
 		if (_defendButton != null)
 			_defendButton.Disabled = disabled;
+		if (_disarmButton != null)
+			_disarmButton.Disabled = disabled;
 	}
 
 	public void HideAllGameplayCommands()
@@ -106,15 +118,18 @@ public partial class CommandPanel : PanelContainer
 		_potionButton.Visible = false;
 		if (_defendButton != null)
 			_defendButton.Visible = false;
+		if (_disarmButton != null)
+			_disarmButton.Visible = false;
 	}
 
-	public void ApplyCombatItemButtons(PlayerState player)
+	public void ApplyPotionButtonState(PlayerState player)
 	{
-		if (_potionButton == null)
-			return;
-		var hpQty = player.InventoryState.SumQuantityForDefinitionId(InventoryIds.HealthPotionItemId);
+		var hpQty = player.InventoryState.SumQuantityForDefinitionId(InventoryIds.HealthPotion);
 		_potionButton.Disabled = hpQty <= 0 || player.CurrentHp >= player.MaxHp;
 	}
+
+	public void ApplyCombatItemButtons(PlayerState player) =>
+		ApplyPotionButtonState(player);
 
 	public void ApplyCombatAbilityButtons(PlayerState player, GameSessionState session, ICombatService combat)
 	{
@@ -131,24 +146,29 @@ public partial class CommandPanel : PanelContainer
 		_defendButton.Disabled = !awaiting || stance || onCd;
 	}
 
-	public void RenderFloorExitButtons(DungeonRoom? currentRoom)
+	public void RenderFloorExitButtons(DungeonRoom? currentRoom, PlayerState? player)
 	{
 		_floorUpButton.Visible = false;
 		_floorDownButton.Visible = false;
 
-		if (currentRoom == null)
+		if (currentRoom == null || player == null)
 			return;
 
 		var floorExitFeature = RoomFeatureHelper.GetFeature<FloorExitFeature>(currentRoom);
 		if (floorExitFeature == null)
 			return;
 
+		var holeTraversable =
+			floorExitFeature.ExitType != FloorConnectionType.Hole ||
+			floorExitFeature.RopeAnchored ||
+			player.InventoryState.SumQuantityForDefinitionId(InventoryIds.Rope) > 0;
+
 		switch (DirectionHelper.GetVerticalExitDirection(currentRoom.Position))
 		{
-			case VerticalDirection.Up:
+			case VerticalDirection.Up when holeTraversable:
 				_floorUpButton.Visible = true;
 				break;
-			case VerticalDirection.Down:
+			case VerticalDirection.Down when holeTraversable:
 				_floorDownButton.Visible = true;
 				break;
 		}

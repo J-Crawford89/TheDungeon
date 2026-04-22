@@ -8,6 +8,8 @@ public sealed class ExplorationUiPresenter
 	private readonly NarrativeService _narrativeService;
 	private readonly DungeonBootstrap _dungeonBootstrap;
 	private readonly TreasurePickupService _treasurePickup;
+	private readonly TrapService _trapService;
+	private readonly PotionEffectApplicationService _potionEffects;
 	private readonly Action<UiRefreshFlags> _refreshHud;
 
 	private readonly bool _useProceduralFloor = true; //Set this bool to true in order to use procedural generation, or false to use prototype hand built floor.
@@ -17,6 +19,8 @@ public sealed class ExplorationUiPresenter
 		ExplorationService explorationService,
 		NarrativeService narrativeService,
 		TreasurePickupService treasurePickup,
+		TrapService trapService,
+		PotionEffectApplicationService potionEffects,
 		DungeonBootstrap dungeonBootstrap,
 		Action<UiRefreshFlags> refreshHud)
 	{
@@ -24,8 +28,26 @@ public sealed class ExplorationUiPresenter
 		_explorationService = explorationService;
 		_narrativeService = narrativeService;
 		_treasurePickup = treasurePickup;
+		_trapService = trapService;
+		_potionEffects = potionEffects;
 		_dungeonBootstrap = dungeonBootstrap;
 		_refreshHud = refreshHud;
+	}
+
+	public void OnPotionPressed()
+	{
+		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
+			return;
+		_potionEffects.TryUseHealthPotion(_session);
+		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command);
+	}
+
+	public void OnDisarmPressed()
+	{
+		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
+			return;
+		_trapService.TryDisarm(_session);
+		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
 
 	public void OnTakePressed()
@@ -101,7 +123,7 @@ public sealed class ExplorationUiPresenter
 		var result = _explorationService.MoveUpAFloor(_session);
 		_session.AppendGameLog(_narrativeService.ForMoveUpFloor(result));
 		if (!TryReportDiagnosticAndRefreshAll(result))
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map);
+			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
 	}
 
 	public void OnFloorDownPressed()
@@ -112,7 +134,7 @@ public sealed class ExplorationUiPresenter
 		if (result.Success && result.FloorAfterMove is { } floorLevel)
 			_explorationService.TryBeginCombatIfHostile(_session, previousCoord, floorLevel);
 		if (!TryReportDiagnosticAndRefreshAll(result))
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map);
+			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
 	}
 
 	private bool TryReportDiagnosticAndRefreshAll(ExplorationServiceResult result)

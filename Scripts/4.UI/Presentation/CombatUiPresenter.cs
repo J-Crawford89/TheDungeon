@@ -62,4 +62,14 @@ public sealed class CombatUiPresenter
 		_combatService.ExecutePlayerDefend(_session);
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
 	}
+
+	public void OnDisarmPressed()
+	{
+		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
+			return;
+		if (!_combatService.IsAwaitingPlayerAction(_session))
+			return;
+		_combatService.ExecutePlayerDisarmTrap(_session);
+		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
+	}
 }

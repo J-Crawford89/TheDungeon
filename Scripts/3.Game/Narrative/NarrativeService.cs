@@ -55,7 +55,14 @@ public sealed partial class NarrativeService
 	public string ForMoveUpFloor(ExplorationServiceResult result)
 	{
 		if (result.Success && result.DestinationAfterMove is { } destination && result.FloorAfterMove is { } floor)
-			return $"You ascend to level {floor}. You are in room {destination}.";
+		{
+			var msg = $"You ascend to level {floor}. You are in room {destination}.";
+			if (result.ConsumedRopeForHole)
+				return msg + " You tie off your rope and climb up.";
+			if (result.HoleWasAlreadyAnchored)
+				return msg + " You climb the anchored rope.";
+			return msg;
+		}
 
 		return result.ErrorCode switch
 		{
@@ -66,7 +73,14 @@ public sealed partial class NarrativeService
 	public string ForMoveDownFloor(ExplorationServiceResult result)
 	{
 		if (result.Success && result.DestinationAfterMove is { } destination && result.FloorAfterMove is { } floor)
-			return $"You descend to level {floor}. You are in room {destination}.";
+		{
+			var msg = $"You descend to level {floor}. You are in room {destination}.";
+			if (result.ConsumedRopeForHole)
+				return msg + " You tie off the rope and rappel down.";
+			if (result.HoleWasAlreadyAnchored)
+				return msg + " You descend using the rope.";
+			return msg;
+		}
 
 		return result.ErrorCode switch
 		{
@@ -98,7 +112,7 @@ public sealed partial class NarrativeService
 		var lines = new List<string>();
 		if (data.VerticalConnection != FloorConnectionType.None)
 		{
-			var vertical = DescribeVertical(data.VerticalConnection);
+			var vertical = DescribeVertical(data.VerticalConnection, data.HoleRopeAnchored);
 			if (!string.IsNullOrEmpty(vertical))
 				lines.Add(vertical + ".");
 		}
@@ -122,11 +136,12 @@ public sealed partial class NarrativeService
 			_ => "blocked"
 		};
 
-	private static string DescribeVertical(FloorConnectionType verticalKind) =>
+	private static string DescribeVertical(FloorConnectionType verticalKind, bool holeRopeAnchored = false) =>
 		verticalKind switch
 		{
 			FloorConnectionType.Stairs => "Stairs lead down",
 			FloorConnectionType.Ladder => "A ladder leads down",
+			FloorConnectionType.Hole when holeRopeAnchored => "A rope hangs into a hole in the floor",
 			FloorConnectionType.Hole => "A hole opens in the floor",
 			_ => ""
 		};

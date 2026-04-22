@@ -48,11 +48,23 @@ public sealed class GodotItemDefinitionRepository : IItemDefinitionRepository
 		_all.OfType<T>().ToArray();
 
 	private static IReadOnlyList<ItemDefinition> DefaultAll() =>
-		new[]
+		new ItemDefinition[]
 		{
+			new ConsumableDefinition
+			{
+				Id = InventoryIds.Rope,
+				Name = "Rope",
+				Description = "Heavy cord salvaged from a sprung snare.",
+				Rarity = ItemRarity.Common,
+				ValueInGold = 2,
+				MaxStackSize = 99,
+				CanDrop = true,
+				CanSell = true,
+				ConsumedOnUse = false,
+			},
 			new PotionDefinition
 			{
-				Id = InventoryIds.HealthPotionItemId,
+				Id = InventoryIds.HealthPotion,
 				Name = "Health potion",
 				Description = "Restores health.",
 				Rarity = ItemRarity.Common,

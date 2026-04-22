@@ -23,6 +23,7 @@ public sealed class GameRunContext
 	public IAbilityDefinitionRepository AbilityDefinitions { get; }
 	public IItemDefinitionRepository ItemDefinitions { get; }
 	public PotionEffectApplicationService PotionEffects { get; }
+	public TrapService TrapService { get; }
 
 	public GameRunContext(
 		GameSessionState session,
@@ -44,7 +45,8 @@ public sealed class GameRunContext
 		ICharacterBackgroundDefinitionRepository characterBackgrounds,
 		IAbilityDefinitionRepository abilityDefinitions,
 		IItemDefinitionRepository itemDefinitions,
-		PotionEffectApplicationService potionEffects)
+		PotionEffectApplicationService potionEffects,
+		TrapService trapService)
 	{
 		Session = session;
 		Random = random;
@@ -66,5 +68,6 @@ public sealed class GameRunContext
 		AbilityDefinitions = abilityDefinitions;
 		ItemDefinitions = itemDefinitions;
 		PotionEffects = potionEffects;
+		TrapService = trapService;
 	}
 }

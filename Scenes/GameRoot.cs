@@ -170,6 +170,7 @@ public partial class GameRoot : Control
 		var vitalsService = new PlayerVitalsService();
 		var gameOverDownedHandler = new GameOverDownedHandler(narrativeService);
 		var playerDownedResolutionService = new PlayerDownedResolutionService(new IPlayerDownedOutcomeHandler[] { gameOverDownedHandler });
+		var trapService = new TrapService(resolutionService, narrativeService, vitalsService, itemRepo);
 		var combatService = new CombatService(
 			diceRollService,
 			resolutionService,
@@ -177,7 +178,8 @@ public partial class GameRoot : Control
 			vitalsService,
 			playerDownedResolutionService,
 			treasurePickupService,
-			potionEffectApplicationService);
+			potionEffectApplicationService,
+			trapService);
 		var explorationService = new ExplorationService(roomFeaturePopulation, combatService);
 		var characterCreation = new CharacterCreationService(diceRollService, random, abilityRepo);
 
@@ -201,6 +203,7 @@ public partial class GameRoot : Control
 			backgroundRepo,
 			abilityRepo,
 			itemRepo,
-			potionEffectApplicationService);
+			potionEffectApplicationService,
+			trapService);
 	}
 }

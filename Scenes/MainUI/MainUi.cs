@@ -40,6 +40,8 @@ public partial class MainUi : Control
 		var explorationService = _runContext.ExplorationService;
 		var combatService = _runContext.Combat;
 		var treasurePickupService = _runContext.TreasurePickupService;
+		var trapService = _runContext.TrapService;
+		var potionEffects = _runContext.PotionEffects;
 		var dungeonBootstrap = _runContext.DungeonBootstrap;
 
 		Position = new Vector2(0, 0);
@@ -60,6 +62,8 @@ public partial class MainUi : Control
 			explorationService,
 			narrativeService,
 			treasurePickupService,
+			trapService,
+			potionEffects,
 			dungeonBootstrap,
 			RefreshHudAndGameOver);
 		_combatPresenter = new CombatUiPresenter(session, combatService, RefreshHudAndGameOver);
@@ -87,6 +91,7 @@ public partial class MainUi : Control
 		_commandPanel.TakePressed += OnCommandTake;
 		_commandPanel.PotionPressed += OnCommandPotion;
 		_commandPanel.DefendPressed += OnCommandDefend;
+		_commandPanel.DisarmPressed += OnCommandDisarm;
 
 		_gameOverOverlay.ReturnToStartMenuPressed += OnGameOverReturnToMenu;
 		_gameOverOverlay.QuitPressed += OnGameOverQuitPressed;
@@ -111,6 +116,7 @@ public partial class MainUi : Control
 	private void OnCommandTake() => _coordinator.OnTakePressed();
 	private void OnCommandPotion() => _coordinator.OnPotionPressed();
 	private void OnCommandDefend() => _coordinator.OnDefendPressed();
+	private void OnCommandDisarm() => _coordinator.OnDisarmPressed();
 
 	private void OnGameOverReturnToMenu() => ReturnToStartMenu();
 
@@ -153,6 +159,8 @@ public partial class MainUi : Control
 			_commandPanel.FleePressed -= OnCommandFlee;
 			_commandPanel.TakePressed -= OnCommandTake;
 			_commandPanel.PotionPressed -= OnCommandPotion;
+			_commandPanel.DefendPressed -= OnCommandDefend;
+			_commandPanel.DisarmPressed -= OnCommandDisarm;
 		}
 
 		if (_gameOverOverlay != null)

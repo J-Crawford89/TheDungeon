@@ -6,6 +6,6 @@
 script = ExtResource("1_pjoa2")
 Id = "snare"
 Name = "Snare Trap"
-DiscoverDc = 11
-DisarmDc = 10
-Damage = 3
+DiscoverDc = 8
+DisarmDc = 8
+Damage = 2

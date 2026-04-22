@@ -107,7 +107,7 @@ public sealed class ExplorationService
                     $"playerCoord={dungeon.PlayerCoord}, roomCount={floor.Rooms.Count}"));
         }
 
-        var inspectData = new InspectRoomData { VerticalConnection = GetExitType(currentRoom) };
+        var inspectData = BuildInspectRoomData(currentRoom);
         foreach (var roomExit in currentRoom.Exits.All())
         {
             if (roomExit.Connection == RoomConnectionType.None)
@@ -155,9 +155,6 @@ public sealed class ExplorationService
                     $"playerCoord={dungeon.PlayerCoord}, facing={session.Player.Facing}, roomCount={floor.Rooms.Count}, floorLevel={floor.Level}"));
         }
 
-        if (!DungeonNavigationHelper.IsVerticalConnectionTraversable(floorExitFeature.ExitType))
-            return ExplorationServiceResult.Fail(ExplorationErrorCode.MoveBlocked);
-
         var floorIndex = dungeon.Floors.IndexOf(dungeon.CurrentFloor);
         if (floorIndex <= 0)
             return ExplorationServiceResult.Fail(ExplorationErrorCode.NoPreviousFloor,
@@ -180,18 +177,45 @@ public sealed class ExplorationService
                     "No room exists on previous floor with downward vertical connection",
                     $"playerCoord={dungeon.PlayerCoord}, facing={session.Player.Facing}, roomCount={floor.Rooms.Count}, floorLevel={floor.Level}"));
 
-        var targetExitType = RoomFeatureHelper.GetFeature<FloorExitFeature>(targetRoom)?.ExitType;
-        if (targetExitType != floorExitFeature.ExitType)
+        var targetExitFeature = RoomFeatureHelper.GetFeature<FloorExitFeature>(targetRoom);
+        if (targetExitFeature == null || targetExitFeature.ExitType != floorExitFeature.ExitType)
             return ExplorationServiceResult.Fail(ExplorationErrorCode.NoRoomAtTargetCoord,
                 DebugMessage.Format(
                     "Move the player up one floor",
                     "Target room and current room do not share the same vertical connection type",
                     $"playerCoord={dungeon.PlayerCoord}, facing={session.Player.Facing}, roomCount={floor.Rooms.Count}, floorLevel={floor.Level}, " +
-                        $"targetVerticalConnection={targetExitType}, currentVerticalConnection={floorExitFeature.ExitType}"));
+                        $"targetVerticalConnection={targetExitFeature?.ExitType}, currentVerticalConnection={floorExitFeature.ExitType}"));
+
+        var traversalContext = BuildFloorTraversalContext(session);
+        if (!DungeonNavigationHelper.IsVerticalConnectionTraversable(floorExitFeature, targetExitFeature, traversalContext))
+            return ExplorationServiceResult.Fail(ExplorationErrorCode.MoveBlocked);
+
+        var wasHole = floorExitFeature.ExitType == FloorConnectionType.Hole;
+        var holeAlreadyAnchored = wasHole && (floorExitFeature.RopeAnchored || targetExitFeature.RopeAnchored);
+        var consumedRopeForHole = false;
+
+        if (wasHole && !holeAlreadyAnchored)
+        {
+            if (!session.Player.InventoryState.TryConsumeOne(InventoryIds.Rope))
+                return ExplorationServiceResult.Fail(
+                    ExplorationErrorCode.MoveBlocked,
+                    DebugMessage.Format(
+                        "Move the player up one floor",
+                        "Hole requires rope but inventory consumption failed",
+                        $"playerCoord={dungeon.PlayerCoord}, floorLevel={floor.Level}"));
+
+            consumedRopeForHole = true;
+            floorExitFeature.RopeAnchored = true;
+            targetExitFeature.RopeAnchored = true;
+        }
 
         dungeon.CurrentFloor = floorAbove;
         dungeon.PlayerCoord = targetRoom.Position;
-        return ExplorationServiceResult.OkChangeFloor(floorAbove.Level, targetRoom.Position);
+        return ExplorationServiceResult.OkChangeFloor(
+            floorAbove.Level,
+            targetRoom.Position,
+            consumedRopeForHole,
+            holeWasAlreadyAnchored: wasHole && !consumedRopeForHole && holeAlreadyAnchored);
     }
 
     public ExplorationServiceResult MoveDownAFloor(GameSessionState session, FloorGenerationParameters? generationOptions = null)
@@ -229,7 +253,8 @@ public sealed class ExplorationService
                     $"playerCoord={dungeon.PlayerCoord}, facing={session.Player.Facing}, roomCount={floor.Rooms.Count}, floorLevel={floor.Level}"));
         }
 
-        if (!DungeonNavigationHelper.IsVerticalConnectionTraversable(floorExitFeature.ExitType))
+        var traversalContext = BuildFloorTraversalContext(session);
+        if (!DungeonNavigationHelper.IsVerticalConnectionTraversable(floorExitFeature, traversalContext))
             return ExplorationServiceResult.Fail(ExplorationErrorCode.MoveBlocked);
 
         var opts = generationOptions ?? new FloorGenerationParameters();
@@ -246,11 +271,46 @@ public sealed class ExplorationService
         };
 
         var newFloor = new FloorGenerator(_roomFeaturePopulation).Generate(parameters);
+
+        var wasHole = floorExitFeature.ExitType == FloorConnectionType.Hole;
+        var holeAlreadyAnchored = wasHole && floorExitFeature.RopeAnchored;
+        var consumedRopeForHole = false;
+
+        if (wasHole && !floorExitFeature.RopeAnchored)
+        {
+            if (!session.Player.InventoryState.TryConsumeOne(InventoryIds.Rope))
+                return ExplorationServiceResult.Fail(
+                    ExplorationErrorCode.MoveBlocked,
+                    DebugMessage.Format(
+                        "Move the player down one floor",
+                        "Hole requires rope but inventory consumption failed",
+                        $"playerCoord={dungeon.PlayerCoord}, floorLevel={floor.Level}"));
+
+            consumedRopeForHole = true;
+            floorExitFeature.RopeAnchored = true;
+
+            if (!DungeonFloorLayoutService.TryGetRoom(newFloor, newFloor.Entrance, out var entranceRoom))
+                return ExplorationServiceResult.Fail(
+                    ExplorationErrorCode.NoRoomAtTargetCoord,
+                    DebugMessage.Format(
+                        "Move the player down one floor",
+                        "Generated floor missing entrance room",
+                        $"entranceCoord={newFloor.Entrance}, floorLevel={newFloor.Level}"));
+
+            var lowerExit = RoomFeatureHelper.GetFeature<FloorExitFeature>(entranceRoom!);
+            if (lowerExit != null)
+                lowerExit.RopeAnchored = true;
+        }
+
         dungeon.Floors.Add(newFloor);
         dungeon.CurrentFloor = newFloor;
         dungeon.PlayerCoord = DirectionHelper.Origin;
         dungeon.DiscoveredRoomsByFloor.Add(newFloor.Level, new HashSet<RoomCoord>([DirectionHelper.Origin]));
-        return ExplorationServiceResult.OkChangeFloor(newFloor.Level, DirectionHelper.Origin);
+        return ExplorationServiceResult.OkChangeFloor(
+            newFloor.Level,
+            DirectionHelper.Origin,
+            consumedRopeForHole,
+            holeWasAlreadyAnchored: wasHole && !consumedRopeForHole && holeAlreadyAnchored);
     }
     
 
@@ -300,11 +360,28 @@ public sealed class ExplorationService
         }
     }
 
-    private FloorConnectionType GetExitType(DungeonRoom room)
+    private static InspectRoomData BuildInspectRoomData(DungeonRoom room)
     {
-        if (RoomFeatureHelper.HasFeature<FloorExitFeature>(room))
-            return RoomFeatureHelper.GetFeature<FloorExitFeature>(room).ExitType;
+        FloorConnectionType vertical = FloorConnectionType.None;
+        var holeRopeAnchored = false;
 
-        return FloorConnectionType.None;
+        if (RoomFeatureHelper.GetFeature<FloorExitFeature>(room) is { } exit)
+        {
+            vertical = exit.ExitType;
+            if (vertical == FloorConnectionType.Hole)
+                holeRopeAnchored = exit.RopeAnchored;
+        }
+
+        return new InspectRoomData
+        {
+            VerticalConnection = vertical,
+            HoleRopeAnchored = holeRopeAnchored,
+        };
     }
+
+    private static DungeonNavigationHelper.FloorTraversalContext BuildFloorTraversalContext(GameSessionState session) =>
+        new()
+        {
+            HasRope = session.Player.InventoryState.SumQuantityForDefinitionId(InventoryIds.Rope) > 0,
+        };
 }

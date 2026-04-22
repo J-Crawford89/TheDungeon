@@ -24,10 +24,9 @@ public sealed class PotionEffectApplicationService
 	public HealthPotionUseOutcome TryUseHealthPotion(GameSessionState session)
 	{
 		var player = session.Player;
-		var potionItemId = InventoryIds.HealthPotionItemId;
+		var potionItemId = InventoryIds.HealthPotion;
 
-		var instanceIndex = FindFirstStackIndex(player.InventoryState.Items, potionItemId);
-		if (instanceIndex < 0)
+		if (player.InventoryState.SumQuantityForDefinitionId(potionItemId) <= 0)
 		{
 			session.AppendGameLog(_narrative.ForHealthPotionNoneLeft());
 			return HealthPotionUseOutcome.NoneLeft;
@@ -51,32 +50,16 @@ public sealed class PotionEffectApplicationService
 		var raw = healTotal < 0 ? 0 : healTotal;
 		var heal = raw <= missing ? raw : missing;
 
-		ConsumeOneFromStackAt(player.InventoryState.Items, instanceIndex);
+		if (!player.InventoryState.TryConsumeOne(potionItemId))
+		{
+			session.AppendGameLog(_narrative.ForHealthPotionNoneLeft());
+			return HealthPotionUseOutcome.NoneLeft;
+		}
 
 		player.CurrentHp += heal;
 		session.AppendGameLog(_narrative.ForUsedHealthPotion(heal, player.CurrentHp));
 
 		return HealthPotionUseOutcome.Applied;
-	}
-
-	private static int FindFirstStackIndex(List<ItemInstance> items, string definitionId)
-	{
-		for (var i = 0; i < items.Count; i++)
-		{
-			if (items[i].Definition.Id == definitionId)
-				return i;
-		}
-
-		return -1;
-	}
-
-	private static void ConsumeOneFromStackAt(List<ItemInstance> items, int index)
-	{
-		var inst = items[index];
-		if (inst.Quantity <= 1)
-			items.RemoveAt(index);
-		else
-			inst.Quantity--;
 	}
 
 	private int ComputeHealFromPotion(GameSessionState session, PotionDefinition potion)

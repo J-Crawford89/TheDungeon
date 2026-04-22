@@ -21,6 +21,15 @@ public sealed class GodotTrapDefinitionRepository : ITrapDefinitionRepository
 		{
 			new TrapDefinition
 			{
+				Id = TrapIds.Snare,
+				Name = "Snare trap",
+				DiscoverDc = 10,
+				DisarmDc = 12,
+				Damage = 2,
+				Effect = "Cord tightens around the ankle."
+			},
+			new TrapDefinition
+			{
 				Id = "rusty_needle",
 				Name = "Rusty needle trap",
 				DiscoverDc = 12,

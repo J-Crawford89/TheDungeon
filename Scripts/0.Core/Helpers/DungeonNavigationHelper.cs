@@ -49,6 +49,9 @@ public static class DungeonNavigationHelper
 	public static bool IsVerticalConnectionTraversable(FloorConnectionType connection) =>
 		IsVerticalConnectionTraversable(connection, FloorTraversalContext.StandardMovement);
 
+	/// <summary>
+	/// Vertical traversal using only connection kind (no per-room rope state). Holes require rope in context.
+	/// </summary>
 	public static bool IsVerticalConnectionTraversable(FloorConnectionType connection, in FloorTraversalContext context) =>
 		connection switch
 		{
@@ -56,6 +59,31 @@ public static class DungeonNavigationHelper
 			FloorConnectionType.Stairs => true,
 			FloorConnectionType.Ladder => true,
 			FloorConnectionType.Hole => context.HasRope,
+			_ => false
+		};
+
+	/// <summary>
+	/// Uses <see cref="FloorExitFeature.RopeAnchored"/> for holes when only one side is known (e.g. generating the floor below).
+	/// </summary>
+	public static bool IsVerticalConnectionTraversable(FloorExitFeature exit, in FloorTraversalContext context) =>
+		IsVerticalConnectionTraversable(exit, pairedOppositeExit: null, context);
+
+	/// <summary>
+	/// Full hole rule: passable if either opening has an anchored rope, or the player carries rope.
+	/// </summary>
+	public static bool IsVerticalConnectionTraversable(
+		FloorExitFeature exit,
+		FloorExitFeature? pairedOppositeExit,
+		in FloorTraversalContext context) =>
+		exit.ExitType switch
+		{
+			FloorConnectionType.None => false,
+			FloorConnectionType.Stairs => true,
+			FloorConnectionType.Ladder => true,
+			FloorConnectionType.Hole =>
+				exit.RopeAnchored ||
+				pairedOppositeExit?.RopeAnchored == true ||
+				context.HasRope,
 			_ => false
 		};
 }
