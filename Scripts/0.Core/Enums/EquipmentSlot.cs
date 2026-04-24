@@ -15,12 +15,14 @@ public enum EquipmentSlot
     Ring2,
     Trinket1,
     Trinket2,
-    Back1,
-    Back2,
+    Back,
+    Backpack,
     BeltSlot1,
     BeltSlot2,
     BeltSlot3,
     BeltSlot4,
-    WeaponMainHand,
-    WeaponOffHand
+    WeaponMainHand1,
+    WeaponOffHand1,
+    WeaponMainHand2,
+    WeaponOffHand2,
 }
