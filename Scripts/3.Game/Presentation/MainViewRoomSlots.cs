@@ -241,7 +241,7 @@ public static class MainViewRoomSlots
 
 	private static MainViewFeatureIconKind? MapTreasure(TreasureDefinition def)
 	{
-		if (def.Id == TreasureIds.CopperCoins || def.GrantKind == TreasureKind.Gold)
+		if (def.GrantKind == TreasureKind.Gold)
 			return MainViewFeatureIconKind.Coins;
 		if (def.Id == TreasureIds.HealthPotion || def.InventoryItemId == InventoryIds.HealthPotion)
 			return MainViewFeatureIconKind.HealthPotion;
