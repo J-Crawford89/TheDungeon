@@ -33,7 +33,7 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="MainUI" type="Control" unique_id=1749426459 node_paths=PackedStringArray("_mainViewPanel", "_characterPanel", "_commandPanel", "_logPanel", "_mapPanel", "_gameOverOverlay")]
+[node name="MainUI" type="Control" unique_id=1749426459 node_paths=PackedStringArray("_mainViewPanel", "_characterPanel", "_commandPanel", "_logPanel", "_mapPanel", "_gameOverOverlay", "_notebookOverlay")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -47,6 +47,7 @@ _commandPanel = NodePath("RootMargin/MainVBox/Row2/CommandPanel")
 _logPanel = NodePath("RootMargin/MainVBox/Row2/LogPanel")
 _mapPanel = NodePath("RootMargin/MainVBox/Row2/MapPanel")
 _gameOverOverlay = NodePath("GameOverOverlay")
+_notebookOverlay = NodePath("NotebookOverlay")
 
 [node name="RootMargin" type="MarginContainer" parent="." unique_id=864533212]
 layout_mode = 1
@@ -73,7 +74,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 3.0
 
-[node name="CharacterPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row1" unique_id=308191709 node_paths=PackedStringArray("_hpLabel", "_levelLabel", "_goldLabel", "_equipmentLabel", "_nameLabel", "_spLabel", "_defendActiveIndicator")]
+[node name="CharacterPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row1" unique_id=308191709 node_paths=PackedStringArray("_hpLabel", "_levelLabel", "_goldLabel", "_equipmentLabel", "_nameLabel", "_spLabel", "_defendActiveIndicator", "_inventoryButton")]
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("3_day7x")
@@ -84,6 +85,7 @@ _equipmentLabel = NodePath("CharacterMargin/CharacterContent/EquipmentLabel")
 _nameLabel = NodePath("CharacterMargin/CharacterContent/CharacterNameLabel")
 _spLabel = NodePath("CharacterMargin/CharacterContent/SpLabel")
 _defendActiveIndicator = NodePath("CharacterMargin/CharacterContent/DefendPlaceholder")
+_inventoryButton = NodePath("CharacterMargin/CharacterContent/CharacterButtonsHBox/InventoryButton")
 
 [node name="CharacterMargin" type="MarginContainer" parent="RootMargin/MainVBox/Row1/CharacterPanel" unique_id=974340699]
 layout_mode = 2

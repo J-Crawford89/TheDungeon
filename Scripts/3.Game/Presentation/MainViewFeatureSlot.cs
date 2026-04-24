@@ -5,7 +5,7 @@ public sealed class MainViewFeatureSlot
 {
 	public required string HighlightKey { get; init; }
 
-	/// <summary>Presentation key resolved to a texture in the Godot layer; see <see cref="MainViewPresentationIconKeys"/>.</summary>
+	/// <summary>Presentation key resolved to a texture in the Godot layer; see <see cref="PresentationIconKeys"/>.</summary>
 	public required string PresentationIconKey { get; init; }
 	/// <summary>When in target-selection mode, label under the icon (matches command button text).</summary>
 	public string? TargetingLabel { get; init; }

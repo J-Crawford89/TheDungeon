@@ -33,7 +33,7 @@ public static class MainViewRoomSlots
 						list.Add(new MainViewFeatureSlot
 						{
 							HighlightKey = $"{MonsterKeyPrefix}{livingMonsterOrdinal}",
-							PresentationIconKey = MainViewPresentationIconKeys.Monster(m.Definition.Id)
+							PresentationIconKey = PresentationIconKeys.MainView.Monster(m.Definition.Id)
 						});
 						livingMonsterOrdinal++;
 					}
@@ -49,7 +49,7 @@ public static class MainViewRoomSlots
 						list.Add(new MainViewFeatureSlot
 						{
 							HighlightKey = $"{TrapKeyPrefix}{tfOrd}:{ti}",
-							PresentationIconKey = MainViewPresentationIconKeys.Trap(tf.Traps[ti].Definition.Id)
+							PresentationIconKey = PresentationIconKeys.MainView.Trap(tf.Traps[ti].Definition.Id)
 						});
 					}
 
@@ -66,7 +66,7 @@ public static class MainViewRoomSlots
 						list.Add(new MainViewFeatureSlot
 						{
 							HighlightKey = $"{TreasureKeyPrefix}{tfOrd}:{ti}",
-							PresentationIconKey = MainViewPresentationIconKeys.ForTreasureInstance(item.Definition)
+							PresentationIconKey = PresentationIconKeys.MainView.ForTreasureInstance(item.Definition)
 						});
 					}
 
@@ -82,7 +82,7 @@ public static class MainViewRoomSlots
 						list.Add(new MainViewFeatureSlot
 						{
 							HighlightKey = $"{NpcKeyPrefix}{ord}:{ni}",
-							PresentationIconKey = MainViewPresentationIconKeys.Npc(nf.NPCs[ni].Definition.Id)
+							PresentationIconKey = PresentationIconKeys.MainView.Npc(nf.NPCs[ni].Definition.Id)
 						});
 					}
 
@@ -98,7 +98,7 @@ public static class MainViewRoomSlots
 						list.Add(new MainViewFeatureSlot
 						{
 							HighlightKey = $"{LoreKeyPrefix}{ord}:{li}",
-							PresentationIconKey = MainViewPresentationIconKeys.Lore(lf.Lore[li].Definition.Id)
+							PresentationIconKey = PresentationIconKeys.MainView.Lore(lf.Lore[li].Definition.Id)
 						});
 					}
 
@@ -106,12 +106,12 @@ public static class MainViewRoomSlots
 				}
 				case FloorExitFeature exit:
 				{
-					if (MainViewPresentationIconKeys.IsVerticalExitIcon(exit.ExitType))
+					if (PresentationIconKeys.MainView.IsVerticalExitIcon(exit.ExitType))
 					{
 						list.Add(new MainViewFeatureSlot
 						{
 							HighlightKey = $"{ExitKeyPrefix}{exitOrdinal}",
-							PresentationIconKey = MainViewPresentationIconKeys.Vertical(exit.ExitType)
+							PresentationIconKey = PresentationIconKeys.MainView.Vertical(exit.ExitType)
 						});
 						exitOrdinal++;
 					}

@@ -1,7 +1,13 @@
 [gd_scene format=3 uid="uid://mjjrcm6tl6bn"]
 
-[node name="InventorySlotControl" type="PanelContainer" unique_id=1688889402]
+[ext_resource type="Script" uid="uid://d38qok5fr0lqb" path="res://Scenes/Components/InventorySlotControl.cs" id="1_isc"]
+
+[node name="InventorySlotControl" type="PanelContainer" unique_id=1688889402 node_paths=PackedStringArray("_itemIcon", "_quantityLabel", "_selectionBorder")]
 custom_minimum_size = Vector2(35, 35)
+script = ExtResource("1_isc")
+_itemIcon = NodePath("SlotMargin/SlotRoot/ItemIcon")
+_quantityLabel = NodePath("SlotMargin/SlotRoot/QuantityLabel")
+_selectionBorder = NodePath("SlotMargin/SlotRoot/SelectionBorder")
 
 [node name="SlotMargin" type="MarginContainer" parent="." unique_id=1984250853]
 layout_mode = 2

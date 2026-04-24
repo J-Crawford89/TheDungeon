@@ -17,4 +17,7 @@ public partial class ItemResource : Resource
 	[Export] public bool CanSell { get; set; } = true;
 
 	[Export] public Texture2D? Icon { get; set; }
+
+	/// <summary>Inventory / notebook UI; when null, <see cref="Icon"/> is used.</summary>
+	[Export] public Texture2D? InventoryIcon { get; set; }
 }

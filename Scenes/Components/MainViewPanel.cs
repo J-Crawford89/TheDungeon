@@ -20,12 +20,12 @@ public partial class MainViewPanel : PanelContainer
 	[Export] private Texture2D _doorTexture = null!;
 	[Export] private Texture2D _passageTexture = null!;
 
-	private MainViewIconResolver? _iconResolver;
+	private IconResolver? _iconResolver;
 
 	private readonly Dictionary<string, Control> _slotRootByHighlightKey = new();
 	private IReadOnlyList<string>? _activeHighlightKeys;
 
-	public void BindIconResolver(MainViewIconResolver resolver) =>
+	public void BindIconResolver(IconResolver resolver) =>
 		_iconResolver = resolver;
 
 	public override void _Ready()

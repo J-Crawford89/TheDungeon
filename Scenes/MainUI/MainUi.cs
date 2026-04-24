@@ -10,6 +10,7 @@ public partial class MainUi : Control
 	[Export] private LogPanel _logPanel = null!;
 	[Export] private MapPanel _mapPanel = null!;
 	[Export] private GameOverOverlay _gameOverOverlay = null!;
+	[Export] private NotebookOverlay? _notebookOverlay;
 
 	public event Action? QuitRequested;
 	public event Action? ReturnToStartMenuRequested;
@@ -38,7 +39,7 @@ public partial class MainUi : Control
 			return;
 		}
 
-		_mainViewPanel.BindIconResolver(_runContext.MainViewIcons);
+		_mainViewPanel.BindIconResolver(_runContext.Icons);
 
 		var session = _runContext.Session;
 		var narrativeService = _runContext.NarrativeService;
@@ -85,6 +86,17 @@ public partial class MainUi : Control
 			_mapPanel);
 		_coordinator = coordinator;
 
+		if (_notebookOverlay == null)
+			GD.PushError("MainUi: assign the Notebook Overlay export to your NotebookOverlay node.");
+		else
+		{
+			_notebookOverlay.Bind(_runContext, f => _coordinator.RefreshHud(f));
+			_notebookOverlay.HideNotebook();
+			_notebookOverlay.ZIndex = 100;
+		}
+
+		_characterPanel.InventoryPressed += OnCharacterInventoryPressed;
+
 		_commandPanel.ForwardPressed += OnCommandForward;
 		_commandPanel.BackwardPressed += OnCommandBackward;
 		_commandPanel.LeftPressed += OnCommandLeft;
@@ -109,6 +121,11 @@ public partial class MainUi : Control
 
 		if (_debugToolsEnabled)
 			AddDebugRoomLootButton();
+	}
+
+	private void OnCharacterInventoryPressed()
+	{
+		_notebookOverlay?.ShowInventory();
 	}
 
 	private void AddDebugRoomLootButton()
@@ -191,6 +208,8 @@ public partial class MainUi : Control
 	{
 		if (GetViewport() != null)
 			GetViewport().SizeChanged -= OnViewportSizeChanged;
+
+		_characterPanel.InventoryPressed -= OnCharacterInventoryPressed;
 
 		if (_commandPanel != null)
 		{

@@ -5,17 +5,24 @@ public partial class LogEntryControl : PanelContainer
 {
 	private const string FontColorKey = "font_color";
 
-	[Export] private Label _label = null!;
+	[Export] private Label? _label;
 
 	public override void _Ready()
 	{
-		_label ??= GetNode<Label>("LogEntryMargin/LogEntry");
-		ConfigureLabel();
+		if (_label == null)
+			GD.PushWarning("LogEntryControl: assign the Label export.");
+		else
+			ConfigureLabel();
 	}
 
 	public void SetEntry(LogEntry entry)
 	{
-		_label ??= GetNode<Label>("LogEntryMargin/LogEntry");
+		if (_label == null)
+		{
+			GD.PushWarning("LogEntryControl: assign the Label export.");
+			return;
+		}
+
 		ConfigureLabel();
 		_label.Text = entry.Text;
 		_label.TooltipText = entry.DetailText ?? string.Empty;
@@ -24,6 +31,8 @@ public partial class LogEntryControl : PanelContainer
 
 	private void ConfigureLabel()
 	{
+		if (_label == null)
+			return;
 		_label.AutowrapMode = TextServer.AutowrapMode.WordSmart;
 		_label.SizeFlagsHorizontal = SizeFlags.ExpandFill;
 	}

@@ -3,7 +3,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public sealed class MainViewIconResolver
+public sealed class IconResolver
 {
 	private readonly MonsterResourceDatabase? _monsters;
 	private readonly ItemResourceDatabase? _items;
@@ -14,7 +14,7 @@ public sealed class MainViewIconResolver
 	private readonly MainViewTraversalIcons? _traversal;
 	private readonly HashSet<string> _warned = new(StringComparer.Ordinal);
 
-	public MainViewIconResolver(
+	public IconResolver(
 		MonsterResourceDatabase? monsters,
 		ItemResourceDatabase? items,
 		TreasureResourceDatabase? treasures,
@@ -37,13 +37,19 @@ public sealed class MainViewIconResolver
 		if (string.IsNullOrEmpty(key))
 			return null;
 
-		if (!key.StartsWith("mainview/", StringComparison.Ordinal))
+		var invPrefix = $"{PresentationIconKeys.Inventory.Root}/";
+		if (key.StartsWith(invPrefix, StringComparison.Ordinal))
+			return ResolveInventoryKey(key, invPrefix);
+
+		var mvPrefix = $"{PresentationIconKeys.MainView.Root}/";
+		if (!key.StartsWith(mvPrefix, StringComparison.Ordinal))
 		{
-			WarnOnce(key, "MainView icon key must start with 'mainview/'.");
+			WarnOnce(key,
+				$"Icon key must start with '{mvPrefix}' or '{invPrefix}'.");
 			return null;
 		}
 
-		var tail = key["mainview/".Length..];
+		var tail = key[mvPrefix.Length..];
 		var slash = tail.IndexOf('/');
 		if (slash < 0)
 		{
@@ -76,6 +82,52 @@ public sealed class MainViewIconResolver
 	{
 		WarnOnce(key, $"Unknown mainview icon category '{category}'.");
 		return null;
+	}
+
+	private Texture2D? ResolveInventoryKey(string key, string invPrefix)
+	{
+		var tail = key[invPrefix.Length..];
+		var slash = tail.IndexOf('/');
+		if (slash < 0)
+		{
+			WarnOnce(key, "Invalid inventory icon key (missing category).");
+			return null;
+		}
+
+		var category = tail[..slash];
+		var id = tail[(slash + 1)..];
+		if (id.Length == 0)
+		{
+			WarnOnce(key, "Invalid inventory icon key (empty id segment).");
+			return null;
+		}
+
+		return category switch
+		{
+			"item" => ResolveInventoryItem(key, id),
+			_ => UnknownInventoryCategory(key, category)
+		};
+	}
+
+	private Texture2D? UnknownInventoryCategory(string key, string category)
+	{
+		WarnOnce(key, $"Unknown inventory icon category '{category}'.");
+		return null;
+	}
+
+	private Texture2D? ResolveInventoryItem(string fullKey, string id)
+	{
+		var row = FindItemById(id);
+		if (row == null)
+		{
+			WarnOnce(fullKey, $"No ItemResource with Id '{id}'.");
+			return null;
+		}
+
+		var tex = row.InventoryIcon ?? row.Icon;
+		if (tex == null)
+			WarnOnce($"{fullKey}|nullicon", $"ItemResource '{id}' has no InventoryIcon or Icon assigned.");
+		return tex;
 	}
 
 	private Texture2D? ResolveMonster(string fullKey, string id)
@@ -164,7 +216,7 @@ public sealed class MainViewIconResolver
 
 	private Texture2D? ResolveVertical(string fullKey, string id)
 	{
-		if (!Enum.TryParse<FloorConnectionType>(id, out var t) || !MainViewPresentationIconKeys.IsVerticalExitIcon(t))
+		if (!Enum.TryParse<FloorConnectionType>(id, out var t) || !PresentationIconKeys.MainView.IsVerticalExitIcon(t))
 		{
 			WarnOnce(fullKey, $"Unrecognized vertical exit type '{id}'.");
 			return null;
@@ -277,6 +329,6 @@ public sealed class MainViewIconResolver
 	{
 		if (!_warned.Add(dedupeKey))
 			return;
-		GD.PushWarning($"MainViewIconResolver: {message} (key: {dedupeKey.Split('|')[0]})");
+		GD.PushWarning($"IconResolver: {message} (key: {dedupeKey.Split('|')[0]})");
 	}
 }

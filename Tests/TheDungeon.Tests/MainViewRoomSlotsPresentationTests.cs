@@ -20,7 +20,7 @@ public sealed class MainViewRoomSlotsPresentationTests
 
 		var slots = MainViewRoomSlots.Enumerate(room);
 		Assert.Single(slots);
-		Assert.Equal(MainViewPresentationIconKeys.Monster("rat"), slots[0].PresentationIconKey);
+		Assert.Equal(PresentationIconKeys.MainView.Monster("rat"), slots[0].PresentationIconKey);
 	}
 
 	[Fact]
@@ -48,7 +48,7 @@ public sealed class MainViewRoomSlotsPresentationTests
 
 		var slots = MainViewRoomSlots.Enumerate(room);
 		Assert.Single(slots);
-		Assert.Equal(MainViewPresentationIconKeys.Treasure("gold_pile"), slots[0].PresentationIconKey);
+		Assert.Equal(PresentationIconKeys.MainView.Treasure("gold_pile"), slots[0].PresentationIconKey);
 	}
 
 	[Fact]
@@ -76,7 +76,7 @@ public sealed class MainViewRoomSlotsPresentationTests
 
 		var slots = MainViewRoomSlots.Enumerate(room);
 		Assert.Single(slots);
-		Assert.Equal(MainViewPresentationIconKeys.Treasure("copper_coins"), slots[0].PresentationIconKey);
+		Assert.Equal(PresentationIconKeys.MainView.Treasure("copper_coins"), slots[0].PresentationIconKey);
 	}
 
 	[Fact]
@@ -103,6 +103,6 @@ public sealed class MainViewRoomSlotsPresentationTests
 
 		var slots = MainViewRoomSlots.Enumerate(room);
 		Assert.Single(slots);
-		Assert.Equal(MainViewPresentationIconKeys.Item("health_potion"), slots[0].PresentationIconKey);
+		Assert.Equal(PresentationIconKeys.MainView.Item("health_potion"), slots[0].PresentationIconKey);
 	}
 }

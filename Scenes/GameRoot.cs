@@ -187,7 +187,7 @@ public partial class GameRoot : Control
 		var explorationService = new ExplorationService(roomFeaturePopulation, combatService, inspectService, trapService);
 		var characterCreation = new CharacterCreationService(diceRollService, random, abilityRepo);
 
-		var mainViewIcons = new MainViewIconResolver(
+		var icons = new IconResolver(
 			MonsterDatabase,
 			ItemDatabase,
 			TreasureDatabase,
@@ -220,6 +220,6 @@ public partial class GameRoot : Control
 			trapService,
 			trapRepo,
 			treasureRepo,
-			mainViewIcons);
+			icons);
 	}
 }

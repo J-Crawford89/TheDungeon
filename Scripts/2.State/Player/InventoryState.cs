@@ -5,6 +5,9 @@ public sealed class InventoryState
 {
 	public List<ItemInstance> Items { get; set; } = new();
 
+	/// <summary>Worn or slotted gear; values may reference the same <see cref="ItemInstance"/> rows as <see cref="Items"/>.</summary>
+	public Dictionary<EquipmentSlot, ItemInstance?> EquippedBySlot { get; set; } = new();
+
 	/// <summary>Sums quantities for stacks whose <see cref="ItemInstance.Definition"/> id matches.</summary>
 	public int SumQuantityForDefinitionId(string itemDefinitionId)
 	{

@@ -1,19 +1,67 @@
 [gd_scene format=3 uid="uid://c6a5ctuwo5260"]
 
 [ext_resource type="PackedScene" uid="uid://mjjrcm6tl6bn" path="res://Scenes/Components/InventorySlotControl.tscn" id="1_pnsvd"]
+[ext_resource type="Script" uid="uid://d1ixrjsgvvdte" path="res://Scenes/Menus/NotebookOverlay.cs" id="2_nbov"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pnsvd"]
 
 [sub_resource type="Theme" id="Theme_k32b5"]
 default_font_size = 9
 
-[node name="NotebookOverlay" type="Control" unique_id=1051656938]
+[node name="NotebookOverlay" type="Control" unique_id=1051656938 node_paths=PackedStringArray("_closeButton", "_characterTabButton", "_inventoryTabButton", "_journalTabButton", "_mapsTabButton", "_bestiaryTabButton", "_optionsTabButton", "_dimBackground", "_backpackGrid", "_itemNameTitle", "_itemImage", "_itemDetailDescription", "_equipButton", "_unequipButton", "_useButton", "_dropButton", "_moveToBeltButton", "_compareButton", "_headSlotControl", "_neckSlotControl", "_torsoSlotControl", "_beltSlotControl", "_legsSlotControl", "_feetSlotControl", "_leftShoulderSlotControl", "_rightShoulderSlotControl", "_leftArmSlotControl", "_rightArmSlotControl", "_leftWristSlotControl", "_rightWristSlotControl", "_leftHandSlotControl", "_rightHandSlotControl", "_backSlotControl", "_backpackSlotControl", "_ring1SlotControl", "_ring2SlotControl", "_trinket1SlotControl", "_trinket2SlotControl", "_belt1SlotControl", "_belt2SlotControl", "_belt3SlotControl", "_belt4SlotControl", "_mainHand1SlotControl", "_offHand1SlotControl", "_mainHand2SlotControl", "_offHand2SlotControl")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("2_nbov")
+_closeButton = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader/CloseButton")
+_characterTabButton = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader/CharacterTabButton")
+_inventoryTabButton = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader/InventoryTabButton")
+_journalTabButton = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader/JournalTabButton")
+_mapsTabButton = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader/MapsTabButton")
+_bestiaryTabButton = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader/BestiaryTabButton")
+_optionsTabButton = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader/OptionsTabButton")
+_dimBackground = NodePath("DimBackground")
+_backpackGrid = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid")
+_itemNameTitle = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemNameTitle")
+_itemImage = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemImage")
+_itemDetailDescription = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox/ItemDetailDescription")
+_equipButton = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox/ItemDetailButtonsHBox/EquipButton")
+_unequipButton = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox/ItemDetailButtonsHBox/UnequipButton")
+_useButton = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox/ItemDetailButtonsHBox/UseButton")
+_dropButton = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox/ItemDetailButtonsHBox/DropButton")
+_moveToBeltButton = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox/ItemDetailButtonsHBox/MoveToBeltButton")
+_compareButton = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox/ItemDetailButtonsHBox/CompareButton")
+_headSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/HeadSlotControl")
+_neckSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/NeckSlotControl")
+_torsoSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/TorsoSlotControl")
+_beltSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/BeltSlotControl")
+_legsSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/LegsSlotControl")
+_feetSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/FeetSlotContrl")
+_leftShoulderSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/LeftShoulderSlotControl")
+_rightShoulderSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/RightShoulderSlotControl")
+_leftArmSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/LeftArmSlotControl")
+_rightArmSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/RightArmSlotControl")
+_leftWristSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/LeftWristSlotControl")
+_rightWristSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/RightWristSlotControl")
+_leftHandSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/LeftHandSlotControl")
+_rightHandSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/RightHandSlotControl")
+_backSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/BackSlotControl")
+_backpackSlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/BackpackSlotControl")
+_ring1SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/Ring1SlotControl")
+_ring2SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/Ring2SlotControl")
+_trinket1SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/Trinket1SlotControl")
+_trinket2SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/Trinket2SlotControl")
+_belt1SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/Belt1SlotControl")
+_belt2SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/Belt2SlotControl")
+_belt3SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/Belt3SlotControl")
+_belt4SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/Belt4SlotControl")
+_mainHand1SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/MainHand1SlotControl")
+_offHand1SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/OffHand1SlotControl")
+_mainHand2SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/MainHand2SlotControl")
+_offHand2SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/OffHand2SlotControl")
 
 [node name="DimBackground" type="ColorRect" parent="." unique_id=2082436519]
 layout_mode = 1
@@ -130,126 +178,108 @@ offset_left = 69.0
 offset_top = 113.0
 offset_right = 125.0
 offset_bottom = 213.0
-
 [node name="MainHand2SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=99632004 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 9.0
 offset_top = 113.0
 offset_right = 65.0
 offset_bottom = 213.0
-
 [node name="OffHand1SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=209798384 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 69.0
 offset_top = 9.0
 offset_right = 125.0
 offset_bottom = 109.0
-
 [node name="MainHand1SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=989009110 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 9.0
 offset_top = 9.0
 offset_right = 65.0
 offset_bottom = 109.0
-
 [node name="Belt4SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1533652626 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 126.0
 offset_top = 391.0
 offset_right = 161.0
 offset_bottom = 426.0
-
 [node name="Belt3SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=2010675108 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 87.0
 offset_top = 391.0
 offset_right = 122.0
 offset_bottom = 426.0
-
 [node name="Belt2SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1740430756 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 48.0
 offset_top = 391.0
 offset_right = 83.0
 offset_bottom = 426.0
-
 [node name="Belt1SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1489025499 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 9.0
 offset_top = 391.0
 offset_right = 44.0
 offset_bottom = 426.0
-
 [node name="Trinket2SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=502641081 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 375.0
 offset_top = 331.0
 offset_right = 417.0
 offset_bottom = 373.0
-
 [node name="Trinket1SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=615802458 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 421.0
 offset_top = 331.0
 offset_right = 463.0
 offset_bottom = 373.0
-
 [node name="Ring2SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=849589900 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 421.0
 offset_top = 285.0
 offset_right = 463.0
 offset_bottom = 327.0
-
 [node name="Ring1SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=967558290 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 375.0
 offset_top = 285.0
 offset_right = 417.0
 offset_bottom = 327.0
-
 [node name="BackpackSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1750653937 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 350.0
 offset_top = 9.0
 offset_right = 395.0
 offset_bottom = 54.0
-
 [node name="BackSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=296499029 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 399.0
 offset_top = 9.0
 offset_right = 463.0
 offset_bottom = 87.0
-
 [node name="RightHandSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=742576424 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 295.0
 offset_top = 222.0
 offset_right = 330.0
 offset_bottom = 257.0
-
 [node name="LeftHandSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=61788071 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 142.0
 offset_top = 222.0
 offset_right = 177.0
 offset_bottom = 257.0
-
 [node name="RightWristSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=851518819 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 295.0
 offset_top = 183.0
 offset_right = 330.0
 offset_bottom = 218.0
-
 [node name="LeftWristSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=981982543 instance=ExtResource("1_pnsvd")]
 layout_mode = 0
 offset_left = 142.0
 offset_top = 183.0
 offset_right = 177.0
 offset_bottom = 218.0
-
 [node name="RightArmSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1971328191 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(35, 58)
 layout_mode = 0
@@ -257,7 +287,6 @@ offset_left = 295.0
 offset_top = 121.0
 offset_right = 330.0
 offset_bottom = 179.0
-
 [node name="LeftArmSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1386966316 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(35, 58)
 layout_mode = 0
@@ -265,7 +294,6 @@ offset_left = 142.0
 offset_top = 121.0
 offset_right = 177.0
 offset_bottom = 179.0
-
 [node name="RightShoulderSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=293616603 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 0
@@ -273,7 +301,6 @@ offset_left = 273.0
 offset_top = 77.0
 offset_right = 313.0
 offset_bottom = 117.0
-
 [node name="LeftShoulderSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1434546258 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 0
@@ -281,7 +308,6 @@ offset_left = 160.0
 offset_top = 77.0
 offset_right = 200.0
 offset_bottom = 117.0
-
 [node name="FeetSlotContrl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=615348488 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(72, 50)
 layout_mode = 1
@@ -293,7 +319,6 @@ offset_top = 337.0
 offset_right = 36.0
 offset_bottom = 387.0
 grow_horizontal = 2
-
 [node name="LegsSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=447234279 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(75, 80)
 layout_mode = 1
@@ -305,7 +330,6 @@ offset_top = 253.0
 offset_right = 37.5
 offset_bottom = 333.0
 grow_horizontal = 2
-
 [node name="BeltSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=75396036 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(46, 35)
 layout_mode = 1
@@ -317,7 +341,6 @@ offset_top = 214.0
 offset_right = 23.0
 offset_bottom = 249.0
 grow_horizontal = 2
-
 [node name="TorsoSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1653444264 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(86, 86)
 layout_mode = 1
@@ -329,7 +352,6 @@ offset_top = 124.0
 offset_right = 43.0
 offset_bottom = 210.0
 grow_horizontal = 2
-
 [node name="NeckSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=2002860211 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(46, 35)
 layout_mode = 1
@@ -341,7 +363,6 @@ offset_top = 85.0
 offset_right = 23.0
 offset_bottom = 120.0
 grow_horizontal = 2
-
 [node name="HeadSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=658845203 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(65, 65)
 layout_mode = 1
@@ -349,7 +370,6 @@ offset_left = 203.5
 offset_top = 16.0
 offset_right = 268.5
 offset_bottom = 81.0
-
 [node name="InventoryVBox" type="VBoxContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox" unique_id=1895450649]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -392,7 +412,7 @@ theme_override_constants/margin_left = 4
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ItemDetailDescripition" type="RichTextLabel" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox" unique_id=1004303942]
+[node name="ItemDetailDescription" type="RichTextLabel" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox" unique_id=1004303942]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_font_sizes/normal_font_size = 14
@@ -467,71 +487,54 @@ columns = 6
 [node name="InventorySlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=158142348 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl2" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1864251972 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl3" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=214974791 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl4" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1892972226 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl5" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1343422773 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl6" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1159323731 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl7" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=492431306 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl8" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=728254206 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl9" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1809448808 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl10" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1444155962 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl11" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=77411081 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl12" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=137791962 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl13" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1521547165 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl14" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1054939544 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl15" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=685610548 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl16" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=206366494 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl17" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=401495042 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-
 [node name="InventorySlotControl18" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=209543119 instance=ExtResource("1_pnsvd")]
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2

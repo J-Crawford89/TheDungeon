@@ -12,6 +12,25 @@ public partial class CharacterPanel : PanelContainer
 	[Export] private Label _nameLabel = null!;
 	[Export] private Label? _spLabel;
 	[Export] private Control? _defendActiveIndicator;
+	[Export] private Button? _inventoryButton;
+
+	public event Action? InventoryPressed;
+
+	public override void _Ready()
+	{
+		if (_inventoryButton == null)
+			GD.PushWarning("CharacterPanel: assign Inventory Button export to open the inventory notebook.");
+		else
+			_inventoryButton.Pressed += OnInventoryButtonPressed;
+	}
+
+	public override void _ExitTree()
+	{
+		if (_inventoryButton != null)
+			_inventoryButton.Pressed -= OnInventoryButtonPressed;
+	}
+
+	private void OnInventoryButtonPressed() => InventoryPressed?.Invoke();
 
 	public void Render(PlayerState player, GameSessionState? session = null)
 	{
