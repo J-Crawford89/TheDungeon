@@ -16,22 +16,25 @@ public partial class MainUi : Control
 
 	private GameRunContext? _runContext;
 	private bool _captureDebugDiagnostics;
+	private bool _debugToolsEnabled;
+	private Button? _debugRoomLootButton;
 
 	private ExplorationUiPresenter _explorationPresenter = null!;
 	private CombatUiPresenter _combatPresenter = null!;
 	private GameUiCoordinator _coordinator = null!;
 
-	public void Initialize(GameRunContext runContext, bool captureDebugDiagnostics)
+	public void Initialize(GameRunContext runContext, bool captureDebugDiagnostics, bool debugToolsEnabled = false)
 	{
 		_runContext = runContext;
 		_captureDebugDiagnostics = captureDebugDiagnostics;
+		_debugToolsEnabled = debugToolsEnabled;
 	}
 
 	public override void _Ready()
 	{
 		if (_runContext == null)
 		{
-			GD.PushError("MainUi.Initialize(GameRunContext, bool) must be called before the node enters the tree.");
+			GD.PushError("MainUi.Initialize(GameRunContext, ...) must be called before the node enters the tree.");
 			return;
 		}
 
@@ -101,6 +104,37 @@ public partial class MainUi : Control
 		_gameOverOverlay.QuitPressed += OnGameOverQuitPressed;
 
 		_explorationPresenter.BootstrapDungeon();
+
+		if (_debugToolsEnabled)
+			AddDebugRoomLootButton();
+	}
+
+	private void AddDebugRoomLootButton()
+	{
+		var b = new Button { Text = "Debug: +room loot" };
+		b.Name = "DebugRoomLootButton";
+		b.TooltipText = "Adds two revealed snares and two revealed health potion piles to the current room (debug builds only).";
+		b.ZIndex = 100;
+		b.SetAnchorsPreset(LayoutPreset.TopLeft);
+		b.OffsetLeft = 12;
+		b.OffsetRight = 220;
+		b.OffsetTop = 12;
+		b.OffsetBottom = 44;
+		b.Pressed += OnDebugRoomLootPressed;
+		AddChild(b);
+		_debugRoomLootButton = b;
+	}
+
+	private void OnDebugRoomLootPressed()
+	{
+		if (_runContext == null)
+			return;
+		var session = _runContext.Session;
+		if (!DebugRoomLootSpawn.TrySpawnSnaresAndPotions(session, _runContext.TrapDefinitions, _runContext.TreasureDefinitions))
+			return;
+		session.AppendGameLog("[Debug] Added two snares and two health potion piles to the current room.");
+		_coordinator.RefreshHud(UiRefreshFlags.All);
+		UpdateGameOverPanel();
 	}
 
 	private void OnViewportSizeChanged()
@@ -180,6 +214,12 @@ public partial class MainUi : Control
 		{
 			_gameOverOverlay.ReturnToStartMenuPressed -= OnGameOverReturnToMenu;
 			_gameOverOverlay.QuitPressed -= OnGameOverQuitPressed;
+		}
+
+		if (_debugRoomLootButton != null)
+		{
+			_debugRoomLootButton.Pressed -= OnDebugRoomLootPressed;
+			_debugRoomLootButton = null;
 		}
 	}
 }

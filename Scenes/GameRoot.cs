@@ -26,7 +26,7 @@ public partial class GameRoot : Control
 	[Export] public bool CaptureDebugDiagnostics { get; set; }
 	[Export] public bool DebugToolsEnabled { get; set; }
 
-    private GameRunContext? _activeRunContext;
+	private GameRunContext? _activeRunContext;
 
 	public override void _Ready()
 	{
@@ -126,7 +126,7 @@ public partial class GameRoot : Control
 		ClearScreenHost();
 
 		var mainUi = _mainUiScene.Instantiate<MainUi>();
-		mainUi.Initialize(_activeRunContext, CaptureDebugDiagnostics);
+		mainUi.Initialize(_activeRunContext, CaptureDebugDiagnostics, DebugToolsEnabled);
 		mainUi.QuitRequested += HandleQuitGame;
 		mainUi.ReturnToStartMenuRequested += HandleReturnToStartMenu;
 		_screenHost.AddChild(mainUi);
@@ -206,6 +206,8 @@ public partial class GameRoot : Control
 			abilityRepo,
 			itemRepo,
 			potionEffectApplicationService,
-			trapService);
+			trapService,
+			trapRepo,
+			treasureRepo);
 	}
 }

@@ -38,6 +38,7 @@ CharacterBackgroundDatabase = ExtResource("12_hpb24")
 AbilityDatabase = ExtResource("13_lpuel")
 ItemDatabase = ExtResource("14_hpb24")
 CaptureDebugDiagnostics = true
+DebugToolsEnabled = true
 
 [node name="ScreenHost" type="Control" parent="." unique_id=1500174924]
 layout_mode = 1
