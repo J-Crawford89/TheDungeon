@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://c027v8qr0q08n" path="res://Scenes/MainUI/MapPanel.cs" id="5_ksueo"]
 [ext_resource type="Script" uid="uid://t7duod6dlknd" path="res://Scenes/Components/MapView.cs" id="6_jr3w4"]
 [ext_resource type="PackedScene" uid="uid://btjn7k3t3388k" path="res://Scenes/Components/LogEntryControl.tscn" id="8_jr3w4"]
+[ext_resource type="PackedScene" uid="uid://c6a5ctuwo5260" path="res://Scenes/Menus/NotebookOverlay.tscn" id="10_fo6o3"]
 [ext_resource type="Script" uid="uid://dhxmgcg1n3vmh" path="res://Scenes/MainUI/GameOverOverlay.cs" id="14_pl31g"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4u3ra"]
@@ -128,6 +129,23 @@ text = "Gold: 0"
 layout_mode = 2
 text = "DEFENDING PLACEHOLDER"
 
+[node name="PanelSpacer" type="Control" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=577786300]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CharacterButtonsHBox" type="HBoxContainer" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1240707138]
+layout_mode = 2
+
+[node name="CharacterButton" type="Button" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent/CharacterButtonsHBox" unique_id=471837620]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Character"
+
+[node name="InventoryButton" type="Button" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent/CharacterButtonsHBox" unique_id=1242204879]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Inventory"
+
 [node name="Row2" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=1152348812]
 layout_mode = 2
 size_flags_vertical = 3
@@ -169,7 +187,7 @@ horizontal_alignment = 1
 
 [node name="ButtonGrid" type="GridContainer" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent" unique_id=1234738609]
 layout_mode = 2
-columns = 2
+columns = 4
 
 [node name="ForwardButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=321784280]
 layout_mode = 2
@@ -362,3 +380,7 @@ theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 36
 theme_override_styles/normal = SubResource("StyleBoxFlat_krt8x")
 text = "Quit Game"
+
+[node name="NotebookOverlay" parent="." unique_id=1051656938 instance=ExtResource("10_fo6o3")]
+visible = false
+layout_mode = 1

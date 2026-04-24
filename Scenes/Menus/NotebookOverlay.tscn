@@ -1,0 +1,537 @@
+[gd_scene format=3 uid="uid://c6a5ctuwo5260"]
+
+[ext_resource type="PackedScene" uid="uid://mjjrcm6tl6bn" path="res://Scenes/Components/InventorySlotControl.tscn" id="1_pnsvd"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pnsvd"]
+
+[sub_resource type="Theme" id="Theme_k32b5"]
+default_font_size = 9
+
+[node name="NotebookOverlay" type="Control" unique_id=1051656938]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DimBackground" type="ColorRect" parent="." unique_id=2082436519]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.654902)
+
+[node name="NotebookMargin" type="MarginContainer" parent="." unique_id=1226160460]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 80
+theme_override_constants/margin_top = 60
+theme_override_constants/margin_right = 80
+theme_override_constants/margin_bottom = 60
+
+[node name="NotebookPanel" type="PanelContainer" parent="NotebookMargin" unique_id=1780224547]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_pnsvd")
+
+[node name="NotebookRootMargin" type="MarginContainer" parent="NotebookMargin/NotebookPanel" unique_id=2066505690]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="NotebookRoot" type="VBoxContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin" unique_id=759742724]
+layout_mode = 2
+
+[node name="NotebookHeader" type="HBoxContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot" unique_id=139502738]
+layout_mode = 2
+
+[node name="CharacterTabButton" type="Button" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader" unique_id=1467714146]
+layout_mode = 2
+text = "Character"
+
+[node name="InventoryTabButton" type="Button" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader" unique_id=1913594187]
+layout_mode = 2
+text = "Inventory"
+
+[node name="JournalTabButton" type="Button" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader" unique_id=1220794993]
+layout_mode = 2
+text = "Journal"
+
+[node name="MapsTabButton" type="Button" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader" unique_id=1407887339]
+layout_mode = 2
+text = "Maps"
+
+[node name="BestiaryTabButton" type="Button" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader" unique_id=1894534783]
+layout_mode = 2
+text = "Bestiary"
+
+[node name="OptionsTabButton" type="Button" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader" unique_id=1708201781]
+layout_mode = 2
+text = "Options"
+
+[node name="HeaderSpacer" type="Control" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader" unique_id=1450314432]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CloseButton" type="Button" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/NotebookHeader" unique_id=1302638970]
+layout_mode = 2
+text = "X"
+
+[node name="PageContainer" type="PanelContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot" unique_id=1071735014]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="InventoryPageMargin" type="MarginContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer" unique_id=1826752052]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="InventoryHBox" type="HBoxContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin" unique_id=1767317241]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="EquippedPanel" type="VBoxContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox" unique_id=406215050]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="EquippedMargin" type="MarginContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel" unique_id=1050697070]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="EquippedRoot" type="VBoxContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin" unique_id=683792932]
+layout_mode = 2
+
+[node name="EquippedTitle" type="Label" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot" unique_id=288738272]
+layout_mode = 2
+text = "Equipped Items"
+horizontal_alignment = 1
+
+[node name="EquipmentSlotArea" type="Control" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot" unique_id=40223904]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OffHand2SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1688889402 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 69.0
+offset_top = 113.0
+offset_right = 125.0
+offset_bottom = 213.0
+
+[node name="MainHand2SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=99632004 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 113.0
+offset_right = 65.0
+offset_bottom = 213.0
+
+[node name="OffHand1SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=209798384 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 69.0
+offset_top = 9.0
+offset_right = 125.0
+offset_bottom = 109.0
+
+[node name="MainHand1SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=989009110 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 9.0
+offset_right = 65.0
+offset_bottom = 109.0
+
+[node name="Belt4SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1533652626 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 126.0
+offset_top = 391.0
+offset_right = 161.0
+offset_bottom = 426.0
+
+[node name="Belt3SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=2010675108 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 87.0
+offset_top = 391.0
+offset_right = 122.0
+offset_bottom = 426.0
+
+[node name="Belt2SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1740430756 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 391.0
+offset_right = 83.0
+offset_bottom = 426.0
+
+[node name="Belt1SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1489025499 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 391.0
+offset_right = 44.0
+offset_bottom = 426.0
+
+[node name="Trinket2SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=502641081 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 375.0
+offset_top = 331.0
+offset_right = 417.0
+offset_bottom = 373.0
+
+[node name="Trinket1SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=615802458 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 421.0
+offset_top = 331.0
+offset_right = 463.0
+offset_bottom = 373.0
+
+[node name="Ring2SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=849589900 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 421.0
+offset_top = 285.0
+offset_right = 463.0
+offset_bottom = 327.0
+
+[node name="Ring1SlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=967558290 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 375.0
+offset_top = 285.0
+offset_right = 417.0
+offset_bottom = 327.0
+
+[node name="BackpackSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1750653937 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 350.0
+offset_top = 9.0
+offset_right = 395.0
+offset_bottom = 54.0
+
+[node name="BackSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=296499029 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 399.0
+offset_top = 9.0
+offset_right = 463.0
+offset_bottom = 87.0
+
+[node name="RightHandSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=742576424 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 295.0
+offset_top = 222.0
+offset_right = 330.0
+offset_bottom = 257.0
+
+[node name="LeftHandSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=61788071 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 142.0
+offset_top = 222.0
+offset_right = 177.0
+offset_bottom = 257.0
+
+[node name="RightWristSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=851518819 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 295.0
+offset_top = 183.0
+offset_right = 330.0
+offset_bottom = 218.0
+
+[node name="LeftWristSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=981982543 instance=ExtResource("1_pnsvd")]
+layout_mode = 0
+offset_left = 142.0
+offset_top = 183.0
+offset_right = 177.0
+offset_bottom = 218.0
+
+[node name="RightArmSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1971328191 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(35, 58)
+layout_mode = 0
+offset_left = 295.0
+offset_top = 121.0
+offset_right = 330.0
+offset_bottom = 179.0
+
+[node name="LeftArmSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1386966316 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(35, 58)
+layout_mode = 0
+offset_left = 142.0
+offset_top = 121.0
+offset_right = 177.0
+offset_bottom = 179.0
+
+[node name="RightShoulderSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=293616603 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 0
+offset_left = 273.0
+offset_top = 77.0
+offset_right = 313.0
+offset_bottom = 117.0
+
+[node name="LeftShoulderSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1434546258 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 0
+offset_left = 160.0
+offset_top = 77.0
+offset_right = 200.0
+offset_bottom = 117.0
+
+[node name="FeetSlotContrl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=615348488 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(72, 50)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -36.0
+offset_top = 337.0
+offset_right = 36.0
+offset_bottom = 387.0
+grow_horizontal = 2
+
+[node name="LegsSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=447234279 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(75, 80)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -37.5
+offset_top = 253.0
+offset_right = 37.5
+offset_bottom = 333.0
+grow_horizontal = 2
+
+[node name="BeltSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=75396036 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(46, 35)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -23.0
+offset_top = 214.0
+offset_right = 23.0
+offset_bottom = 249.0
+grow_horizontal = 2
+
+[node name="TorsoSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=1653444264 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(86, 86)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -43.0
+offset_top = 124.0
+offset_right = 43.0
+offset_bottom = 210.0
+grow_horizontal = 2
+
+[node name="NeckSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=2002860211 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(46, 35)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -23.0
+offset_top = 85.0
+offset_right = 23.0
+offset_bottom = 120.0
+grow_horizontal = 2
+
+[node name="HeadSlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea" unique_id=658845203 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(65, 65)
+layout_mode = 1
+offset_left = 203.5
+offset_top = 16.0
+offset_right = 268.5
+offset_bottom = 81.0
+
+[node name="InventoryVBox" type="VBoxContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox" unique_id=1895450649]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ItemDetailPanel" type="PanelContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox" unique_id=1026848597]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ItemDetailMargin" type="MarginContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel" unique_id=1527212079]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="ItemDetailRoot" type="VBoxContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin" unique_id=153309593]
+layout_mode = 2
+
+[node name="ItemNameTitle" type="Label" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot" unique_id=912693747]
+layout_mode = 2
+text = "No Item Selected"
+horizontal_alignment = 1
+
+[node name="ItemDetailHBox" type="HBoxContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot" unique_id=1655004643]
+layout_mode = 2
+
+[node name="ItemImage" type="TextureRect" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox" unique_id=70324193]
+custom_minimum_size = Vector2(197, 197)
+layout_mode = 2
+expand_mode = 3
+stretch_mode = 5
+
+[node name="ItemDetailVBoxMargin" type="MarginContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox" unique_id=748241705]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 4
+
+[node name="ItemDetailVBox" type="VBoxContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin" unique_id=1989856449]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ItemDetailDescripition" type="RichTextLabel" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox" unique_id=1004303942]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 14
+bbcode_enabled = true
+text = "Select an item to view it's description"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ItemDetailButtonsHBox" type="HBoxContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox" unique_id=1324076230]
+layout_mode = 2
+
+[node name="EquipButton" type="Button" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox/ItemDetailButtonsHBox" unique_id=1127786793]
+layout_mode = 2
+theme = SubResource("Theme_k32b5")
+text = "Equip"
+
+[node name="UnequipButton" type="Button" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox/ItemDetailButtonsHBox" unique_id=64401740]
+layout_mode = 2
+theme = SubResource("Theme_k32b5")
+text = "Unequip"
+
+[node name="UseButton" type="Button" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox/ItemDetailButtonsHBox" unique_id=345808167]
+layout_mode = 2
+theme = SubResource("Theme_k32b5")
+text = "Use"
+
+[node name="DropButton" type="Button" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox/ItemDetailButtonsHBox" unique_id=1755720875]
+layout_mode = 2
+theme = SubResource("Theme_k32b5")
+text = "Drop"
+
+[node name="MoveToBeltButton" type="Button" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox/ItemDetailButtonsHBox" unique_id=480381737]
+layout_mode = 2
+theme = SubResource("Theme_k32b5")
+text = "Move to Belt"
+
+[node name="CompareButton" type="Button" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox/ItemDetailVBoxMargin/ItemDetailVBox/ItemDetailButtonsHBox" unique_id=735458483]
+layout_mode = 2
+theme = SubResource("Theme_k32b5")
+text = "Compare"
+
+[node name="BackpackPanel" type="PanelContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox" unique_id=1857592724]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackpackMargin" type="MarginContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel" unique_id=1000690979]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="BackpackRoot" type="VBoxContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin" unique_id=750339362]
+layout_mode = 2
+
+[node name="BackpackTitle" type="Label" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot" unique_id=1165681578]
+layout_mode = 2
+text = "Backpack"
+horizontal_alignment = 1
+
+[node name="BackpackCenterContainer" type="CenterContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot" unique_id=271892771]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackpackGrid" type="GridContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer" unique_id=1868202149]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 6
+
+[node name="InventorySlotControl" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=158142348 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl2" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1864251972 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl3" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=214974791 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl4" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1892972226 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl5" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1343422773 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl6" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1159323731 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl7" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=492431306 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl8" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=728254206 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl9" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1809448808 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl10" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1444155962 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl11" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=77411081 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl12" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=137791962 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl13" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1521547165 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl14" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=1054939544 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl15" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=685610548 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl16" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=206366494 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl17" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=401495042 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+
+[node name="InventorySlotControl18" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/BackpackPanel/BackpackMargin/BackpackRoot/BackpackCenterContainer/BackpackGrid" unique_id=209543119 instance=ExtResource("1_pnsvd")]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2

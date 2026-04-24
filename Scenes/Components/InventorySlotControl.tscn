@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://mjjrcm6tl6bn"]
+
+[node name="InventorySlotControl" type="PanelContainer" unique_id=1688889402]
+custom_minimum_size = Vector2(35, 35)
+
+[node name="SlotMargin" type="MarginContainer" parent="." unique_id=1984250853]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="SlotRoot" type="Control" parent="SlotMargin" unique_id=604672375]
+layout_mode = 2
+
+[node name="ItemIcon" type="TextureRect" parent="SlotMargin/SlotRoot" unique_id=664836349]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 3
+stretch_mode = 5
+
+[node name="QuantityLabel" type="Label" parent="SlotMargin/SlotRoot" unique_id=1494070715]
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -29.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 14
+text = "1"
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="SelectionBorder" type="Panel" parent="SlotMargin/SlotRoot" unique_id=410898714]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
