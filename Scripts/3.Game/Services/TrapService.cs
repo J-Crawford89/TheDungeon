@@ -26,7 +26,7 @@ public sealed class TrapService
 	{
 		if (session.Dungeon.CurrentFloor == null || session.Dungeon.CurrentRoom is not { } room)
 			return false;
-		return RoomFeatureHelper.GetFirstTrapFeatureOrdered(room) != null;
+		return room.Features.OfType<TrapFeature>().Any(tf => tf.Traps.Any(t => t.IsRevealed));
 	}
 
 	/// <summary>When the player leaves a room, every armed trap may fire unless this is a no-trip backtrack move.</summary>
@@ -93,6 +93,29 @@ public sealed class TrapService
 			trapFeature.Traps.FirstOrDefault(t => t.IsRevealed);
 
 		if (trapInstance == null)
+			return new TrapDisarmResult { ResultCode = TrapDisarmResultCode.NoTrapPresent };
+
+		return TryDisarm(session, room, trapFeature, trapInstance);
+	}
+
+	public TrapDisarmResult TryDisarmAtSlot(GameSessionState session, int trapFeatureOrdinal, int trapIndexInFeature)
+	{
+		if (session.Dungeon.CurrentFloor == null)
+			return new TrapDisarmResult { ResultCode = TrapDisarmResultCode.NoCurrentFloor };
+
+		if (session.Dungeon.CurrentRoom is not { } room)
+			return new TrapDisarmResult { ResultCode = TrapDisarmResultCode.NoCurrentRoom };
+
+		if (!MainViewRoomSlots.TryGetTrapSlot(room, trapFeatureOrdinal, trapIndexInFeature, out var trapFeature, out var trapInstance) ||
+		    trapFeature == null || trapInstance == null)
+			return new TrapDisarmResult { ResultCode = TrapDisarmResultCode.NoTrapPresent };
+
+		return TryDisarm(session, room, trapFeature, trapInstance);
+	}
+
+	public TrapDisarmResult TryDisarm(GameSessionState session, DungeonRoom room, TrapFeature trapFeature, TrapInstance trapInstance)
+	{
+		if (!trapFeature.Traps.Contains(trapInstance))
 			return new TrapDisarmResult { ResultCode = TrapDisarmResultCode.NoTrapPresent };
 
 		var trapDef = trapInstance.Definition;

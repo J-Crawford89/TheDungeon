@@ -42,19 +42,33 @@ public sealed class ExplorationUiPresenter
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command);
 	}
 
-	public void OnDisarmPressed()
+	public void OnDisarmWithTarget(TargetPayload payload)
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
 			return;
-		_trapService.TryDisarm(_session);
+		if (payload.Kind != TargetPayloadKind.DisarmTrapInstance)
+			return;
+		_trapService.TryDisarmAtSlot(_session, payload.TrapFeatureOrdinal, payload.TrapIndexInFeature);
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
 
-	public void OnTakePressed()
+	public void OnTakeWithTarget(TargetPayload payload)
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
 			return;
-		_treasurePickup.TakeAllFromCurrentRoom(_session);
+		switch (payload.Kind)
+		{
+			case TargetPayloadKind.TakeTreasureItem:
+				_treasurePickup.TakeTreasureInstanceAtSlot(_session, payload.TreasureFeatureOrdinal,
+					payload.TreasureItemIndexInFeature);
+				break;
+			case TargetPayloadKind.TakeAllEligibleTreasure:
+				_treasurePickup.TakeAllEligibleFromCurrentRoom(_session);
+				break;
+			default:
+				return;
+		}
+
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
 

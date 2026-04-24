@@ -24,8 +24,9 @@ public partial class GameRoot : Control
 	[Export] public ItemResourceDatabase? ItemDatabase { get; set; }
 
 	[Export] public bool CaptureDebugDiagnostics { get; set; }
+	[Export] public bool DebugToolsEnabled { get; set; }
 
-	private GameRunContext? _activeRunContext;
+    private GameRunContext? _activeRunContext;
 
 	public override void _Ready()
 	{

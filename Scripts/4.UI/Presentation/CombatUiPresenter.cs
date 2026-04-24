@@ -13,13 +13,13 @@ public sealed class CombatUiPresenter
 		_refreshHud = refreshHud;
 	}
 
-	public void OnAttackPressed()
+	public void OnAttackWithTarget(int livingMonsterOrdinal)
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		if (!_combatService.IsAwaitingPlayerAction(_session))
 			return;
-		_combatService.ExecutePlayerAttack(_session);
+		_combatService.ExecutePlayerAttack(_session, livingMonsterOrdinal);
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
 	}
 
@@ -33,13 +33,13 @@ public sealed class CombatUiPresenter
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
 	}
 
-	public void OnTakePressed()
+	public void OnTakeWithTarget(TargetPayload payload)
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		if (!_combatService.IsAwaitingPlayerAction(_session))
 			return;
-		_combatService.ExecutePlayerTakeTreasure(_session);
+		_combatService.ExecutePlayerTakeTreasure(_session, payload);
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
 	}
 
@@ -63,13 +63,13 @@ public sealed class CombatUiPresenter
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
 	}
 
-	public void OnDisarmPressed()
+	public void OnDisarmWithTarget(TargetPayload payload)
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		if (!_combatService.IsAwaitingPlayerAction(_session))
 			return;
-		_combatService.ExecutePlayerDisarmTrap(_session);
+		_combatService.ExecutePlayerDisarmTrap(_session, payload);
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
 	}
 }

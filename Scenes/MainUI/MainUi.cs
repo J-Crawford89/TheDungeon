@@ -70,6 +70,7 @@ public partial class MainUi : Control
 		coordinator = new GameUiCoordinator(
 			session,
 			combatService,
+			narrativeService,
 			_explorationPresenter,
 			_combatPresenter,
 			_mainViewPanel,
@@ -92,6 +93,9 @@ public partial class MainUi : Control
 		_commandPanel.PotionPressed += OnCommandPotion;
 		_commandPanel.DefendPressed += OnCommandDefend;
 		_commandPanel.DisarmPressed += OnCommandDisarm;
+		_commandPanel.TargetSelectCancelPressed += OnTargetSelectCancel;
+		_commandPanel.TargetSelectPicked += OnTargetSelectPicked;
+		_commandPanel.TargetSelectHoverChanged += OnTargetSelectHoverChanged;
 
 		_gameOverOverlay.ReturnToStartMenuPressed += OnGameOverReturnToMenu;
 		_gameOverOverlay.QuitPressed += OnGameOverQuitPressed;
@@ -117,6 +121,12 @@ public partial class MainUi : Control
 	private void OnCommandPotion() => _coordinator.OnPotionPressed();
 	private void OnCommandDefend() => _coordinator.OnDefendPressed();
 	private void OnCommandDisarm() => _coordinator.OnDisarmPressed();
+
+	private void OnTargetSelectCancel() => _coordinator.OnTargetSelectionCanceled();
+
+	private void OnTargetSelectPicked(int index) => _coordinator.OnTargetSelectionPicked(index);
+
+	private void OnTargetSelectHoverChanged(int? index) => _coordinator.OnTargetSelectionHoverChanged(index);
 
 	private void OnGameOverReturnToMenu() => ReturnToStartMenu();
 
@@ -161,6 +171,9 @@ public partial class MainUi : Control
 			_commandPanel.PotionPressed -= OnCommandPotion;
 			_commandPanel.DefendPressed -= OnCommandDefend;
 			_commandPanel.DisarmPressed -= OnCommandDisarm;
+			_commandPanel.TargetSelectCancelPressed -= OnTargetSelectCancel;
+			_commandPanel.TargetSelectPicked -= OnTargetSelectPicked;
+			_commandPanel.TargetSelectHoverChanged -= OnTargetSelectHoverChanged;
 		}
 
 		if (_gameOverOverlay != null)

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public partial class MainViewPanel : PanelContainer
 {
+	private const float HighlightModulate = 1.35f;
+
 	[Export] private Control _viewArea = null!;
 	[Export] private Control _stage = null!;
 
@@ -30,6 +32,9 @@ public partial class MainViewPanel : PanelContainer
 	[Export] private Texture2D _holeTexture = null!;
 	[Export] private Texture2D _ladderTexture = null!;
 
+	private readonly Dictionary<string, Control> _slotRootByHighlightKey = new();
+	private IReadOnlyList<string>? _activeHighlightKeys;
+
 	public override void _Ready()
 	{
 		if (_backgroundRect != null)
@@ -54,6 +59,7 @@ public partial class MainViewPanel : PanelContainer
 
 	public void Render(MainViewRenderModel model)
 	{
+		_activeHighlightKeys = null;
 		SetTitle(model.Title);
 		ApplyWall(_leftWallRect, model.LeftConnection);
 		ApplyWall(_backWallRect, model.FrontConnection);
@@ -62,12 +68,46 @@ public partial class MainViewPanel : PanelContainer
 		ClearFeatures();
 		if (_featureContainer == null)
 			return;
-		foreach (var kind in model.FeatureIcons)
+		foreach (var slot in model.FeatureSlots)
+			AddFeatureSlot(slot);
+		ApplyHighlightVisuals();
+	}
+
+	/// <summary>Highlight one main-view slot (or clear when null).</summary>
+	public void SetTargetingHighlight(string? highlightKey) =>
+		SetTargetingHighlight(highlightKey == null ? null : new[] { highlightKey });
+
+	/// <summary>Highlight multiple slots (e.g. Take All hover). Pass null or empty to clear.</summary>
+	public void SetTargetingHighlight(IReadOnlyList<string>? highlightKeys)
+	{
+		_activeHighlightKeys = highlightKeys is { Count: > 0 } ? highlightKeys : null;
+		ApplyHighlightVisuals();
+	}
+
+	public void ClearTargetingHighlight() => SetTargetingHighlight((IReadOnlyList<string>?)null);
+
+	private void ApplyHighlightVisuals()
+	{
+		foreach (var (key, root) in _slotRootByHighlightKey)
 		{
-			var tex = TextureForFeatureIcon(kind);
-			if (tex != null)
-				AddFeatureTexture(tex);
+			if (!GodotObject.IsInstanceValid(root))
+				continue;
+			var on = _activeHighlightKeys != null && ContainsHighlight(key);
+			root.Modulate = on ? new Color(HighlightModulate, HighlightModulate, 0.85f) : Colors.White;
 		}
+	}
+
+	private bool ContainsHighlight(string key)
+	{
+		if (_activeHighlightKeys == null)
+			return false;
+		foreach (var k in _activeHighlightKeys)
+		{
+			if (k == key)
+				return true;
+		}
+
+		return false;
 	}
 
 	private void ApplyWall(TextureRect rect, RoomConnectionType connection)
@@ -102,31 +142,74 @@ public partial class MainViewPanel : PanelContainer
 			MainViewFeatureIconKind.Stairs => _stairsTexture,
 			MainViewFeatureIconKind.Hole => _holeTexture,
 			MainViewFeatureIconKind.Ladder => _ladderTexture,
+			MainViewFeatureIconKind.UnknownMonster => null,
+			MainViewFeatureIconKind.UnknownTreasure => null,
 			_ => null
 		};
 
 	public void ClearFeatures()
 	{
+		_slotRootByHighlightKey.Clear();
 		if (_featureContainer == null)
 			return;
 		foreach (Node child in _featureContainer.GetChildren())
 			child.QueueFree();
 	}
 
-	public void AddFeatureTexture(Texture2D texture)
+	private void AddFeatureSlot(MainViewFeatureSlot slot)
 	{
-		if (texture == null || _featureContainer == null)
+		if (_featureContainer == null)
 			return;
 
-		var textureRect = new TextureRect();
-		textureRect.Texture = texture;
-		textureRect.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
-		textureRect.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
-		textureRect.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-		textureRect.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
-		textureRect.CustomMinimumSize = new Vector2(80, 80);
+		var root = new VBoxContainer();
+		root.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+		root.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
 
-		_featureContainer.AddChild(textureRect);
+		var tex = TextureForFeatureIcon(slot.IconKind);
+		if (tex != null)
+		{
+			var textureRect = new TextureRect();
+			textureRect.Texture = tex;
+			textureRect.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
+			textureRect.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
+			textureRect.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+			textureRect.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+			textureRect.CustomMinimumSize = new Vector2(80, 80);
+			root.AddChild(textureRect);
+		}
+		else
+		{
+			var placeholder = new Control();
+			placeholder.CustomMinimumSize = new Vector2(80, 80);
+			root.AddChild(placeholder);
+		}
+
+		if (!string.IsNullOrEmpty(slot.TargetingLabel))
+		{
+			var panel = new PanelContainer();
+			panel.SizeFlagsHorizontal = Control.SizeFlags.ShrinkCenter;
+			panel.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
+			var backing = new StyleBoxFlat
+			{
+				BgColor = new Color(0.2f, 0.2f, 0.2f, 0.95f)
+			};
+			backing.SetContentMarginAll(6);
+			panel.AddThemeStyleboxOverride("panel", backing);
+
+			var label = new Label();
+			label.Text = slot.TargetingLabel;
+			// Word wrap uses the parent's width budget; in a tight HBox slot that can collapse to ~1 char wide.
+			label.AutowrapMode = TextServer.AutowrapMode.Off;
+			label.HorizontalAlignment = HorizontalAlignment.Center;
+			label.SizeFlagsHorizontal = Control.SizeFlags.ShrinkBegin;
+			label.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
+			label.AddThemeColorOverride("font_color", Colors.White);
+			panel.AddChild(label);
+			root.AddChild(panel);
+		}
+
+		_featureContainer.AddChild(root);
+		_slotRootByHighlightKey[slot.HighlightKey] = root;
 	}
 
 	private static void ShowWallTexture(TextureRect rect, Texture2D texture)

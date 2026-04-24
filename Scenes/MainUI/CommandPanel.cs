@@ -1,6 +1,7 @@
 #nullable enable
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class CommandPanel : PanelContainer
 {
@@ -19,6 +20,9 @@ public partial class CommandPanel : PanelContainer
 	[Export] private Button? _defendButton;
 	[Export] private Button? _disarmButton;
 
+	private GridContainer? _gameplayButtonGrid;
+	private Control? _targetingButtonHost;
+
 	public event Action? ForwardPressed;
 	public event Action? BackwardPressed;
 	public event Action? LeftPressed;
@@ -33,8 +37,14 @@ public partial class CommandPanel : PanelContainer
 	public event Action? DefendPressed;
 	public event Action? DisarmPressed;
 
+	public event Action? TargetSelectCancelPressed;
+	public event Action<int>? TargetSelectPicked;
+	public event Action<int?>? TargetSelectHoverChanged;
+
 	public override void _Ready()
 	{
+		_gameplayButtonGrid = _forwardButton.GetParent() as GridContainer;
+
 		_forwardButton.Pressed += () => ForwardPressed?.Invoke();
 		_backwardButton.Pressed += () => BackwardPressed?.Invoke();
 		_leftButton.Pressed += () => LeftPressed?.Invoke();
@@ -50,6 +60,60 @@ public partial class CommandPanel : PanelContainer
 			_defendButton.Pressed += () => DefendPressed?.Invoke();
 		if (_disarmButton != null)
 			_disarmButton.Pressed += () => DisarmPressed?.Invoke();
+	}
+
+	public bool IsInTargetSelectionMode => _targetingButtonHost != null;
+
+	public void EnterTargetSelection(IReadOnlyList<TargetDescriptor> descriptors)
+	{
+		ExitTargetSelection();
+		if (_gameplayButtonGrid == null)
+			return;
+		var parent = _gameplayButtonGrid.GetParent() as Control;
+		if (parent == null)
+			return;
+
+		_gameplayButtonGrid.Visible = false;
+
+		var host = new FlowContainer();
+		host.Name = "TargetingButtonHost";
+		host.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+		host.AddThemeConstantOverride("h_separation", 8);
+		host.AddThemeConstantOverride("v_separation", 8);
+
+		for (var i = 0; i < descriptors.Count; i++)
+		{
+			var index = i;
+			var d = descriptors[i];
+			var b = new Button { Text = d.Label };
+			b.SizeFlagsHorizontal = Control.SizeFlags.ShrinkBegin;
+			b.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
+			b.Pressed += () => TargetSelectPicked?.Invoke(index);
+			b.MouseEntered += () => TargetSelectHoverChanged?.Invoke(index);
+			b.MouseExited += () => TargetSelectHoverChanged?.Invoke(null);
+			host.AddChild(b);
+		}
+
+		var cancel = new Button { Text = "Cancel" };
+		cancel.SizeFlagsHorizontal = Control.SizeFlags.ShrinkBegin;
+		cancel.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
+		cancel.Pressed += () => TargetSelectCancelPressed?.Invoke();
+		host.AddChild(cancel);
+
+		parent.AddChild(host);
+		_targetingButtonHost = host;
+	}
+
+	public void ExitTargetSelection()
+	{
+		if (_targetingButtonHost != null)
+		{
+			_targetingButtonHost.QueueFree();
+			_targetingButtonHost = null;
+		}
+
+		if (_gameplayButtonGrid != null)
+			_gameplayButtonGrid.Visible = true;
 	}
 
 	public void ApplyDungeonMode(DungeonMode mode)

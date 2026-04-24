@@ -6,15 +6,15 @@ public interface ICombatService
 
 	bool IsAwaitingPlayerAction(GameSessionState session);
 
-	void ExecutePlayerAttack(GameSessionState session);
+	void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal);
 
 	void ExecutePlayerFlee(GameSessionState session);
 
-	void ExecutePlayerTakeTreasure(GameSessionState session);
+	void ExecutePlayerTakeTreasure(GameSessionState session, TargetPayload payload);
 
 	void ExecutePlayerUseHealthPotion(GameSessionState session);
 
 	void ExecutePlayerDefend(GameSessionState session);
 
-	void ExecutePlayerDisarmTrap(GameSessionState session);
+	void ExecutePlayerDisarmTrap(GameSessionState session, TargetPayload payload);
 }

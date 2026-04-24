@@ -108,20 +108,21 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		return slot.IsPlayer;
 	}
 
-	public void ExecutePlayerAttack(GameSessionState session)
+	public void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal)
 	{
 		if (!IsAwaitingPlayerAction(session))
 			return;
 		var room = session.Dungeon.CurrentRoom!;
-		var feature = RoomFeatureHelper.GetFeature<MonsterFeature>(room)!;
-		var targetIndex = CombatState.FirstLivingMonsterIndex(feature);
-		if (targetIndex < 0)
+		if (!MainViewRoomSlots.TryGetLivingMonsterByOrdinal(room, livingMonsterOrdinal, out var feature, out var targetIndex) ||
+		    feature == null || targetIndex < 0)
 		{
-			_lifecycle.EndCombatVictory(session);
+			session.AppendGameLog("There is nothing you can attack.");
 			return;
 		}
 
 		var monster = feature.Monsters[targetIndex];
+		if (monster.CurrentHp <= 0)
+			return;
 		var might = session.Player.AbilityScores.Might;
 		var req = new DiceRollRequest
 		{
@@ -203,11 +204,17 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		_turnLoop.ProcessAutomaticMonsterTurns(session);
 	}
 
-	public void ExecutePlayerTakeTreasure(GameSessionState session)
+	public void ExecutePlayerTakeTreasure(GameSessionState session, TargetPayload payload)
 	{
 		if (!IsAwaitingPlayerAction(session))
 			return;
-		var outcome = _treasurePickup.TakeAllFromCurrentRoom(session);
+		var outcome = payload.Kind switch
+		{
+			TargetPayloadKind.TakeTreasureItem => _treasurePickup.TakeTreasureInstanceAtSlot(session,
+				payload.TreasureFeatureOrdinal, payload.TreasureItemIndexInFeature),
+			TargetPayloadKind.TakeAllEligibleTreasure => _treasurePickup.TakeAllEligibleFromCurrentRoom(session),
+			_ => TakeTreasureOutcome.NothingToTake
+		};
 		if (outcome != TakeTreasureOutcome.TookItems)
 			return;
 		var room = session.Dungeon.CurrentRoom;
@@ -232,12 +239,14 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			RunAfterSuccessfulCombatHealthPotion(session);
 	}
 
-	public void ExecutePlayerDisarmTrap(GameSessionState session)
+	public void ExecutePlayerDisarmTrap(GameSessionState session, TargetPayload payload)
 	{
 		if (!IsAwaitingPlayerAction(session))
 			return;
 
-		var result = _trapService.TryDisarm(session);
+		var result = payload.Kind != TargetPayloadKind.DisarmTrapInstance
+			? new TrapDisarmResult { ResultCode = TrapDisarmResultCode.NoTrapPresent }
+			: _trapService.TryDisarmAtSlot(session, payload.TrapFeatureOrdinal, payload.TrapIndexInFeature);
 		if (!result.ShouldAdvanceCombatTurn)
 			return;
 

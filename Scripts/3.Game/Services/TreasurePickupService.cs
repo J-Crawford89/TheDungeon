@@ -1,4 +1,5 @@
 #nullable enable
+using System.Collections.Generic;
 using System.Linq;
 
 public sealed class TreasurePickupService
@@ -12,43 +13,80 @@ public sealed class TreasurePickupService
 		_items = items;
 	}
 
+	/// <summary>Whether this instance can be taken via room Take actions (revealed; future: not locked).</summary>
+	public static bool IsInstanceEligibleForRoomTake(TreasureInstance instance)
+	{
+		if (!instance.IsRevealed)
+			return false;
+		return true;
+	}
+
 	public static bool HasTakeableLootInCurrentRoom(GameSessionState session)
 	{
 		if (session.Dungeon.CurrentRoom is not { } room)
 			return false;
-		var treasureFeature = RoomFeatureHelper.GetFeature<TreasureFeature>(room);
-		return treasureFeature != null && treasureFeature.TreasureItems.Any(t => t.IsRevealed);
+		return room.Features.OfType<TreasureFeature>().Any(tf =>
+			tf.TreasureItems.Any(IsInstanceEligibleForRoomTake));
 	}
 
-	public TakeTreasureOutcome TakeAllFromCurrentRoom(GameSessionState session)
+	/// <summary>Removes every eligible revealed treasure instance from every <see cref="TreasureFeature"/> in the current room.</summary>
+	public TakeTreasureOutcome TakeAllEligibleFromCurrentRoom(GameSessionState session)
 	{
 		if (session.Dungeon.CurrentFloor == null)
 			return TakeTreasureOutcome.NoCurrentFloor;
 		if (session.Dungeon.CurrentRoom is not { } room)
 			return TakeTreasureOutcome.NoCurrentRoom;
 
-		var treasureFeature = RoomFeatureHelper.GetFeature<TreasureFeature>(room);
-		if (treasureFeature == null || treasureFeature.TreasureItems.Count == 0)
+		var toRemove = new List<(TreasureFeature Feature, TreasureInstance Instance)>();
+		foreach (var tf in room.Features.OfType<TreasureFeature>())
+		{
+			foreach (var inst in tf.TreasureItems.Where(IsInstanceEligibleForRoomTake))
+				toRemove.Add((tf, inst));
+		}
+
+		if (toRemove.Count == 0)
 		{
 			session.AppendGameLog(_narrative.ForTakeNothingHere());
 			return TakeTreasureOutcome.NothingToTake;
 		}
 
-		var revealed = treasureFeature.TreasureItems.Where(t => t.IsRevealed).ToList();
-		if (revealed.Count == 0)
+		foreach (var (_, inst) in toRemove)
+			ApplyInstance(session, inst);
+
+		foreach (var (tf, inst) in toRemove)
+		{
+			tf.TreasureItems.Remove(inst);
+			if (tf.RemoveFeatureWhenEmpty && tf.TreasureItems.Count == 0)
+				room.Features.Remove(tf);
+		}
+
+		return TakeTreasureOutcome.TookItems;
+	}
+
+	public TakeTreasureOutcome TakeTreasureInstanceAtSlot(GameSessionState session, int treasureFeatureOrdinal, int itemIndexInFeature)
+	{
+		if (session.Dungeon.CurrentFloor == null)
+			return TakeTreasureOutcome.NoCurrentFloor;
+		if (session.Dungeon.CurrentRoom is not { } room)
+			return TakeTreasureOutcome.NoCurrentRoom;
+
+		if (!MainViewRoomSlots.TryGetTreasureSlot(room, treasureFeatureOrdinal, itemIndexInFeature, out var tf, out var inst) ||
+		    tf == null || inst == null)
 		{
 			session.AppendGameLog(_narrative.ForTakeNothingHere());
 			return TakeTreasureOutcome.NothingToTake;
 		}
 
-		foreach (var instance in revealed)
-			ApplyInstance(session, instance);
+		if (!IsInstanceEligibleForRoomTake(inst))
+		{
+			session.AppendGameLog(_narrative.ForTakeNothingHere());
+			return TakeTreasureOutcome.NothingToTake;
+		}
 
-		foreach (var instance in revealed)
-			treasureFeature.TreasureItems.Remove(instance);
-
-		if (treasureFeature.RemoveFeatureWhenEmpty)
-			room.Features.Remove(treasureFeature);
+		ApplyInstance(session, inst);
+		tf.TreasureItems.Remove(inst);
+		if (tf.RemoveFeatureWhenEmpty && tf.TreasureItems.Count == 0)
+			room.Features.Remove(tf);
 
 		return TakeTreasureOutcome.TookItems;
 	}
