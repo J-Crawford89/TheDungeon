@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="MainViewTraversalIcons" format=3 uid="uid://c8v5ckgmqi3u1"]
+
+[ext_resource type="Texture2D" uid="uid://dtc0xg1xqd70b" path="res://Assets/PrototypeAssets/Hole.png" id="1_3mx0a"]
+[ext_resource type="Script" uid="uid://cy6qo1i1eaeb0" path="res://Resources/MainViewTraversalIcons.cs" id="1_oi8m5"]
+[ext_resource type="Texture2D" uid="uid://bshjebxlomxb6" path="res://Assets/PrototypeAssets/Ladder.png" id="2_prwfd"]
+[ext_resource type="Texture2D" uid="uid://dstbbjkmh1imt" path="res://Assets/PrototypeAssets/Stairs.png" id="3_i2jcw"]
+
+[resource]
+script = ExtResource("1_oi8m5")
+StairsIcon = ExtResource("3_i2jcw")
+HoleIcon = ExtResource("1_3mx0a")
+LadderIcon = ExtResource("2_prwfd")
+metadata/_custom_type_script = "uid://cy6qo1i1eaeb0"

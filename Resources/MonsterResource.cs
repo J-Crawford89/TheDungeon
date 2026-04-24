@@ -1,3 +1,4 @@
+#nullable enable
 using Godot;
 
 [GlobalClass]
@@ -10,4 +11,6 @@ public partial class MonsterResource : Resource
 	[Export] public int Defense { get; set; }
 	[Export] public bool IsBoss { get; set; }
 	[Export] public int RandomizerWeight { get; set; }
+
+	[Export] public Texture2D? Icon { get; set; }
 }

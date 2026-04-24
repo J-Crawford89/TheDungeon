@@ -40,7 +40,7 @@ public static class MainViewPresentationBuilder
 			slots.Add(new MainViewFeatureSlot
 			{
 				HighlightKey = s.HighlightKey,
-				IconKind = s.IconKind,
+				PresentationIconKey = s.PresentationIconKey,
 				TargetingLabel = label
 			});
 		}

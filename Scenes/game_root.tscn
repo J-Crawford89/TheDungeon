@@ -14,6 +14,7 @@
 [ext_resource type="Resource" uid="uid://46x1vwpgn0sh" path="res://Content/Databases/CharacterBackgroundDatabase.tres" id="12_hpb24"]
 [ext_resource type="Resource" uid="uid://dw64ti8d4fr4e" path="res://Content/Databases/AbilityDatabase.tres" id="13_lpuel"]
 [ext_resource type="Resource" uid="uid://b4nsdqvaj1meg" path="res://Content/Databases/ItemDatabase.tres" id="14_hpb24"]
+[ext_resource type="Resource" uid="uid://c8v5ckgmqi3u1" path="res://Content/World/VerticalTraversalIcons.tres" id="15_nf18g"]
 
 [node name="GameRoot" type="Control" unique_id=1615480598 node_paths=PackedStringArray("_screenHost")]
 layout_mode = 3
@@ -37,6 +38,7 @@ CharacterRaceDatabase = ExtResource("11_lpuel")
 CharacterBackgroundDatabase = ExtResource("12_hpb24")
 AbilityDatabase = ExtResource("13_lpuel")
 ItemDatabase = ExtResource("14_hpb24")
+MainViewTraversalIcons = ExtResource("15_nf18g")
 CaptureDebugDiagnostics = true
 DebugToolsEnabled = true
 

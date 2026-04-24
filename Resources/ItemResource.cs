@@ -1,3 +1,4 @@
+#nullable enable
 using Godot;
 
 [GlobalClass]
@@ -14,4 +15,6 @@ public partial class ItemResource : Resource
 
 	[Export] public bool CanDrop { get; set; } = true;
 	[Export] public bool CanSell { get; set; } = true;
+
+	[Export] public Texture2D? Icon { get; set; }
 }

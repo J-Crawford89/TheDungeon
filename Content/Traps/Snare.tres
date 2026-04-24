@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="TrapResource" format=3 uid="uid://nk1sow88pe05"]
 
+[ext_resource type="Texture2D" uid="uid://4s2xtg0vthh4" path="res://Assets/PrototypeAssets/Trap.png" id="1_6haao"]
 [ext_resource type="Script" uid="uid://bmvsqkv3o05c4" path="res://Resources/TrapResource.cs" id="1_pjoa2"]
 
 [resource]
@@ -10,3 +11,4 @@ DiscoverDc = 8
 DisarmDc = 8
 Damage = 2
 Effect = "Snared"
+Icon = ExtResource("1_6haao")

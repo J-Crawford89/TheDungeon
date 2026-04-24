@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="PotionResource" format=3 uid="uid://cw2l68qbnjvr4"]
 
+[ext_resource type="Texture2D" uid="uid://cen40agknmvhr" path="res://Assets/PrototypeAssets/HealthPotion.png" id="1_0ypew"]
 [ext_resource type="Script" uid="uid://c08x74ttsd8bj" path="res://Resources/RestoreHealthEffectResource.cs" id="1_umgf0"]
 [ext_resource type="Resource" uid="uid://bcre6cnouqkws" path="res://Content/Effects/HealthPotionEffect.tres" id="2_0ypew"]
 [ext_resource type="Script" uid="uid://bjy6fpfyl7vqc" path="res://Resources/PotionResource.cs" id="2_fncci"]
@@ -12,4 +13,5 @@ Name = "Health Potion"
 Description = "A small potion of redish liquid which revitalizes your health."
 ValueInGold = 25
 MaxStackSize = 10
+Icon = ExtResource("1_0ypew")
 metadata/_custom_type_script = "uid://bjy6fpfyl7vqc"

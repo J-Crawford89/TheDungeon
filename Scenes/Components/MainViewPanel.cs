@@ -20,20 +20,13 @@ public partial class MainViewPanel : PanelContainer
 	[Export] private Texture2D _doorTexture = null!;
 	[Export] private Texture2D _passageTexture = null!;
 
-	[Export] private Texture2D _ratTexture = null!;
-	[Export] private Texture2D _giantRatTexture = null!;
-	[Export] private Texture2D _ratKingTexture = null!;
-	[Export] private Texture2D _coinsTexture = null!;
-	[Export] private Texture2D _healthPotionTexture = null!;
-	[Export] private Texture2D _loreTexture = null!;
-	[Export] private Texture2D _npcTexture = null!;
-	[Export] private Texture2D _trapTexture = null!;
-	[Export] private Texture2D _stairsTexture = null!;
-	[Export] private Texture2D _holeTexture = null!;
-	[Export] private Texture2D _ladderTexture = null!;
+	private MainViewIconResolver? _iconResolver;
 
 	private readonly Dictionary<string, Control> _slotRootByHighlightKey = new();
 	private IReadOnlyList<string>? _activeHighlightKeys;
+
+	public void BindIconResolver(MainViewIconResolver resolver) =>
+		_iconResolver = resolver;
 
 	public override void _Ready()
 	{
@@ -128,25 +121,6 @@ public partial class MainViewPanel : PanelContainer
 		}
 	}
 
-	private Texture2D? TextureForFeatureIcon(MainViewFeatureIconKind kind) =>
-		kind switch
-		{
-			MainViewFeatureIconKind.Rat => _ratTexture,
-			MainViewFeatureIconKind.GiantRat => _giantRatTexture,
-			MainViewFeatureIconKind.RatKing => _ratKingTexture,
-			MainViewFeatureIconKind.Coins => _coinsTexture,
-			MainViewFeatureIconKind.HealthPotion => _healthPotionTexture,
-			MainViewFeatureIconKind.Lore => _loreTexture,
-			MainViewFeatureIconKind.Npc => _npcTexture,
-			MainViewFeatureIconKind.Trap => _trapTexture,
-			MainViewFeatureIconKind.Stairs => _stairsTexture,
-			MainViewFeatureIconKind.Hole => _holeTexture,
-			MainViewFeatureIconKind.Ladder => _ladderTexture,
-			MainViewFeatureIconKind.UnknownMonster => null,
-			MainViewFeatureIconKind.UnknownTreasure => null,
-			_ => null
-		};
-
 	public void ClearFeatures()
 	{
 		_slotRootByHighlightKey.Clear();
@@ -165,7 +139,7 @@ public partial class MainViewPanel : PanelContainer
 		root.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
 		root.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
 
-		var tex = TextureForFeatureIcon(slot.IconKind);
+		var tex = _iconResolver?.Resolve(slot.PresentationIconKey);
 		if (tex != null)
 		{
 			var textureRect = new TextureRect();

@@ -1,9 +1,11 @@
 [gd_resource type="Resource" script_class="LoreResource" format=3 uid="uid://bp1itaho3irs8"]
 
 [ext_resource type="Script" uid="uid://b1ox3330uhj23" path="res://Resources/LoreResource.cs" id="1_dbi0t"]
+[ext_resource type="Texture2D" uid="uid://lx02hh3b4jrr" path="res://Assets/PrototypeAssets/Lore.png" id="1_o2waw"]
 
 [resource]
 script = ExtResource("1_dbi0t")
 Id = "stone_tablet"
 Name = "Stone Tablet"
 Description = "This stone tablet has an ancient prayer written on it."
+Icon = ExtResource("1_o2waw")

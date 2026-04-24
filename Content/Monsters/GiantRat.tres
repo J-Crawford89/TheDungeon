@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="MonsterResource" format=3 uid="uid://bhplrng7sf8ix"]
 
 [ext_resource type="Script" uid="uid://h3kt4eef0b3n" path="res://Resources/MonsterResource.cs" id="1_0vblb"]
+[ext_resource type="Texture2D" uid="uid://bq7fkrinl6s1c" path="res://Assets/PrototypeAssets/GiantRat.png" id="1_ustx4"]
 
 [resource]
 script = ExtResource("1_0vblb")
@@ -10,3 +11,4 @@ MaxHp = 10
 Attack = 4
 Defense = 10
 RandomizerWeight = 15
+Icon = ExtResource("1_ustx4")

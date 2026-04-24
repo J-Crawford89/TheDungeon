@@ -1,0 +1,282 @@
+#nullable enable
+using Godot;
+using System;
+using System.Collections.Generic;
+
+public sealed class MainViewIconResolver
+{
+	private readonly MonsterResourceDatabase? _monsters;
+	private readonly ItemResourceDatabase? _items;
+	private readonly TreasureResourceDatabase? _treasures;
+	private readonly TrapResourceDatabase? _traps;
+	private readonly NpcResourceDatabase? _npcs;
+	private readonly LoreResourceDatabase? _lore;
+	private readonly MainViewTraversalIcons? _traversal;
+	private readonly HashSet<string> _warned = new(StringComparer.Ordinal);
+
+	public MainViewIconResolver(
+		MonsterResourceDatabase? monsters,
+		ItemResourceDatabase? items,
+		TreasureResourceDatabase? treasures,
+		TrapResourceDatabase? traps,
+		NpcResourceDatabase? npcs,
+		LoreResourceDatabase? lore,
+		MainViewTraversalIcons? traversal)
+	{
+		_monsters = monsters;
+		_items = items;
+		_treasures = treasures;
+		_traps = traps;
+		_npcs = npcs;
+		_lore = lore;
+		_traversal = traversal;
+	}
+
+	public Texture2D? Resolve(string key)
+	{
+		if (string.IsNullOrEmpty(key))
+			return null;
+
+		if (!key.StartsWith("mainview/", StringComparison.Ordinal))
+		{
+			WarnOnce(key, "MainView icon key must start with 'mainview/'.");
+			return null;
+		}
+
+		var tail = key["mainview/".Length..];
+		var slash = tail.IndexOf('/');
+		if (slash < 0)
+		{
+			WarnOnce(key, "Invalid mainview icon key (missing category).");
+			return null;
+		}
+
+		var category = tail[..slash];
+		var id = tail[(slash + 1)..];
+		if (id.Length == 0)
+		{
+			WarnOnce(key, "Invalid mainview icon key (empty id segment).");
+			return null;
+		}
+
+		return category switch
+		{
+			"monster" => ResolveMonster(key, id),
+			"trap" => ResolveTrap(key, id),
+			"item" => ResolveItem(key, id),
+			"treasure" => ResolveTreasure(key, id),
+			"npc" => ResolveNpc(key, id),
+			"lore" => ResolveLore(key, id),
+			"vertical" => ResolveVertical(key, id),
+			_ => UnknownCategory(key, category)
+		};
+	}
+
+	private Texture2D? UnknownCategory(string key, string category)
+	{
+		WarnOnce(key, $"Unknown mainview icon category '{category}'.");
+		return null;
+	}
+
+	private Texture2D? ResolveMonster(string fullKey, string id)
+	{
+		var row = FindMonsterById(id);
+		if (row == null)
+		{
+			WarnOnce(fullKey, $"No MonsterResource with Id '{id}'.");
+			return null;
+		}
+
+		if (row.Icon == null)
+			WarnOnce($"{fullKey}|nullicon", $"MonsterResource '{id}' has no Icon assigned.");
+		return row.Icon;
+	}
+
+	private Texture2D? ResolveTrap(string fullKey, string id)
+	{
+		var row = FindTrapById(id);
+		if (row == null)
+		{
+			WarnOnce(fullKey, $"No TrapResource with Id '{id}'.");
+			return null;
+		}
+
+		if (row.Icon == null)
+			WarnOnce($"{fullKey}|nullicon", $"TrapResource '{id}' has no Icon assigned.");
+		return row.Icon;
+	}
+
+	private Texture2D? ResolveItem(string fullKey, string id)
+	{
+		var row = FindItemById(id);
+		if (row == null)
+		{
+			WarnOnce(fullKey, $"No ItemResource with Id '{id}'.");
+			return null;
+		}
+
+		if (row.Icon == null)
+			WarnOnce($"{fullKey}|nullicon", $"ItemResource '{id}' has no Icon assigned.");
+		return row.Icon;
+	}
+
+	private Texture2D? ResolveTreasure(string fullKey, string id)
+	{
+		var row = FindTreasureById(id);
+		if (row == null)
+		{
+			WarnOnce(fullKey, $"No TreasureResource with Id '{id}'.");
+			return null;
+		}
+
+		if (row.Icon == null)
+			WarnOnce($"{fullKey}|nullicon", $"TreasureResource '{id}' has no Icon assigned.");
+		return row.Icon;
+	}
+
+	private Texture2D? ResolveNpc(string fullKey, string id)
+	{
+		var row = FindNpcById(id);
+		if (row == null)
+		{
+			WarnOnce(fullKey, $"No NpcResource with Id '{id}'.");
+			return null;
+		}
+
+		if (row.Icon == null)
+			WarnOnce($"{fullKey}|nullicon", $"NpcResource '{id}' has no Icon assigned.");
+		return row.Icon;
+	}
+
+	private Texture2D? ResolveLore(string fullKey, string id)
+	{
+		var row = FindLoreById(id);
+		if (row == null)
+		{
+			WarnOnce(fullKey, $"No LoreResource with Id '{id}'.");
+			return null;
+		}
+
+		if (row.Icon == null)
+			WarnOnce($"{fullKey}|nullicon", $"LoreResource '{id}' has no Icon assigned.");
+		return row.Icon;
+	}
+
+	private Texture2D? ResolveVertical(string fullKey, string id)
+	{
+		if (!Enum.TryParse<FloorConnectionType>(id, out var t) || !MainViewPresentationIconKeys.IsVerticalExitIcon(t))
+		{
+			WarnOnce(fullKey, $"Unrecognized vertical exit type '{id}'.");
+			return null;
+		}
+
+		if (_traversal == null)
+		{
+			WarnOnce($"{fullKey}|notraversal", "Assign MainViewTraversalIcons on GameRoot for vertical exit icons.");
+			return null;
+		}
+
+		var tex = t switch
+		{
+			FloorConnectionType.Stairs => _traversal.StairsIcon,
+			FloorConnectionType.Hole => _traversal.HoleIcon,
+			FloorConnectionType.Ladder => _traversal.LadderIcon,
+			_ => null
+		};
+
+		if (tex == null)
+			WarnOnce($"{fullKey}|nullicon", $"MainViewTraversalIcons has no icon for {t}.");
+		return tex;
+	}
+
+	private MonsterResource? FindMonsterById(string id)
+	{
+		var items = _monsters?.Monsters;
+		if (items == null)
+			return null;
+		for (var i = 0; i < items.Count; i++)
+		{
+			if (items[i] is { } m && m.Id == id)
+				return m;
+		}
+
+		return null;
+	}
+
+	private TrapResource? FindTrapById(string id)
+	{
+		var items = _traps?.Traps;
+		if (items == null)
+			return null;
+		for (var i = 0; i < items.Count; i++)
+		{
+			if (items[i] is { } t && t.Id == id)
+				return t;
+		}
+
+		return null;
+	}
+
+	private ItemResource? FindItemById(string id)
+	{
+		var items = _items?.Items;
+		if (items == null)
+			return null;
+		for (var i = 0; i < items.Count; i++)
+		{
+			if (items[i] is { } it && it.Id == id)
+				return it;
+		}
+
+		return null;
+	}
+
+	private TreasureResource? FindTreasureById(string id)
+	{
+		var items = _treasures?.Treasures;
+		if (items == null)
+			return null;
+		for (var i = 0; i < items.Count; i++)
+		{
+			if (items[i] is { } t && t.Id == id)
+				return t;
+		}
+
+		return null;
+	}
+
+	private NpcResource? FindNpcById(string id)
+	{
+		var items = _npcs?.Npcs;
+		if (items == null)
+			return null;
+		for (var i = 0; i < items.Count; i++)
+		{
+			if (items[i] is { } n && n.Id == id)
+				return n;
+		}
+
+		return null;
+	}
+
+	private LoreResource? FindLoreById(string id)
+	{
+		var items = _lore?.LoreEntries;
+		if (items == null)
+			return null;
+		for (var i = 0; i < items.Count; i++)
+		{
+			if (items[i] is { } l && l.Id == id)
+				return l;
+		}
+
+		return null;
+	}
+
+	private void WarnOnce(string dedupeKey, string message)
+	{
+		if (!_warned.Add(dedupeKey))
+			return;
+		GD.PushWarning($"MainViewIconResolver: {message} (key: {dedupeKey.Split('|')[0]})");
+	}
+}

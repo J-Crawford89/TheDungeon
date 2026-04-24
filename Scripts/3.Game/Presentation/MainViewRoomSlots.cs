@@ -30,11 +30,10 @@ public static class MainViewRoomSlots
 					{
 						if (m.CurrentHp <= 0)
 							continue;
-						var k = MapMonsterId(m.Definition.Id) ?? MainViewFeatureIconKind.UnknownMonster;
 						list.Add(new MainViewFeatureSlot
 						{
 							HighlightKey = $"{MonsterKeyPrefix}{livingMonsterOrdinal}",
-							IconKind = k
+							PresentationIconKey = MainViewPresentationIconKeys.Monster(m.Definition.Id)
 						});
 						livingMonsterOrdinal++;
 					}
@@ -50,7 +49,7 @@ public static class MainViewRoomSlots
 						list.Add(new MainViewFeatureSlot
 						{
 							HighlightKey = $"{TrapKeyPrefix}{tfOrd}:{ti}",
-							IconKind = MainViewFeatureIconKind.Trap
+							PresentationIconKey = MainViewPresentationIconKeys.Trap(tf.Traps[ti].Definition.Id)
 						});
 					}
 
@@ -64,11 +63,10 @@ public static class MainViewRoomSlots
 						var item = treasure.TreasureItems[ti];
 						if (!item.IsRevealed)
 							continue;
-						var k = MapTreasure(item.Definition) ?? MainViewFeatureIconKind.UnknownTreasure;
 						list.Add(new MainViewFeatureSlot
 						{
 							HighlightKey = $"{TreasureKeyPrefix}{tfOrd}:{ti}",
-							IconKind = k
+							PresentationIconKey = MainViewPresentationIconKeys.ForTreasureInstance(item.Definition)
 						});
 					}
 
@@ -84,7 +82,7 @@ public static class MainViewRoomSlots
 						list.Add(new MainViewFeatureSlot
 						{
 							HighlightKey = $"{NpcKeyPrefix}{ord}:{ni}",
-							IconKind = MainViewFeatureIconKind.Npc
+							PresentationIconKey = MainViewPresentationIconKeys.Npc(nf.NPCs[ni].Definition.Id)
 						});
 					}
 
@@ -100,7 +98,7 @@ public static class MainViewRoomSlots
 						list.Add(new MainViewFeatureSlot
 						{
 							HighlightKey = $"{LoreKeyPrefix}{ord}:{li}",
-							IconKind = MainViewFeatureIconKind.Lore
+							PresentationIconKey = MainViewPresentationIconKeys.Lore(lf.Lore[li].Definition.Id)
 						});
 					}
 
@@ -108,13 +106,12 @@ public static class MainViewRoomSlots
 				}
 				case FloorExitFeature exit:
 				{
-					var v = MapVerticalExit(exit.ExitType);
-					if (v.HasValue)
+					if (MainViewPresentationIconKeys.IsVerticalExitIcon(exit.ExitType))
 					{
 						list.Add(new MainViewFeatureSlot
 						{
 							HighlightKey = $"{ExitKeyPrefix}{exitOrdinal}",
-							IconKind = v.Value
+							PresentationIconKey = MainViewPresentationIconKeys.Vertical(exit.ExitType)
 						});
 						exitOrdinal++;
 					}
@@ -229,31 +226,4 @@ public static class MainViewRoomSlots
 
 		return keys;
 	}
-
-	private static MainViewFeatureIconKind? MapMonsterId(string id) =>
-		id switch
-		{
-			"rat" => MainViewFeatureIconKind.Rat,
-			"giant_rat" => MainViewFeatureIconKind.GiantRat,
-			"rat_king" => MainViewFeatureIconKind.RatKing,
-			_ => null
-		};
-
-	private static MainViewFeatureIconKind? MapTreasure(TreasureDefinition def)
-	{
-		if (def.GrantKind == TreasureKind.Gold)
-			return MainViewFeatureIconKind.Coins;
-		if (def.Id == TreasureIds.HealthPotion || def.InventoryItemId == InventoryIds.HealthPotion)
-			return MainViewFeatureIconKind.HealthPotion;
-		return null;
-	}
-
-	private static MainViewFeatureIconKind? MapVerticalExit(FloorConnectionType t) =>
-		t switch
-		{
-			FloorConnectionType.Stairs => MainViewFeatureIconKind.Stairs,
-			FloorConnectionType.Hole => MainViewFeatureIconKind.Hole,
-			FloorConnectionType.Ladder => MainViewFeatureIconKind.Ladder,
-			_ => null
-		};
 }

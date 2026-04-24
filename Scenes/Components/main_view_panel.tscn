@@ -4,17 +4,6 @@
 [ext_resource type="Texture2D" uid="uid://dl3mwhc4s5xxk" path="res://Assets/PrototypeAssets/Background.png" id="2_ydaod"]
 [ext_resource type="Texture2D" uid="uid://dgdid3wsi11hc" path="res://Assets/PrototypeAssets/Door.png" id="3_5xurg"]
 [ext_resource type="Texture2D" uid="uid://d0f0ygfinohfb" path="res://Assets/PrototypeAssets/Passage.png" id="4_yj4sx"]
-[ext_resource type="Texture2D" uid="uid://brgtdq2ffhcug" path="res://Assets/PrototypeAssets/Rat.png" id="5_ghlj3"]
-[ext_resource type="Texture2D" uid="uid://bq7fkrinl6s1c" path="res://Assets/PrototypeAssets/GiantRat.png" id="6_htkoi"]
-[ext_resource type="Texture2D" uid="uid://b3n8mh18joiyc" path="res://Assets/PrototypeAssets/RatKing.png" id="7_ewaih"]
-[ext_resource type="Texture2D" uid="uid://ttxdxm54rnj4" path="res://Assets/PrototypeAssets/Coins.png" id="8_d2fe7"]
-[ext_resource type="Texture2D" uid="uid://cen40agknmvhr" path="res://Assets/PrototypeAssets/HealthPotion.png" id="9_wl637"]
-[ext_resource type="Texture2D" uid="uid://lx02hh3b4jrr" path="res://Assets/PrototypeAssets/Lore.png" id="10_jce2p"]
-[ext_resource type="Texture2D" uid="uid://ct2knpbbjq75l" path="res://Assets/PrototypeAssets/NPC.png" id="11_fv5g4"]
-[ext_resource type="Texture2D" uid="uid://4s2xtg0vthh4" path="res://Assets/PrototypeAssets/Trap.png" id="12_cffhd"]
-[ext_resource type="Texture2D" uid="uid://dstbbjkmh1imt" path="res://Assets/PrototypeAssets/Stairs.png" id="13_pjnii"]
-[ext_resource type="Texture2D" uid="uid://dtc0xg1xqd70b" path="res://Assets/PrototypeAssets/Hole.png" id="14_ha37f"]
-[ext_resource type="Texture2D" uid="uid://bshjebxlomxb6" path="res://Assets/PrototypeAssets/Ladder.png" id="15_15r8l"]
 
 [node name="MainViewPanel" type="PanelContainer" unique_id=1544386070 node_paths=PackedStringArray("_viewArea", "_stage", "_mainViewTitle", "_backgroundRect", "_leftWallRect", "_backWallRect", "_rightWallRect", "_featureContainer")]
 anchors_preset = 15
@@ -34,17 +23,6 @@ _featureContainer = NodePath("MainViewMargin/MainViewContent/ViewArea/Stage/Feat
 _backgroundTexture = ExtResource("2_ydaod")
 _doorTexture = ExtResource("3_5xurg")
 _passageTexture = ExtResource("4_yj4sx")
-_ratTexture = ExtResource("5_ghlj3")
-_giantRatTexture = ExtResource("6_htkoi")
-_ratKingTexture = ExtResource("7_ewaih")
-_coinsTexture = ExtResource("8_d2fe7")
-_healthPotionTexture = ExtResource("9_wl637")
-_loreTexture = ExtResource("10_jce2p")
-_npcTexture = ExtResource("11_fv5g4")
-_trapTexture = ExtResource("12_cffhd")
-_stairsTexture = ExtResource("13_pjnii")
-_holeTexture = ExtResource("14_ha37f")
-_ladderTexture = ExtResource("15_15r8l")
 
 [node name="MainViewMargin" type="MarginContainer" parent="." unique_id=1190998000]
 layout_mode = 2

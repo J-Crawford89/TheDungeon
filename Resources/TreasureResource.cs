@@ -1,3 +1,4 @@
+#nullable enable
 using Godot;
 
 [GlobalClass]
@@ -9,4 +10,6 @@ public partial class TreasureResource : Resource
 	[Export] public int ValueInGp { get; set; }
 	[Export] public string InventoryItemId { get; set; } = string.Empty;
 	[Export] public int DiscoverDc { get; set; } = 0;
+
+	[Export] public Texture2D? Icon { get; set; }
 }

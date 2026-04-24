@@ -23,6 +23,8 @@ public partial class GameRoot : Control
 
 	[Export] public ItemResourceDatabase? ItemDatabase { get; set; }
 
+	[Export] public MainViewTraversalIcons? MainViewTraversalIcons { get; set; }
+
 	[Export] public bool CaptureDebugDiagnostics { get; set; }
 	[Export] public bool DebugToolsEnabled { get; set; }
 
@@ -185,6 +187,15 @@ public partial class GameRoot : Control
 		var explorationService = new ExplorationService(roomFeaturePopulation, combatService, inspectService, trapService);
 		var characterCreation = new CharacterCreationService(diceRollService, random, abilityRepo);
 
+		var mainViewIcons = new MainViewIconResolver(
+			MonsterDatabase,
+			ItemDatabase,
+			TreasureDatabase,
+			TrapDatabase,
+			NpcDatabase,
+			LoreDatabase,
+			MainViewTraversalIcons);
+
 		return new GameRunContext(
 			session,
 			random,
@@ -208,6 +219,7 @@ public partial class GameRoot : Control
 			potionEffectApplicationService,
 			trapService,
 			trapRepo,
-			treasureRepo);
+			treasureRepo,
+			mainViewIcons);
 	}
 }

@@ -27,6 +27,8 @@ public sealed class GameRunContext
 	public ITrapDefinitionRepository TrapDefinitions { get; }
 	public ITreasureDefinitionRepository TreasureDefinitions { get; }
 
+	public MainViewIconResolver MainViewIcons { get; }
+
 	public GameRunContext(
 		GameSessionState session,
 		Random random,
@@ -50,7 +52,8 @@ public sealed class GameRunContext
 		PotionEffectApplicationService potionEffects,
 		TrapService trapService,
 		ITrapDefinitionRepository trapDefinitions,
-		ITreasureDefinitionRepository treasureDefinitions)
+		ITreasureDefinitionRepository treasureDefinitions,
+		MainViewIconResolver mainViewIcons)
 	{
 		Session = session;
 		Random = random;
@@ -75,5 +78,6 @@ public sealed class GameRunContext
 		TrapService = trapService;
 		TrapDefinitions = trapDefinitions;
 		TreasureDefinitions = treasureDefinitions;
+		MainViewIcons = mainViewIcons;
 	}
 }

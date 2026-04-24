@@ -38,6 +38,8 @@ public partial class MainUi : Control
 			return;
 		}
 
+		_mainViewPanel.BindIconResolver(_runContext.MainViewIcons);
+
 		var session = _runContext.Session;
 		var narrativeService = _runContext.NarrativeService;
 		var explorationService = _runContext.ExplorationService;

@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="TreasureResource" format=3 uid="uid://b2ly604b8c0t1"]
 
 [ext_resource type="Script" uid="uid://cnod6aldlemvr" path="res://Resources/TreasureResource.cs" id="1_6htn4"]
+[ext_resource type="Texture2D" uid="uid://ttxdxm54rnj4" path="res://Assets/PrototypeAssets/Coins.png" id="1_8jpqw"]
 
 [resource]
 script = ExtResource("1_6htn4")
@@ -8,3 +9,4 @@ Id = "copper_coins"
 Name = "A few copper coins"
 ValueInGp = 2
 InventoryItemId = "copper_coins"
+Icon = ExtResource("1_8jpqw")

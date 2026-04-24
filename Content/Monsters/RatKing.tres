@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="MonsterResource" format=3 uid="uid://8xwnbf8nrx4k"]
 
+[ext_resource type="Texture2D" uid="uid://b3n8mh18joiyc" path="res://Assets/PrototypeAssets/RatKing.png" id="1_12p7m"]
 [ext_resource type="Script" uid="uid://h3kt4eef0b3n" path="res://Resources/MonsterResource.cs" id="1_u437f"]
 
 [resource]
@@ -11,3 +12,4 @@ Attack = 5
 Defense = 13
 IsBoss = true
 RandomizerWeight = 5
+Icon = ExtResource("1_12p7m")

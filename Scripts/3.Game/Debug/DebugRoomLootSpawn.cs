@@ -25,6 +25,8 @@ public static class DebugRoomLootSpawn
 		if (snare == null || potion == null)
 			return false;
 
+		if (!TryAddCopper(treasures, room)) return false;
+
 		for (var i = 0; i < 2; i++)
 		{
 			room.Features.Add(new TrapFeature
@@ -50,4 +52,22 @@ public static class DebugRoomLootSpawn
 
 		return true;
 	}
+
+	private static bool TryAddCopper(ITreasureDefinitionRepository treasures, DungeonRoom room)
+	{
+		var copper = treasures.All.FirstOrDefault(d => d.Id == TreasureIds.CopperCoins);
+		if (copper == null)
+			return false;
+
+		room.Features.Add(new TreasureFeature
+		{
+			RemoveFeatureWhenEmpty = true,
+			TreasureItems = new List<TreasureInstance>
+			{
+				new() { Definition = copper, IsRevealed = true },
+			},
+		});
+
+		return true;
+    }
 }
