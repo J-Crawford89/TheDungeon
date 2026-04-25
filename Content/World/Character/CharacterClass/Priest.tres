@@ -2,7 +2,14 @@
 
 [ext_resource type="Script" uid="uid://c577agexi465p" path="res://Resources/CharacterClassResource.cs" id="1_16qcu"]
 [ext_resource type="Script" uid="uid://rr8vsheybc0y" path="res://Resources/LevelAbilityGrantResource.cs" id="2_grant"]
-[ext_resource type="Resource" uid="uid://d2vynnkm3kxuu" path="res://Content/World/Character/AbilityGrants/SpellcastingAt1.tres" id="3_spl"]
+[ext_resource type="Resource" uid="uid://cn86n85x2hpki" path="res://Content/Abilities/Spellcasting.tres" id="2_p113i"]
+[ext_resource type="Script" uid="uid://2bdywe1406xv" path="res://Resources/ItemResource.cs" id="3_fcpkd"]
+
+[sub_resource type="Resource" id="Resource_5u73v"]
+script = ExtResource("2_grant")
+Level = 1
+Ability = ExtResource("2_p113i")
+metadata/_custom_type_script = "uid://rr8vsheybc0y"
 
 [resource]
 script = ExtResource("1_16qcu")
@@ -10,4 +17,4 @@ Id = "priest"
 Name = "Priest"
 Description = "Priests rely on holy magic and divine intervention to keep going. They are far from skilled fighters, but can keep themselves in nearly any fight and are particularly effective against the undead and other unholy monsters."
 BaseHp = 4
-AbilityGrants = Array[ExtResource("2_grant")]([ExtResource("3_spl")])
+AbilityGrants = Array[ExtResource("2_grant")]([SubResource("Resource_5u73v")])

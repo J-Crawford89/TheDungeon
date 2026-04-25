@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://2bdywe1406xv" path="res://Resources/ItemResource.cs" id="1_vhtmu"]
 [ext_resource type="Script" uid="uid://bwbvrglbu1prr" path="res://Resources/Databases/ItemResourceDatabase.cs" id="2_guymr"]
-[ext_resource type="Resource" uid="uid://cw2l68qbnjvr4" path="res://Content/Item/HealthPotion.tres" id="2_jdoyd"]
-[ext_resource type="Resource" uid="uid://c1oyad26ywhqk" path="res://Content/Item/Rope.tres" id="3_jdoyd"]
+[ext_resource type="Resource" uid="uid://cw2l68qbnjvr4" path="res://Content/Item/Consumable/Potion/HealthPotion.tres" id="2_jdoyd"]
+[ext_resource type="Resource" uid="uid://c1oyad26ywhqk" path="res://Content/Item/Consumable/Rope.tres" id="3_jdoyd"]
 
 [resource]
 script = ExtResource("2_guymr")

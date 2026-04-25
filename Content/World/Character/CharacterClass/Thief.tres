@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="CharacterClassResource" format=3 uid="uid://bkoa0tjwsgbep"]
 
 [ext_resource type="Script" uid="uid://c577agexi465p" path="res://Resources/CharacterClassResource.cs" id="1_dmvnv"]
+[ext_resource type="Script" uid="uid://rr8vsheybc0y" path="res://Resources/LevelAbilityGrantResource.cs" id="1_evhtx"]
 
 [resource]
 script = ExtResource("1_dmvnv")

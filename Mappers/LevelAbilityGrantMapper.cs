@@ -13,7 +13,7 @@ public static class LevelAbilityGrantMapper
 		{
 			if (r == null)
 				continue;
-			var id = r.AbilityId?.Trim() ?? "";
+			var id = r.Ability?.Id?.Trim() ?? "";
 			if (string.IsNullOrEmpty(id))
 				continue;
 			list.Add(new LevelAbilityGrant { Level = r.Level, AbilityId = id });

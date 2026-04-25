@@ -13,7 +13,7 @@ public static class CharacterBackgroundMapper
 			Description = resource.Description,
 			StartingGold = resource.StartingGold,
 			AbilityGrants = LevelAbilityGrantMapper.ToDomainList(resource.AbilityGrants),
-			StartingEquipment = ToStringList(resource.StartingEquipment),
+			StartingEquipment = ItemResourceListMapper.ToDefinitionIds(resource.StartingEquipment),
 			Proficiencies = ToStringList(resource.Proficiencies),
 		};
 

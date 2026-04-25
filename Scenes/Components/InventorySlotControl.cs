@@ -75,11 +75,23 @@ public partial class InventorySlotControl : PanelContainer
 	public override void _Ready()
 	{
 		MouseFilter = MouseFilterEnum.Stop;
+		// Child controls default to MouseFilter.Stop and receive clicks first; _GuiInput on this node
+		// would never run. Let hits reach the PanelContainer so selection / SlotClicked work.
+		foreach (var child in GetChildren())
+			SetDescendantsMouseFilterIgnore(child);
 
 		if (_itemIcon == null || _quantityLabel == null)
 			GD.PushWarning("InventorySlotControl: assign ItemIcon and QuantityLabel exports in the inspector.");
 
 		SetSelected(false);
 		SetEmpty();
+	}
+
+	private static void SetDescendantsMouseFilterIgnore(Node node)
+	{
+		if (node is Control c)
+			c.MouseFilter = MouseFilterEnum.Ignore;
+		foreach (var ch in node.GetChildren())
+			SetDescendantsMouseFilterIgnore(ch);
 	}
 }

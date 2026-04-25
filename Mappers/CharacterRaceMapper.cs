@@ -13,7 +13,7 @@ public static class CharacterRaceMapper
 			Description = resource.Description,
 			BaseHp = resource.BaseHp,
 			AbilityGrants = LevelAbilityGrantMapper.ToDomainList(resource.AbilityGrants),
-			StartingEquipment = ToStringList(resource.StartingEquipment),
+			StartingEquipment = ItemResourceListMapper.ToDefinitionIds(resource.StartingEquipment),
 			Proficiencies = ToStringList(resource.Proficiencies),
 		};
 

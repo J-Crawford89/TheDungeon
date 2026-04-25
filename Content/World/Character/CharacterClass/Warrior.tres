@@ -1,6 +1,8 @@
 [gd_resource type="Resource" script_class="CharacterClassResource" format=3 uid="uid://ifync0w8y1re"]
 
 [ext_resource type="Script" uid="uid://c577agexi465p" path="res://Resources/CharacterClassResource.cs" id="1_kl110"]
+[ext_resource type="Script" uid="uid://rr8vsheybc0y" path="res://Resources/LevelAbilityGrantResource.cs" id="1_y67h1"]
+[ext_resource type="Script" uid="uid://2bdywe1406xv" path="res://Resources/ItemResource.cs" id="2_syjui"]
 
 [resource]
 script = ExtResource("1_kl110")

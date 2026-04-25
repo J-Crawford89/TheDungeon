@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dgxwvbumstmik" path="res://Resources/CharacterBackgroundResource.cs" id="1_ily7t"]
 [ext_resource type="Script" uid="uid://rr8vsheybc0y" path="res://Resources/LevelAbilityGrantResource.cs" id="1_liskd"]
+[ext_resource type="Script" uid="uid://2bdywe1406xv" path="res://Resources/ItemResource.cs" id="2_g8ouu"]
 
 [resource]
 script = ExtResource("1_ily7t")
