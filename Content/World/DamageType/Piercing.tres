@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="DamageTypeResource" format=3 uid="uid://khjg6aq0tt0o"]
+
+[ext_resource type="Script" uid="uid://cnhe7uq4anhb1" path="res://Resources/DamageTypeResource.cs" id="1_odxwo"]
+
+[resource]
+script = ExtResource("1_odxwo")
+Id = "piercing"
+Name = "Piercing"
+metadata/_custom_type_script = "uid://cnhe7uq4anhb1"

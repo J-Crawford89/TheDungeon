@@ -4,8 +4,11 @@
 [ext_resource type="Script" uid="uid://bwbvrglbu1prr" path="res://Resources/Databases/ItemResourceDatabase.cs" id="2_guymr"]
 [ext_resource type="Resource" uid="uid://cw2l68qbnjvr4" path="res://Content/Item/Consumable/Potion/HealthPotion.tres" id="2_jdoyd"]
 [ext_resource type="Resource" uid="uid://c1oyad26ywhqk" path="res://Content/Item/Consumable/Rope.tres" id="3_jdoyd"]
+[ext_resource type="Resource" uid="uid://cb6ww8x8jw6qx" path="res://Content/Item/Equipment/Armor/BasicChainShirt.tres" id="4_wppuf"]
+[ext_resource type="Resource" uid="uid://ck6xjfcacxoxy" path="res://Content/Item/Equipment/Armor/BasicMetalShield.tres" id="5_mpqax"]
+[ext_resource type="Resource" uid="uid://dyj1uky2yiios" path="res://Content/Item/Equipment/Weapon/BasicArmingSword.tres" id="6_mpj5q"]
 
 [resource]
 script = ExtResource("2_guymr")
-Items = Array[ExtResource("1_vhtmu")]([ExtResource("2_jdoyd"), ExtResource("3_jdoyd")])
+Items = Array[ExtResource("1_vhtmu")]([ExtResource("2_jdoyd"), ExtResource("3_jdoyd"), ExtResource("4_wppuf"), ExtResource("5_mpqax"), ExtResource("6_mpj5q")])
 metadata/_custom_type_script = "uid://bwbvrglbu1prr"

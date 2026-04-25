@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="DamageTypeResourceDatabase" format=3 uid="uid://b78u41sjmceo2"]
+
+[ext_resource type="Script" uid="uid://cnhe7uq4anhb1" path="res://Resources/DamageTypeResource.cs" id="1_05xx4"]
+[ext_resource type="Resource" uid="uid://cx2c87rsbu5cv" path="res://Content/World/DamageType/Acid.tres" id="2_2jku1"]
+[ext_resource type="Script" uid="uid://cwctpdwt3cd0h" path="res://Resources/Databases/DamageTypeResourceDatabase.cs" id="2_ojswe"]
+[ext_resource type="Resource" uid="uid://byr7c6ixnu4p1" path="res://Content/World/DamageType/Air.tres" id="3_k46yl"]
+[ext_resource type="Resource" uid="uid://lbv2c1n2kapj" path="res://Content/World/DamageType/Bludgeoning.tres" id="4_obts2"]
+[ext_resource type="Resource" uid="uid://s2cvneivlmar" path="res://Content/World/DamageType/Electric.tres" id="5_dsi41"]
+[ext_resource type="Resource" uid="uid://ienj5rvhvb38" path="res://Content/World/DamageType/Fire.tres" id="6_wwleh"]
+[ext_resource type="Resource" uid="uid://0vn04vpyf6to" path="res://Content/World/DamageType/Force.tres" id="7_js843"]
+[ext_resource type="Resource" uid="uid://7wxdjul7fu74" path="res://Content/World/DamageType/Frost.tres" id="8_ydbo2"]
+[ext_resource type="Resource" uid="uid://5lv0m3o47brf" path="res://Content/World/DamageType/Holy.tres" id="9_1oaby"]
+[ext_resource type="Resource" uid="uid://bm7c5jit0e554" path="res://Content/World/DamageType/Necrotic.tres" id="10_8bdg2"]
+[ext_resource type="Resource" uid="uid://khjg6aq0tt0o" path="res://Content/World/DamageType/Piercing.tres" id="11_0fcn7"]
+[ext_resource type="Resource" uid="uid://dfv1steqjk60g" path="res://Content/World/DamageType/Poison.tres" id="12_4ow7s"]
+[ext_resource type="Resource" uid="uid://dybt5hlctjy0f" path="res://Content/World/DamageType/Psychic.tres" id="13_dalds"]
+[ext_resource type="Resource" uid="uid://b8r5eyjlrffjk" path="res://Content/World/DamageType/Slashing.tres" id="14_3atmr"]
+[ext_resource type="Resource" uid="uid://c4runpjspuj17" path="res://Content/World/DamageType/Sonic.tres" id="15_ag1w3"]
+[ext_resource type="Resource" uid="uid://cenqr0gow2k6b" path="res://Content/World/DamageType/Unholy.tres" id="16_snsqm"]
+
+[resource]
+script = ExtResource("2_ojswe")
+DamageTypes = Array[ExtResource("1_05xx4")]([ExtResource("2_2jku1"), ExtResource("3_k46yl"), ExtResource("4_obts2"), ExtResource("5_dsi41"), ExtResource("6_wwleh"), ExtResource("7_js843"), ExtResource("8_ydbo2"), ExtResource("9_1oaby"), ExtResource("10_8bdg2"), ExtResource("11_0fcn7"), ExtResource("12_4ow7s"), ExtResource("13_dalds"), ExtResource("14_3atmr"), ExtResource("15_ag1w3"), ExtResource("16_snsqm")])
+metadata/_custom_type_script = "uid://cwctpdwt3cd0h"

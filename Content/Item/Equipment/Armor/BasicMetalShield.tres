@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ArmorResource" format=3 uid="uid://ck6xjfcacxoxy"]
+
+[ext_resource type="Texture2D" uid="uid://c7gvaxn2nd66b" path="res://Assets/PrototypeAssets/Shield.png" id="1_dgmfs"]
+[ext_resource type="Script" uid="uid://dks2gj6q81xln" path="res://Resources/ArmorResource.cs" id="1_qxa5w"]
+
+[resource]
+script = ExtResource("1_qxa5w")
+ArmorBonus = 1
+Slots = Array[int]([22, 24])
+Id = "basic_metal_shield"
+Name = "Basic Metal Shield"
+Description = "This shield should stop a blow or two."
+ValueInGold = 5
+Icon = ExtResource("1_dgmfs")
+InventoryIcon = ExtResource("1_dgmfs")
+metadata/_custom_type_script = "uid://dks2gj6q81xln"

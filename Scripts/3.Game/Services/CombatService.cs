@@ -108,7 +108,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		return slot.IsPlayer;
 	}
 
-	public void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal)
+	public void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice)
 	{
 		if (!IsAwaitingPlayerAction(session))
 			return;
@@ -124,9 +124,26 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		if (monster.CurrentHp <= 0)
 			return;
 		var might = session.Player.AbilityScores.Might;
+
+		var resolvedChoice = attackChoice;
+		if (!resolvedChoice.IsUnarmed)
+		{
+			var inv = session.Player.InventoryState;
+			if (!inv.EquippedBySlot.TryGetValue(resolvedChoice.WeaponSlotIfAny!.Value, out var inst) ||
+			    inst == null || inst.Definition is not WeaponDefinition)
+			{
+				session.AppendGameLog("You have nothing to attack with in that hand; you strike unarmed instead.");
+				resolvedChoice = PlayerAttackChoice.Unarmed;
+			}
+		}
+
+		var attackLabel = resolvedChoice.IsUnarmed
+			? $"Unarmed strike vs {monster.Definition.Name}"
+			: $"{session.Player.InventoryState.EquippedBySlot[resolvedChoice.WeaponSlotIfAny!.Value]!.Definition.Name} vs {monster.Definition.Name}";
+
 		var req = new DiceRollRequest
 		{
-			DiceRollLabel = $"Unarmed strike vs {monster.Definition.Name}",
+			DiceRollLabel = attackLabel,
 			TargetNumber = monster.Definition.Defense,
 			CheckStyle = D20CheckStyle.Standard,
 			DiceExpressions = new List<DiceExpression>
@@ -147,12 +164,24 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 
 		if (result.Outcome == ResolutionOutcome.Success || result.Outcome == ResolutionOutcome.CriticalSuccess)
 		{
-			var d6 = _dice.Roll(DieType.d6);
-			var dmg = CombatFormulas.UnarmedDamageTotal(d6.RolledValue, might);
+			int dmg;
+			string damageDetail;
+			if (resolvedChoice.IsUnarmed)
+			{
+				var d6 = _dice.Roll(DieType.d6);
+				dmg = CombatFormulas.UnarmedDamageTotal(d6.RolledValue, might);
+				damageDetail = $"½×d6 from {d6.RolledValue}";
+			}
+			else
+			{
+				var weapon = (WeaponDefinition)session.Player.InventoryState.EquippedBySlot[resolvedChoice.WeaponSlotIfAny!.Value]!.Definition;
+				dmg = RollWeaponDamageTotal(weapon, might, out damageDetail);
+			}
+
 			if (result.Outcome == ResolutionOutcome.CriticalSuccess)
 				dmg *= 2;
 			monster.CurrentHp -= dmg;
-			session.AppendGameLog(_narrative.ForDamageDealt(monster.Definition.Name, dmg, monster.CurrentHp, d6.RolledValue));
+			session.AppendGameLog(_narrative.ForDamageDealt(monster.Definition.Name, dmg, monster.CurrentHp, damageDetail));
 		}
 		else
 			session.AppendGameLog(_narrative.ForAttackMiss("You", monster.Definition.Name));
@@ -163,6 +192,29 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 
 		_turnLoop.AdvanceTurn(session);
 		_turnLoop.ProcessAutomaticMonsterTurns(session);
+	}
+
+	private int RollWeaponDamageTotal(WeaponDefinition weapon, int mightScore, out string damageDetail)
+	{
+		var parts = new List<string>();
+		var sum = 0;
+		foreach (var comp in weapon.DamageComponents)
+		{
+			var rolled = 0;
+			for (var i = 0; i < comp.DamageDice.NumberOfDice; i++)
+				rolled += _dice.Roll(comp.DamageDice.DieType).RolledValue;
+
+			var part = rolled + comp.FlatAmount;
+			sum += part;
+			parts.Add($"{comp.DamageType.Name} {rolled}+{comp.FlatAmount}");
+		}
+
+		sum += mightScore;
+		var raw = Math.Max(1, sum);
+		damageDetail = parts.Count > 0
+			? $"{string.Join(", ", parts)} + Might {mightScore}"
+			: $"Might {mightScore}";
+		return raw;
 	}
 
 	public void ExecutePlayerFlee(GameSessionState session)

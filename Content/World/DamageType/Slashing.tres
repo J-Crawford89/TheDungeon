@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="DamageTypeResource" format=3 uid="uid://b8r5eyjlrffjk"]
+
+[ext_resource type="Script" uid="uid://cnhe7uq4anhb1" path="res://Resources/DamageTypeResource.cs" id="1_n1dir"]
+
+[resource]
+script = ExtResource("1_n1dir")
+Id = "slashing"
+Name = "Slashing"
+metadata/_custom_type_script = "uid://cnhe7uq4anhb1"

@@ -21,6 +21,8 @@ public partial class GameRoot : Control
 
 	[Export] public AbilityResourceDatabase? AbilityDatabase { get; set; }
 
+	[Export] public DamageTypeResourceDatabase? DamageTypeDatabase { get; set; }
+
 	[Export] public ItemResourceDatabase? ItemDatabase { get; set; }
 
 	[Export] public MainViewTraversalIcons? MainViewTraversalIcons { get; set; }
@@ -160,8 +162,11 @@ public partial class GameRoot : Control
 			GD.PushWarning("GameRoot: assign AbilityDatabase (e.g. Content/Databases/AbilityDatabase.tres) on this node so ability grants validate and resolve.");
 		if (ItemDatabase == null)
 			GD.PushWarning("GameRoot: assign ItemDatabase (e.g. Content/Databases/ItemDatabase.tres) on this node for item definitions.");
+		if (DamageTypeDatabase == null)
+			GD.PushWarning("GameRoot: assign DamageTypeDatabase (e.g. Content/Databases/DamageTypeDatabase.tres) for damage type definitions.");
 
 		var abilityRepo = new GodotAbilityDefinitionRepository(AbilityDatabase);
+		var damageTypeRepo = new GodotDamageTypeDefinitionRepository(DamageTypeDatabase);
 		var itemRepo = new GodotItemDefinitionRepository(ItemDatabase);
 
 		var roomFeaturePopulation = new RoomFeaturePopulationService(monsterRepo, trapRepo, treasureRepo, npcRepo, loreRepo);
@@ -185,7 +190,7 @@ public partial class GameRoot : Control
 			trapService);
 		var inspectService = new InspectService(diceRollService, resolutionService, narrativeService);
 		var explorationService = new ExplorationService(roomFeaturePopulation, combatService, inspectService, trapService);
-		var characterCreation = new CharacterCreationService(diceRollService, random, abilityRepo);
+		var characterCreation = new CharacterCreationService(diceRollService, random, abilityRepo, itemRepo);
 
 		var icons = new IconResolver(
 			MonsterDatabase,
@@ -215,6 +220,7 @@ public partial class GameRoot : Control
 			raceRepo,
 			backgroundRepo,
 			abilityRepo,
+			damageTypeRepo,
 			itemRepo,
 			potionEffectApplicationService,
 			trapService,

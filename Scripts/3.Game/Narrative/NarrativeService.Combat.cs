@@ -32,7 +32,10 @@ public sealed partial class NarrativeService
 		$"{attacker} misses {target}.";
 
 	public string ForDamageDealt(string targetName, int damage, int hpRemaining, int d6Face) =>
-		$"You hit {targetName} for {damage} damage (½×d6 from {d6Face}). {targetName} has {hpRemaining} HP left.";
+		ForDamageDealt(targetName, damage, hpRemaining, $"½×d6 from {d6Face}");
+
+	public string ForDamageDealt(string targetName, int damage, int hpRemaining, string damageDetail) =>
+		$"You hit {targetName} for {damage} damage ({damageDetail}). {targetName} has {hpRemaining} HP left.";
 
 	public string ForMonsterHitPlayer(string monsterName, int damage, int playerHp) =>
 		$"{monsterName} hits you for {damage} damage. You have {playerHp} HP left.";

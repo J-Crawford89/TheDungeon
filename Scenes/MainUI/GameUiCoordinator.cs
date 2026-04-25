@@ -7,6 +7,7 @@ public sealed class GameUiCoordinator
 	private enum TargetingKind
 	{
 		Attack,
+		AttackWeapon,
 		Take,
 		Disarm,
 	}
@@ -30,6 +31,7 @@ public sealed class GameUiCoordinator
 
 	private ActiveTargeting? _targeting;
 	private int? _targetHoverDescriptorIndex;
+	private PlayerAttackChoice? _pendingAttackChoice;
 
 	public GameUiCoordinator(
 		GameSessionState session,
@@ -64,6 +66,7 @@ public sealed class GameUiCoordinator
 
 	public void OnTargetSelectionCanceled()
 	{
+		_pendingAttackChoice = null;
 		ClearTargetingSession();
 		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
@@ -77,9 +80,16 @@ public sealed class GameUiCoordinator
 		ClearTargetingSession();
 		switch (kind)
 		{
-			case TargetingKind.Attack:
-				_combat.OnAttackWithTarget(d.Payload.LivingMonsterOrdinal);
+			case TargetingKind.AttackWeapon:
+				OnAttackWeaponPicked(d.Payload);
 				break;
+			case TargetingKind.Attack:
+			{
+				var choice = _pendingAttackChoice ?? PlayerAttackChoice.Unarmed;
+				_pendingAttackChoice = null;
+				_combat.OnAttackWithTarget(d.Payload.LivingMonsterOrdinal, choice);
+				break;
+			}
 			case TargetingKind.Take:
 				if (_session.Dungeon.DungeonMode == DungeonMode.Exploration)
 					_exploration.OnTakeWithTarget(d.Payload);
@@ -142,7 +152,10 @@ public sealed class GameUiCoordinator
 	public void RefreshHud(UiRefreshFlags flags)
 	{
 		if (_session.Phase != GamePlayPhase.InProgress)
+		{
+			_pendingAttackChoice = null;
 			ClearTargetingSession();
+		}
 
 		if (flags.HasFlag(UiRefreshFlags.Command) && _session.Phase == GamePlayPhase.GameOver)
 		{
@@ -265,22 +278,73 @@ public sealed class GameUiCoordinator
 		if (!_combatService.IsAwaitingPlayerAction(_session))
 			return;
 
-		var list = PlayerActionTargetResolvers.ResolveAttackTargets(_session);
-		if (list.Count == 0)
+		var monsters = PlayerActionTargetResolvers.ResolveAttackTargets(_session);
+		if (monsters.Count == 0)
 		{
 			_session.AppendGameLog("There is nothing you can attack.");
 			return;
 		}
 
-		if (list.Count == 1)
+		var weaponChoices = PlayerAttackOptionsResolver.ResolveWeaponChoiceDescriptors(_session.Player.InventoryState);
+		var needsWeaponPick = weaponChoices.Count > 1;
+
+		if (!needsWeaponPick)
 		{
-			_combat.OnAttackWithTarget(list[0].Payload.LivingMonsterOrdinal);
+			if (monsters.Count == 1)
+			{
+				_combat.OnAttackWithTarget(monsters[0].Payload.LivingMonsterOrdinal, PlayerAttackChoice.Unarmed);
+				return;
+			}
+
+			_pendingAttackChoice = null;
+			_targeting = new ActiveTargeting { Kind = TargetingKind.Attack, Descriptors = monsters };
+			_targetHoverDescriptorIndex = null;
+			_commandPanel.EnterTargetSelection(monsters);
+			RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
 			return;
 		}
 
-		_targeting = new ActiveTargeting { Kind = TargetingKind.Attack, Descriptors = list };
+		if (monsters.Count == 1)
+		{
+			_targeting = new ActiveTargeting { Kind = TargetingKind.AttackWeapon, Descriptors = weaponChoices };
+			_targetHoverDescriptorIndex = null;
+			_commandPanel.EnterTargetSelection(weaponChoices);
+			RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
+			return;
+		}
+
+		_pendingAttackChoice = null;
+		_targeting = new ActiveTargeting { Kind = TargetingKind.AttackWeapon, Descriptors = weaponChoices };
 		_targetHoverDescriptorIndex = null;
-		_commandPanel.EnterTargetSelection(list);
+		_commandPanel.EnterTargetSelection(weaponChoices);
+		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
+	}
+
+	private void OnAttackWeaponPicked(TargetPayload payload)
+	{
+		if (payload.Kind != TargetPayloadKind.PlayerAttackWeaponPick)
+			return;
+
+		_pendingAttackChoice = payload.AttackChoice;
+		var monsters = PlayerActionTargetResolvers.ResolveAttackTargets(_session);
+		if (monsters.Count == 0)
+		{
+			_session.AppendGameLog("There is nothing you can attack.");
+			_pendingAttackChoice = null;
+			return;
+		}
+
+		if (monsters.Count == 1)
+		{
+			var choice = _pendingAttackChoice ?? PlayerAttackChoice.Unarmed;
+			_pendingAttackChoice = null;
+			_combat.OnAttackWithTarget(monsters[0].Payload.LivingMonsterOrdinal, choice);
+			return;
+		}
+
+		_targeting = new ActiveTargeting { Kind = TargetingKind.Attack, Descriptors = monsters };
+		_targetHoverDescriptorIndex = null;
+		_commandPanel.EnterTargetSelection(monsters);
 		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
 

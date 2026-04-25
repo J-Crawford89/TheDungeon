@@ -6,7 +6,7 @@ public interface ICombatService
 
 	bool IsAwaitingPlayerAction(GameSessionState session);
 
-	void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal);
+	void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice);
 
 	void ExecutePlayerFlee(GameSessionState session);
 

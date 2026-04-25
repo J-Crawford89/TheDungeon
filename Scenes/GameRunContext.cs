@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 
 public sealed class GameRunContext
 {
@@ -21,6 +22,7 @@ public sealed class GameRunContext
 	public ICharacterRaceDefinitionRepository CharacterRaces { get; }
 	public ICharacterBackgroundDefinitionRepository CharacterBackgrounds { get; }
 	public IAbilityDefinitionRepository AbilityDefinitions { get; }
+	public IDamageTypeDefinitionRepository DamageTypeDefinitions { get; }
 	public IItemDefinitionRepository ItemDefinitions { get; }
 	public PotionEffectApplicationService PotionEffects { get; }
 	public TrapService TrapService { get; }
@@ -48,6 +50,7 @@ public sealed class GameRunContext
 		ICharacterRaceDefinitionRepository characterRaces,
 		ICharacterBackgroundDefinitionRepository characterBackgrounds,
 		IAbilityDefinitionRepository abilityDefinitions,
+		IDamageTypeDefinitionRepository damageTypeDefinitions,
 		IItemDefinitionRepository itemDefinitions,
 		PotionEffectApplicationService potionEffects,
 		TrapService trapService,
@@ -73,6 +76,7 @@ public sealed class GameRunContext
 		CharacterRaces = characterRaces;
 		CharacterBackgrounds = characterBackgrounds;
 		AbilityDefinitions = abilityDefinitions;
+		DamageTypeDefinitions = damageTypeDefinitions;
 		ItemDefinitions = itemDefinitions;
 		PotionEffects = potionEffects;
 		TrapService = trapService;

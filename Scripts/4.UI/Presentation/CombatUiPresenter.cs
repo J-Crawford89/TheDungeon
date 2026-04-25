@@ -13,13 +13,13 @@ public sealed class CombatUiPresenter
 		_refreshHud = refreshHud;
 	}
 
-	public void OnAttackWithTarget(int livingMonsterOrdinal)
+	public void OnAttackWithTarget(int livingMonsterOrdinal, PlayerAttackChoice attackChoice = default)
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		if (!_combatService.IsAwaitingPlayerAction(_session))
 			return;
-		_combatService.ExecutePlayerAttack(_session, livingMonsterOrdinal);
+		_combatService.ExecutePlayerAttack(_session, livingMonsterOrdinal, attackChoice);
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
 	}
 

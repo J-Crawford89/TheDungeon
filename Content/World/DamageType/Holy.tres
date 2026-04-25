@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="DamageTypeResource" format=3 uid="uid://5lv0m3o47brf"]
+
+[ext_resource type="Script" uid="uid://cnhe7uq4anhb1" path="res://Resources/DamageTypeResource.cs" id="1_ah2vd"]
+
+[resource]
+script = ExtResource("1_ah2vd")
+Id = "holy"
+Name = "Holy"
+Family = 2
+metadata/_custom_type_script = "uid://cnhe7uq4anhb1"

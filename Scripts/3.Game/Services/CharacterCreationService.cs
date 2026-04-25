@@ -9,15 +9,18 @@ public sealed class CharacterCreationService
 	private readonly DiceRollService _diceRollService;
 	private readonly Random _random;
 	private readonly IAbilityDefinitionRepository _abilityDefinitions;
+	private readonly IItemDefinitionRepository _itemDefinitions;
 
 	public CharacterCreationService(
 		DiceRollService diceRollService,
 		Random random,
-		IAbilityDefinitionRepository abilityDefinitions)
+		IAbilityDefinitionRepository abilityDefinitions,
+		IItemDefinitionRepository itemDefinitions)
 	{
 		_diceRollService = diceRollService;
 		_random = random;
 		_abilityDefinitions = abilityDefinitions;
+		_itemDefinitions = itemDefinitions;
 	}
 
 	public void RollAndApplyRolledScores(CharacterCreationState state)
@@ -112,8 +115,12 @@ public sealed class CharacterCreationService
 		}
 
 		player.InventoryState = new InventoryState();
-
-		// TODO: merge StartingEquipment from class/race/background into inventory when equipment is modeled.
+		PlayerStartingEquipmentGrantBuilder.ApplyToInventory(
+			state.SelectedClass,
+			state.SelectedRace,
+			state.SelectedBackground,
+			player.InventoryState,
+			_itemDefinitions);
 	}
 
 	private static int SumAbilities(AbilityScores s) =>

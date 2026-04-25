@@ -377,12 +377,27 @@ public partial class NotebookOverlay : Control
 
 		private void OnEquipPressed()
 		{
-			GD.Print("[Notebook] Equip not implemented yet.");
+			if (!InventoryNotebookActionRules.ShouldEnableEquip(_selection, GetSelectedItem()))
+				return;
+			var item = GetSelectedItem();
+			if (item == null)
+				return;
+			if (!InventoryEquipmentOperations.TryEquipOneFromBackpackRow(_session.Player.InventoryState, item))
+				return;
+			_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
+			RefreshAll();
 		}
 
 		private void OnUnequipPressed()
 		{
-			GD.Print("[Notebook] Unequip not implemented yet.");
+			if (!InventoryNotebookActionRules.ShouldEnableUnequip(_selection, GetSelectedItem()))
+				return;
+			if (_selection.Kind != InventorySlotKind.Equipment)
+				return;
+			if (!InventoryEquipmentOperations.TryUnequipSlot(_session.Player.InventoryState, _selection.EquipmentSlot))
+				return;
+			_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
+			RefreshAll();
 		}
 
 		private void OnUsePressed()

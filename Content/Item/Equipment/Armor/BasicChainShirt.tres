@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ArmorResource" format=3 uid="uid://cb6ww8x8jw6qx"]
+
+[ext_resource type="Texture2D" uid="uid://c26wir8e2yjri" path="res://Assets/PrototypeAssets/ChainShirt.png" id="1_1lmue"]
+[ext_resource type="Script" uid="uid://dks2gj6q81xln" path="res://Resources/ArmorResource.cs" id="2_8vkwi"]
+
+[resource]
+script = ExtResource("2_8vkwi")
+ArmorBonus = 3
+Slots = Array[int]([1])
+Id = "basic_chain_shirt"
+Name = "Basic Chain Shirt"
+Description = "This chain shirt has seen better days."
+ValueInGold = 6
+Icon = ExtResource("1_1lmue")
+InventoryIcon = ExtResource("1_1lmue")
+metadata/_custom_type_script = "uid://dks2gj6q81xln"
