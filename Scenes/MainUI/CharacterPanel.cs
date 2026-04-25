@@ -36,7 +36,7 @@ public partial class CharacterPanel : PanelContainer
 	{
 		_nameLabel.Text = $"Name: {player.Name}";
 		_hpLabel.Text = $"HP: {player.CurrentHp} / {player.MaxHp}";
-		_levelLabel.Text = $"LEVEL: {player.Level}";
+		_levelLabel.Text = $"LEVEL: {player.Level}  XP: {player.Experience}";
 		if (_goldLabel != null)
 			_goldLabel.Text = $"GOLD: {player.Gold}";
 		var hpQty = player.InventoryState.SumQuantityForDefinitionId(InventoryIds.HealthPotion);

@@ -96,7 +96,7 @@ public sealed class ExplorationUiPresenter
 		if (result.Success)
 			_explorationService.TryBeginCombatIfHostile(_session, previousCoord, floorLevel);
 		if (!TryReportDiagnosticAndRefreshAll(result))
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map);
+			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
 	}
 
 	public void OnBackwardPressed()

@@ -8,6 +8,7 @@ public static class MonsterMapper
 			MaxHp = resource.MaxHp,
 			Attack = resource.Attack,
 			Defense = resource.Defense,
+			ExperienceReward = resource.ExperienceReward,
 			IsBoss = resource.IsBoss,
 			RandomizerWeight = resource.RandomizerWeight
 		};

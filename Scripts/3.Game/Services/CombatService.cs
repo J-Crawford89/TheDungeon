@@ -12,6 +12,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 	private readonly TreasurePickupService _treasurePickup;
 	private readonly PotionEffectApplicationService _potionEffects;
 	private readonly TrapService _trapService;
+	private readonly PlayerExperienceService? _experience;
 	private readonly CombatAbilityEffectsRegistry _combatAbilities = new();
 	private readonly CombatEncounterLifecycle _lifecycle;
 	private readonly CombatInitiative _initiative;
@@ -26,7 +27,8 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		PlayerDownedResolutionService playerDowned,
 		TreasurePickupService treasurePickup,
 		PotionEffectApplicationService potionEffects,
-		TrapService trapService)
+		TrapService trapService,
+		PlayerExperienceService? experience = null)
 	{
 		_dice = dice;
 		_resolution = resolution;
@@ -35,6 +37,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		_playerDowned = playerDowned;
 		_treasurePickup = treasurePickup;
 		_trapService = trapService;
+		_experience = experience;
 		_lifecycle = new CombatEncounterLifecycle(_narrative);
 		_monsterTurn = new CombatMonsterTurn(_resolution, _narrative, _vitals, _playerDowned);
 		_initiative = new CombatInitiative(_dice, _narrative);
@@ -123,6 +126,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		var monster = feature.Monsters[targetIndex];
 		if (monster.CurrentHp <= 0)
 			return;
+		var monsterWasAlive = monster.CurrentHp > 0;
 		var might = session.Player.AbilityScores.Might;
 
 		var resolvedChoice = attackChoice;
@@ -182,6 +186,8 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 				dmg *= 2;
 			monster.CurrentHp -= dmg;
 			session.AppendGameLog(_narrative.ForDamageDealt(monster.Definition.Name, dmg, monster.CurrentHp, damageDetail));
+			if (monsterWasAlive && monster.CurrentHp <= 0)
+				_experience?.GrantExperience(session, monster.Definition.ExperienceReward);
 		}
 		else
 			session.AppendGameLog(_narrative.ForAttackMiss("You", monster.Definition.Name));

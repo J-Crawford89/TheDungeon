@@ -1,0 +1,36 @@
+[gd_scene format=3 uid="uid://cwawgt4d0onew"]
+
+[ext_resource type="Script" uid="uid://pc7c728w4ytg" path="res://Scenes/Components/CollapsibleInfoRow.cs" id="1_bxuw8"]
+
+[node name="CollapsibleInfoRow" type="VBoxContainer" unique_id=1472411627 node_paths=PackedStringArray("_headerButton", "_bodyMargin", "_bodyLabel")]
+offset_right = 83.0
+offset_bottom = 68.0
+size_flags_horizontal = 3
+script = ExtResource("1_bxuw8")
+_headerButton = NodePath("HeaderButton")
+_bodyMargin = NodePath("BodyMargin")
+_bodyLabel = NodePath("BodyMargin/BodyLabel")
+
+[node name="HeaderButton" type="Button" parent="." unique_id=218851116]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "  ▶   Header"
+alignment = 0
+
+[node name="BodyMargin" type="MarginContainer" parent="." unique_id=135735993]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_bottom = 6
+
+[node name="BodyLabel" type="RichTextLabel" parent="BodyMargin" unique_id=1679610525]
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 14
+theme_override_font_sizes/bold_font_size = 14
+theme_override_font_sizes/bold_italics_font_size = 14
+theme_override_font_sizes/italics_font_size = 14
+theme_override_font_sizes/mono_font_size = 14
+bbcode_enabled = true
+fit_content = true
+scroll_active = false

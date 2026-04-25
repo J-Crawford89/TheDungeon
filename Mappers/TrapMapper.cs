@@ -7,6 +7,7 @@ public static class TrapMapper
 			Name = resource.Name,
 			DiscoverDc = resource.DiscoverDc,
 			DisarmDc = resource.DisarmDc,
+			ExperienceReward = resource.ExperienceReward,
 			Damage = resource.Damage,
 			Effect = resource.Effect,
 			IsRemovedAfterTripped = resource.IsRemovedAfterTripped,

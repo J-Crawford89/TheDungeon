@@ -10,5 +10,6 @@ Name = "Giant Rat"
 MaxHp = 10
 Attack = 4
 Defense = 10
+ExperienceReward = 8
 RandomizerWeight = 15
 Icon = ExtResource("1_ustx4")

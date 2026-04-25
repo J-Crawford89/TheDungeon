@@ -10,6 +10,7 @@ Name = "Rat King"
 MaxHp = 25
 Attack = 5
 Defense = 13
+ExperienceReward = 15
 IsBoss = true
 RandomizerWeight = 5
 Icon = ExtResource("1_12p7m")

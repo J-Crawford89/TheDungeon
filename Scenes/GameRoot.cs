@@ -24,6 +24,7 @@ public partial class GameRoot : Control
 	[Export] public DamageTypeResourceDatabase? DamageTypeDatabase { get; set; }
 
 	[Export] public ItemResourceDatabase? ItemDatabase { get; set; }
+	[Export] public GameBalanceSettingsResource? GameBalanceSettings { get; set; }
 
 	[Export] public MainViewTraversalIcons? MainViewTraversalIcons { get; set; }
 
@@ -173,12 +174,13 @@ public partial class GameRoot : Control
 		var dungeonBootstrap = new DungeonBootstrap(roomFeaturePopulation);
 		var diceRollService = new DiceRollService(random);
 		var resolutionService = new ResolutionService(diceRollService);
+		var experienceService = new PlayerExperienceService(narrativeService);
 		var treasurePickupService = new TreasurePickupService(narrativeService, itemRepo);
 		var potionEffectApplicationService = new PotionEffectApplicationService(diceRollService, narrativeService, itemRepo);
 		var vitalsService = new PlayerVitalsService();
 		var gameOverDownedHandler = new GameOverDownedHandler(narrativeService);
 		var playerDownedResolutionService = new PlayerDownedResolutionService(new IPlayerDownedOutcomeHandler[] { gameOverDownedHandler });
-		var trapService = new TrapService(resolutionService, narrativeService, vitalsService, itemRepo);
+		var trapService = new TrapService(resolutionService, narrativeService, vitalsService, itemRepo, experienceService);
 		var combatService = new CombatService(
 			diceRollService,
 			resolutionService,
@@ -187,9 +189,17 @@ public partial class GameRoot : Control
 			playerDownedResolutionService,
 			treasurePickupService,
 			potionEffectApplicationService,
-			trapService);
+			trapService,
+			experienceService);
 		var inspectService = new InspectService(diceRollService, resolutionService, narrativeService);
-		var explorationService = new ExplorationService(roomFeaturePopulation, combatService, inspectService, trapService);
+		var explorationService = new ExplorationService(
+			roomFeaturePopulation,
+			combatService,
+			inspectService,
+			trapService,
+			experienceService,
+			GameBalanceSettings?.ExperiencePerFirstRoomVisit ?? 0,
+			GameBalanceSettings?.ExperiencePerFloorEntry ?? 0);
 		var characterCreation = new CharacterCreationService(diceRollService, random, abilityRepo, itemRepo);
 
 		var icons = new IconResolver(
@@ -222,6 +232,8 @@ public partial class GameRoot : Control
 			abilityRepo,
 			damageTypeRepo,
 			itemRepo,
+			GameBalanceSettings,
+			experienceService,
 			potionEffectApplicationService,
 			trapService,
 			trapRepo,

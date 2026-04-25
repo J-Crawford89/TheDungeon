@@ -94,6 +94,7 @@ public sealed class CharacterCreationService
 
 		player.Gold = state.SelectedBackground?.StartingGold ?? 0;
 		player.Level = 1;
+		player.Experience = 0;
 		player.Facing = HorizontalDirection.North;
 
 		player.GrantedAbilities = PlayerAbilityGrantBuilder.Build(

@@ -8,17 +8,26 @@ public sealed class ExplorationService
     private readonly ICombatService _combat;
     private readonly InspectService _inspect;
     private readonly TrapService _trapService;
+    private readonly PlayerExperienceService? _experience;
+    private readonly int _experiencePerFirstRoomVisit;
+    private readonly int _experiencePerFloorEntry;
 
     public ExplorationService(
         RoomFeaturePopulationService roomFeaturePopulation,
         ICombatService combat,
         InspectService inspect,
-        TrapService trapService)
+        TrapService trapService,
+        PlayerExperienceService? experience = null,
+        int experiencePerFirstRoomVisit = 0,
+        int experiencePerFloorEntry = 0)
     {
         _roomFeaturePopulation = roomFeaturePopulation;
         _combat = combat;
         _inspect = inspect;
         _trapService = trapService;
+        _experience = experience;
+        _experiencePerFirstRoomVisit = experiencePerFirstRoomVisit;
+        _experiencePerFloorEntry = experiencePerFloorEntry;
     }
 
     public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
@@ -67,9 +76,13 @@ public sealed class ExplorationService
         var backtrackHorizontal = dungeon.EnteredFromCompass.HasValue && playerFacing == dungeon.EnteredFromCompass.Value;
         _trapService.ProcessTrapsOnRoomExit(session, currentRoom, backtrackHorizontal);
 
+        var discovered = dungeon.DiscoveredRoomsByFloor[floor.Level];
+        var firstVisit = !discovered.Contains(destinationCoord);
         dungeon.PlayerCoord = destinationCoord;
-        dungeon.DiscoveredRoomsByFloor[floor.Level].Add(destinationCoord);
+        discovered.Add(destinationCoord);
         dungeon.SetIngressAfterHorizontalEnter(playerFacing);
+        if (firstVisit)
+            _experience?.GrantExperience(session, _experiencePerFirstRoomVisit);
         return ExplorationServiceResult.OkMoveForward(destinationCoord);
     }
 
@@ -226,10 +239,20 @@ public sealed class ExplorationService
             targetExitFeature.RopeAnchored = true;
         }
 
+        var firstVisitToFloorAbove = !dungeon.DiscoveredRoomsByFloor.TryGetValue(floorAbove.Level, out var discoveredAbove);
+        if (discoveredAbove == null)
+        {
+            discoveredAbove = new HashSet<RoomCoord>();
+            dungeon.DiscoveredRoomsByFloor[floorAbove.Level] = discoveredAbove;
+        }
+        discoveredAbove.Add(targetRoom.Position);
+
         dungeon.CurrentFloor = floorAbove;
         dungeon.PlayerCoord = targetRoom.Position;
         dungeon.EnteredFromCompass = null;
         dungeon.VerticalIngress = VerticalIngressKind.EnteredFromFloorBelow;
+        if (firstVisitToFloorAbove)
+            _experience?.GrantExperience(session, _experiencePerFloorEntry);
         return ExplorationServiceResult.OkChangeFloor(
             floorAbove.Level,
             targetRoom.Position,
@@ -324,12 +347,19 @@ public sealed class ExplorationService
                 lowerExit.RopeAnchored = true;
         }
 
+        var firstVisitToNewFloor = !dungeon.DiscoveredRoomsByFloor.ContainsKey(newFloor.Level);
+
         dungeon.Floors.Add(newFloor);
         dungeon.CurrentFloor = newFloor;
         dungeon.PlayerCoord = DirectionHelper.Origin;
-        dungeon.DiscoveredRoomsByFloor.Add(newFloor.Level, new HashSet<RoomCoord>([DirectionHelper.Origin]));
+        if (dungeon.DiscoveredRoomsByFloor.TryGetValue(newFloor.Level, out var discoveredOnNewFloor))
+            discoveredOnNewFloor.Add(DirectionHelper.Origin);
+        else
+            dungeon.DiscoveredRoomsByFloor.Add(newFloor.Level, new HashSet<RoomCoord>([DirectionHelper.Origin]));
         dungeon.EnteredFromCompass = null;
         dungeon.VerticalIngress = VerticalIngressKind.EnteredFromFloorAbove;
+        if (firstVisitToNewFloor)
+            _experience?.GrantExperience(session, _experiencePerFloorEntry);
         return ExplorationServiceResult.OkChangeFloor(
             newFloor.Level,
             DirectionHelper.Origin,

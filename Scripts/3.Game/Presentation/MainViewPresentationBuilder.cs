@@ -14,7 +14,11 @@ public static class MainViewPresentationBuilder
 		var verticalNote = verticalConnection == FloorConnectionType.None
 			? string.Empty
 			: $" | {verticalConnection}";
-		var title = $"Room {coord} — Facing: {facing}{verticalNote}";
+
+		var floorPrefix = dungeon.CurrentFloor is { } floor
+			? $"Floor {floor.Level} — "
+			: string.Empty;
+		var title = $"{floorPrefix}Room {coord} — Facing: {facing}{verticalNote}";
 
 		RoomConnectionType left, front, right;
 		if (dungeon.CurrentRoom is { } room)

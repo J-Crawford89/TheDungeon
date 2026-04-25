@@ -1,0 +1,214 @@
+[gd_scene format=3 uid="uid://ly4mi3n33reh"]
+
+[ext_resource type="PackedScene" uid="uid://cwawgt4d0onew" path="res://Scenes/Components/CollapsibleInfoRow.tscn" id="1_c64xy"]
+
+[node name="CharacterPageMargin" type="MarginContainer" unique_id=1368927034]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="CharacterPageHBox" type="HBoxContainer" parent="." unique_id=1944661052]
+layout_mode = 2
+
+[node name="CharacterPageLeftPanel" type="PanelContainer" parent="CharacterPageHBox" unique_id=1072720208]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CharacterPageLeftMargin" type="MarginContainer" parent="CharacterPageHBox/CharacterPageLeftPanel" unique_id=1139853087]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="CharacterPageLeftVBox" type="VBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin" unique_id=1820365001]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CharacterNameTitle" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=1615982511]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Character Name"
+horizontal_alignment = 1
+
+[node name="HpEcHBox" type="HBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=1953456048]
+layout_mode = 2
+
+[node name="HpLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/HpEcHBox" unique_id=634979757]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "HP: 10/10"
+
+[node name="EcLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/HpEcHBox" unique_id=280828420]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "EC: 10"
+
+[node name="ArmorHBox" type="HBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=221077108]
+layout_mode = 2
+
+[node name="ArmorBonusLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/ArmorHBox" unique_id=857290546]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Armor Bonus: 0"
+
+[node name="DamageReductionLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/ArmorHBox" unique_id=545413920]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Damage Reduction: 0"
+
+[node name="LevelExperienceHBox" type="HBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=1718344041]
+layout_mode = 2
+
+[node name="LevelLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/LevelExperienceHBox" unique_id=728233703]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Level: 1"
+
+[node name="ExperienceLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/LevelExperienceHBox" unique_id=2056586862]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "XP: 0"
+
+[node name="SpLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=1086549925]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "SP: 10/10"
+
+[node name="IdentityListVBox" type="VBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=1808003502]
+layout_mode = 2
+
+[node name="RaceHBox" type="HBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/IdentityListVBox" unique_id=1184949843]
+layout_mode = 2
+
+[node name="CollapsibleInfoRow" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/IdentityListVBox/RaceHBox" unique_id=1472411627 instance=ExtResource("1_c64xy")]
+layout_mode = 2
+
+[node name="ClassHBox" type="HBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/IdentityListVBox" unique_id=1458834993]
+layout_mode = 2
+
+[node name="CollapsibleInfoRow" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/IdentityListVBox/ClassHBox" unique_id=708449995 instance=ExtResource("1_c64xy")]
+layout_mode = 2
+
+[node name="CollapsibleInfoRow" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/IdentityListVBox" unique_id=221806374 instance=ExtResource("1_c64xy")]
+layout_mode = 2
+
+[node name="AbilityScoresLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=2140297351]
+layout_mode = 2
+text = "Ability Scores"
+horizontal_alignment = 1
+
+[node name="AbilityScoreHBox1" type="HBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=1145870164]
+layout_mode = 2
+
+[node name="MightLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/AbilityScoreHBox1" unique_id=1323653660]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Might: 0"
+
+[node name="ConstitutionLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/AbilityScoreHBox1" unique_id=669635730]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Constitution: 0"
+
+[node name="AbilityScoreHBox2" type="HBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=687053434]
+layout_mode = 2
+
+[node name="DexterityLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/AbilityScoreHBox2" unique_id=1226819239]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Dexterity: 0"
+
+[node name="AgilityLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/AbilityScoreHBox2" unique_id=6490790]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Agility: 0"
+
+[node name="AbilityScoreHBox3" type="HBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=247827804]
+layout_mode = 2
+
+[node name="IntelligenceLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/AbilityScoreHBox3" unique_id=785518143]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Intelligence: 0"
+
+[node name="WisdomLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/AbilityScoreHBox3" unique_id=996308273]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Wisdom: 0"
+
+[node name="AbilityScoreHBox4" type="HBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=944310493]
+layout_mode = 2
+
+[node name="GravitasLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/AbilityScoreHBox4" unique_id=1579451243]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Gravitas: 0"
+
+[node name="LuckLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/CharacterPageLeftMargin/CharacterPageLeftVBox/AbilityScoreHBox4" unique_id=8361024]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Luck: 0"
+
+[node name="CharacterPageRightPanel" type="PanelContainer" parent="CharacterPageHBox" unique_id=1952959155]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CharacterPageRightMargin" type="MarginContainer" parent="CharacterPageHBox/CharacterPageRightPanel" unique_id=976071391]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="CharacterPageRightVBox" type="VBoxContainer" parent="CharacterPageHBox/CharacterPageRightPanel/CharacterPageRightMargin" unique_id=935472447]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AbilitiesLabel" type="Label" parent="CharacterPageHBox/CharacterPageRightPanel/CharacterPageRightMargin/CharacterPageRightVBox" unique_id=1651982362]
+layout_mode = 2
+text = "Abilities"
+horizontal_alignment = 1
+
+[node name="GrantedAbilitiesLabel" type="Label" parent="CharacterPageHBox/CharacterPageRightPanel/CharacterPageRightMargin/CharacterPageRightVBox" unique_id=1646075123]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Granted Abilities"
+
+[node name="GrantedAbilitiesVBox" type="VBoxContainer" parent="CharacterPageHBox/CharacterPageRightPanel/CharacterPageRightMargin/CharacterPageRightVBox" unique_id=2025195557]
+layout_mode = 2
+
+[node name="CollapsibleInfoRow" parent="CharacterPageHBox/CharacterPageRightPanel/CharacterPageRightMargin/CharacterPageRightVBox/GrantedAbilitiesVBox" unique_id=807658079 instance=ExtResource("1_c64xy")]
+layout_mode = 2
+
+[node name="FutureAbilitiesLabel" type="Label" parent="CharacterPageHBox/CharacterPageRightPanel/CharacterPageRightMargin/CharacterPageRightVBox" unique_id=963453286]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Future Abilities"
+
+[node name="FutureAbilitiesVBox" type="VBoxContainer" parent="CharacterPageHBox/CharacterPageRightPanel/CharacterPageRightMargin/CharacterPageRightVBox" unique_id=463671395]
+layout_mode = 2
+
+[node name="CollapsibleInfoRow" parent="CharacterPageHBox/CharacterPageRightPanel/CharacterPageRightMargin/CharacterPageRightVBox/FutureAbilitiesVBox" unique_id=703296602 instance=ExtResource("1_c64xy")]
+layout_mode = 2

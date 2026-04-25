@@ -9,17 +9,20 @@ public sealed class TrapService
 	private readonly NarrativeService _narrative;
 	private readonly PlayerVitalsService _vitals;
 	private readonly IItemDefinitionRepository _items;
+	private readonly PlayerExperienceService? _experience;
 
 	public TrapService(
 		ResolutionService resolution,
 		NarrativeService narrative,
 		PlayerVitalsService vitals,
-		IItemDefinitionRepository items)
+		IItemDefinitionRepository items,
+		PlayerExperienceService? experience = null)
 	{
 		_resolution = resolution;
 		_narrative = narrative;
 		_vitals = vitals;
 		_items = items;
+		_experience = experience;
 	}
 
 	public static bool CurrentRoomHasTrap(GameSessionState session)
@@ -184,6 +187,7 @@ public sealed class TrapService
 		TrapDefinition trapDef)
 	{
 		session.AppendGameLog(_narrative.ForTrapDisarmSuccess(trapDef.Name));
+		_experience?.GrantExperience(session, trapDef.ExperienceReward);
 
 		var grantedIds = new List<string>();
 

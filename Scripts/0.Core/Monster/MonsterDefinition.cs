@@ -5,6 +5,7 @@ public sealed class MonsterDefinition
     public int MaxHp { get; set; }
     public int Attack { get; set; }
     public int Defense { get; set; }
+    public int ExperienceReward { get; set; }
     public bool IsBoss { get; set; }
     public int RandomizerWeight { get; set; }
 }

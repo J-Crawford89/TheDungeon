@@ -8,6 +8,7 @@ public sealed class PlayerCharacterSnapshot
 	public CharacterSex Sex { get; init; }
 	public int MaxHp { get; init; }
 	public int Level { get; init; }
+	public int Experience { get; init; }
 	public int Gold { get; init; }
 	public HorizontalDirection Facing { get; init; }
 	public AbilityScores AbilityScores { get; init; } = new();
@@ -23,6 +24,7 @@ public sealed class PlayerCharacterSnapshot
 			Sex = player.Sex,
 			MaxHp = player.MaxHp,
 			Level = player.Level,
+			Experience = player.Experience,
 			Gold = player.Gold,
 			Facing = player.Facing,
 			AbilityScores = AbilityScoresCopy.From(src),

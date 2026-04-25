@@ -4,6 +4,7 @@ public sealed class TrapDefinition
     public string Name { get; set; } = string.Empty;
     public int DiscoverDc { get; set; }
     public int DisarmDc { get; set; }
+    public int ExperienceReward { get; set; }
     public int Damage { get; set; }
     public string Effect { get; set; }
 

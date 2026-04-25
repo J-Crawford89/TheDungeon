@@ -24,6 +24,8 @@ public sealed class GameRunContext
 	public IAbilityDefinitionRepository AbilityDefinitions { get; }
 	public IDamageTypeDefinitionRepository DamageTypeDefinitions { get; }
 	public IItemDefinitionRepository ItemDefinitions { get; }
+	public GameBalanceSettingsResource? GameBalanceSettings { get; }
+	public PlayerExperienceService PlayerExperienceService { get; }
 	public PotionEffectApplicationService PotionEffects { get; }
 	public TrapService TrapService { get; }
 	public ITrapDefinitionRepository TrapDefinitions { get; }
@@ -52,6 +54,8 @@ public sealed class GameRunContext
 		IAbilityDefinitionRepository abilityDefinitions,
 		IDamageTypeDefinitionRepository damageTypeDefinitions,
 		IItemDefinitionRepository itemDefinitions,
+		GameBalanceSettingsResource? gameBalanceSettings,
+		PlayerExperienceService playerExperienceService,
 		PotionEffectApplicationService potionEffects,
 		TrapService trapService,
 		ITrapDefinitionRepository trapDefinitions,
@@ -78,6 +82,8 @@ public sealed class GameRunContext
 		AbilityDefinitions = abilityDefinitions;
 		DamageTypeDefinitions = damageTypeDefinitions;
 		ItemDefinitions = itemDefinitions;
+		GameBalanceSettings = gameBalanceSettings;
+		PlayerExperienceService = playerExperienceService;
 		PotionEffects = potionEffects;
 		TrapService = trapService;
 		TrapDefinitions = trapDefinitions;

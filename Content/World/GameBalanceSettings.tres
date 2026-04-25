@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="GameBalanceSettingsResource" format=3 uid="uid://di5bscavcplik"]
+
+[ext_resource type="Script" uid="uid://c82k0313gfr82" path="res://Resources/GameBalanceSettingsResource.cs" id="1_t0gwv"]
+
+[resource]
+script = ExtResource("1_t0gwv")
+ExperiencePerFirstRoomVisit = 1
+ExperiencePerFloorEntry = 5
+metadata/_custom_type_script = "uid://c82k0313gfr82"

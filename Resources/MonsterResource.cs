@@ -9,6 +9,7 @@ public partial class MonsterResource : Resource
 	[Export] public int MaxHp { get; set; }
 	[Export] public int Attack { get; set; }
 	[Export] public int Defense { get; set; }
+	[Export] public int ExperienceReward { get; set; }
 	[Export] public bool IsBoss { get; set; }
 	[Export] public int RandomizerWeight { get; set; }
 

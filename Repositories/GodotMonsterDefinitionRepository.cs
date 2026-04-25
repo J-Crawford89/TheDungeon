@@ -26,6 +26,7 @@ public sealed class GodotMonsterDefinitionRepository : IMonsterDefinitionReposit
 				MaxHp = 2,
 				Attack = 1,
 				Defense = 12,
+				ExperienceReward = 0,
 				RandomizerWeight = 50
 			},
 			new MonsterDefinition
@@ -35,6 +36,7 @@ public sealed class GodotMonsterDefinitionRepository : IMonsterDefinitionReposit
 				MaxHp = 20,
 				Attack = 4,
 				Defense = 10,
+				ExperienceReward = 0,
 				RandomizerWeight = 20
 			},
 			new MonsterDefinition
@@ -44,6 +46,7 @@ public sealed class GodotMonsterDefinitionRepository : IMonsterDefinitionReposit
 				MaxHp = 32,
 				Attack = 6,
 				Defense = 13,
+				ExperienceReward = 0,
 				IsBoss = true,
 				RandomizerWeight = 5
 			}

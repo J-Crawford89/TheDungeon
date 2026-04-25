@@ -9,6 +9,7 @@ Id = "snare"
 Name = "Snare Trap"
 DiscoverDc = 8
 DisarmDc = 8
+ExperienceReward = 3
 Damage = 2
 Effect = "Snared"
 Icon = ExtResource("1_6haao")

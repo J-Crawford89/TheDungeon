@@ -10,5 +10,6 @@ Name = "Rat"
 MaxHp = 2
 Attack = 1
 Defense = 12
+ExperienceReward = 2
 RandomizerWeight = 50
 Icon = ExtResource("1_5mlta")
