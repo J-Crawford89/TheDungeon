@@ -10,6 +10,21 @@ public partial class CharacterPage : MarginContainer
 	[Export] private VBoxContainer _grantedAbilitiesList = null!;
 	[Export] private VBoxContainer _futureAbilitiesList = null!;
 	[Export] private PackedScene _collapsibleInfoRowScene = null!;
+	[Export] private Label _hpLabel = null!;
+	[Export] private Label _ecLabel = null!;
+	[Export] private Label _armorBonusLabel = null!;
+	[Export] private Label _damageReductionLabel = null!;
+	[Export] private Label _levelLabel = null!;
+	[Export] private Label _experienceLabel = null!;
+	[Export] private Label _spLabel = null!;
+	[Export] private Label _mightLabel = null!;
+	[Export] private Label _constitutionLabel = null!;
+	[Export] private Label _dexterityLabel = null!;
+	[Export] private Label _agilityLabel = null!;
+	[Export] private Label _intelligenceLabel = null!;
+	[Export] private Label _wisdomLabel = null!;
+	[Export] private Label _gravitasLabel = null!;
+	[Export] private Label _luckLabel = null!;
 
 	public void Populate(GameRunContext context)
 	{
@@ -24,6 +39,30 @@ public partial class CharacterPage : MarginContainer
 		var races = context.CharacterRaces;
 		var backgrounds = context.CharacterBackgrounds;
 		var abilities = context.AbilityDefinitions;
+		var scores = player.AbilityScores;
+
+		_hpLabel.Text = $"HP: {player.CurrentHp} / {player.MaxHp}";
+		_ecLabel.Text = $"EC: {CombatFormulas.PlayerEvasionClass(scores.Agility)}";
+		_armorBonusLabel.Text = $"Armor Bonus: {player.TotalArmorBonus}";
+		_damageReductionLabel.Text = $"Damage Reduction: {player.TotalDamageReduction}";
+		_levelLabel.Text = $"Level: {player.Level}";
+		_experienceLabel.Text = $"XP: {player.Experience}";
+		if (player.CurrentSpellPoints is { } curSp && player.MaxSpellPoints is { } maxSp)
+		{
+			_spLabel.Visible = true;
+			_spLabel.Text = $"SP: {curSp} / {maxSp}";
+		}
+		else
+			_spLabel.Visible = false;
+
+		_mightLabel.Text = $"Might: {scores.Might}";
+		_constitutionLabel.Text = $"Constitution: {scores.Constitution}";
+		_dexterityLabel.Text = $"Dexterity: {scores.Dexterity}";
+		_agilityLabel.Text = $"Agility: {scores.Agility}";
+		_intelligenceLabel.Text = $"Intelligence: {scores.Intelligence}";
+		_wisdomLabel.Text = $"Wisdom: {scores.Wisdom}";
+		_gravitasLabel.Text = $"Gravitas: {scores.Gravitas}";
+		_luckLabel.Text = $"Luck: {scores.Luck}";
 
 		AddDefinitionIdentity(_identityList, "Race", player.CharacterRaceId, TryRace(races, player.CharacterRaceId));
 		AddDefinitionIdentity(_identityList, "Class", player.CharacterClassId, TryClass(classes, player.CharacterClassId));
