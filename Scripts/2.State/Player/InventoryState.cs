@@ -52,17 +52,25 @@ public sealed class InventoryState
 	/// <summary>Increment an existing stack for <paramref name="definition"/>, or add a new row of quantity 1.</summary>
 	public void AddOrStackOne(ItemDefinition definition)
 	{
+		AddOrStackOneAndReturnRow(definition);
+	}
+
+	/// <summary>Increment an existing stack for <paramref name="definition"/>, or add a new row of quantity 1, and return the affected row.</summary>
+	public ItemInstance AddOrStackOneAndReturnRow(ItemDefinition definition)
+	{
 		var existing = Items.FirstOrDefault(i => i.Definition.Id == definition.Id);
 		if (existing != null && existing.Quantity < definition.MaxStackSize)
 		{
 			existing.Quantity++;
-			return;
+			return existing;
 		}
 
-		Items.Add(new ItemInstance
+		var created = new ItemInstance
 		{
 			Definition = definition,
 			Quantity = 1,
-		});
+		};
+		Items.Add(created);
+		return created;
 	}
 }

@@ -23,7 +23,8 @@ public static class PlayerStartingEquipmentGrantBuilder
 				var def = itemDefinitions.TryGetById(id);
 				if (def == null)
 					continue;
-				inventory.AddOrStackOne(def);
+				var row = inventory.AddOrStackOneAndReturnRow(def);
+				InventoryEquipmentOperations.TryAutoEquipStartingGearOne(inventory, row);
 			}
 		}
 

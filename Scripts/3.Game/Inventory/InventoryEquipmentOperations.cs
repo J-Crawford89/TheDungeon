@@ -46,6 +46,58 @@ public static class InventoryEquipmentOperations
 		return TryEquipOneFromBackpackRowToSlot(inventory, backpackRow, candidates[0]);
 	}
 
+	/// <summary>
+	/// Character-creation auto-equip for single-slot equipment:
+	/// tries first empty allowed slot; if occupied, displaces only when the occupant can move to another empty allowed slot.
+	/// Returns <see langword="false"/> when not equipable under these rules (including multi-slot footprint items).
+	/// </summary>
+	public static bool TryAutoEquipStartingGearOne(InventoryState inventory, ItemInstance backpackRow)
+	{
+		ArgumentNullException.ThrowIfNull(backpackRow);
+
+		if (backpackRow.Definition is not EquipmentDefinition eqDef)
+			return false;
+		if (HasMultiSlotFootprint(eqDef))
+			return false;
+
+		var allowed = DistinctSlotsPreserveOrder(eqDef.Slots ?? []);
+		if (allowed.Count == 0)
+			return false;
+
+		// First preference: first empty allowed slot.
+		foreach (var slot in allowed)
+		{
+			if (!inventory.EquippedBySlot.TryGetValue(slot, out var occupant) || occupant == null)
+				return TryEquipOneFromBackpackRowToSlot(inventory, backpackRow, slot);
+		}
+
+		// No empty target slot for the new item; try to move an existing occupant.
+		foreach (var blockedSlot in allowed)
+		{
+			if (!inventory.EquippedBySlot.TryGetValue(blockedSlot, out var occupant) || occupant == null)
+				continue;
+			if (occupant.Definition is not EquipmentDefinition occupiedDef)
+				continue;
+			if (HasMultiSlotFootprint(occupiedDef))
+				continue;
+
+			var occupiedAllowed = DistinctSlotsPreserveOrder(occupiedDef.Slots ?? []);
+			foreach (var occupiedCandidateSlot in occupiedAllowed)
+			{
+				if (occupiedCandidateSlot == blockedSlot)
+					continue;
+				if (inventory.EquippedBySlot.TryGetValue(occupiedCandidateSlot, out var occupiedCandidate) && occupiedCandidate != null)
+					continue;
+
+				inventory.EquippedBySlot[occupiedCandidateSlot] = occupant;
+				inventory.EquippedBySlot[blockedSlot] = null;
+				return TryEquipOneFromBackpackRowToSlot(inventory, backpackRow, blockedSlot);
+			}
+		}
+
+		return false;
+	}
+
 	/// <summary>Single-slot equip to a slot listed in <see cref="EquipmentDefinition.Slots"/>; not for multi-slot <see cref="EquipmentDefinition.OccupiedSlots"/> items.</summary>
 	public static bool TryEquipOneFromBackpackRowToSlot(InventoryState inventory, ItemInstance backpackRow, EquipmentSlot chosenSlot)
 	{

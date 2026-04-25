@@ -9,6 +9,15 @@ public sealed class InventoryEquipmentOperationsTests
 			Quantity = qty,
 		};
 
+	private static EquipmentDefinition EquipDef(string id, params EquipmentSlot[] slots) =>
+		new()
+		{
+			Id = id,
+			Name = id,
+			MaxStackSize = 1,
+			Slots = [..slots],
+		};
+
 	[Fact]
 	public void TryEquipOneFromBackpackRow_EquipsSingleStackRow()
 	{
@@ -219,5 +228,56 @@ public sealed class InventoryEquipmentOperationsTests
 		Assert.Same(gsRow, inv.EquippedBySlot[EquipmentSlot.WeaponMainHand1]);
 		Assert.Same(gsRow, inv.EquippedBySlot[EquipmentSlot.WeaponOffHand1]);
 		Assert.Contains(shieldInst, inv.Items);
+	}
+
+	[Fact]
+	public void TryAutoEquipStartingGearOne_UsesFirstEmptyAllowedSlot()
+	{
+		var flex = EquipDef("flex", EquipmentSlot.WeaponMainHand1, EquipmentSlot.WeaponMainHand2);
+		var row = new ItemInstance { Definition = flex, Quantity = 1 };
+		var inv = new InventoryState { Items = { row } };
+
+		Assert.True(InventoryEquipmentOperations.TryAutoEquipStartingGearOne(inv, row));
+		Assert.Same(row, inv.EquippedBySlot[EquipmentSlot.WeaponMainHand1]);
+	}
+
+	[Fact]
+	public void TryAutoEquipStartingGearOne_MovesOccupantWhenOccupantCanSafelyRelocate()
+	{
+		var flexible = EquipDef("flex", EquipmentSlot.WeaponMainHand1, EquipmentSlot.WeaponMainHand2);
+		var locked = EquipDef("lock", EquipmentSlot.WeaponMainHand1);
+		var occupied = new ItemInstance { Definition = flexible, Quantity = 1 };
+		var incoming = new ItemInstance { Definition = locked, Quantity = 1 };
+		var inv = new InventoryState
+		{
+			Items = { occupied, incoming },
+			EquippedBySlot =
+			{
+				[EquipmentSlot.WeaponMainHand1] = occupied,
+				[EquipmentSlot.WeaponMainHand2] = null
+			}
+		};
+
+		Assert.True(InventoryEquipmentOperations.TryAutoEquipStartingGearOne(inv, incoming));
+		Assert.Same(incoming, inv.EquippedBySlot[EquipmentSlot.WeaponMainHand1]);
+		Assert.Same(occupied, inv.EquippedBySlot[EquipmentSlot.WeaponMainHand2]);
+	}
+
+	[Fact]
+	public void TryAutoEquipStartingGearOne_LeavesIncomingInBackpackWhenOccupantCannotRelocate()
+	{
+		var occupiedDef = EquipDef("occupied", EquipmentSlot.Head);
+		var incomingDef = EquipDef("incoming", EquipmentSlot.Head);
+		var occupied = new ItemInstance { Definition = occupiedDef, Quantity = 1 };
+		var incoming = new ItemInstance { Definition = incomingDef, Quantity = 1 };
+		var inv = new InventoryState
+		{
+			Items = { occupied, incoming },
+			EquippedBySlot = { [EquipmentSlot.Head] = occupied }
+		};
+
+		Assert.False(InventoryEquipmentOperations.TryAutoEquipStartingGearOne(inv, incoming));
+		Assert.Same(occupied, inv.EquippedBySlot[EquipmentSlot.Head]);
+		Assert.Contains(incoming, inv.Items);
 	}
 }
