@@ -14,6 +14,9 @@ public sealed class InventoryStateEquippedTests
 	public void ResetToNewAdventurer_ClearsEquippedWithNewInventory()
 	{
 		var player = new PlayerState();
+		player.CharacterRaceId = "r";
+		player.CharacterClassId = "c";
+		player.CharacterBackgroundId = "b";
 		player.InventoryState.Items.Add(new ItemInstance { Definition = new ItemDefinition { Id = "x" }, Quantity = 1 });
 		player.InventoryState.EquippedBySlot[EquipmentSlot.Head] = player.InventoryState.Items[0];
 
@@ -21,5 +24,8 @@ public sealed class InventoryStateEquippedTests
 
 		Assert.Empty(player.InventoryState.EquippedBySlot);
 		Assert.Empty(player.InventoryState.Items);
+		Assert.Equal("", player.CharacterRaceId);
+		Assert.Equal("", player.CharacterClassId);
+		Assert.Equal("", player.CharacterBackgroundId);
 	}
 }

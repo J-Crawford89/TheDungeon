@@ -13,8 +13,10 @@ public partial class CharacterPanel : PanelContainer
 	[Export] private Label? _spLabel;
 	[Export] private Control? _defendActiveIndicator;
 	[Export] private Button? _inventoryButton;
+	[Export] private Button? _characterButton;
 
 	public event Action? InventoryPressed;
+	public event Action? CharacterPressed;
 
 	public override void _Ready()
 	{
@@ -22,15 +24,24 @@ public partial class CharacterPanel : PanelContainer
 			GD.PushWarning("CharacterPanel: assign Inventory Button export to open the inventory notebook.");
 		else
 			_inventoryButton.Pressed += OnInventoryButtonPressed;
+
+		if (_characterButton == null)
+			GD.PushWarning("CharacterPanel: assign Character Button export to open the character notebook tab.");
+		else
+			_characterButton.Pressed += OnCharacterButtonPressed;
 	}
 
 	public override void _ExitTree()
 	{
 		if (_inventoryButton != null)
 			_inventoryButton.Pressed -= OnInventoryButtonPressed;
+		if (_characterButton != null)
+			_characterButton.Pressed -= OnCharacterButtonPressed;
 	}
 
 	private void OnInventoryButtonPressed() => InventoryPressed?.Invoke();
+
+	private void OnCharacterButtonPressed() => CharacterPressed?.Invoke();
 
 	public void Render(PlayerState player, GameSessionState? session = null)
 	{

@@ -96,6 +96,7 @@ public partial class MainUi : Control
 		}
 
 		_characterPanel.InventoryPressed += OnCharacterInventoryPressed;
+		_characterPanel.CharacterPressed += OnCharacterCharacterPressed;
 
 		_commandPanel.ForwardPressed += OnCommandForward;
 		_commandPanel.BackwardPressed += OnCommandBackward;
@@ -126,6 +127,11 @@ public partial class MainUi : Control
 	private void OnCharacterInventoryPressed()
 	{
 		_notebookOverlay?.ShowInventory();
+	}
+
+	private void OnCharacterCharacterPressed()
+	{
+		_notebookOverlay?.ShowCharacter();
 	}
 
 	private void AddDebugRoomLootButton()
@@ -210,6 +216,7 @@ public partial class MainUi : Control
 			GetViewport().SizeChanged -= OnViewportSizeChanged;
 
 		_characterPanel.InventoryPressed -= OnCharacterInventoryPressed;
+		_characterPanel.CharacterPressed -= OnCharacterCharacterPressed;
 
 		if (_commandPanel != null)
 		{

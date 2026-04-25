@@ -97,6 +97,10 @@ public sealed class CharacterCreationService
 		player.Experience = 0;
 		player.Facing = HorizontalDirection.North;
 
+		player.CharacterRaceId = NormalizeDefinitionId(state.SelectedRace?.Id);
+		player.CharacterClassId = NormalizeDefinitionId(state.SelectedClass?.Id);
+		player.CharacterBackgroundId = NormalizeDefinitionId(state.SelectedBackground?.Id);
+
 		player.GrantedAbilities = PlayerAbilityGrantBuilder.Build(
 			state.SelectedClass,
 			state.SelectedRace,
@@ -122,6 +126,13 @@ public sealed class CharacterCreationService
 			state.SelectedBackground,
 			player.InventoryState,
 			_itemDefinitions);
+	}
+
+	private static string NormalizeDefinitionId(string? id)
+	{
+		if (string.IsNullOrWhiteSpace(id))
+			return "";
+		return id.Trim();
 	}
 
 	private static int SumAbilities(AbilityScores s) =>

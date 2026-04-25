@@ -9,7 +9,7 @@
 [sub_resource type="Theme" id="Theme_k32b5"]
 default_font_size = 9
 
-[node name="NotebookOverlay" type="Control" unique_id=1051656938 node_paths=PackedStringArray("_closeButton", "_characterTabButton", "_inventoryTabButton", "_journalTabButton", "_mapsTabButton", "_bestiaryTabButton", "_optionsTabButton", "_dimBackground", "_backpackGrid", "_itemNameTitle", "_itemImage", "_itemDetailDescription", "_equipButton", "_unequipButton", "_useButton", "_dropButton", "_moveToBeltButton", "_compareButton", "_headSlotControl", "_neckSlotControl", "_torsoSlotControl", "_beltSlotControl", "_legsSlotControl", "_feetSlotControl", "_leftShoulderSlotControl", "_rightShoulderSlotControl", "_leftArmSlotControl", "_rightArmSlotControl", "_leftWristSlotControl", "_rightWristSlotControl", "_leftHandSlotControl", "_rightHandSlotControl", "_backSlotControl", "_backpackSlotControl", "_ring1SlotControl", "_ring2SlotControl", "_trinket1SlotControl", "_trinket2SlotControl", "_belt1SlotControl", "_belt2SlotControl", "_belt3SlotControl", "_belt4SlotControl", "_mainHand1SlotControl", "_offHand1SlotControl", "_mainHand2SlotControl", "_offHand2SlotControl")]
+[node name="NotebookOverlay" type="Control" unique_id=1051656938 node_paths=PackedStringArray("_closeButton", "_characterTabButton", "_inventoryTabButton", "_journalTabButton", "_mapsTabButton", "_bestiaryTabButton", "_optionsTabButton", "_dimBackground", "_backpackGrid", "_itemNameTitle", "_itemImage", "_itemDetailDescription", "_equipButton", "_unequipButton", "_useButton", "_dropButton", "_moveToBeltButton", "_compareButton", "_headSlotControl", "_neckSlotControl", "_torsoSlotControl", "_beltSlotControl", "_legsSlotControl", "_feetSlotControl", "_leftShoulderSlotControl", "_rightShoulderSlotControl", "_leftArmSlotControl", "_rightArmSlotControl", "_leftWristSlotControl", "_rightWristSlotControl", "_leftHandSlotControl", "_rightHandSlotControl", "_backSlotControl", "_backpackSlotControl", "_ring1SlotControl", "_ring2SlotControl", "_trinket1SlotControl", "_trinket2SlotControl", "_belt1SlotControl", "_belt2SlotControl", "_belt3SlotControl", "_belt4SlotControl", "_mainHand1SlotControl", "_offHand1SlotControl", "_mainHand2SlotControl", "_offHand2SlotControl", "_inventoryPageRoot", "_characterPage")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -63,6 +63,8 @@ _mainHand1SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargi
 _offHand1SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/OffHand1SlotControl")
 _mainHand2SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/MainHand2SlotControl")
 _offHand2SlotControl = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/EquippedPanel/EquippedMargin/EquippedRoot/EquipmentSlotArea/OffHand2SlotControl")
+_inventoryPageRoot = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin")
+_characterPage = NodePath("NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/CharacterPageMargin")
 
 [node name="DimBackground" type="ColorRect" parent="." unique_id=2082436519]
 layout_mode = 1

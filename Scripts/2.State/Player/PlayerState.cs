@@ -5,10 +5,14 @@ public sealed class PlayerState
 {
 	public string Name { get; set; } = "Testy McTestface";
 	public CharacterSex Sex { get; set; } = CharacterSex.Male;
-	public CharacterRaceDefinition Race { get; set; } = new();
-	public CharacterClassDefinition Class { get; set; } = new();
-	public CharacterBackgroundDefinition Background { get; set; } = new();
-    public int CurrentHp { get; set; } = 10;
+	/// <summary>Definition id from character resources; empty if unset.</summary>
+	public string CharacterRaceId { get; set; } = "";
+	/// <summary>Definition id from character resources; empty if unset.</summary>
+	public string CharacterClassId { get; set; } = "";
+	/// <summary>Definition id from character resources; empty if unset.</summary>
+	public string CharacterBackgroundId { get; set; } = "";
+
+	public int CurrentHp { get; set; } = 10;
 	public int MaxHp { get; set; } = 10;
 	public int Level { get; set; } = 1;
 	public int Experience { get; set; }
@@ -46,5 +50,8 @@ public sealed class PlayerState
 		CurrentSpellPoints = null;
 		MaxSpellPoints = null;
 		InventoryState = new InventoryState();
+		CharacterRaceId = "";
+		CharacterClassId = "";
+		CharacterBackgroundId = "";
 	}
 }

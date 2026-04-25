@@ -58,8 +58,12 @@ public partial class NotebookOverlay : Control
 	[Export] private InventorySlotControl? _mainHand2SlotControl;
 	[Export] private InventorySlotControl? _offHand2SlotControl;
 
+	[Export] private Control? _inventoryPageRoot;
+	[Export] private CharacterPage? _characterPage;
+
 	private InventoryNotebookCoordinator? _coordinator;
 	private bool _wired;
+	private GameRunContext? _runContext;
 
 	public override void _Ready()
 	{
@@ -73,6 +77,11 @@ public partial class NotebookOverlay : Control
 		if (_closeButton != null)
 			_closeButton.Pressed += OnClosePressed;
 
+		if (_inventoryTabButton != null)
+			_inventoryTabButton.Pressed += OnInventoryTabPressed;
+		if (_characterTabButton != null)
+			_characterTabButton.Pressed += OnCharacterTabPressed;
+
 		ValidateExports();
 	}
 
@@ -80,6 +89,11 @@ public partial class NotebookOverlay : Control
 	{
 		if (_closeButton != null)
 			_closeButton.Pressed -= OnClosePressed;
+		if (_inventoryTabButton != null)
+			_inventoryTabButton.Pressed -= OnInventoryTabPressed;
+		if (_characterTabButton != null)
+			_characterTabButton.Pressed -= OnCharacterTabPressed;
+
 		if (_wired && _coordinator != null)
 			_coordinator.DisconnectSlots();
 		_wired = false;
@@ -88,6 +102,8 @@ public partial class NotebookOverlay : Control
 
 	public void Bind(GameRunContext context, Action<UiRefreshFlags>? refreshHud)
 	{
+		_runContext = context;
+
 		if (_wired)
 			return;
 		_coordinator = new InventoryNotebookCoordinator(this, context, refreshHud);
@@ -98,9 +114,21 @@ public partial class NotebookOverlay : Control
 	public void ShowInventory()
 	{
 		Visible = true;
+		SwitchToInventoryPage();
 		_coordinator?.DismissEquipSlotPicker();
 		_coordinator?.ClearSelection();
 		_coordinator?.RefreshAll();
+	}
+
+	public void ShowCharacter()
+	{
+		Visible = true;
+		SwitchToCharacterPage();
+		_coordinator?.DismissEquipSlotPicker();
+		_coordinator?.ClearSelection();
+
+		if (_runContext != null && _characterPage != null)
+			_characterPage.Populate(_runContext);
 	}
 
 	public void HideNotebook()
@@ -112,6 +140,26 @@ public partial class NotebookOverlay : Control
 
 	private void OnClosePressed() => HideNotebook();
 
+	private void OnInventoryTabPressed() => ShowInventory();
+
+	private void OnCharacterTabPressed() => ShowCharacter();
+
+	private void SwitchToInventoryPage()
+	{
+		if (_inventoryPageRoot != null)
+			_inventoryPageRoot.Visible = true;
+		if (_characterPage != null)
+			_characterPage.Visible = false;
+	}
+
+	private void SwitchToCharacterPage()
+	{
+		if (_inventoryPageRoot != null)
+			_inventoryPageRoot.Visible = false;
+		if (_characterPage != null)
+			_characterPage.Visible = true;
+	}
+
 	private void DisablePlaceholderTabs()
 	{
 		void dis(Button? b)
@@ -120,7 +168,6 @@ public partial class NotebookOverlay : Control
 				b.Disabled = true;
 		}
 
-		dis(_characterTabButton);
 		dis(_journalTabButton);
 		dis(_mapsTabButton);
 		dis(_bestiaryTabButton);
@@ -132,6 +179,8 @@ public partial class NotebookOverlay : Control
 		if (_closeButton == null || _backpackGrid == null || _itemNameTitle == null || _itemImage == null ||
 			_itemDetailDescription == null)
 			GD.PushWarning("NotebookOverlay: assign CloseButton, BackpackGrid, and item detail exports.");
+		if (_inventoryPageRoot == null || _characterPage == null)
+			GD.PushWarning("NotebookOverlay: assign Inventory Page Root and Character Page exports for tab switching.");
 	}
 
 	private sealed class InventoryNotebookCoordinator
