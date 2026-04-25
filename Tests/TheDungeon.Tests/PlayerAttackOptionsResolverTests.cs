@@ -51,4 +51,39 @@ public sealed class PlayerAttackOptionsResolverTests
 	{
 		Assert.False(PlayerAttackOptionsResolver.HasWeaponChoiceBeyondUnarmed(new InventoryState()));
 	}
+
+	[Fact]
+	public void ResolveWeaponChoiceDescriptors_SameInstanceInMainAndOff_DedupesWeaponButton()
+	{
+		var pierce = new DamageTypeDefinition("p", "Piercing", DamageFamily.Physical);
+		var gs = new WeaponDefinition
+		{
+			Id = "gs",
+			Name = "Greatsword",
+			MaxStackSize = 1,
+			OccupiedSlots = [EquipmentSlot.WeaponMainHand1, EquipmentSlot.WeaponOffHand1],
+			DamageComponents =
+			[
+				new DamageComponent(
+					new DiceExpression { NumberOfDice = 1, DieType = DieType.d6, InD20CheckPool = false },
+					0,
+					pierce),
+			],
+		};
+		var inst = new ItemInstance { Definition = gs, Quantity = 1 };
+		var inv = new InventoryState
+		{
+			Items = { inst },
+			EquippedBySlot =
+			{
+				[EquipmentSlot.WeaponMainHand1] = inst,
+				[EquipmentSlot.WeaponOffHand1] = inst,
+			},
+		};
+
+		var list = PlayerAttackOptionsResolver.ResolveWeaponChoiceDescriptors(inv);
+		Assert.Equal(2, list.Count);
+		Assert.Equal("Unarmed", list[0].Label);
+		Assert.Contains("Greatsword", list[1].Label);
+	}
 }

@@ -16,6 +16,7 @@ public partial class InventorySlotControl : PanelContainer
 	public event Action<InventorySlotControl>? SlotClicked;
 
 	private bool _selected;
+	private bool _pendingEquipCandidate;
 
 	public void ConfigureEquipment(EquipmentSlot slot)
 	{
@@ -57,10 +58,30 @@ public partial class InventorySlotControl : PanelContainer
 	public void SetSelected(bool selected)
 	{
 		_selected = selected;
+		RefreshChrome();
+	}
+
+	/// <summary>Highlight valid equipment targets while choosing where to equip a multi-slot item (inventory notebook).</summary>
+	public void SetPendingEquipCandidate(bool pending)
+	{
+		_pendingEquipCandidate = pending;
+		RefreshChrome();
+	}
+
+	private void RefreshChrome()
+	{
+		var pendingGlow = _pendingEquipCandidate && !_selected;
 		if (_selectionBorder != null)
-			_selectionBorder.Visible = selected;
+		{
+			_selectionBorder.Visible = _selected;
+			Modulate = pendingGlow ? new Color(1.12f, 1.22f, 0.72f) : Colors.White;
+		}
+		else if (_selected)
+			Modulate = new Color(1.15f, 1.15f, 1f);
+		else if (_pendingEquipCandidate)
+			Modulate = new Color(1.12f, 1.22f, 0.72f);
 		else
-			Modulate = selected ? new Color(1.15f, 1.15f, 1f) : Colors.White;
+			Modulate = Colors.White;
 	}
 
 	public override void _GuiInput(InputEvent @event)

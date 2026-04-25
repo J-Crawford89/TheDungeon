@@ -53,6 +53,7 @@ public static class ItemMapper
 			CanDrop = b.CanDrop,
 			CanSell = b.CanSell,
 			Slots = MapEquipmentSlots(resource.Slots),
+			OccupiedSlots = MapEquipmentSlots(resource.OccupiedSlots),
 		};
 	}
 
@@ -70,6 +71,7 @@ public static class ItemMapper
 			CanDrop = eq.CanDrop,
 			CanSell = eq.CanSell,
 			Slots = eq.Slots,
+			OccupiedSlots = eq.OccupiedSlots,
 			ArmorBonus = resource.ArmorBonus,
 		};
 	}
@@ -118,6 +120,7 @@ public static class ItemMapper
 			CanDrop = eq.CanDrop,
 			CanSell = eq.CanSell,
 			Slots = eq.Slots,
+			OccupiedSlots = eq.OccupiedSlots,
 			DamageComponents = damage,
 		};
 	}

@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 
 /// <summary>Builds attack-style choices (unarmed + equipped weapons in hand slots) for combat UI.</summary>
@@ -28,11 +29,14 @@ public static class PlayerAttackOptionsResolver
 			},
 		};
 
+		var seenWeaponInstance = new HashSet<Guid>();
 		foreach (var slot in HandWeaponSlots)
 		{
 			if (!inventory.EquippedBySlot.TryGetValue(slot, out var inst) || inst == null)
 				continue;
 			if (inst.Definition is not WeaponDefinition w)
+				continue;
+			if (!seenWeaponInstance.Add(inst.InstanceId))
 				continue;
 
 			list.Add(new TargetDescriptor

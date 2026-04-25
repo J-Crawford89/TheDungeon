@@ -102,4 +102,122 @@ public sealed class InventoryEquipmentOperationsTests
 		var inv = new InventoryState { Items = { Stack("junk", 1) } };
 		Assert.False(InventoryEquipmentOperations.TryEquipOneFromBackpackRow(inv, inv.Items[0]));
 	}
+
+	[Fact]
+	public void TryEquipOneFromBackpackRow_MultipleDistinctSlots_ReturnsFalse()
+	{
+		var def = new EquipmentDefinition
+		{
+			Id = "flex",
+			Name = "Flex",
+			MaxStackSize = 1,
+			Slots = [EquipmentSlot.WeaponMainHand1, EquipmentSlot.WeaponMainHand2],
+		};
+		var row = new ItemInstance { Definition = def, Quantity = 1 };
+		var inv = new InventoryState { Items = { row } };
+
+		Assert.False(InventoryEquipmentOperations.TryEquipOneFromBackpackRow(inv, row));
+		Assert.True(InventoryEquipmentOperations.TryEquipOneFromBackpackRowToSlot(inv, row, EquipmentSlot.WeaponMainHand2));
+		Assert.True(inv.EquippedBySlot.TryGetValue(EquipmentSlot.WeaponMainHand2, out var e) && ReferenceEquals(e, row));
+	}
+
+	[Fact]
+	public void TryEquipOneFromBackpackRowToSlot_DisallowedSlot_ReturnsFalse()
+	{
+		var def = new EquipmentDefinition
+		{
+			Id = "flex",
+			Name = "Flex",
+			MaxStackSize = 1,
+			Slots = [EquipmentSlot.WeaponMainHand1],
+		};
+		var row = new ItemInstance { Definition = def, Quantity = 1 };
+		var inv = new InventoryState { Items = { row } };
+
+		Assert.False(InventoryEquipmentOperations.TryEquipOneFromBackpackRowToSlot(inv, row, EquipmentSlot.Head));
+	}
+
+	[Fact]
+	public void FootprintSlots_DedupesOccupiedSlots()
+	{
+		var def = new EquipmentDefinition
+		{
+			OccupiedSlots = [EquipmentSlot.WeaponMainHand1, EquipmentSlot.WeaponOffHand1, EquipmentSlot.WeaponMainHand1],
+		};
+		var fp = InventoryEquipmentOperations.FootprintSlots(def);
+		Assert.Equal(2, fp.Count);
+		Assert.Equal(EquipmentSlot.WeaponMainHand1, fp[0]);
+		Assert.Equal(EquipmentSlot.WeaponOffHand1, fp[1]);
+	}
+
+	[Fact]
+	public void TryEquipOneFromBackpackRow_TwoHanded_AssignsSameInstanceToBothSlots_UnequipClearsBoth()
+	{
+		var pierce = new DamageTypeDefinition("p", "Piercing", DamageFamily.Physical);
+		var gs = new WeaponDefinition
+		{
+			Id = "gs",
+			Name = "Greatsword",
+			MaxStackSize = 1,
+			Slots = [EquipmentSlot.WeaponMainHand1],
+			OccupiedSlots = [EquipmentSlot.WeaponMainHand1, EquipmentSlot.WeaponOffHand1],
+			DamageComponents =
+			[
+				new DamageComponent(
+					new DiceExpression { NumberOfDice = 1, DieType = DieType.d6, InD20CheckPool = false },
+					0,
+					pierce),
+			],
+		};
+		var row = new ItemInstance { Definition = gs, Quantity = 1 };
+		var inv = new InventoryState { Items = { row } };
+
+		Assert.True(InventoryEquipmentOperations.TryEquipOneFromBackpackRow(inv, row));
+		Assert.True(inv.EquippedBySlot.TryGetValue(EquipmentSlot.WeaponMainHand1, out var a) && a != null);
+		Assert.True(inv.EquippedBySlot.TryGetValue(EquipmentSlot.WeaponOffHand1, out var b) && b != null);
+		Assert.Same(a, b);
+
+		Assert.True(InventoryEquipmentOperations.TryUnequipSlot(inv, EquipmentSlot.WeaponOffHand1));
+		Assert.False(inv.EquippedBySlot.TryGetValue(EquipmentSlot.WeaponMainHand1, out var x) && x != null);
+		Assert.False(inv.EquippedBySlot.TryGetValue(EquipmentSlot.WeaponOffHand1, out var y) && y != null);
+	}
+
+	[Fact]
+	public void TryEquipOneFromBackpackRow_TwoHanded_EvictsDistinctItemsInFootprint()
+	{
+		var pierce = new DamageTypeDefinition("p", "Piercing", DamageFamily.Physical);
+		var shield = new EquipmentDefinition
+		{
+			Id = "sh",
+			Name = "Shield",
+			MaxStackSize = 1,
+			Slots = [EquipmentSlot.WeaponOffHand1],
+		};
+		var gs = new WeaponDefinition
+		{
+			Id = "gs",
+			Name = "Greatsword",
+			MaxStackSize = 1,
+			OccupiedSlots = [EquipmentSlot.WeaponMainHand1, EquipmentSlot.WeaponOffHand1],
+			DamageComponents =
+			[
+				new DamageComponent(
+					new DiceExpression { NumberOfDice = 1, DieType = DieType.d6, InD20CheckPool = false },
+					0,
+					pierce),
+			],
+		};
+		var shieldInst = new ItemInstance { Definition = shield, Quantity = 1 };
+		var gsRow = new ItemInstance { Definition = gs, Quantity = 1 };
+		var inv = new InventoryState
+		{
+			Items = { shieldInst, gsRow },
+			EquippedBySlot = { [EquipmentSlot.WeaponOffHand1] = shieldInst },
+		};
+
+		Assert.True(InventoryEquipmentOperations.TryEquipOneFromBackpackRow(inv, gsRow));
+		Assert.Same(gsRow, inv.EquippedBySlot[EquipmentSlot.WeaponMainHand1]);
+		Assert.Same(gsRow, inv.EquippedBySlot[EquipmentSlot.WeaponOffHand1]);
+		Assert.Contains(shieldInst, inv.Items);
+	}
 }

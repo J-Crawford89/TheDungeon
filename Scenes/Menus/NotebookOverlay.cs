@@ -98,6 +98,7 @@ public partial class NotebookOverlay : Control
 	public void ShowInventory()
 	{
 		Visible = true;
+		_coordinator?.DismissEquipSlotPicker();
 		_coordinator?.ClearSelection();
 		_coordinator?.RefreshAll();
 	}
@@ -105,6 +106,7 @@ public partial class NotebookOverlay : Control
 	public void HideNotebook()
 	{
 		Visible = false;
+		_coordinator?.DismissEquipSlotPicker();
 		_coordinator?.ClearSelection();
 	}
 
@@ -144,6 +146,8 @@ public partial class NotebookOverlay : Control
 		private IReadOnlyList<ItemInstance> _backpackRows = Array.Empty<ItemInstance>();
 		private InventoryNotebookSelection _selection = InventoryNotebookSelection.None;
 		private static bool _overflowWarned;
+		private Guid? _pendingEquipItemInstanceId;
+		private HashSet<EquipmentSlot>? _pendingEquipEligibleSlots;
 
 		public InventoryNotebookCoordinator(NotebookOverlay o, GameRunContext context, Action<UiRefreshFlags>? refreshHud)
 		{
@@ -218,6 +222,7 @@ public partial class NotebookOverlay : Control
 
 		public void DisconnectSlots()
 		{
+			DismissEquipSlotPicker();
 			foreach (var s in _slotRefs)
 				s.SlotClicked -= OnSlotClicked;
 			if (_o._equipButton != null)
@@ -245,9 +250,21 @@ public partial class NotebookOverlay : Control
 
 		private void OnSlotClicked(InventorySlotControl slot)
 		{
+			if (_pendingEquipItemInstanceId.HasValue && _pendingEquipEligibleSlots != null)
+			{
+				if (slot.SlotKind == InventorySlotKind.Equipment && slot.EquipmentSlot is { } es &&
+					_pendingEquipEligibleSlots.Contains(es))
+				{
+					TryCompletePendingEquipToSlot(es);
+					return;
+				}
+
+				ClearPendingEquipSlotMode();
+			}
+
 			_selection = slot.SlotKind switch
 			{
-				InventorySlotKind.Equipment when slot.EquipmentSlot is { } es => InventoryNotebookSelection.Equipment(es),
+				InventorySlotKind.Equipment when slot.EquipmentSlot is { } es2 => InventoryNotebookSelection.Equipment(es2),
 				InventorySlotKind.Backpack when slot.BackpackIndex is { } ix => InventoryNotebookSelection.Backpack(ix),
 				_ => InventoryNotebookSelection.None,
 			};
@@ -257,13 +274,68 @@ public partial class NotebookOverlay : Control
 
 		public void ClearSelection()
 		{
+			ClearPendingEquipSlotMode();
 			_selection = InventoryNotebookSelection.None;
 			ApplySelectionVisuals();
 			UpdateDetailPanel();
 		}
 
+		public void DismissEquipSlotPicker()
+		{
+			ClearPendingEquipSlotMode();
+			ApplySelectionVisuals();
+		}
+
+		private void ClearPendingEquipSlotMode()
+		{
+			_pendingEquipItemInstanceId = null;
+			_pendingEquipEligibleSlots = null;
+		}
+
+		private void BeginPendingEquipSlotSelection(EquipmentDefinition eqDef, ItemInstance item)
+		{
+			ClearPendingEquipSlotMode();
+			_pendingEquipItemInstanceId = item.InstanceId;
+			_pendingEquipEligibleSlots = new HashSet<EquipmentSlot>(InventoryEquipmentOperations.SingleSlotEquipChoices(eqDef));
+			ApplySelectionVisuals();
+		}
+
+		private void TryCompletePendingEquipToSlot(EquipmentSlot chosenSlot)
+		{
+			if (!_pendingEquipItemInstanceId.HasValue || _pendingEquipEligibleSlots == null)
+				return;
+			if (!_pendingEquipEligibleSlots.Contains(chosenSlot))
+				return;
+
+			var instanceId = _pendingEquipItemInstanceId.Value;
+			ClearPendingEquipSlotMode();
+
+			var inv = _session.Player.InventoryState;
+			ItemInstance? row = null;
+			foreach (var r in inv.Items)
+			{
+				if (r.InstanceId == instanceId)
+				{
+					row = r;
+					break;
+				}
+			}
+
+			if (row == null || !InventoryEquipmentOperations.TryEquipOneFromBackpackRowToSlot(inv, row, chosenSlot))
+			{
+				ApplySelectionVisuals();
+				UpdateDetailPanel();
+				return;
+			}
+
+			_selection = InventoryNotebookSelection.Equipment(chosenSlot);
+			_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
+			RefreshAll();
+		}
+
 		private void ApplySelectionVisuals()
 		{
+			var pending = _pendingEquipItemInstanceId.HasValue && _pendingEquipEligibleSlots != null;
 			foreach (var s in _slotRefs)
 			{
 				var on = s.SlotKind switch
@@ -275,6 +347,12 @@ public partial class NotebookOverlay : Control
 					_ => false,
 				};
 				s.SetSelected(on);
+
+				var pendingTarget = pending &&
+									s.SlotKind == InventorySlotKind.Equipment &&
+									s.EquipmentSlot is { } es2 &&
+									_pendingEquipEligibleSlots!.Contains(es2);
+				s.SetPendingEquipCandidate(pendingTarget);
 			}
 		}
 
@@ -382,6 +460,15 @@ public partial class NotebookOverlay : Control
 			var item = GetSelectedItem();
 			if (item == null)
 				return;
+			if (item.Definition is not EquipmentDefinition eqDef)
+				return;
+
+			if (InventoryEquipmentOperations.RequiresPlayerSlotChoiceForEquip(eqDef))
+			{
+				BeginPendingEquipSlotSelection(eqDef, item);
+				return;
+			}
+
 			if (!InventoryEquipmentOperations.TryEquipOneFromBackpackRow(_session.Player.InventoryState, item))
 				return;
 			_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
