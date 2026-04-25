@@ -1,14 +1,32 @@
 [gd_resource type="Resource" script_class="MonsterResource" format=3 uid="uid://bhplrng7sf8ix"]
 
 [ext_resource type="Script" uid="uid://h3kt4eef0b3n" path="res://Resources/MonsterResource.cs" id="1_0vblb"]
+[ext_resource type="Script" uid="uid://cp4x0wf1unxo7" path="res://Resources/AttackResource.cs" id="1_c3vaw"]
 [ext_resource type="Texture2D" uid="uid://bq7fkrinl6s1c" path="res://Assets/PrototypeAssets/GiantRat.png" id="1_ustx4"]
+[ext_resource type="Resource" uid="uid://khjg6aq0tt0o" path="res://Content/World/DamageType/Piercing.tres" id="2_hbwqt"]
+[ext_resource type="Script" uid="uid://l11npu0nk6bm" path="res://Resources/DamageComponentResource.cs" id="3_fevfy"]
+
+[sub_resource type="Resource" id="Resource_5f6kq"]
+script = ExtResource("3_fevfy")
+NumberOfDice = 2
+DiceType = 4
+FlatAmount = 2
+DamageType = ExtResource("2_hbwqt")
+metadata/_custom_type_script = "uid://l11npu0nk6bm"
+
+[sub_resource type="Resource" id="Resource_iogdg"]
+script = ExtResource("1_c3vaw")
+Name = "Bite"
+AttackModifier = 4
+Damage = SubResource("Resource_5f6kq")
+metadata/_custom_type_script = "uid://cp4x0wf1unxo7"
 
 [resource]
 script = ExtResource("1_0vblb")
 Id = "giant_rat"
 Name = "Giant Rat"
 MaxHp = 10
-Attack = 4
+Attacks = Array[ExtResource("1_c3vaw")]([SubResource("Resource_iogdg")])
 Defense = 10
 ExperienceReward = 8
 RandomizerWeight = 15

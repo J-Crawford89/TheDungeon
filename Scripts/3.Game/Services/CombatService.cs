@@ -39,7 +39,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		_trapService = trapService;
 		_experience = experience;
 		_lifecycle = new CombatEncounterLifecycle(_narrative);
-		_monsterTurn = new CombatMonsterTurn(_resolution, _narrative, _vitals, _playerDowned);
+		_monsterTurn = new CombatMonsterTurn(_resolution, _dice, _narrative, _vitals, _playerDowned);
 		_initiative = new CombatInitiative(_dice, _narrative);
 		_turnLoop = new CombatTurnLoop(this, _lifecycle, _monsterTurn);
 		_potionEffects = potionEffects;

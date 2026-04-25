@@ -39,7 +39,25 @@ public sealed class CombatServiceTests
 				new MonsterInstance
 				{
 					CurrentHp = 500,
-					Definition = new MonsterDefinition { Id = "bag", Name = "Sandbag", Defense = -50 },
+					Definition = new MonsterDefinition
+					{
+						Id = "bag",
+						Name = "Sandbag",
+						Defense = -50,
+						Attacks =
+						[
+							new AttackDefinition
+							{
+								Name = "Nudge",
+								AttackModifier = 0,
+								AttackItem = null,
+								Damage = new DamageComponent(
+									new DiceExpression { NumberOfDice = 0, DieType = DieType.d6, InD20CheckPool = false },
+									0,
+									new DamageTypeDefinition("monster.physical", "Physical", DamageFamily.Physical))
+							}
+						]
+					},
 				},
 			],
 		});

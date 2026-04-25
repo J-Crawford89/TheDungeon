@@ -84,17 +84,35 @@ public sealed class PlayerActionTargetResolversTests
 				new MonsterInstance
 				{
 					CurrentHp = 3,
-					Definition = new MonsterDefinition { Id = "rat", Name = "Rat", Defense = 10 },
+					Definition = new MonsterDefinition
+					{
+						Id = "rat",
+						Name = "Rat",
+						Defense = 10,
+						Attacks = [TestAttack()]
+					},
 				},
 				new MonsterInstance
 				{
 					CurrentHp = 0,
-					Definition = new MonsterDefinition { Id = "rat", Name = "Dead", Defense = 10 },
+					Definition = new MonsterDefinition
+					{
+						Id = "rat",
+						Name = "Dead",
+						Defense = 10,
+						Attacks = [TestAttack()]
+					},
 				},
 				new MonsterInstance
 				{
 					CurrentHp = 2,
-					Definition = new MonsterDefinition { Id = "giant_rat", Name = "Big", Defense = 11 },
+					Definition = new MonsterDefinition
+					{
+						Id = "giant_rat",
+						Name = "Big",
+						Defense = 11,
+						Attacks = [TestAttack()]
+					},
 				},
 			],
 		});
@@ -126,4 +144,16 @@ public sealed class PlayerActionTargetResolversTests
 		Assert.Equal($"{MainViewRoomSlots.TrapKeyPrefix}0:0", list[0].HighlightKey);
 		Assert.Equal($"{MainViewRoomSlots.TrapKeyPrefix}0:1", list[1].HighlightKey);
 	}
+
+	private static AttackDefinition TestAttack() =>
+		new()
+		{
+			Name = "Scratch",
+			AttackModifier = 0,
+			AttackItem = null,
+			Damage = new DamageComponent(
+				new DiceExpression { NumberOfDice = 0, DieType = DieType.d6, InD20CheckPool = false },
+				0,
+				new DamageTypeDefinition("monster.physical", "Physical", DamageFamily.Physical))
+		};
 }

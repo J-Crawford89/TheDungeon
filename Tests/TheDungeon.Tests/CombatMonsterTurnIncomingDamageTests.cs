@@ -66,11 +66,12 @@ public sealed class CombatMonsterTurnIncomingDamageTests
 
 	private static CombatMonsterTurn CreateMonsterTurn(int seed)
 	{
-		var resolution = new ResolutionService(new DiceRollService(new Random(seed)));
+		var dice = new DiceRollService(new Random(seed));
+		var resolution = new ResolutionService(dice);
 		var narrative = new NarrativeService();
 		var vitals = new PlayerVitalsService();
 		var downed = new PlayerDownedResolutionService(Array.Empty<IPlayerDownedOutcomeHandler>());
-		return new CombatMonsterTurn(resolution, narrative, vitals, downed);
+		return new CombatMonsterTurn(resolution, dice, narrative, vitals, downed);
 	}
 
 	private static GameSessionState CreateSessionWithArmor(
@@ -108,7 +109,19 @@ public sealed class CombatMonsterTurnIncomingDamageTests
 					{
 						Id = "m",
 						Name = "Monster",
-						Attack = attack,
+						Attacks =
+						[
+							new AttackDefinition
+							{
+								Name = "Claw",
+								AttackModifier = attack,
+								AttackItem = null,
+								Damage = new DamageComponent(
+									new DiceExpression { NumberOfDice = 0, DieType = DieType.d6, InD20CheckPool = false },
+									attack,
+									new DamageTypeDefinition("monster.physical", "Physical", DamageFamily.Physical))
+							}
+						],
 						MaxHp = 10,
 						Defense = 0,
 						ExperienceReward = 0,

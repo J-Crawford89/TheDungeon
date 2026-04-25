@@ -13,7 +13,13 @@ public sealed class MainViewRoomSlotsPresentationTests
 				new MonsterInstance
 				{
 					CurrentHp = 1,
-					Definition = new MonsterDefinition { Id = "rat", Name = "Rat", Defense = 1 },
+					Definition = new MonsterDefinition
+					{
+						Id = "rat",
+						Name = "Rat",
+						Defense = 1,
+						Attacks = [TestAttack()]
+					},
 				},
 			],
 		});
@@ -105,4 +111,16 @@ public sealed class MainViewRoomSlotsPresentationTests
 		Assert.Single(slots);
 		Assert.Equal(PresentationIconKeys.MainView.Item("health_potion"), slots[0].PresentationIconKey);
 	}
+
+	private static AttackDefinition TestAttack() =>
+		new()
+		{
+			Name = "Scratch",
+			AttackModifier = 0,
+			AttackItem = null,
+			Damage = new DamageComponent(
+				new DiceExpression { NumberOfDice = 0, DieType = DieType.d6, InD20CheckPool = false },
+				0,
+				new DamageTypeDefinition("monster.physical", "Physical", DamageFamily.Physical))
+		};
 }

@@ -40,8 +40,8 @@ public sealed partial class NarrativeService
 	public string ForMonsterHitPlayer(string monsterName, int damage, int playerHp) =>
 		$"{monsterName} hits you for {damage} damage. You have {playerHp} HP left.";
 
-	public string ForMonsterHitArmor(string monsterName, int damage, int playerHp) =>
-		$"{monsterName} strikes your armor for {damage} damage. You have {playerHp} HP left.";
+	public string ForMonsterHitArmor(string monsterName, int rolledDamage, int reducedByArmor, int finalDamage, int playerHp) =>
+		$"{monsterName} strikes your armor: rolled {rolledDamage}, armor reduced {reducedByArmor}, final damage {finalDamage}. You have {playerHp} HP left.";
 
 	public string ForFleeRoll(int total, int fleeDc, string detail) =>
 		$"Flee attempt: {total} vs DC {fleeDc}. {detail}".Trim();

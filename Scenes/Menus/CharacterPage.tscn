@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://cwawgt4d0onew" path="res://Scenes/Components/CollapsibleInfoRow.tscn" id="1_c64xy"]
 [ext_resource type="Script" uid="uid://bnnrgkhe1bj7m" path="res://Scenes/Menus/CharacterPage.cs" id="2_chpg"]
 
-[node name="CharacterPageMargin" type="MarginContainer" unique_id=1368927034 node_paths=PackedStringArray("_identityList", "_grantedAbilitiesList", "_futureAbilitiesList", "_hpLabel", "_ecLabel", "_armorBonusLabel", "_damageReductionLabel", "_levelLabel", "_experienceLabel", "_spLabel", "_mightLabel", "_constitutionLabel", "_dexterityLabel", "_agilityLabel", "_intelligenceLabel", "_wisdomLabel", "_gravitasLabel", "_luckLabel")]
+[node name="CharacterPageMargin" type="MarginContainer" unique_id=1368927034 node_paths=PackedStringArray("_identityList", "_grantedAbilitiesList", "_futureAbilitiesList", "_damageReductionsGrid", "_hpLabel", "_ecLabel", "_armorBonusLabel", "_levelLabel", "_experienceLabel", "_spLabel", "_mightLabel", "_constitutionLabel", "_dexterityLabel", "_agilityLabel", "_intelligenceLabel", "_wisdomLabel", "_gravitasLabel", "_luckLabel")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -20,10 +20,10 @@ _identityList = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollCon
 _grantedAbilitiesList = NodePath("CharacterPageHBox/CharacterPageRightPanel/RightScrollContainer/CharacterPageRightMargin/CharacterPageRightVBox/GrantedAbilitiesVBox")
 _futureAbilitiesList = NodePath("CharacterPageHBox/CharacterPageRightPanel/RightScrollContainer/CharacterPageRightMargin/CharacterPageRightVBox/FutureAbilitiesVBox")
 _collapsibleInfoRowScene = ExtResource("1_c64xy")
+_damageReductionsGrid = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/DamageReductionVBox/DamageReductionsGrid")
 _hpLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/Line2HBox/HpLabel")
 _ecLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/Line3HBox/EcLabel")
 _armorBonusLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/Line3HBox/ArmorBonusLabel")
-_damageReductionLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/DamageReductionVBox/DamageReductionsTitle")
 _levelLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/LevelExperienceHBox/LevelLabel")
 _experienceLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/LevelExperienceHBox/ExperienceLabel")
 _spLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/Line2HBox/SpLabel")
@@ -140,15 +140,17 @@ horizontal_alignment = 1
 
 [node name="DamageReductionsGrid" type="GridContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/DamageReductionVBox" unique_id=1860609514]
 layout_mode = 2
-columns = 3
+columns = 2
 
 [node name="DamageReduction1" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/DamageReductionVBox/DamageReductionsGrid" unique_id=1347432018]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 14
 text = "Physical: 2"
 
 [node name="DamageReduction2" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/DamageReductionVBox/DamageReductionsGrid" unique_id=1480670163]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 14
 text = "Fire: 3"
 

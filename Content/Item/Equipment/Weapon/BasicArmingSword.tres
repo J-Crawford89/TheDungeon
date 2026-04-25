@@ -1,20 +1,20 @@
 [gd_resource type="Resource" script_class="WeaponResource" format=3 uid="uid://dyj1uky2yiios"]
 
-[ext_resource type="Script" uid="uid://dgsq2pyq2wiiq" path="res://Resources/WeaponDamageComponentResource.cs" id="1_fpoor"]
+[ext_resource type="Script" uid="uid://l11npu0nk6bm" path="res://Resources/DamageComponentResource.cs" id="1_l1w0c"]
 [ext_resource type="Script" uid="uid://bdnjh3oenwke5" path="res://Resources/WeaponResource.cs" id="2_fkog5"]
 [ext_resource type="Resource" uid="uid://b8r5eyjlrffjk" path="res://Content/World/DamageType/Slashing.tres" id="2_jkku0"]
 [ext_resource type="Texture2D" uid="uid://c2emvmjs8qggt" path="res://Assets/PrototypeAssets/Sword.png" id="3_l1w0c"]
 [ext_resource type="Script" uid="uid://cjbkth835rns8" path="res://Resources/ItemEffectResource.cs" id="3_q1f66"]
 
 [sub_resource type="Resource" id="Resource_q1f66"]
-script = ExtResource("1_fpoor")
+script = ExtResource("1_l1w0c")
 NumberOfDice = 1
 DamageType = ExtResource("2_jkku0")
-metadata/_custom_type_script = "uid://dgsq2pyq2wiiq"
+metadata/_custom_type_script = "uid://l11npu0nk6bm"
 
 [resource]
 script = ExtResource("2_fkog5")
-DamageComponents = Array[ExtResource("1_fpoor")]([SubResource("Resource_q1f66")])
+DamageComponents = Array[ExtResource("1_l1w0c")]([SubResource("Resource_q1f66")])
 Slots = Array[int]([21, 23])
 Id = "basic_arming_sword"
 Name = "Basic Arming Sword"

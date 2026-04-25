@@ -109,7 +109,7 @@ public partial class CharacterPage : MarginContainer
 
 		foreach (var typeReduction in player.DamageReductionByDamageTypeId)
 		{
-			AddDamageReductionLabel($"{typeReduction.Key}: {typeReduction.Value}");
+			AddDamageReductionLabel($"{UiTextFormatHelper.FromIdToDisplayName(typeReduction.Key)}: {typeReduction.Value}");
 		}
 	}
 
@@ -120,11 +120,12 @@ public partial class CharacterPage : MarginContainer
 			Text = text,
 			HorizontalAlignment = HorizontalAlignment.Left,
 			SizeFlagsHorizontal = SizeFlags.Fill | SizeFlags.Expand
-        };
+		};
+		label.AddThemeFontSizeOverride("font_size", 14);
 		_damageReductionsGrid.AddChild(label);
-    }
+	}
 
-    private static void ClearChildren(Node parent)
+	private static void ClearChildren(Node parent)
 	{
 		foreach (var child in parent.GetChildren())
 			child.QueueFree();

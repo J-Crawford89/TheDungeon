@@ -2,7 +2,7 @@
 using Godot;
 
 [GlobalClass]
-public partial class WeaponDamageComponentResource : Resource
+public partial class DamageComponentResource : Resource
 {
 	[Export] public int NumberOfDice { get; set; }
 	[Export] public DieType DiceType { get; set; } = DieType.d6;

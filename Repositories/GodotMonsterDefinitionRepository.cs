@@ -4,6 +4,9 @@ using System.Linq;
 
 public sealed class GodotMonsterDefinitionRepository : IMonsterDefinitionRepository
 {
+	private static readonly DamageTypeDefinition DefaultPhysicalDamageType =
+		new("monster.default.physical", "Physical", DamageFamily.Physical);
+
 	private readonly IReadOnlyList<MonsterDefinition> _all;
 
 	public GodotMonsterDefinitionRepository(MonsterResourceDatabase? database)
@@ -24,7 +27,7 @@ public sealed class GodotMonsterDefinitionRepository : IMonsterDefinitionReposit
 				Id = "rat",
 				Name = "Rat",
 				MaxHp = 2,
-				Attack = 1,
+				Attacks = [CreateDefaultAttack("Bite", 1)],
 				Defense = 12,
 				ExperienceReward = 0,
 				RandomizerWeight = 50
@@ -34,7 +37,7 @@ public sealed class GodotMonsterDefinitionRepository : IMonsterDefinitionReposit
 				Id = "giant_rat",
 				Name = "Giant Rat",
 				MaxHp = 20,
-				Attack = 4,
+				Attacks = [CreateDefaultAttack("Bite", 4)],
 				Defense = 10,
 				ExperienceReward = 0,
 				RandomizerWeight = 20
@@ -44,11 +47,23 @@ public sealed class GodotMonsterDefinitionRepository : IMonsterDefinitionReposit
 				Id = "rat_king",
 				Name = "Rat King",
 				MaxHp = 32,
-				Attack = 6,
+				Attacks = [CreateDefaultAttack("Royal Bite", 6)],
 				Defense = 13,
 				ExperienceReward = 0,
 				IsBoss = true,
 				RandomizerWeight = 5
 			}
+		};
+
+	private static AttackDefinition CreateDefaultAttack(string name, int amount) =>
+		new()
+		{
+			Name = name,
+			AttackModifier = amount,
+			AttackItem = null,
+			Damage = new DamageComponent(
+				new DiceExpression { NumberOfDice = 0, DieType = DieType.d6, InD20CheckPool = false },
+				amount,
+				DefaultPhysicalDamageType)
 		};
 }
