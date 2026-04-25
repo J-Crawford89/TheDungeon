@@ -1,11 +1,35 @@
 [gd_resource type="Resource" script_class="ArmorResource" format=3 uid="uid://cb6ww8x8jw6qx"]
 
 [ext_resource type="Texture2D" uid="uid://c26wir8e2yjri" path="res://Assets/PrototypeAssets/ChainShirt.png" id="1_1lmue"]
+[ext_resource type="Script" uid="uid://cjbkth835rns8" path="res://Resources/ItemEffectResource.cs" id="1_ubr7k"]
 [ext_resource type="Script" uid="uid://dks2gj6q81xln" path="res://Resources/ArmorResource.cs" id="2_8vkwi"]
+[ext_resource type="Resource" uid="uid://lbv2c1n2kapj" path="res://Content/World/DamageType/Bludgeoning.tres" id="2_kl5vi"]
+[ext_resource type="Script" uid="uid://n1iep6m0g3k7" path="res://Resources/DamageReductionEffectResource.cs" id="3_i81ph"]
+[ext_resource type="Resource" uid="uid://khjg6aq0tt0o" path="res://Content/World/DamageType/Piercing.tres" id="4_rr4ae"]
+[ext_resource type="Resource" uid="uid://b8r5eyjlrffjk" path="res://Content/World/DamageType/Slashing.tres" id="5_pymkn"]
+
+[sub_resource type="Resource" id="Resource_2e20f"]
+script = ExtResource("3_i81ph")
+DamageType = ExtResource("2_kl5vi")
+ReductionAmount = 1
+metadata/_custom_type_script = "uid://n1iep6m0g3k7"
+
+[sub_resource type="Resource" id="Resource_4x1na"]
+script = ExtResource("3_i81ph")
+DamageType = ExtResource("4_rr4ae")
+ReductionAmount = 1
+metadata/_custom_type_script = "uid://n1iep6m0g3k7"
+
+[sub_resource type="Resource" id="Resource_l1o5h"]
+script = ExtResource("3_i81ph")
+DamageType = ExtResource("5_pymkn")
+ReductionAmount = 3
+metadata/_custom_type_script = "uid://n1iep6m0g3k7"
 
 [resource]
 script = ExtResource("2_8vkwi")
-ArmorBonus = 3
+ArmorBonus = 4
+AgilityPenalty = 2
 Slots = Array[int]([1])
 Id = "basic_chain_shirt"
 Name = "Basic Chain Shirt"
@@ -13,4 +37,5 @@ Description = "This chain shirt has seen better days."
 ValueInGold = 6
 Icon = ExtResource("1_1lmue")
 InventoryIcon = ExtResource("1_1lmue")
+Effects = Array[ExtResource("1_ubr7k")]([SubResource("Resource_2e20f"), SubResource("Resource_4x1na"), SubResource("Resource_l1o5h")])
 metadata/_custom_type_script = "uid://dks2gj6q81xln"

@@ -46,3 +46,14 @@ This file records concrete, agreed decisions so implementation stays consistent 
 - **Rationale:** Small, local helpers improve ergonomics without forcing unnecessary service indirection.
 - **Boundary:** Cross-system orchestration and heavier rule logic remain in service/helper layers.
 
+## ADR-0007: Armor damage-reduction targeting and lookup
+
+- **Status:** Accepted
+- **Decision:**
+  - `DamageReductionEffectDefinition` targeting precedence is:
+    1. `DamageType` set -> applies only to that damage type.
+    2. `DamageType` unset + `DamageFamily` set -> applies to that family.
+    3. both unset -> applies to all damage.
+  - Aggregation stays on `PlayerState` as data fields; lookup logic is handled by `PlayerDamageReductionHelper`.
+- **Rationale:** Keeps serialized effect data compact and unambiguous, avoids duplicate armor DR storage, and keeps query logic out of state shape while remaining reusable beyond combat.
+

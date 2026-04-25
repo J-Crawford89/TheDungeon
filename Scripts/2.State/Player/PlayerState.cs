@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,6 +19,7 @@ public sealed class PlayerState
 	public int Experience { get; set; }
 	public int TotalArmorBonus { get; set; }
 	public int TotalDamageReduction { get; set; }
+	public int TotalAgilityPenalty { get; set; }
 	public int Gold { get; set; }
 	public HorizontalDirection Facing { get; set; } = HorizontalDirection.North;
 	public AbilityScores AbilityScores { get; set; } = new();
@@ -26,6 +28,9 @@ public sealed class PlayerState
 
 	public int? CurrentSpellPoints { get; set; }
 	public int? MaxSpellPoints { get; set; }
+	public Dictionary<string, int> DamageReductionByDamageTypeId { get; set; } = new(StringComparer.Ordinal);
+	public Dictionary<DamageFamily, int> DamageReductionByDamageFamily { get; set; } = new();
+	public int DamageReductionAllDamage { get; set; }
 
 	public InventoryState InventoryState { get; set; } = new();
 
@@ -47,6 +52,7 @@ public sealed class PlayerState
 		Experience = 0;
 		TotalArmorBonus = 0;
 		TotalDamageReduction = 0;
+		TotalAgilityPenalty = 0;
 		Gold = 0;
 		Facing = HorizontalDirection.North;
 		AbilityScores = new AbilityScores();
@@ -54,6 +60,9 @@ public sealed class PlayerState
 		CurrentSpellPoints = null;
 		MaxSpellPoints = null;
 		InventoryState = new InventoryState();
+		DamageReductionByDamageTypeId = new Dictionary<string, int>(StringComparer.Ordinal);
+		DamageReductionByDamageFamily = new Dictionary<DamageFamily, int>();
+		DamageReductionAllDamage = 0;
 		CharacterRaceId = "";
 		CharacterClassId = "";
 		CharacterBackgroundId = "";

@@ -10,10 +10,12 @@ public partial class CharacterPage : MarginContainer
 	[Export] private VBoxContainer _grantedAbilitiesList = null!;
 	[Export] private VBoxContainer _futureAbilitiesList = null!;
 	[Export] private PackedScene _collapsibleInfoRowScene = null!;
+
+	[Export] private GridContainer _damageReductionsGrid = null!;
+
 	[Export] private Label _hpLabel = null!;
 	[Export] private Label _ecLabel = null!;
 	[Export] private Label _armorBonusLabel = null!;
-	[Export] private Label _damageReductionLabel = null!;
 	[Export] private Label _levelLabel = null!;
 	[Export] private Label _experienceLabel = null!;
 	[Export] private Label _spLabel = null!;
@@ -33,8 +35,10 @@ public partial class CharacterPage : MarginContainer
 		ClearChildren(_identityList);
 		ClearChildren(_grantedAbilitiesList);
 		ClearChildren(_futureAbilitiesList);
+		ClearChildren(_damageReductionsGrid);
 
 		var player = context.Session.Player;
+		PlayerDefenseAggregationHelper.RecomputeFromEquippedArmor(player);
 		var classes = context.CharacterClasses;
 		var races = context.CharacterRaces;
 		var backgrounds = context.CharacterBackgrounds;
@@ -42,9 +46,9 @@ public partial class CharacterPage : MarginContainer
 		var scores = player.AbilityScores;
 
 		_hpLabel.Text = $"HP: {player.CurrentHp} / {player.MaxHp}";
-		_ecLabel.Text = $"EC: {CombatFormulas.PlayerEvasionClass(scores.Agility)}";
+		var effectiveAgility = CombatFormulas.PlayerEffectiveAgility(scores.Agility, player.TotalAgilityPenalty);
+		_ecLabel.Text = $"EC: {CombatFormulas.PlayerEvasionClass(effectiveAgility)}";
 		_armorBonusLabel.Text = $"Armor Bonus: {player.TotalArmorBonus}";
-		_damageReductionLabel.Text = $"Damage Reduction: {player.TotalDamageReduction}";
 		_levelLabel.Text = $"Level: {player.Level}";
 		_experienceLabel.Text = $"XP: {player.Experience}";
 		if (player.CurrentSpellPoints is { } curSp && player.MaxSpellPoints is { } maxSp)
@@ -97,11 +101,32 @@ public partial class CharacterPage : MarginContainer
 			var desc = def?.Description ?? "";
 			AddRow(_futureAbilitiesList, title, desc);
 		}
+
+		foreach (var familyReduction in player.DamageReductionByDamageFamily)
+		{
+			AddDamageReductionLabel($"{familyReduction.Key}: {familyReduction.Value}");
+		}
+
+		foreach (var typeReduction in player.DamageReductionByDamageTypeId)
+		{
+			AddDamageReductionLabel($"{typeReduction.Key}: {typeReduction.Value}");
+		}
 	}
 
-	private static void ClearChildren(VBoxContainer box)
+	private void AddDamageReductionLabel(string text)
 	{
-		foreach (var child in box.GetChildren())
+		var label = new Label()
+		{
+			Text = text,
+			HorizontalAlignment = HorizontalAlignment.Left,
+			SizeFlagsHorizontal = SizeFlags.Fill | SizeFlags.Expand
+        };
+		_damageReductionsGrid.AddChild(label);
+    }
+
+    private static void ClearChildren(Node parent)
+	{
+		foreach (var child in parent.GetChildren())
 			child.QueueFree();
 	}
 

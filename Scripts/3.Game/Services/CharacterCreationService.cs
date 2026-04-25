@@ -126,6 +126,7 @@ public sealed class CharacterCreationService
 			state.SelectedBackground,
 			player.InventoryState,
 			_itemDefinitions);
+		PlayerDefenseAggregationHelper.RecomputeFromEquippedArmor(player);
 	}
 
 	private static string NormalizeDefinitionId(string? id)

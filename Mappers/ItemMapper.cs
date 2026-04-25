@@ -26,8 +26,36 @@ public static class ItemMapper
 			ValueInGold = resource.ValueInGold,
 			MaxStackSize = resource.MaxStackSize,
 			CanDrop = resource.CanDrop,
-			CanSell = resource.CanSell
+			CanSell = resource.CanSell,
+			Effects = MapItemEffects(resource.Effects),
 		};
+
+	private static List<ItemEffectDefinition> MapItemEffects(Array<ItemEffectResource>? resources)
+	{
+		var list = new List<ItemEffectDefinition>();
+		if (resources == null)
+			return list;
+
+		foreach (var resource in resources)
+		{
+			if (resource == null)
+				continue;
+			switch (resource)
+			{
+				case RestoreHealthEffectResource restore:
+					list.Add(ToRestoreHealthEffectDefinition(restore));
+					break;
+				case DamageReductionEffectResource reduction:
+					list.Add(ToDamageReductionEffectDefinition(reduction));
+					break;
+				default:
+					GD.PushWarning($"ItemMapper: unsupported item effect resource '{resource.GetType().Name}' on item effects list.");
+					break;
+			}
+		}
+
+		return list;
+	}
 
 	private static List<EquipmentSlot> MapEquipmentSlots(Array<EquipmentSlot>? slots)
 	{
@@ -52,6 +80,7 @@ public static class ItemMapper
 			MaxStackSize = b.MaxStackSize,
 			CanDrop = b.CanDrop,
 			CanSell = b.CanSell,
+			Effects = new List<ItemEffectDefinition>(b.Effects),
 			Slots = MapEquipmentSlots(resource.Slots),
 			OccupiedSlots = MapEquipmentSlots(resource.OccupiedSlots),
 		};
@@ -70,9 +99,11 @@ public static class ItemMapper
 			MaxStackSize = eq.MaxStackSize,
 			CanDrop = eq.CanDrop,
 			CanSell = eq.CanSell,
+			Effects = new List<ItemEffectDefinition>(eq.Effects),
 			Slots = eq.Slots,
 			OccupiedSlots = eq.OccupiedSlots,
 			ArmorBonus = resource.ArmorBonus,
+			AgilityPenalty = resource.AgilityPenalty,
 		};
 	}
 
@@ -119,6 +150,7 @@ public static class ItemMapper
 			MaxStackSize = eq.MaxStackSize,
 			CanDrop = eq.CanDrop,
 			CanSell = eq.CanSell,
+			Effects = new List<ItemEffectDefinition>(eq.Effects),
 			Slots = eq.Slots,
 			OccupiedSlots = eq.OccupiedSlots,
 			DamageComponents = damage,
@@ -128,16 +160,6 @@ public static class ItemMapper
 	private static PotionDefinition ToPotionDefinition(PotionResource resource)
 	{
 		var baseDef = ToBaseItemDefinition(resource);
-		var effects = new List<ItemEffectDefinition>();
-		if (resource.RestoreHealthEffects != null)
-		{
-			foreach (var restore in resource.RestoreHealthEffects)
-			{
-				if (restore == null)
-					continue;
-				effects.Add(ToRestoreHealthEffectDefinition(restore));
-			}
-		}
 
 		return new PotionDefinition
 		{
@@ -150,7 +172,7 @@ public static class ItemMapper
 			CanDrop = baseDef.CanDrop,
 			CanSell = baseDef.CanSell,
 			ConsumedOnUse = resource.ConsumedOnUse,
-			Effects = effects
+			Effects = new List<ItemEffectDefinition>(baseDef.Effects),
 		};
 	}
 
@@ -167,6 +189,24 @@ public static class ItemMapper
 		{
 			HealDice = healDice,
 			FlatHealAmount = resource.FlatHealAmount
+		};
+	}
+
+	private static DamageReductionEffectDefinition ToDamageReductionEffectDefinition(DamageReductionEffectResource resource)
+	{
+		DamageTypeDefinition? damageType = null;
+		if (resource.DamageType != null)
+		{
+			var mapped = DamageTypeMapper.ToDomain(resource.DamageType);
+			if (!string.IsNullOrWhiteSpace(mapped.Id))
+				damageType = mapped;
+		}
+		return new DamageReductionEffectDefinition
+		{
+			// Selection rule: DamageType overrides DamageFamily; if both are unset, effect applies to all damage.
+			DamageType = damageType,
+			DamageFamily = damageType == null ? resource.DamageFamily : null,
+			ReductionAmount = resource.ReductionAmount,
 		};
 	}
 }

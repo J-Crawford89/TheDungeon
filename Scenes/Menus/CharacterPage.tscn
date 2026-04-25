@@ -20,13 +20,13 @@ _identityList = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollCon
 _grantedAbilitiesList = NodePath("CharacterPageHBox/CharacterPageRightPanel/RightScrollContainer/CharacterPageRightMargin/CharacterPageRightVBox/GrantedAbilitiesVBox")
 _futureAbilitiesList = NodePath("CharacterPageHBox/CharacterPageRightPanel/RightScrollContainer/CharacterPageRightMargin/CharacterPageRightVBox/FutureAbilitiesVBox")
 _collapsibleInfoRowScene = ExtResource("1_c64xy")
-_hpLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/HpEcHBox/HpLabel")
-_ecLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/HpEcHBox/EcLabel")
-_armorBonusLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/ArmorHBox/ArmorBonusLabel")
-_damageReductionLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/ArmorHBox/DamageReductionLabel")
+_hpLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/Line2HBox/HpLabel")
+_ecLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/Line3HBox/EcLabel")
+_armorBonusLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/Line3HBox/ArmorBonusLabel")
+_damageReductionLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/DamageReductionVBox/DamageReductionsTitle")
 _levelLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/LevelExperienceHBox/LevelLabel")
 _experienceLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/LevelExperienceHBox/ExperienceLabel")
-_spLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/SpLabel")
+_spLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/Line2HBox/SpLabel")
 _mightLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/AbilityScoreHBox1/MightLabel")
 _constitutionLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/AbilityScoreHBox1/ConstitutionLabel")
 _dexterityLabel = NodePath("CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/AbilityScoreHBox2/DexterityLabel")
@@ -65,36 +65,6 @@ theme_override_font_sizes/font_size = 18
 text = "Character Name"
 horizontal_alignment = 1
 
-[node name="HpEcHBox" type="HBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=1953456048]
-layout_mode = 2
-
-[node name="HpLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/HpEcHBox" unique_id=634979757]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 14
-text = "HP: 10/10"
-
-[node name="EcLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/HpEcHBox" unique_id=280828420]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 14
-text = "EC: 10"
-
-[node name="ArmorHBox" type="HBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=221077108]
-layout_mode = 2
-
-[node name="ArmorBonusLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/ArmorHBox" unique_id=857290546]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 14
-text = "Armor Bonus: 0"
-
-[node name="DamageReductionLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/ArmorHBox" unique_id=545413920]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 14
-text = "Damage Reduction: 0"
-
 [node name="LevelExperienceHBox" type="HBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=1718344041]
 layout_mode = 2
 
@@ -110,10 +80,35 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 14
 text = "XP: 0"
 
-[node name="SpLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=1086549925]
+[node name="Line2HBox" type="HBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=1953456048]
 layout_mode = 2
+
+[node name="HpLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/Line2HBox" unique_id=634979757]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "HP: 10/10"
+
+[node name="SpLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/Line2HBox" unique_id=1086549925]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 14
 text = "SP: 10/10"
+
+[node name="Line3HBox" type="HBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=221077108]
+layout_mode = 2
+
+[node name="ArmorBonusLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/Line3HBox" unique_id=857290546]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Armor Bonus: 0"
+
+[node name="EcLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/Line3HBox" unique_id=280828420]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "EC: 10"
 
 [node name="IdentityListVBox" type="VBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=1808003502]
 layout_mode = 2
@@ -132,6 +127,30 @@ layout_mode = 2
 
 [node name="CollapsibleInfoRow" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/IdentityListVBox" unique_id=221806374 instance=ExtResource("1_c64xy")]
 layout_mode = 2
+
+[node name="DamageReductionVBox" type="VBoxContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=56771373]
+layout_mode = 2
+
+[node name="DamageReductionsTitle" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/DamageReductionVBox" unique_id=545413920]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "Damage Reductions"
+horizontal_alignment = 1
+
+[node name="DamageReductionsGrid" type="GridContainer" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/DamageReductionVBox" unique_id=1860609514]
+layout_mode = 2
+columns = 3
+
+[node name="DamageReduction1" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/DamageReductionVBox/DamageReductionsGrid" unique_id=1347432018]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Physical: 2"
+
+[node name="DamageReduction2" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox/DamageReductionVBox/DamageReductionsGrid" unique_id=1480670163]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Fire: 3"
 
 [node name="AbilityScoresLabel" type="Label" parent="CharacterPageHBox/CharacterPageLeftPanel/LeftScrollContainer/CharacterPageLeftMargin/CharacterPageLeftVBox" unique_id=2140297351]
 layout_mode = 2

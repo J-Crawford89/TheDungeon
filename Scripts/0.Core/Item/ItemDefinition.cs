@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 public class ItemDefinition
 {
     public string Id { get; set; } = string.Empty;
@@ -11,4 +13,6 @@ public class ItemDefinition
 
     public bool CanDrop { get; set; } = true;
     public bool CanSell { get; set; } = true;
+
+    public List<ItemEffectDefinition> Effects { get; set; } = new();
 }

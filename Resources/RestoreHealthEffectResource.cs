@@ -1,7 +1,7 @@
 using Godot;
 
 [GlobalClass]
-public partial class RestoreHealthEffectResource : Resource
+public partial class RestoreHealthEffectResource : UseItemEffectResource
 {
 	[Export] public int FlatHealAmount { get; set; }
 

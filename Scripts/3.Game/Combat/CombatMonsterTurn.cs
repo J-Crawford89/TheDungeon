@@ -1,7 +1,11 @@
+using System;
 using System.Collections.Generic;
 
 public sealed class CombatMonsterTurn
 {
+	private static readonly DamageTypeDefinition DefaultMonsterIncomingDamageType =
+		new("monster.default.physical", "Physical", DamageFamily.Physical);
+
 	private readonly ResolutionService _resolution;
 	private readonly NarrativeService _narrative;
 	private readonly PlayerVitalsService _vitals;
@@ -26,10 +30,15 @@ public sealed class CombatMonsterTurn
 		var monster = feature.Monsters[monsterIndex];
 		if (monster.CurrentHp <= 0)
 			return;
+		PlayerDefenseAggregationHelper.RecomputeFromEquippedArmor(session.Player);
 
 		var name = monster.Definition.Name;
 		var atk = monster.Definition.Attack;
-		var playerEc = CombatFormulas.PlayerEvasionClass(session.Player.AbilityScores.Agility);
+		var effectiveAgility = CombatFormulas.PlayerEffectiveAgility(
+			session.Player.AbilityScores.Agility,
+			session.Player.TotalAgilityPenalty);
+		var playerEc = CombatFormulas.PlayerEvasionClass(effectiveAgility);
+		var armorThreshold = CombatFormulas.PlayerArmorThreshold(playerEc, session.Player.TotalArmorBonus);
 		var req = new DiceRollRequest
 		{
 			DiceRollLabel = $"{name} attacks",
@@ -53,11 +62,19 @@ public sealed class CombatMonsterTurn
 
 		if (result.Outcome == ResolutionOutcome.Success || result.Outcome == ResolutionOutcome.CriticalSuccess)
 		{
+			var hitArmorBand = result.Roll.Total >= playerEc && result.Roll.Total < armorThreshold;
 			if (result.Outcome == ResolutionOutcome.CriticalSuccess)
 				atk *= 2;
 			var damage = atk;
+			// Preserve existing defend ordering: it can fully negate damage before any armor/DR math.
 			if (CombatPlayerIncomingDamage.TryApplyDefendNegate(ref damage, session, _narrative))
 				return;
+			if (hitArmorBand)
+			{
+				var totalReduction = PlayerDamageReductionHelper.TotalDamageReductionFor(session.Player, DefaultMonsterIncomingDamageType);
+				if (totalReduction != 0)
+					damage = Math.Max(0, damage - totalReduction);
+			}
 
 			var source = new PlayerDamageSource
 			{
@@ -66,7 +83,10 @@ public sealed class CombatMonsterTurn
 				DefinitionId = monster.Definition.Id,
 			};
 			var vitals = _vitals.ApplyDamage(session.Player, damage);
-			session.AppendGameLog(_narrative.ForMonsterHitPlayer(name, damage, vitals.HpAfterClamped));
+			if (hitArmorBand)
+				session.AppendGameLog(_narrative.ForMonsterHitArmor(name, damage, vitals.HpAfterClamped));
+			else
+				session.AppendGameLog(_narrative.ForMonsterHitPlayer(name, damage, vitals.HpAfterClamped));
 			if (vitals.HpAfterClamped <= 0)
 			{
 				_playerDowned.Resolve(session, new PlayerDownedContext

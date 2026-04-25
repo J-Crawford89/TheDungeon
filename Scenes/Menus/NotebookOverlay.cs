@@ -377,6 +377,7 @@ public partial class NotebookOverlay : Control
 				return;
 			}
 
+			PlayerDefenseAggregationHelper.RecomputeFromEquippedArmor(_session.Player);
 			_selection = InventoryNotebookSelection.Equipment(chosenSlot);
 			_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
 			RefreshAll();
@@ -520,6 +521,7 @@ public partial class NotebookOverlay : Control
 
 			if (!InventoryEquipmentOperations.TryEquipOneFromBackpackRow(_session.Player.InventoryState, item))
 				return;
+			PlayerDefenseAggregationHelper.RecomputeFromEquippedArmor(_session.Player);
 			_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
 			RefreshAll();
 		}
@@ -532,6 +534,7 @@ public partial class NotebookOverlay : Control
 				return;
 			if (!InventoryEquipmentOperations.TryUnequipSlot(_session.Player.InventoryState, _selection.EquipmentSlot))
 				return;
+			PlayerDefenseAggregationHelper.RecomputeFromEquippedArmor(_session.Player);
 			_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
 			RefreshAll();
 		}

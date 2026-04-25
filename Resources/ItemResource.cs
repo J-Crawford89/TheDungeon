@@ -1,5 +1,6 @@
 #nullable enable
 using Godot;
+using Godot.Collections;
 
 [GlobalClass]
 public partial class ItemResource : Resource
@@ -20,4 +21,6 @@ public partial class ItemResource : Resource
 
 	/// <summary>Inventory / notebook UI; when null, <see cref="Icon"/> is used.</summary>
 	[Export] public Texture2D? InventoryIcon { get; set; }
+
+	[Export] public Array<ItemEffectResource> Effects { get; set; } = [];
 }

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="DamageTypeResource" format=3 uid="uid://s2cvneivlmar"]
+[gd_resource type="Resource" format=3 uid="uid://s2cvneivlmar"]
 
 [ext_resource type="Script" uid="uid://cnhe7uq4anhb1" path="res://Resources/DamageTypeResource.cs" id="1_rwtv3"]
 
@@ -6,5 +6,5 @@
 script = ExtResource("1_rwtv3")
 Id = "electric"
 Name = "Electric"
-Family = 1
+Family = 2
 metadata/_custom_type_script = "uid://cnhe7uq4anhb1"
