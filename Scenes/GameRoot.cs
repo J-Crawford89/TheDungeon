@@ -144,9 +144,7 @@ public partial class GameRoot : Control
 
 	private GameRunContext BuildGameRunContext()
 	{
-		LogArchive.FileWriter = new GodotLogFileWriter();
-
-		var session = new GameSessionState();
+		var session = new GameSessionState(new GodotLogFileWriter());
 		var random = new Random();
 		var narrativeService = new NarrativeService();
 

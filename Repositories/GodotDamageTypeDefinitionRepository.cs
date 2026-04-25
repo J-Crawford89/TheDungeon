@@ -1,4 +1,5 @@
 #nullable enable
+using Godot;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,7 +19,7 @@ public sealed class GodotDamageTypeDefinitionRepository : IDamageTypeDefinitionR
 				.ToList();
 
 			foreach (var group in mapped.GroupBy(d => d.Id).Where(g => g.Count() > 1))
-				Godot.GD.PushWarning($"GodotDamageTypeDefinitionRepository: duplicate damage type id '{group.Key}'. Using last occurrence.");
+				GD.PushWarning($"GodotDamageTypeDefinitionRepository: duplicate damage type id '{group.Key}'. Using last occurrence.");
 
 			_all = mapped.GroupBy(d => d.Id).Select(g => g.Last()).ToList();
 		}

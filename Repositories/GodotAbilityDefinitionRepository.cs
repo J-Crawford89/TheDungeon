@@ -1,4 +1,5 @@
 #nullable enable
+using Godot;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,10 +12,14 @@ public sealed class GodotAbilityDefinitionRepository : IAbilityDefinitionReposit
 	{
 		if (database?.Abilities != null && database.Abilities.Count > 0)
 		{
-			_all = database.Abilities
+			var mapped = database.Abilities
 				.Where(a => a != null && !string.IsNullOrWhiteSpace(a.Id))
 				.Select(AbilityMapper.ToDomain)
 				.ToList();
+			foreach (var group in mapped.GroupBy(a => a.Id).Where(g => g.Count() > 1))
+				GD.PushWarning($"GodotAbilityDefinitionRepository: duplicate ability id '{group.Key}'. Using last occurrence.");
+
+			_all = mapped.GroupBy(a => a.Id).Select(g => g.Last()).ToList();
 		}
 		else
 			_all = [];

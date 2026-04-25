@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-public sealed partial class NarrativeService
+public sealed partial class NarrativeService : INarrativeTextProvider
 {
 	public string ForEnterDungeon() => "You enter the dungeon.";
 

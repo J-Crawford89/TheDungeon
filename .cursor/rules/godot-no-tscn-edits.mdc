@@ -1,11 +1,21 @@
 ---
-description: Do not edit Godot scene or serialized resource files; instruct user to use Godot Editor GUI instead.
+description: Never edit Godot .tscn/.tres; give exact Godot Editor steps; no workarounds; assume wiring exists.
 alwaysApply: true
 ---
 
 # Godot scenes and serialized resources
 
-- **Do not** edit `*.tscn` files (or other Godot serialized scene text) in the repo.
-- **Do not** edit `*.tres` / other Godot serialized **resource** text on disk (same policy as scenes), including adding new `.tres` files via the agent.
-- If the UI, scene tree, or resource data needs changes, **describe the steps** for the user to apply in the **Godot Editor** (which nodes to add, which properties to set, export paths, which `.tres` to create or adjust, etc.).
-- It is fine to edit **C# scripts** (`.cs`) that attach to scenes or define `[GlobalClass]` resources; avoid changing serialized scene/resource data on disk when the user prefers editor-owned content.
+## Non-negotiable
+
+- **Never** edit `*.tscn`, `*.tres`, or other Godot **serialized** scene/resource text in this repo (including “small fixes,” `script = null` removals, export path lines, or `ext_resource` tweaks).
+- **Never** add new `.tres` / serialized resources on disk via the agent.
+
+## What to do instead
+
+- When scene trees, node properties, exports, or resources need to change: give **exact, step-by-step Godot Editor instructions** (which scene to open, which node, Inspector fields, `NodePath` / export targets, sub-resources, etc.) so **you** apply the change once and it stays stable.
+- **Assume** you will complete that wiring. **Write C# accordingly**: normal `[Export]` fields, straightforward references, and clear `GD.PushWarning` / errors only when something is missing—not elaborate runtime discovery (`GetNode`/`FindChild` trees, duplicate code paths, “try export else scan the tree,” etc.) to replace editor-owned data.
+
+## Scripts
+
+- Editing **C#** (`.cs`) attached to scenes or `[GlobalClass]` resources is fine.
+- Prefer designs where **the editor owns** serialized layout and exports; **code owns** behavior.

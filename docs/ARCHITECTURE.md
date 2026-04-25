@@ -55,3 +55,5 @@ Reserve **direct** calls like `RefreshX()` from deep services into specific pane
 ---
 
 For Godot-specific editing constraints (scenes vs scripts), see `.cursor/rules/godot-no-tscn-edits.mdc`.
+
+Concrete decisions and policy lock-ins are tracked in `docs/ARCHITECTURE_DECISIONS.md`.

@@ -20,7 +20,7 @@ public sealed class GameUiCoordinator
 
 	private readonly GameSessionState _session;
 	private readonly ICombatService _combatService;
-	private readonly NarrativeService _narrative;
+	private readonly INarrativeTextProvider _takeNarrative;
 	private readonly ExplorationUiPresenter _exploration;
 	private readonly CombatUiPresenter _combat;
 	private readonly MainViewPanel _mainViewPanel;
@@ -36,7 +36,7 @@ public sealed class GameUiCoordinator
 	public GameUiCoordinator(
 		GameSessionState session,
 		ICombatService combatService,
-		NarrativeService narrativeService,
+		INarrativeTextProvider takeNarrative,
 		ExplorationUiPresenter exploration,
 		CombatUiPresenter combat,
 		MainViewPanel mainViewPanel,
@@ -47,7 +47,7 @@ public sealed class GameUiCoordinator
 	{
 		_session = session;
 		_combatService = combatService;
-		_narrative = narrativeService;
+		_takeNarrative = takeNarrative;
 		_exploration = exploration;
 		_combat = combat;
 		_mainViewPanel = mainViewPanel;
@@ -375,7 +375,7 @@ public sealed class GameUiCoordinator
 		var list = PlayerActionTargetResolvers.ResolveTakeTargets(_session, mode);
 		if (list.Count == 0)
 		{
-			_session.AppendGameLog(_narrative.ForTakeNothingHere());
+			_session.AppendGameLog(_takeNarrative.ForTakeNothingHere());
 			return;
 		}
 

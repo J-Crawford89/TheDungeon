@@ -18,14 +18,14 @@ public sealed class GodotItemDefinitionRepository : IItemDefinitionRepository
 				.ToList();
 
 			foreach (var group in mapped.GroupBy(i => i.Id).Where(g => g.Count() > 1))
-				Godot.GD.PushWarning($"GodotItemDefinitionRepository: duplicate item id '{group.Key}'. Using last occurrence.");
+				GD.PushWarning($"GodotItemDefinitionRepository: duplicate item id '{group.Key}'. Using last occurrence.");
 
 			_all = mapped.GroupBy(i => i.Id).Select(g => g.Last()).ToList();
 		}
 		else
 		{
-			Godot.GD.PushWarning("GodotItemDefinitionRepository: ItemDatabase missing or empty; using DefaultAll(). Assign ItemDatabase on GameRoot.");
-			_all = DefaultAll();
+			GD.PushWarning("GodotItemDefinitionRepository: ItemDatabase missing or empty; repository has no item definitions.");
+			_all = [];
 		}
 
 		_byId = _all.ToDictionary(static i => i.Id, static i => i);
@@ -38,49 +38,10 @@ public sealed class GodotItemDefinitionRepository : IItemDefinitionRepository
 		if (string.IsNullOrWhiteSpace(id))
 			return null;
 		var key = id.Trim();
-		if (_byId.TryGetValue(key, out var def))
-			return def;
-		Godot.GD.PushWarning($"GodotItemDefinitionRepository: unknown item id '{key}'.");
-		return null;
+		return _byId.TryGetValue(key, out var def) ? def : null;
 	}
 
 	public IReadOnlyList<T> GetDefinitionsOfType<T>() where T : ItemDefinition =>
 		_all.OfType<T>().ToArray();
 
-	private static IReadOnlyList<ItemDefinition> DefaultAll() =>
-		new ItemDefinition[]
-		{
-			new ConsumableDefinition
-			{
-				Id = InventoryIds.Rope,
-				Name = "Rope",
-				Description = "Heavy cord salvaged from a sprung snare.",
-				Rarity = ItemRarity.Common,
-				ValueInGold = 2,
-				MaxStackSize = 99,
-				CanDrop = true,
-				CanSell = true,
-				ConsumedOnUse = false,
-			},
-			new PotionDefinition
-			{
-				Id = InventoryIds.HealthPotion,
-				Name = "Health potion",
-				Description = "Restores health.",
-				Rarity = ItemRarity.Common,
-				ValueInGold = 0,
-				MaxStackSize = 99,
-				CanDrop = true,
-				CanSell = true,
-				ConsumedOnUse = true,
-				Effects = new List<ItemEffectDefinition>
-				{
-					new RestoreHealthEffectDefinition
-					{
-						HealDice = new DiceExpression { NumberOfDice = 0, DieType = DieType.d6 },
-						FlatHealAmount = 4
-					}
-				}
-			}
-		};
 }
