@@ -431,7 +431,6 @@ layout_mode = 2
 [node name="ItemImage" type="TextureRect" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox" unique_id=70324193]
 custom_minimum_size = Vector2(197, 197)
 layout_mode = 2
-expand_mode = 3
 stretch_mode = 5
 
 [node name="ItemDetailVBoxMargin" type="MarginContainer" parent="NotebookMargin/NotebookPanel/NotebookRootMargin/NotebookRoot/PageContainer/InventoryPageMargin/InventoryHBox/InventoryVBox/ItemDetailPanel/ItemDetailMargin/ItemDetailRoot/ItemDetailHBox" unique_id=748241705]
