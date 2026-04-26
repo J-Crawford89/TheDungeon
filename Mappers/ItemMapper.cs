@@ -154,6 +154,59 @@ public static class ItemMapper
 			Slots = eq.Slots,
 			OccupiedSlots = eq.OccupiedSlots,
 			DamageComponents = damage,
+			Category = MapWeaponCategory(resource.Category),
+			SubCategory = MapWeaponSubCategory(resource.SubCategory),
+			Group = MapWeaponGroup(resource.Group),
+			SubGroup = MapWeaponSubGroup(resource.SubGroup),
+			OwnershipProficiencyRank = resource.OwnershipProficiencyRank,
+		};
+	}
+
+	private static WeaponCategoryDefinition MapWeaponCategory(WeaponCategoryResource? r)
+	{
+		if (r == null)
+			return new WeaponCategoryDefinition();
+		return new WeaponCategoryDefinition
+		{
+			Id = r.Id?.Trim() ?? "",
+			Name = r.Name?.Trim() ?? "",
+			Description = r.Description?.Trim() ?? "",
+		};
+	}
+
+	private static WeaponSubCategoryDefinition MapWeaponSubCategory(WeaponSubCategoryResource? r)
+	{
+		if (r == null)
+			return new WeaponSubCategoryDefinition();
+		return new WeaponSubCategoryDefinition
+		{
+			Id = r.Id?.Trim() ?? "",
+			Name = r.Name?.Trim() ?? "",
+			Description = r.Description?.Trim() ?? "",
+		};
+	}
+
+	private static WeaponGroupDefinition MapWeaponGroup(WeaponGroupResource? r)
+	{
+		if (r == null)
+			return new WeaponGroupDefinition();
+		return new WeaponGroupDefinition
+		{
+			Id = r.Id?.Trim() ?? "",
+			Name = r.Name?.Trim() ?? "",
+			Description = r.Description?.Trim() ?? "",
+		};
+	}
+
+	private static WeaponSubGroupDefinition MapWeaponSubGroup(WeaponSubGroupResource? r)
+	{
+		if (r == null)
+			return new WeaponSubGroupDefinition();
+		return new WeaponSubGroupDefinition
+		{
+			Id = r.Id?.Trim() ?? "",
+			Name = r.Name?.Trim() ?? "",
+			Description = r.Description?.Trim() ?? "",
 		};
 	}
 

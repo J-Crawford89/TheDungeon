@@ -11,4 +11,6 @@ public class EquipmentDefinition : ItemDefinition
 	/// When empty, the item uses single-slot rules via <see cref="Slots"/>.
 	/// </summary>
 	public List<EquipmentSlot> OccupiedSlots { get; set; } = new();
+
+    public MaterialDefinition Material { get; set; } = new();
 }

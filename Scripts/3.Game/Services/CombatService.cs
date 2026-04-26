@@ -145,6 +145,18 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			? $"Unarmed strike vs {monster.Definition.Name}"
 			: $"{session.Player.InventoryState.EquippedBySlot[resolvedChoice.WeaponSlotIfAny!.Value]!.Definition.Name} vs {monster.Definition.Name}";
 
+		var modifiers = new List<ModifierWithSource>
+		{
+			new() { Modifier = might, Source = "Might" },
+		};
+		if (!resolvedChoice.IsUnarmed)
+		{
+			var weapon = (WeaponDefinition)session.Player.InventoryState.EquippedBySlot[resolvedChoice.WeaponSlotIfAny!.Value]!.Definition;
+			var prof = WeaponProficiencyResolver.Resolve(session.Player.Proficiencies, weapon);
+			if ((int)prof.Rank != 0)
+				modifiers.Add(new ModifierWithSource { Modifier = (int)prof.Rank, Source = prof.ModifierSourceLabel });
+		}
+
 		var req = new DiceRollRequest
 		{
 			DiceRollLabel = attackLabel,
@@ -154,10 +166,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			{
 				new() { NumberOfDice = 1, DieType = DieType.d20, InD20CheckPool = true }
 			},
-			ModifiersWithSources = new List<ModifierWithSource>
-			{
-				new() { Modifier = might, Source = "Might" }
-			}
+			ModifiersWithSources = modifiers,
 		};
 		var result = _resolution.RollAgainstTarget(req);
 		session.AppendLog(new LogEntry

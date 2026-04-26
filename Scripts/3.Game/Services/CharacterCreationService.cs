@@ -10,17 +10,20 @@ public sealed class CharacterCreationService
 	private readonly Random _random;
 	private readonly IAbilityDefinitionRepository _abilityDefinitions;
 	private readonly IItemDefinitionRepository _itemDefinitions;
+	private readonly PlayerProficiencyAggregationService _proficiencyAggregation;
 
 	public CharacterCreationService(
 		DiceRollService diceRollService,
 		Random random,
 		IAbilityDefinitionRepository abilityDefinitions,
-		IItemDefinitionRepository itemDefinitions)
+		IItemDefinitionRepository itemDefinitions,
+		PlayerProficiencyAggregationService proficiencyAggregation)
 	{
 		_diceRollService = diceRollService;
 		_random = random;
 		_abilityDefinitions = abilityDefinitions;
 		_itemDefinitions = itemDefinitions;
+		_proficiencyAggregation = proficiencyAggregation;
 	}
 
 	public void RollAndApplyRolledScores(CharacterCreationState state)
@@ -127,6 +130,7 @@ public sealed class CharacterCreationService
 			player.InventoryState,
 			_itemDefinitions);
 		PlayerDefenseAggregationHelper.RecomputeFromEquippedArmor(player);
+		_proficiencyAggregation.Recompute(player);
 	}
 
 	private static string NormalizeDefinitionId(string? id)

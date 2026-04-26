@@ -1,6 +1,4 @@
 #nullable enable
-using System.Collections.Generic;
-using System.Linq;
 using Godot.Collections;
 
 public static class CharacterRaceMapper
@@ -14,9 +12,6 @@ public static class CharacterRaceMapper
 			BaseHp = resource.BaseHp,
 			AbilityGrants = LevelAbilityGrantMapper.ToDomainList(resource.AbilityGrants),
 			StartingEquipment = ItemResourceListMapper.ToDefinitionIds(resource.StartingEquipment),
-			Proficiencies = ToStringList(resource.Proficiencies),
+			ProficiencyGrants = ProficiencyGrantMapper.ToDomainList(resource.ProficiencyGrants),
 		};
-
-	private static List<string> ToStringList(Array<string>? arr) =>
-		arr == null || arr.Count == 0 ? [] : arr.Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s!).ToList();
 }

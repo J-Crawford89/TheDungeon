@@ -6,6 +6,6 @@ public sealed class CharacterClassDefinition
     public int BaseHp { get; set; }
     public List<LevelAbilityGrant> AbilityGrants { get; set; } = new();
     public List<string> StartingEquipment { get; set; } = new();
-    public List<string> Proficiencies { get; set; } = new();
+    public List<ProficiencyGrant> ProficiencyGrants { get; set; } = new();
 }
 

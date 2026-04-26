@@ -6,11 +6,16 @@ public sealed class TreasurePickupService
 {
 	private readonly NarrativeService _narrative;
 	private readonly IItemDefinitionRepository _items;
+	private readonly PlayerProficiencyAggregationService _proficiencyAggregation;
 
-	public TreasurePickupService(NarrativeService narrative, IItemDefinitionRepository items)
+	public TreasurePickupService(
+		NarrativeService narrative,
+		IItemDefinitionRepository items,
+		PlayerProficiencyAggregationService proficiencyAggregation)
 	{
 		_narrative = narrative;
 		_items = items;
+		_proficiencyAggregation = proficiencyAggregation;
 	}
 
 	/// <summary>Whether this instance can be taken via room Take actions (revealed; future: not locked).</summary>
@@ -123,6 +128,7 @@ public sealed class TreasurePickupService
 		}
 
 		session.Player.InventoryState.AddOrStackOne(itemDef);
+		_proficiencyAggregation.Recompute(session.Player);
 		session.AppendGameLog(_narrative.ForTookItem(treasureDef.Name));
 	}
 }

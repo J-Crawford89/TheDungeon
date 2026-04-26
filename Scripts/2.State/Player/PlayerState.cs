@@ -34,6 +34,8 @@ public sealed class PlayerState
 
 	public InventoryState InventoryState { get; set; } = new();
 
+	public Dictionary<ProficiencyKey, ProficiencyRank> Proficiencies { get; set; } = new();
+
 	public bool HasAbility(string abilityId)
 	{
 		if (string.IsNullOrWhiteSpace(abilityId))
@@ -66,5 +68,6 @@ public sealed class PlayerState
 		CharacterRaceId = "";
 		CharacterClassId = "";
 		CharacterBackgroundId = "";
+		Proficiencies = new Dictionary<ProficiencyKey, ProficiencyRank>();
 	}
 }

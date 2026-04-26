@@ -32,6 +32,7 @@ public sealed class GameRunContext
 	public ITreasureDefinitionRepository TreasureDefinitions { get; }
 
 	public IconResolver Icons { get; }
+	public PlayerProficiencyAggregationService ProficiencyAggregation { get; }
 
 	public GameRunContext(
 		GameSessionState session,
@@ -60,7 +61,8 @@ public sealed class GameRunContext
 		TrapService trapService,
 		ITrapDefinitionRepository trapDefinitions,
 		ITreasureDefinitionRepository treasureDefinitions,
-		IconResolver icons)
+		IconResolver icons,
+		PlayerProficiencyAggregationService proficiencyAggregation)
 	{
 		Session = session;
 		Random = random;
@@ -89,5 +91,6 @@ public sealed class GameRunContext
 		TrapDefinitions = trapDefinitions;
 		TreasureDefinitions = treasureDefinitions;
 		Icons = icons;
+		ProficiencyAggregation = proficiencyAggregation;
 	}
 }

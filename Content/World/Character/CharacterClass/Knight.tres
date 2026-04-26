@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://rr8vsheybc0y" path="res://Resources/LevelAbilityGrantResource.cs" id="2_grant"]
 [ext_resource type="Resource" uid="uid://bd8dcgln2cllc" path="res://Content/Abilities/Defend.tres" id="2_pocy0"]
 [ext_resource type="Script" uid="uid://2bdywe1406xv" path="res://Resources/ItemResource.cs" id="3_5m18i"]
+[ext_resource type="Script" uid="uid://bt2ebxv7822cs" path="res://Resources/ProficiencyGrantResource.cs" id="3_ljd45"]
 [ext_resource type="Resource" uid="uid://dyj1uky2yiios" path="res://Content/Item/Equipment/Weapon/BasicArmingSword.tres" id="4_5m18i"]
 [ext_resource type="Resource" uid="uid://cb6ww8x8jw6qx" path="res://Content/Item/Equipment/Armor/BasicChainShirt.tres" id="5_8pjje"]
 [ext_resource type="Resource" uid="uid://ck6xjfcacxoxy" path="res://Content/Item/Equipment/Armor/BasicMetalShield.tres" id="6_ljd45"]

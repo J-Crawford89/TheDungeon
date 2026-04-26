@@ -95,7 +95,7 @@ public sealed class PlayerAbilityGrantFutureTests
 		var dice = new DiceRollService(random);
 		var abilities = new MemoryAbilityRepo([]);
 		var items = new MemoryItemRepo();
-		var svc = new CharacterCreationService(dice, random, abilities, items);
+		var svc = new CharacterCreationService(dice, random, abilities, items, TestPlayerProficiencyAggregation.CreateEmpty());
 
 		var state = new CharacterCreationState
 		{

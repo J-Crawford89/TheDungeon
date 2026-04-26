@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WeaponCategoryResource" format=3 uid="uid://cltevtne7ehch"]
+
+[ext_resource type="Script" uid="uid://dtesrgtrf6qjn" path="res://Resources/NamedResource/WeaponCategoryResource.cs" id="1_8s7ie"]
+
+[resource]
+script = ExtResource("1_8s7ie")
+Id = "melee_weapons"
+Name = "Melee Weapons"
+Description = "Melee Weapons are weapons used to attack a target by closing in and swinging directly toward it to physically strike a target. Melee Weapons typically use your Might Score to for attack and damage rolls."
+metadata/_custom_type_script = "uid://dtesrgtrf6qjn"

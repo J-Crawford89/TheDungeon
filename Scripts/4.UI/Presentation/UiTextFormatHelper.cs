@@ -1,13 +1,6 @@
-using System;
-
+/// <summary>UI-friendly entry point; delegates to <see cref="DisplayIdHelper"/> for shared rules.</summary>
 public static class UiTextFormatHelper
 {
-	public static string FromIdToDisplayName(string id)
-	{
-		if (string.IsNullOrWhiteSpace(id))
-			return id;
-
-		var cleaned = id.Trim().Replace('_', ' ');
-		return char.ToUpperInvariant(cleaned[0]) + cleaned[1..];
-	}
+	public static string FromIdToDisplayName(string? id) =>
+		DisplayIdHelper.FormatSnakeOrRawId(id);
 }

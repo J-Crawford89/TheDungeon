@@ -189,6 +189,7 @@ public partial class NotebookOverlay : Control
 		private readonly GameSessionState _session;
 		private readonly IconResolver _icons;
 		private readonly PotionEffectApplicationService _potions;
+		private readonly PlayerProficiencyAggregationService _proficiencyAggregation;
 		private readonly Action<UiRefreshFlags>? _refreshHud;
 
 		private readonly List<InventorySlotControl> _slotRefs = new();
@@ -204,6 +205,7 @@ public partial class NotebookOverlay : Control
 			_session = context.Session;
 			_icons = context.Icons;
 			_potions = context.PotionEffects;
+			_proficiencyAggregation = context.ProficiencyAggregation;
 			_refreshHud = refreshHud;
 		}
 
@@ -378,6 +380,7 @@ public partial class NotebookOverlay : Control
 			}
 
 			PlayerDefenseAggregationHelper.RecomputeFromEquippedArmor(_session.Player);
+			_proficiencyAggregation.Recompute(_session.Player);
 			_selection = InventoryNotebookSelection.Equipment(chosenSlot);
 			_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
 			RefreshAll();
@@ -522,6 +525,7 @@ public partial class NotebookOverlay : Control
 			if (!InventoryEquipmentOperations.TryEquipOneFromBackpackRow(_session.Player.InventoryState, item))
 				return;
 			PlayerDefenseAggregationHelper.RecomputeFromEquippedArmor(_session.Player);
+			_proficiencyAggregation.Recompute(_session.Player);
 			_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
 			RefreshAll();
 		}
@@ -535,6 +539,7 @@ public partial class NotebookOverlay : Control
 			if (!InventoryEquipmentOperations.TryUnequipSlot(_session.Player.InventoryState, _selection.EquipmentSlot))
 				return;
 			PlayerDefenseAggregationHelper.RecomputeFromEquippedArmor(_session.Player);
+			_proficiencyAggregation.Recompute(_session.Player);
 			_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
 			RefreshAll();
 		}

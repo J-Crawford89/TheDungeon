@@ -23,7 +23,7 @@ public sealed class CombatServiceTests
 		var vitals = new PlayerVitalsService();
 		var downed = new PlayerDownedResolutionService(Array.Empty<IPlayerDownedOutcomeHandler>());
 		var items = new EmptyItemDefinitionRepository();
-		var treasure = new TreasurePickupService(narrative, items);
+		var treasure = new TreasurePickupService(narrative, items, TestPlayerProficiencyAggregation.CreateEmpty());
 		var potionFx = new PotionEffectApplicationService(dice, narrative, items);
 		var traps = new TrapService(resolution, narrative, vitals, items);
 		return new CombatService(dice, resolution, narrative, vitals, downed, treasure, potionFx, traps);

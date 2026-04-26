@@ -10,5 +10,5 @@ public partial class CharacterRaceResource : Resource
     [Export] public int BaseHp { get; set; }
     [Export] public Array<LevelAbilityGrantResource> AbilityGrants { get; set; } = [];
     [Export] public Array<ItemResource> StartingEquipment { get; set; } = [];
-    [Export] public Array<string> Proficiencies { get; set; } = new();
+    [Export] public Array<ProficiencyGrantResource> ProficiencyGrants { get; set; } = [];
 }

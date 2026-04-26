@@ -168,12 +168,14 @@ public partial class GameRoot : Control
 		var damageTypeRepo = new GodotDamageTypeDefinitionRepository(DamageTypeDatabase);
 		var itemRepo = new GodotItemDefinitionRepository(ItemDatabase);
 
+		var proficiencyAggregation = new PlayerProficiencyAggregationService(raceRepo, classRepo, backgroundRepo);
+
 		var roomFeaturePopulation = new RoomFeaturePopulationService(monsterRepo, trapRepo, treasureRepo, npcRepo, loreRepo);
 		var dungeonBootstrap = new DungeonBootstrap(roomFeaturePopulation);
 		var diceRollService = new DiceRollService(random);
 		var resolutionService = new ResolutionService(diceRollService);
 		var experienceService = new PlayerExperienceService(narrativeService);
-		var treasurePickupService = new TreasurePickupService(narrativeService, itemRepo);
+		var treasurePickupService = new TreasurePickupService(narrativeService, itemRepo, proficiencyAggregation);
 		var potionEffectApplicationService = new PotionEffectApplicationService(diceRollService, narrativeService, itemRepo);
 		var vitalsService = new PlayerVitalsService();
 		var gameOverDownedHandler = new GameOverDownedHandler(narrativeService);
@@ -198,7 +200,7 @@ public partial class GameRoot : Control
 			experienceService,
 			GameBalanceSettings?.ExperiencePerFirstRoomVisit ?? 0,
 			GameBalanceSettings?.ExperiencePerFloorEntry ?? 0);
-		var characterCreation = new CharacterCreationService(diceRollService, random, abilityRepo, itemRepo);
+		var characterCreation = new CharacterCreationService(diceRollService, random, abilityRepo, itemRepo, proficiencyAggregation);
 
 		var icons = new IconResolver(
 			MonsterDatabase,
@@ -236,6 +238,7 @@ public partial class GameRoot : Control
 			trapService,
 			trapRepo,
 			treasureRepo,
-			icons);
+			icons,
+			proficiencyAggregation);
 	}
 }
