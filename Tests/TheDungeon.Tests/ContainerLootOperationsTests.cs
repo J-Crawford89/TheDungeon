@@ -87,6 +87,73 @@ public sealed class ContainerLootOperationsTests
 	}
 
 	[Fact]
+	public void TransferSelectedContents_TakesOneStack_LeavesOther()
+	{
+		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
+		var gem = new ItemDefinition { Id = "gem", Name = "Gem", MaxStackSize = 1 };
+		var repo = new MapItemRepo(coin, gem);
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		var salvage = new SalvageFeature
+		{
+			Contents =
+			[
+				new LootableItemDefinition { ItemDefinitionId = "coin", Quantity = 2 },
+				new LootableItemDefinition { ItemDefinitionId = "gem", Quantity = 1 },
+			],
+		};
+		room.Features.Add(salvage);
+		var session = new GameSessionState();
+		var floor = new DungeonFloor { Level = 1, Entrance = DirectionHelper.Origin };
+		floor.Rooms[DirectionHelper.Origin] = room;
+		session.Dungeon.CurrentFloor = floor;
+		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
+
+		var result = ContainerLootOperations.TransferSelectedContents(
+			session,
+			room,
+			salvage,
+			[0],
+			repo,
+			new NarrativeService(),
+			TestPlayerProficiencyAggregation.CreateEmpty(),
+			"salvage pile");
+
+		Assert.Equal(1, result.StacksGranted);
+		Assert.Single(salvage.Contents);
+		Assert.Equal("gem", salvage.Contents[0].ItemDefinitionId);
+		Assert.Equal(2, session.Player.InventoryState.SumQuantityForDefinitionId("coin"));
+	}
+
+	[Fact]
+	public void TransferSelectedContents_InvalidIndex_Throws()
+	{
+		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
+		var repo = new MapItemRepo(coin);
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		var salvage = new SalvageFeature
+		{
+			Contents = [new LootableItemDefinition { ItemDefinitionId = "coin", Quantity = 1 }],
+		};
+		room.Features.Add(salvage);
+		var session = new GameSessionState();
+		var floor = new DungeonFloor { Level = 1, Entrance = DirectionHelper.Origin };
+		floor.Rooms[DirectionHelper.Origin] = room;
+		session.Dungeon.CurrentFloor = floor;
+		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
+
+		Assert.Throws<System.ArgumentOutOfRangeException>(() =>
+			ContainerLootOperations.TransferSelectedContents(
+				session,
+				room,
+				salvage,
+				[9],
+				repo,
+				new NarrativeService(),
+				TestPlayerProficiencyAggregation.CreateEmpty(),
+				"pile"));
+	}
+
+	[Fact]
 	public void TransferAllContents_UnknownId_KeepsRowAndSkips()
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };

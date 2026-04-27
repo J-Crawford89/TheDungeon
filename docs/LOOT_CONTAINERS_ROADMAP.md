@@ -39,7 +39,12 @@ Single checklist for container-backed loot. Reference in chats: `@docs/LOOT_CONT
 
 **Exit criteria**
 
-- [ ] Presenter/tests can drive loot without Godot scenes.
+- [x] Presenter/tests can drive loot without Godot scenes.
+
+**Key files**
+
+- [`ContainerLoot*Dto` / `ContainerLootErrorCode`](../Scripts/3.Game.Contracts/Inventory/) (Contracts)
+- [`ContainerLootInteractionService`](../Scripts/3.Game/Services/ContainerLootInteractionService.cs), [`RoomContainerLocator`](../Scripts/3.Game/Services/RoomContainerLocator.cs), [`ContainerLootOperations`](../Scripts/3.Game/Services/ContainerLootOperations.cs)
 
 ## Phase 4 — Monsters
 
