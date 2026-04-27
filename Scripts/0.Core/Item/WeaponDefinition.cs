@@ -1,6 +1,6 @@
 public sealed class WeaponDefinition : EquipmentDefinition
 {
-    public List<DamageComponent> DamageComponents { get; set; } = new();
+    public List<AttackDefinition> Attacks { get; set; } = new();
     public WeaponCategoryDefinition Category { get; set; } = new();
     public WeaponSubCategoryDefinition SubCategory { get; set; } = new();
     public WeaponGroupDefinition Group { get; set; } = new();

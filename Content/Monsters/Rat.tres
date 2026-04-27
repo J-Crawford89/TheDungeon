@@ -6,18 +6,18 @@
 [ext_resource type="Resource" uid="uid://khjg6aq0tt0o" path="res://Content/World/DamageType/Piercing.tres" id="2_2vcak"]
 [ext_resource type="Script" uid="uid://l11npu0nk6bm" path="res://Resources/DamageComponentResource.cs" id="3_mj8ll"]
 
-[sub_resource type="Resource" id="Resource_1o3sb"]
+[sub_resource type="Resource" id="Resource_kqecf"]
 script = ExtResource("3_mj8ll")
 NumberOfDice = 1
-DiceType = 4
+DiceType = 3
 DamageType = ExtResource("2_2vcak")
 metadata/_custom_type_script = "uid://l11npu0nk6bm"
 
 [sub_resource type="Resource" id="Resource_8svrn"]
 script = ExtResource("1_kqecf")
 Name = "Bite"
-AttackModifier = 2
-Damage = SubResource("Resource_1o3sb")
+AbilityScore = 2
+DamageComponents = Array[ExtResource("3_mj8ll")]([SubResource("Resource_kqecf")])
 metadata/_custom_type_script = "uid://cp4x0wf1unxo7"
 
 [resource]
@@ -25,6 +25,13 @@ script = ExtResource("1_80rr7")
 Id = "rat"
 Name = "Rat"
 MaxHp = 2
+Might = -2
+Constitution = -2
+Dexterity = 1
+Agility = 2
+Intelligence = -3
+Wisdom = 1
+Gravitas = -4
 Attacks = Array[ExtResource("1_kqecf")]([SubResource("Resource_8svrn")])
 Defense = 12
 ExperienceReward = 2

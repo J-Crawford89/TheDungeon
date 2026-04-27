@@ -50,13 +50,15 @@ public sealed class CombatServiceTests
 							{
 								Name = "Nudge",
 								AttackModifier = 0,
-								AttackItem = null,
-								Damage = new DamageComponent(
-									new DiceExpression { NumberOfDice = 0, DieType = DieType.d6, InD20CheckPool = false },
-									0,
-									new DamageTypeDefinition("monster.physical", "Physical", DamageFamily.Physical))
-							}
-						]
+								DamageComponents =
+								[
+									new DamageComponent(
+										new DiceExpression { NumberOfDice = 0, DieType = DieType.d6, InD20CheckPool = false },
+										0,
+										new DamageTypeDefinition("monster.physical", "Physical", DamageFamily.Physical)),
+								],
+							},
+						],
 					},
 				},
 			],
@@ -116,12 +118,22 @@ public sealed class CombatServiceTests
 			Name = "Club",
 			MaxStackSize = 1,
 			Slots = [EquipmentSlot.WeaponMainHand1],
-			DamageComponents =
+			Attacks =
 			[
-				new DamageComponent(
-					new DiceExpression { NumberOfDice = 1, DieType = DieType.d4, InD20CheckPool = false },
-					0,
-					pierce),
+				new AttackDefinition
+				{
+					Name = "Swing",
+					AttackModifier = 0,
+					AbilityScore = AbilityScore.Might,
+					AddAbilityScoreToDamage = true,
+					DamageComponents =
+					[
+						new DamageComponent(
+							new DiceExpression { NumberOfDice = 1, DieType = DieType.d4, InD20CheckPool = false },
+							0,
+							pierce),
+					],
+				},
 			],
 		};
 		var weaponRow = new ItemInstance { Definition = club, Quantity = 1 };

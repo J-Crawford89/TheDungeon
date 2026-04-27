@@ -18,6 +18,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 	private readonly CombatInitiative _initiative;
 	private readonly CombatMonsterTurn _monsterTurn;
 	private readonly CombatTurnLoop _turnLoop;
+	private readonly IAttackRollAbilityOverlay? _attackRollAbilityOverlay;
 
 	public CombatService(
 		DiceRollService dice,
@@ -28,7 +29,8 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		TreasurePickupService treasurePickup,
 		PotionEffectApplicationService potionEffects,
 		TrapService trapService,
-		PlayerExperienceService? experience = null)
+		PlayerExperienceService? experience = null,
+		IAttackRollAbilityOverlay? attackRollAbilityOverlay = null)
 	{
 		_dice = dice;
 		_resolution = resolution;
@@ -38,6 +40,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		_treasurePickup = treasurePickup;
 		_trapService = trapService;
 		_experience = experience;
+		_attackRollAbilityOverlay = attackRollAbilityOverlay;
 		_lifecycle = new CombatEncounterLifecycle(_narrative);
 		_monsterTurn = new CombatMonsterTurn(_resolution, _dice, _narrative, _vitals, _playerDowned);
 		_initiative = new CombatInitiative(_dice, _narrative);
@@ -127,7 +130,6 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		if (monster.CurrentHp <= 0)
 			return;
 		var monsterWasAlive = monster.CurrentHp > 0;
-		var might = session.Player.AbilityScores.Might;
 
 		var resolvedChoice = attackChoice;
 		if (!resolvedChoice.IsUnarmed)
@@ -141,33 +143,34 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			}
 		}
 
-		var attackLabel = resolvedChoice.IsUnarmed
-			? $"Unarmed strike vs {monster.Definition.Name}"
-			: $"{session.Player.InventoryState.EquippedBySlot[resolvedChoice.WeaponSlotIfAny!.Value]!.Definition.Name} vs {monster.Definition.Name}";
+		AttackDefinition attack;
+		WeaponDefinition? weapon = null;
+		if (resolvedChoice.IsUnarmed)
+			attack = DefaultUnarmedAttackDefinition.Create();
+		else
+		{
+			weapon = (WeaponDefinition)session.Player.InventoryState.EquippedBySlot[resolvedChoice.WeaponSlotIfAny!.Value]!.Definition;
+			if (weapon.Attacks.Count == 0)
+			{
+				session.AppendGameLog("That weapon has no attacks configured; you cannot strike with it.");
+				return;
+			}
 
-		var modifiers = new List<ModifierWithSource>
-		{
-			new() { Modifier = might, Source = "Might" },
-		};
-		if (!resolvedChoice.IsUnarmed)
-		{
-			var weapon = (WeaponDefinition)session.Player.InventoryState.EquippedBySlot[resolvedChoice.WeaponSlotIfAny!.Value]!.Definition;
-			var prof = WeaponProficiencyResolver.Resolve(session.Player.Proficiencies, weapon);
-			if ((int)prof.Rank != 0)
-				modifiers.Add(new ModifierWithSource { Modifier = (int)prof.Rank, Source = prof.ModifierSourceLabel });
+			attack = weapon.Attacks[0];
 		}
 
-		var req = new DiceRollRequest
+		var attackLabel = resolvedChoice.IsUnarmed
+			? $"{attack.Name} vs {monster.Definition.Name}"
+			: $"{weapon!.Name} vs {monster.Definition.Name}";
+
+		var rollInput = new PlayerAttackRollInput
 		{
-			DiceRollLabel = attackLabel,
-			TargetNumber = monster.Definition.Defense,
-			CheckStyle = D20CheckStyle.Standard,
-			DiceExpressions = new List<DiceExpression>
-			{
-				new() { NumberOfDice = 1, DieType = DieType.d20, InD20CheckPool = true }
-			},
-			ModifiersWithSources = modifiers,
+			Session = session,
+			Attack = attack,
+			Weapon = weapon,
+			AbilityOverlay = _attackRollAbilityOverlay,
 		};
+		var req = PlayerAttackRollBuilder.BuildToHitRequest(rollInput, attackLabel, monster.Definition.Defense);
 		var result = _resolution.RollAgainstTarget(req);
 		session.AppendLog(new LogEntry
 		{
@@ -177,19 +180,16 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 
 		if (result.Outcome == ResolutionOutcome.Success || result.Outcome == ResolutionOutcome.CriticalSuccess)
 		{
-			int dmg;
-			string damageDetail;
-			if (resolvedChoice.IsUnarmed)
-			{
-				var d6 = _dice.Roll(DieType.d6);
-				dmg = CombatFormulas.UnarmedDamageTotal(d6.RolledValue, might);
-				damageDetail = $"½×d6 from {d6.RolledValue}";
-			}
-			else
-			{
-				var weapon = (WeaponDefinition)session.Player.InventoryState.EquippedBySlot[resolvedChoice.WeaponSlotIfAny!.Value]!.Definition;
-				dmg = RollWeaponDamageTotal(weapon, might, out damageDetail);
-			}
+			var (damageAbility, addAbilityToDamage) = PlayerAttackRollBuilder.ResolveDamageAbility(rollInput);
+			var dmg = PlayerAttackRollBuilder.RollDamageTotal(
+				new PlayerAttackDamageRollInput
+				{
+					Dice = _dice,
+					Roll = rollInput,
+					DamageAbility = damageAbility,
+					AddAbilityToDamage = addAbilityToDamage,
+				},
+				out var damageDetail);
 
 			if (result.Outcome == ResolutionOutcome.CriticalSuccess)
 				dmg *= 2;
@@ -207,29 +207,6 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 
 		_turnLoop.AdvanceTurn(session);
 		_turnLoop.ProcessAutomaticMonsterTurns(session);
-	}
-
-	private int RollWeaponDamageTotal(WeaponDefinition weapon, int mightScore, out string damageDetail)
-	{
-		var parts = new List<string>();
-		var sum = 0;
-		foreach (var comp in weapon.DamageComponents)
-		{
-			var rolled = 0;
-			for (var i = 0; i < comp.DamageDice.NumberOfDice; i++)
-				rolled += _dice.Roll(comp.DamageDice.DieType).RolledValue;
-
-			var part = rolled + comp.FlatAmount;
-			sum += part;
-			parts.Add($"{comp.DamageType.Name} {rolled}+{comp.FlatAmount}");
-		}
-
-		sum += mightScore;
-		var raw = Math.Max(1, sum);
-		damageDetail = parts.Count > 0
-			? $"{string.Join(", ", parts)} + Might {mightScore}"
-			: $"Might {mightScore}";
-		return raw;
 	}
 
 	public void ExecutePlayerFlee(GameSessionState session)

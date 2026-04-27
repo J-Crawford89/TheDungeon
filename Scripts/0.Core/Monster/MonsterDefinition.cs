@@ -5,6 +5,7 @@ public sealed class MonsterDefinition
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public int MaxHp { get; set; }
+    public AbilityScores AbilityScores { get; set; } = new();
     public List<AttackDefinition> Attacks { get; set; } = new();
     public int Defense { get; set; }
     public int ExperienceReward { get; set; }

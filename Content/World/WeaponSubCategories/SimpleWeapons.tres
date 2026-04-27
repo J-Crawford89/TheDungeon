@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WeaponSubCategoryResource" format=3 uid="uid://bw4msu6uay8h0"]
+
+[ext_resource type="Script" uid="uid://1bxysguuh56n" path="res://Resources/NamedResource/WeaponSubCategoryResource.cs" id="1_qpr47"]
+
+[resource]
+script = ExtResource("1_qpr47")
+Id = "simple_weapons"
+Name = "Simple Weapons"
+Description = "Simple Weapons are weapons that most people in the world are fairly familiar with, and the majority of adventurers, town guards, and those with minimal combat training are comfortable using. Examples include Simple Short Spears, Simple Clubs, and Simple Crossbows. These weapons require little advanced training and techniques to use, but are also typically less effective than more advanced weaponry."
+metadata/_custom_type_script = "uid://1bxysguuh56n"

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WeaponSubCategoryResource" format=3 uid="uid://nw2co6hlxt8y"]
+
+[ext_resource type="Script" uid="uid://1bxysguuh56n" path="res://Resources/NamedResource/WeaponSubCategoryResource.cs" id="1_c2415"]
+
+[resource]
+script = ExtResource("1_c2415")
+Id = "advanced_weapons"
+Name = "Advanced Weapons"
+Description = "Advanced Weapons are weapons that many commoners have seen and are somewhat familiar with, but require a good bit of training in order to effectively use. Well trained soldiers, mercenaries, and other martially trained creatures are typically seen with these weapons. Examples include things Basic Arming Swords, Hunting Longbows, and Basic Flails."
+metadata/_custom_type_script = "uid://1bxysguuh56n"

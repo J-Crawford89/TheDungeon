@@ -170,12 +170,19 @@ public sealed class InventoryEquipmentOperationsTests
 			MaxStackSize = 1,
 			Slots = [EquipmentSlot.WeaponMainHand1],
 			OccupiedSlots = [EquipmentSlot.WeaponMainHand1, EquipmentSlot.WeaponOffHand1],
-			DamageComponents =
+			Attacks =
 			[
-				new DamageComponent(
-					new DiceExpression { NumberOfDice = 1, DieType = DieType.d6, InD20CheckPool = false },
-					0,
-					pierce),
+				new AttackDefinition
+				{
+					Name = "Cleave",
+					DamageComponents =
+					[
+						new DamageComponent(
+							new DiceExpression { NumberOfDice = 1, DieType = DieType.d6, InD20CheckPool = false },
+							0,
+							pierce),
+					],
+				},
 			],
 		};
 		var row = new ItemInstance { Definition = gs, Quantity = 1 };
@@ -208,12 +215,19 @@ public sealed class InventoryEquipmentOperationsTests
 			Name = "Greatsword",
 			MaxStackSize = 1,
 			OccupiedSlots = [EquipmentSlot.WeaponMainHand1, EquipmentSlot.WeaponOffHand1],
-			DamageComponents =
+			Attacks =
 			[
-				new DamageComponent(
-					new DiceExpression { NumberOfDice = 1, DieType = DieType.d6, InD20CheckPool = false },
-					0,
-					pierce),
+				new AttackDefinition
+				{
+					Name = "Cleave",
+					DamageComponents =
+					[
+						new DamageComponent(
+							new DiceExpression { NumberOfDice = 1, DieType = DieType.d6, InD20CheckPool = false },
+							0,
+							pierce),
+					],
+				},
 			],
 		};
 		var shieldInst = new ItemInstance { Definition = shield, Quantity = 1 };

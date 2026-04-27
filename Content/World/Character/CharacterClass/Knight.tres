@@ -6,7 +6,9 @@
 [ext_resource type="Script" uid="uid://2bdywe1406xv" path="res://Resources/ItemResource.cs" id="3_5m18i"]
 [ext_resource type="Script" uid="uid://bt2ebxv7822cs" path="res://Resources/ProficiencyGrantResource.cs" id="3_ljd45"]
 [ext_resource type="Resource" uid="uid://dyj1uky2yiios" path="res://Content/Item/Equipment/Weapon/BasicArmingSword.tres" id="4_5m18i"]
+[ext_resource type="Resource" uid="uid://bw4msu6uay8h0" path="res://Content/World/WeaponSubCategories/SimpleWeapons.tres" id="4_puj74"]
 [ext_resource type="Resource" uid="uid://cb6ww8x8jw6qx" path="res://Content/Item/Equipment/Armor/BasicChainShirt.tres" id="5_8pjje"]
+[ext_resource type="Resource" uid="uid://nw2co6hlxt8y" path="res://Content/World/WeaponSubCategories/AdvancedWeapons.tres" id="5_weuej"]
 [ext_resource type="Resource" uid="uid://ck6xjfcacxoxy" path="res://Content/Item/Equipment/Armor/BasicMetalShield.tres" id="6_ljd45"]
 
 [sub_resource type="Resource" id="Resource_dndc0"]
@@ -14,6 +16,18 @@ script = ExtResource("2_grant")
 Level = 1
 Ability = ExtResource("2_pocy0")
 metadata/_custom_type_script = "uid://rr8vsheybc0y"
+
+[sub_resource type="Resource" id="Resource_gxwui"]
+script = ExtResource("3_ljd45")
+Target = ExtResource("4_puj74")
+Rank = 2
+metadata/_custom_type_script = "uid://bt2ebxv7822cs"
+
+[sub_resource type="Resource" id="Resource_6i3o2"]
+script = ExtResource("3_ljd45")
+Target = ExtResource("5_weuej")
+Rank = 2
+metadata/_custom_type_script = "uid://bt2ebxv7822cs"
 
 [resource]
 script = ExtResource("1_svryp")
@@ -23,3 +37,4 @@ Description = "Knights are heavily armored noble warriors. While they are not th
 BaseHp = 7
 AbilityGrants = Array[ExtResource("2_grant")]([SubResource("Resource_dndc0")])
 StartingEquipment = Array[ExtResource("3_5m18i")]([ExtResource("4_5m18i"), ExtResource("5_8pjje"), ExtResource("6_ljd45")])
+ProficiencyGrants = Array[ExtResource("3_ljd45")]([SubResource("Resource_gxwui"), SubResource("Resource_6i3o2")])

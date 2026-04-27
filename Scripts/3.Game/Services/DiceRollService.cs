@@ -43,15 +43,17 @@ public sealed class DiceRollService : IDiceRollRequestExecutor
         };
     }
 
-    public DieRollResult Roll(DieType dieType)
+    public DieRollResult RollDie(DieType dieType)
     {
         var sides = (int)dieType;
-        return new DieRollResult()
+        return new DieRollResult
         {
             DieType = dieType,
             RolledValue = _random.Next(1, sides + 1)
         };
     }
+
+    public DieRollResult Roll(DieType dieType) => RollDie(dieType);
 
     public DiceRollResult RollD20Plus(string label, int modifier, string modSource)
     {

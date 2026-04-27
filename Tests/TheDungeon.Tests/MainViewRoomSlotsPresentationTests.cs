@@ -117,10 +117,12 @@ public sealed class MainViewRoomSlotsPresentationTests
 		{
 			Name = "Scratch",
 			AttackModifier = 0,
-			AttackItem = null,
-			Damage = new DamageComponent(
-				new DiceExpression { NumberOfDice = 0, DieType = DieType.d6, InD20CheckPool = false },
-				0,
-				new DamageTypeDefinition("monster.physical", "Physical", DamageFamily.Physical))
+			DamageComponents =
+			[
+				new DamageComponent(
+					new DiceExpression { NumberOfDice = 0, DieType = DieType.d6, InD20CheckPool = false },
+					0,
+					new DamageTypeDefinition("monster.physical", "Physical", DamageFamily.Physical)),
+			],
 		};
 }

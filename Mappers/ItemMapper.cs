@@ -110,35 +110,9 @@ public static class ItemMapper
 	private static WeaponDefinition ToWeaponDefinition(WeaponResource resource)
 	{
 		var eq = ToEquipmentDefinition(resource);
-		var damage = new List<DamageComponent>();
-		if (resource.DamageComponents != null)
-		{
-			foreach (var part in resource.DamageComponents)
-			{
-				if (part == null)
-					continue;
-				if (part.DamageType == null)
-				{
-					GD.PushWarning($"ItemMapper: weapon '{resource.Id}' has a damage component with no DamageType; skipped.");
-					continue;
-				}
-
-				var typeId = part.DamageType.Id?.Trim() ?? "";
-				if (typeId.Length == 0)
-				{
-					GD.PushWarning($"ItemMapper: weapon '{resource.Id}' has a damage component with empty damage type id; skipped.");
-					continue;
-				}
-
-				var dice = new DiceExpression
-				{
-					NumberOfDice = Math.Max(0, part.NumberOfDice),
-					DieType = part.NumberOfDice > 0 ? part.DiceType : DieType.d6,
-					InD20CheckPool = part.InD20CheckPool,
-				};
-				damage.Add(new DamageComponent(dice, part.FlatAmount, DamageTypeMapper.ToDomain(part.DamageType)));
-			}
-		}
+		var attacks = AttackResourceMapper.ToDomainList(resource.Attacks);
+		if (attacks.Count == 0)
+			GD.PushWarning($"ItemMapper: weapon '{resource.Id}' has no valid attacks; assign AttackResource entries in the editor.");
 
 		return new WeaponDefinition
 		{
@@ -153,7 +127,7 @@ public static class ItemMapper
 			Effects = new List<ItemEffectDefinition>(eq.Effects),
 			Slots = eq.Slots,
 			OccupiedSlots = eq.OccupiedSlots,
-			DamageComponents = damage,
+			Attacks = attacks,
 			Category = MapWeaponCategory(resource.Category),
 			SubCategory = MapWeaponSubCategory(resource.SubCategory),
 			Group = MapWeaponGroup(resource.Group),

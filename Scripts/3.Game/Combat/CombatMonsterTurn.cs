@@ -34,10 +34,16 @@ public sealed class CombatMonsterTurn
 
 		var name = monster.Definition.Name;
 		var attack = SelectAttack(session, monster.Definition, name);
-		if (attack?.Damage == null)
+		if (attack == null || attack.DamageComponents == null || attack.DamageComponents.Count == 0)
 			return;
 
-		var attackModifier = attack.AttackModifier;
+		var abilityMod = monster.Definition.AbilityScores.GetScore(attack.AbilityScore);
+		var modifiers = new List<ModifierWithSource>();
+		if (abilityMod != 0)
+			modifiers.Add(new ModifierWithSource { Modifier = abilityMod, Source = attack.AbilityScore.ToString() });
+		if (attack.AttackModifier != 0)
+			modifiers.Add(new ModifierWithSource { Modifier = attack.AttackModifier, Source = "Attack" });
+
 		var effectiveAgility = CombatFormulas.PlayerEffectiveAgility(
 			session.Player.AbilityScores.Agility,
 			session.Player.TotalAgilityPenalty);
@@ -52,10 +58,7 @@ public sealed class CombatMonsterTurn
 			{
 				new() { NumberOfDice = 1, DieType = DieType.d20, InD20CheckPool = true }
 			},
-			ModifiersWithSources = new List<ModifierWithSource>
-			{
-				new() { Modifier = attackModifier, Source = "Attack" }
-			}
+			ModifiersWithSources = modifiers,
 		};
 		var result = _resolution.RollAgainstTarget(req);
 		session.AppendLog(new LogEntry
@@ -67,7 +70,10 @@ public sealed class CombatMonsterTurn
 		if (result.Outcome == ResolutionOutcome.Success || result.Outcome == ResolutionOutcome.CriticalSuccess)
 		{
 			var hitArmorBand = result.Roll.Total >= playerEc && result.Roll.Total < armorThreshold;
-			var damage = RollAttackDamage(attack.Damage);
+			var damage = RollAttackDamageSum(attack);
+			if (attack.AddAbilityScoreToDamage)
+				damage += monster.Definition.AbilityScores.GetScore(attack.AbilityScore);
+			damage = Math.Max(0, damage);
 			if (result.Outcome == ResolutionOutcome.CriticalSuccess)
 				damage *= 2;
 			// Preserve existing defend ordering: it can fully negate damage before any armor/DR math.
@@ -77,7 +83,8 @@ public sealed class CombatMonsterTurn
 			var reducedByArmor = 0;
 			if (hitArmorBand)
 			{
-				var totalReduction = PlayerDamageReductionHelper.TotalDamageReductionFor(session.Player, attack.Damage.DamageType);
+				var primaryType = attack.DamageComponents[0].DamageType;
+				var totalReduction = PlayerDamageReductionHelper.TotalDamageReductionFor(session.Player, primaryType);
 				if (totalReduction != 0)
 				{
 					var reduced = Math.Max(0, damage - totalReduction);
@@ -115,7 +122,7 @@ public sealed class CombatMonsterTurn
 		for (var i = 0; i < definition.Attacks.Count; i++)
 		{
 			var attack = definition.Attacks[i];
-			if (attack?.Damage == null)
+			if (attack?.DamageComponents == null || attack.DamageComponents.Count == 0)
 				continue;
 			return attack;
 		}
@@ -130,7 +137,15 @@ public sealed class CombatMonsterTurn
 		return null;
 	}
 
-	private int RollAttackDamage(DamageComponent damage)
+	private int RollAttackDamageSum(AttackDefinition attack)
+	{
+		var sum = 0;
+		foreach (var damage in attack.DamageComponents)
+			sum += RollAttackDamageOne(damage);
+		return sum;
+	}
+
+	private int RollAttackDamageOne(DamageComponent damage)
 	{
 		var damageRoll = _diceRolls.Roll(new DiceRollRequest
 		{

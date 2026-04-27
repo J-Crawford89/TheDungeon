@@ -10,6 +10,9 @@ public sealed class InspectDiscoveryTests
 		public FixedDiceRoll(DiceRollResult result) => _result = result;
 
 		public DiceRollResult Roll(DiceRollRequest request) => _result;
+
+		public DieRollResult RollDie(DieType dieType) =>
+			new() { DieType = dieType, RolledValue = 1 };
 	}
 
 	private static DiceRollResult BuildRoll(int total, int resolvedD20)

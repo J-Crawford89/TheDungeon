@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WeaponGroupResource" format=3 uid="uid://drtkaypeb7q1c"]
+
+[ext_resource type="Script" uid="uid://vxlrnhjtcpb8" path="res://Resources/NamedResource/WeaponGroupResource.cs" id="1_xr4l7"]
+
+[resource]
+script = ExtResource("1_xr4l7")
+Id = "blades"
+Name = "Blades"
+Description = "Weapons in the Blades group consist mostly of Swords. A few of these swords are thrusted and deal Piercing damage, like the Basic Short Sword, but most are swung, dealing Slashing damage."
+metadata/_custom_type_script = "uid://vxlrnhjtcpb8"

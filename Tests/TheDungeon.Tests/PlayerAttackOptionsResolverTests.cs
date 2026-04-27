@@ -23,12 +23,19 @@ public sealed class PlayerAttackOptionsResolverTests
 			Name = "Club",
 			MaxStackSize = 1,
 			Slots = [EquipmentSlot.WeaponMainHand1],
-			DamageComponents =
+			Attacks =
 			[
-				new DamageComponent(
-					new DiceExpression { NumberOfDice = 1, DieType = DieType.d6, InD20CheckPool = false },
-					0,
-					pierce),
+				new AttackDefinition
+				{
+					Name = "Swing",
+					DamageComponents =
+					[
+						new DamageComponent(
+							new DiceExpression { NumberOfDice = 1, DieType = DieType.d6, InD20CheckPool = false },
+							0,
+							pierce),
+					],
+				},
 			],
 		};
 		var inst = new ItemInstance { Definition = club, Quantity = 1 };
@@ -62,12 +69,19 @@ public sealed class PlayerAttackOptionsResolverTests
 			Name = "Greatsword",
 			MaxStackSize = 1,
 			OccupiedSlots = [EquipmentSlot.WeaponMainHand1, EquipmentSlot.WeaponOffHand1],
-			DamageComponents =
+			Attacks =
 			[
-				new DamageComponent(
-					new DiceExpression { NumberOfDice = 1, DieType = DieType.d6, InD20CheckPool = false },
-					0,
-					pierce),
+				new AttackDefinition
+				{
+					Name = "Cleave",
+					DamageComponents =
+					[
+						new DamageComponent(
+							new DiceExpression { NumberOfDice = 1, DieType = DieType.d6, InD20CheckPool = false },
+							0,
+							pierce),
+					],
+				},
 			],
 		};
 		var inst = new ItemInstance { Definition = gs, Quantity = 1 };

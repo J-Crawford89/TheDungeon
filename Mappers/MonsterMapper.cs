@@ -11,11 +11,25 @@ public static class MonsterMapper
 			Id = resource.Id,
 			Name = resource.Name,
 			MaxHp = resource.MaxHp,
+			AbilityScores = MapAbilityScores(resource),
 			Attacks = MapAttacks(resource),
 			Defense = resource.Defense,
 			ExperienceReward = resource.ExperienceReward,
 			IsBoss = resource.IsBoss,
 			RandomizerWeight = resource.RandomizerWeight
+		};
+
+	private static AbilityScores MapAbilityScores(MonsterResource resource) =>
+		new()
+		{
+			Might = resource.Might,
+			Constitution = resource.Constitution,
+			Dexterity = resource.Dexterity,
+			Agility = resource.Agility,
+			Intelligence = resource.Intelligence,
+			Wisdom = resource.Wisdom,
+			Gravitas = resource.Gravitas,
+			Luck = resource.Luck,
 		};
 
 	private static List<AttackDefinition> MapAttacks(MonsterResource resource)
@@ -29,10 +43,10 @@ public static class MonsterMapper
 			if (attack == null)
 				continue;
 
-			var mapped = ToAttackDefinition(attack);
+			var mapped = AttackResourceMapper.ToDomain(attack);
 			if (mapped == null)
 			{
-				GD.PushWarning($"MonsterMapper: monster '{resource.Id}' has an attack with no valid damage type; skipped.");
+				GD.PushWarning($"MonsterMapper: monster '{resource.Id}' has an attack with no valid damage components; skipped.");
 				continue;
 			}
 
@@ -40,30 +54,5 @@ public static class MonsterMapper
 		}
 
 		return list;
-	}
-
-	private static AttackDefinition? ToAttackDefinition(AttackResource resource)
-	{
-		if (resource.Damage?.DamageType == null)
-			return null;
-
-		var type = DamageTypeMapper.ToDomain(resource.Damage.DamageType);
-		if (string.IsNullOrWhiteSpace(type.Id))
-			return null;
-
-		var damageDice = new DiceExpression
-		{
-			NumberOfDice = Math.Max(0, resource.Damage.NumberOfDice),
-			DieType = resource.Damage.NumberOfDice > 0 ? resource.Damage.DiceType : DieType.d6,
-			InD20CheckPool = resource.Damage.InD20CheckPool
-		};
-
-		return new AttackDefinition
-		{
-			Name = resource.Name,
-			AttackModifier = resource.AttackModifier,
-			AttackItem = resource.AttackItem == null ? null : ItemMapper.ToDomain(resource.AttackItem),
-			Damage = new DamageComponent(damageDice, resource.Damage.FlatAmount, type)
-		};
 	}
 }

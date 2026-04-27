@@ -1,20 +1,38 @@
 [gd_resource type="Resource" script_class="WeaponResource" format=3 uid="uid://dyj1uky2yiios"]
 
 [ext_resource type="Script" uid="uid://l11npu0nk6bm" path="res://Resources/DamageComponentResource.cs" id="1_l1w0c"]
+[ext_resource type="Script" uid="uid://cp4x0wf1unxo7" path="res://Resources/AttackResource.cs" id="1_q5pct"]
 [ext_resource type="Script" uid="uid://bdnjh3oenwke5" path="res://Resources/WeaponResource.cs" id="2_fkog5"]
 [ext_resource type="Resource" uid="uid://b8r5eyjlrffjk" path="res://Content/World/DamageType/Slashing.tres" id="2_jkku0"]
 [ext_resource type="Texture2D" uid="uid://c2emvmjs8qggt" path="res://Assets/PrototypeAssets/Sword.png" id="3_l1w0c"]
 [ext_resource type="Script" uid="uid://cjbkth835rns8" path="res://Resources/ItemEffectResource.cs" id="3_q1f66"]
+[ext_resource type="Resource" uid="uid://cltevtne7ehch" path="res://Content/World/WeaponCategories/MeleeWeapons.tres" id="4_i55gh"]
+[ext_resource type="Resource" uid="uid://drtkaypeb7q1c" path="res://Content/World/WeaponGroups/Blades.tres" id="6_13p23"]
+[ext_resource type="Resource" uid="uid://nw2co6hlxt8y" path="res://Content/World/WeaponSubCategories/AdvancedWeapons.tres" id="8_xqhjp"]
+[ext_resource type="Script" uid="uid://deaplswskq5l1" path="res://Resources/NamedResource/WeaponSubGroupResource.cs" id="9_vd7w4"]
 
-[sub_resource type="Resource" id="Resource_q1f66"]
+[sub_resource type="Resource" id="Resource_12woj"]
 script = ExtResource("1_l1w0c")
 NumberOfDice = 1
 DamageType = ExtResource("2_jkku0")
 metadata/_custom_type_script = "uid://l11npu0nk6bm"
 
+[sub_resource type="Resource" id="Resource_llbcn"]
+script = ExtResource("1_q5pct")
+Id = "basic_arming_sword.attack"
+Name = "Attack"
+DamageComponents = Array[ExtResource("1_l1w0c")]([SubResource("Resource_12woj")])
+metadata/_custom_type_script = "uid://cp4x0wf1unxo7"
+
+[sub_resource type="Resource" id="Resource_2d80b"]
+script = ExtResource("9_vd7w4")
+
 [resource]
 script = ExtResource("2_fkog5")
-DamageComponents = Array[ExtResource("1_l1w0c")]([SubResource("Resource_q1f66")])
+Attacks = Array[ExtResource("1_q5pct")]([SubResource("Resource_llbcn")])
+Category = ExtResource("4_i55gh")
+SubCategory = ExtResource("8_xqhjp")
+Group = ExtResource("6_13p23")
 Slots = Array[int]([21, 23])
 Id = "basic_arming_sword"
 Name = "Basic Arming Sword"

@@ -115,12 +115,16 @@ public sealed class CombatMonsterTurnIncomingDamageTests
 							{
 								Name = "Claw",
 								AttackModifier = attack,
-								AttackItem = null,
-								Damage = new DamageComponent(
-									new DiceExpression { NumberOfDice = 0, DieType = DieType.d6, InD20CheckPool = false },
-									attack,
-									new DamageTypeDefinition("monster.physical", "Physical", DamageFamily.Physical))
-							}
+								AbilityScore = AbilityScore.Might,
+								AddAbilityScoreToDamage = true,
+								DamageComponents =
+								[
+									new DamageComponent(
+										new DiceExpression { NumberOfDice = 0, DieType = DieType.d6, InD20CheckPool = false },
+										attack,
+										new DamageTypeDefinition("monster.physical", "Physical", DamageFamily.Physical)),
+								],
+							},
 						],
 						MaxHp = 10,
 						Defense = 0,

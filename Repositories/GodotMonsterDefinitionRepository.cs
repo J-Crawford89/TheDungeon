@@ -60,10 +60,14 @@ public sealed class GodotMonsterDefinitionRepository : IMonsterDefinitionReposit
 		{
 			Name = name,
 			AttackModifier = amount,
-			AttackItem = null,
-			Damage = new DamageComponent(
-				new DiceExpression { NumberOfDice = 0, DieType = DieType.d6, InD20CheckPool = false },
-				amount,
-				DefaultPhysicalDamageType)
+			AbilityScore = AbilityScore.Might,
+			AddAbilityScoreToDamage = true,
+			DamageComponents =
+			[
+				new DamageComponent(
+					new DiceExpression { NumberOfDice = 0, DieType = DieType.d6, InD20CheckPool = false },
+					amount,
+					DefaultPhysicalDamageType),
+			],
 		};
 }
