@@ -24,10 +24,7 @@ public static class PlayerAttackRollBuilder
 		}
 		else
 		{
-			var ov = input.Attack.ProficiencyLookupOverride;
-			var profRes = ov.HasValue
-				? ProficiencyLookupResolution.ResolveSingleKey(player.Proficiencies, ov.Value)
-				: UnarmedProficiencyResolver.Resolve(player.Proficiencies, input.Attack.Id);
+			var profRes = UnarmedProficiencyResolver.Resolve(player.Proficiencies, input.Attack.Id);
 			if ((int)profRes.Rank != 0)
 				modifiers.Add(new ModifierWithSource { Modifier = (int)profRes.Rank, Source = profRes.ModifierSourceLabel });
 		}

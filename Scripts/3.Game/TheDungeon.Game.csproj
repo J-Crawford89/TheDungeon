@@ -9,4 +9,9 @@
     <ProjectReference Include="..\2.State\TheDungeon.State.csproj" />
     <ProjectReference Include="..\3.Game.Contracts\TheDungeon.Game.Contracts.csproj" />
   </ItemGroup>
+
+  <!-- Allow xUnit assembly to exercise internal combat orchestration (CombatTurnLoop) in isolation. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="TheDungeon.Tests" />
+  </ItemGroup>
 </Project>

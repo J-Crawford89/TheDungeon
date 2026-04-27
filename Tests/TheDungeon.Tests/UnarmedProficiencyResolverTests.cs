@@ -68,4 +68,32 @@ public sealed class UnarmedProficiencyResolverTests
 		Assert.Equal(ProficiencyRank.Untrained, r.Rank);
 		Assert.Equal("", r.ModifierSourceLabel);
 	}
+
+	[Fact]
+	public void Resolve_WhitespaceAttackId_UsesAllKey()
+	{
+		var d = new Dictionary<ProficiencyKey, ProficiencyRank>
+		{
+			[new ProficiencyKey(ProficiencyTargetType.UnarmedStrikes, UnarmedProficiencyIds.All)] = ProficiencyRank.Trained,
+		};
+
+		var r = UnarmedProficiencyResolver.Resolve(d, "   ");
+
+		Assert.Equal(ProficiencyRank.Trained, r.Rank);
+		Assert.Equal("Unarmed Strikes Proficiency", r.ModifierSourceLabel);
+	}
+
+	[Fact]
+	public void Resolve_RankZeroEntriesRemainUntrained()
+	{
+		var d = new Dictionary<ProficiencyKey, ProficiencyRank>
+		{
+			[new ProficiencyKey(ProficiencyTargetType.UnarmedStrikes, "jab")] = ProficiencyRank.Untrained,
+			[new ProficiencyKey(ProficiencyTargetType.UnarmedStrikes, UnarmedProficiencyIds.All)] = ProficiencyRank.Untrained,
+		};
+
+		var r = UnarmedProficiencyResolver.Resolve(d, "jab");
+
+		Assert.Equal(ProficiencyRank.Untrained, r.Rank);
+	}
 }

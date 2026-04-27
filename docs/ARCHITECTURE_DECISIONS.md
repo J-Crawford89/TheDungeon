@@ -57,3 +57,14 @@ This file records concrete, agreed decisions so implementation stays consistent 
   - Aggregation stays on `PlayerState` as data fields; lookup logic is handled by `PlayerDamageReductionHelper`.
 - **Rationale:** Keeps serialized effect data compact and unambiguous, avoids duplicate armor DR storage, and keeps query logic out of state shape while remaining reusable beyond combat.
 
+## ADR-0008: Temporary automated test-scope boundary
+
+- **Status:** Accepted
+- **Decision:** The default xUnit harness focuses on pure C# logic under `Scripts/0.Core`, `Scripts/2.State`, and `Scripts/3.Game`. Automated tests for `Mappers/`, `Repositories/` Godot runtime/resource behavior, and `Resources/` wiring are deferred for now.
+- **Rationale:** These areas are better validated in a stable Godot-hosted integration harness; forcing them into the non-Godot xUnit runtime causes brittle behavior and poor signal.
+- **Scope notes:**
+  - New or changed code in in-scope areas should include happy-path and fail-path tests.
+  - Changes in deferred areas should explicitly note deferred coverage in PR/review notes.
+- **Revisit condition:** Revisit this boundary when a reliable Godot-hosted integration test workflow is available, then add mapper/repository/resource coverage there.
+- **Reference:** `docs/TESTING_POLICY.md`
+

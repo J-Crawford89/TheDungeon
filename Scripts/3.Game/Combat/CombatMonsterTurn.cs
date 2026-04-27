@@ -42,9 +42,9 @@ public sealed class CombatMonsterTurn
 		if (abilityMod != 0)
 			modifiers.Add(new ModifierWithSource { Modifier = abilityMod, Source = attack.AbilityScore.ToString() });
 
-		var profRes = MonsterAttackProficiency.Resolve(monster.Definition, attack);
-		if ((int)profRes.Rank != 0)
-			modifiers.Add(new ModifierWithSource { Modifier = (int)profRes.Rank, Source = profRes.ModifierSourceLabel });
+		var profRank = MonsterAttackProficiencyRank.Resolve(monster.Definition, attack);
+		if ((int)profRank != 0)
+			modifiers.Add(new ModifierWithSource { Modifier = (int)profRank, Source = "Proficiency" });
 
 		if (attack.AttackModifier != 0)
 			modifiers.Add(new ModifierWithSource { Modifier = attack.AttackModifier, Source = "Attack" });

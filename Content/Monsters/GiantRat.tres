@@ -5,20 +5,19 @@
 [ext_resource type="Texture2D" uid="uid://bq7fkrinl6s1c" path="res://Assets/PrototypeAssets/GiantRat.png" id="1_ustx4"]
 [ext_resource type="Resource" uid="uid://khjg6aq0tt0o" path="res://Content/World/DamageType/Piercing.tres" id="2_hbwqt"]
 [ext_resource type="Script" uid="uid://l11npu0nk6bm" path="res://Resources/DamageComponentResource.cs" id="3_fevfy"]
-[ext_resource type="Script" uid="uid://bt2ebxv7822cs" path="res://Resources/ProficiencyGrantResource.cs" id="5_fevfy"]
-[ext_resource type="Resource" uid="uid://0lsca6nnsyr5" path="res://Content/World/UnarmedProficiency/UnarmedStrikeTrained.tres" id="6_5f6kq"]
+[ext_resource type="Script" uid="uid://cim33xbbm276o" path="res://Resources/MonsterAttackResource.cs" id="4_hbwqt"]
 
-[sub_resource type="Resource" id="Resource_c3vaw"]
+[sub_resource type="Resource" id="Resource_fevfy"]
 script = ExtResource("3_fevfy")
 NumberOfDice = 1
 DamageType = ExtResource("2_hbwqt")
 metadata/_custom_type_script = "uid://l11npu0nk6bm"
 
-[sub_resource type="Resource" id="Resource_iogdg"]
-script = ExtResource("1_c3vaw")
+[sub_resource type="Resource" id="Resource_5f6kq"]
+script = ExtResource("4_hbwqt")
 Name = "Bite"
-DamageComponents = Array[ExtResource("3_fevfy")]([SubResource("Resource_c3vaw")])
-metadata/_custom_type_script = "uid://cp4x0wf1unxo7"
+DamageComponents = Array[ExtResource("3_fevfy")]([SubResource("Resource_fevfy")])
+metadata/_custom_type_script = "uid://cim33xbbm276o"
 
 [resource]
 script = ExtResource("1_0vblb")
@@ -32,8 +31,7 @@ Agility = 2
 Intelligence = -3
 Wisdom = 1
 Gravitas = -4
-Attacks = Array[ExtResource("1_c3vaw")]([SubResource("Resource_iogdg")])
-ProficiencyGrants = Array[ExtResource("5_fevfy")]([ExtResource("6_5f6kq")])
+Attacks = Array[ExtResource("1_c3vaw")]([SubResource("Resource_5f6kq")])
 Defense = 10
 ExperienceReward = 8
 RandomizerWeight = 15

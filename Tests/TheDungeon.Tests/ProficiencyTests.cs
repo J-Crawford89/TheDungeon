@@ -187,6 +187,32 @@ public sealed class ProficiencyTests
 		Assert.Contains("Long Blades", r.ModifierSourceLabel, StringComparison.Ordinal);
 	}
 
+	[Fact]
+	public void WeaponResolver_NoMatches_ReturnsUntrainedAndNoWinningKey()
+	{
+		var weapon = new WeaponDefinition { Id = "w1", Name = "Weapon" };
+		var r = WeaponProficiencyResolver.Resolve(new Dictionary<ProficiencyKey, ProficiencyRank>(), weapon);
+
+		Assert.Equal(ProficiencyRank.Untrained, r.Rank);
+		Assert.Null(r.WinningKey);
+		Assert.Equal("", r.ModifierSourceLabel);
+	}
+
+	[Fact]
+	public void WeaponResolver_WeaponNameMissing_UsesFormattedIdInLabel()
+	{
+		var weapon = new WeaponDefinition { Id = "iron_sword", Name = " " };
+		var profs = new Dictionary<ProficiencyKey, ProficiencyRank>
+		{
+			[new ProficiencyKey(ProficiencyTargetType.Weapon, "iron_sword")] = ProficiencyRank.Trained
+		};
+
+		var r = WeaponProficiencyResolver.Resolve(profs, weapon);
+
+		Assert.Equal(ProficiencyRank.Trained, r.Rank);
+		Assert.Contains("Iron Sword", r.ModifierSourceLabel, StringComparison.Ordinal);
+	}
+
 	private sealed class SingleRaceRepo : ICharacterRaceDefinitionRepository
 	{
 		private readonly CharacterRaceDefinition _race;

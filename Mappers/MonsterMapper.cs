@@ -1,27 +1,28 @@
-using System;
 using System.Collections.Generic;
+
 using Godot;
+
 using Godot.Collections;
 
+
+
 public static class MonsterMapper
+
 {
-	public static MonsterDefinition ToDomain(MonsterResource resource)
-	{
-		var grants = ProficiencyGrantMapper.ToDomainList(resource.ProficiencyGrants);
-		return new MonsterDefinition
+	public static MonsterDefinition ToDomain(MonsterResource resource) =>
+		new()
 		{
 			Id = resource.Id,
 			Name = resource.Name,
 			MaxHp = resource.MaxHp,
 			AbilityScores = MapAbilityScores(resource),
-			Proficiencies = ProficiencyGrantMerge.Merge(grants),
+			DefaultAttackProficiencyRank = resource.DefaultAttackProficiencyRank,
 			Attacks = MapAttacks(resource),
 			Defense = resource.Defense,
 			ExperienceReward = resource.ExperienceReward,
 			IsBoss = resource.IsBoss,
 			RandomizerWeight = resource.RandomizerWeight
 		};
-	}
 
 	private static AbilityScores MapAbilityScores(MonsterResource resource) =>
 		new()
@@ -39,6 +40,7 @@ public static class MonsterMapper
 	private static List<AttackDefinition> MapAttacks(MonsterResource resource)
 	{
 		var list = new List<AttackDefinition>();
+
 		if (resource.Attacks == null)
 			return list;
 
@@ -46,17 +48,20 @@ public static class MonsterMapper
 		{
 			if (attack == null)
 				continue;
-
-			var mapped = AttackResourceMapper.ToDomain(attack);
-			if (mapped == null)
+			if (attack is MonsterAttackResource mar)
 			{
-				GD.PushWarning($"MonsterMapper: monster '{resource.Id}' has an attack with no valid damage components; skipped.");
+				var mapped = MonsterAttackResourceMapper.ToDomain(mar);
+				if (mapped == null)
+				{
+					GD.PushWarning($"MonsterMapper: monster '{resource.Id}' has an attack with no valid damage components; skipped.");
+					continue;
+				}
+
+				list.Add(mapped);
 				continue;
 			}
-
-			list.Add(mapped);
+			GD.PushWarning($"MonsterMapper: monster '{resource.Id}' attack must be a MonsterAttackResource; skipped.");
 		}
-
 		return list;
 	}
 }

@@ -5,21 +5,21 @@
 [ext_resource type="Script" uid="uid://h3kt4eef0b3n" path="res://Resources/MonsterResource.cs" id="1_u437f"]
 [ext_resource type="Resource" uid="uid://khjg6aq0tt0o" path="res://Content/World/DamageType/Piercing.tres" id="2_rwhse"]
 [ext_resource type="Script" uid="uid://l11npu0nk6bm" path="res://Resources/DamageComponentResource.cs" id="3_wpf37"]
-[ext_resource type="Script" uid="uid://bt2ebxv7822cs" path="res://Resources/ProficiencyGrantResource.cs" id="5_wpf37"]
-[ext_resource type="Resource" uid="uid://bqhg344avaug" path="res://Content/World/UnarmedProficiency/UnarmedStrikeExpert.tres" id="6_bf1os"]
+[ext_resource type="Script" uid="uid://cim33xbbm276o" path="res://Resources/MonsterAttackResource.cs" id="4_rwhse"]
 
-[sub_resource type="Resource" id="Resource_m5iwf"]
+[sub_resource type="Resource" id="Resource_wpf37"]
 script = ExtResource("3_wpf37")
 NumberOfDice = 2
 DiceType = 4
 DamageType = ExtResource("2_rwhse")
 metadata/_custom_type_script = "uid://l11npu0nk6bm"
 
-[sub_resource type="Resource" id="Resource_dqoug"]
-script = ExtResource("1_m5iwf")
+[sub_resource type="Resource" id="Resource_bf1os"]
+script = ExtResource("4_rwhse")
+AttackProficiencyRank = 4
 Name = "Bite"
-DamageComponents = Array[ExtResource("3_wpf37")]([SubResource("Resource_m5iwf")])
-metadata/_custom_type_script = "uid://cp4x0wf1unxo7"
+DamageComponents = Array[ExtResource("3_wpf37")]([SubResource("Resource_wpf37")])
+metadata/_custom_type_script = "uid://cim33xbbm276o"
 
 [resource]
 script = ExtResource("1_u437f")
@@ -33,8 +33,7 @@ Agility = 3
 Intelligence = -2
 Wisdom = 2
 Gravitas = -2
-Attacks = Array[ExtResource("1_m5iwf")]([SubResource("Resource_dqoug")])
-ProficiencyGrants = Array[ExtResource("5_wpf37")]([ExtResource("6_bf1os")])
+Attacks = Array[ExtResource("1_m5iwf")]([SubResource("Resource_bf1os")])
 Defense = 13
 ExperienceReward = 15
 IsBoss = true

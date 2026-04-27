@@ -16,5 +16,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Scripts\3.Game\TheDungeon.Game.csproj" />
     <ProjectReference Include="..\..\Scripts\2.State\TheDungeon.State.csproj" />
+    <ProjectReference Include="..\..\Scripts\4.UI\TheDungeon.UI.csproj" />
   </ItemGroup>
 </Project>

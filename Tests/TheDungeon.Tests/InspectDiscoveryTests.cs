@@ -3,6 +3,23 @@ using Xunit;
 
 public sealed class InspectDiscoveryTests
 {
+	private sealed class CapturingDiceRoll : IDiceRollRequestExecutor
+	{
+		private readonly DiceRollResult _result;
+		public DiceRollRequest? LastRequest { get; private set; }
+
+		public CapturingDiceRoll(DiceRollResult result) => _result = result;
+
+		public DiceRollResult Roll(DiceRollRequest request)
+		{
+			LastRequest = request;
+			return _result;
+		}
+
+		public DieRollResult RollDie(DieType dieType) =>
+			new() { DieType = dieType, RolledValue = 1 };
+	}
+
 	private sealed class FixedDiceRoll : IDiceRollRequestExecutor
 	{
 		private readonly DiceRollResult _result;
@@ -111,5 +128,41 @@ public sealed class InspectDiscoveryTests
 		var roll = BuildRoll(total: 5, resolvedD20: 20);
 
 		Assert.Equal(ResolutionOutcome.CriticalSuccess, resolution.ResolveOutcomeAgainstTarget(roll, 99));
+	}
+
+	[Fact]
+	public void RunInspectDiscovery_WhenWisdomHigher_UsesWisdomModifierSource()
+	{
+		var dice = new CapturingDiceRoll(BuildRoll(total: 10, resolvedD20: 10));
+		var resolution = new ResolutionService(dice);
+		var inspect = new InspectService(dice, resolution, new NarrativeService());
+		var session = new GameSessionState();
+		session.Player.AbilityScores.Intelligence = 1;
+		session.Player.AbilityScores.Wisdom = 3;
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		room.Features.Add(new TreasureFeature
+		{
+			TreasureItems =
+			[
+				new TreasureInstance
+				{
+					IsRevealed = false,
+					Definition = new TreasureDefinition
+					{
+						Id = "a",
+						Name = "Pouch",
+						DiscoverDc = 20,
+						GrantKind = TreasureKind.Gold
+					}
+				}
+			]
+		});
+
+		inspect.RunInspectDiscovery(session, room);
+
+		Assert.NotNull(dice.LastRequest);
+		Assert.Single(dice.LastRequest!.ModifiersWithSources);
+		Assert.Equal("Wisdom", dice.LastRequest.ModifiersWithSources[0].Source);
+		Assert.Equal(3, dice.LastRequest.ModifiersWithSources[0].Modifier);
 	}
 }

@@ -55,13 +55,14 @@ public sealed class GodotMonsterDefinitionRepository : IMonsterDefinitionReposit
 			}
 		};
 
-	private static AttackDefinition CreateDefaultAttack(string name, int amount) =>
+	private static MonsterAttackDefinition CreateDefaultAttack(string name, int amount) =>
 		new()
 		{
 			Name = name,
 			AttackModifier = amount,
 			AbilityScore = AbilityScore.Might,
 			AddAbilityScoreToDamage = true,
+			AttackProficiencyRank = ProficiencyRank.Untrained,
 			DamageComponents =
 			[
 				new DamageComponent(

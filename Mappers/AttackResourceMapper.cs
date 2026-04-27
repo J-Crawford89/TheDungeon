@@ -4,16 +4,6 @@ using Godot.Collections;
 
 public static class AttackResourceMapper
 {
-	private static ProficiencyKey? MapProficiencyOverride(ProficiencyTargetResource? target)
-	{
-		if (target == null)
-			return null;
-		var id = target.Id?.Trim() ?? "";
-		if (id.Length == 0)
-			return null;
-		return new ProficiencyKey(target.TargetType, id);
-	}
-
 	public static AttackDefinition? ToDomain(AttackResource resource)
 	{
 		if (resource == null)
@@ -31,7 +21,6 @@ public static class AttackResourceMapper
 			AbilityScore = resource.AbilityScore,
 			AddAbilityScoreToDamage = resource.AddAbilityScoreToDamage,
 			DamageComponents = damageList,
-			ProficiencyLookupOverride = MapProficiencyOverride(resource.ProficiencyLookupOverrideTarget),
 		};
 	}
 
