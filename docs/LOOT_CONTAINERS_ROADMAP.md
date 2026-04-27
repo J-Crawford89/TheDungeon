@@ -31,7 +31,7 @@ Single checklist for container-backed loot. Reference in chats: `@docs/LOOT_CONT
 
 **Exit criteria**
 
-- [ ] Disarm tests updated ([`TrapServiceDisarmTests`](../Tests/TheDungeon.Tests/TrapServiceDisarmTests.cs)).
+- [x] Disarm tests updated ([`TrapServiceDisarmTests`](../Tests/TheDungeon.Tests/TrapServiceDisarmTests.cs)).
 
 ## Phase 3 — Picker contract
 

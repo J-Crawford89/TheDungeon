@@ -28,6 +28,10 @@ public sealed class GodotTrapDefinitionRepository : ITrapDefinitionRepository
 				Damage = 2,
 				Effect = "Cord tightens around the ankle.",
 				IsRemovedAfterTripped = true,
+				DisarmLoot =
+				[
+					new LootableItemDefinition { ItemDefinitionId = InventoryIds.Rope, Quantity = 1 }
+				],
 			},
 			new TrapDefinition
 			{

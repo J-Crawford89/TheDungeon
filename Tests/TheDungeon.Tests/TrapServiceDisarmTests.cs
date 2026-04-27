@@ -28,7 +28,7 @@ public sealed class TrapServiceDisarmTests
 			new PlayerVitalsService(),
 			items);
 
-	private static TrapDefinition Trap(string id, int dc, int damage, bool removeAfterTrip = true) =>
+	private static TrapDefinition Trap(string id, int dc, int damage, bool removeAfterTrip = true, List<LootableItemDefinition>? disarmLoot = null) =>
 		new()
 		{
 			Id = id,
@@ -38,6 +38,7 @@ public sealed class TrapServiceDisarmTests
 			Damage = damage,
 			Effect = "Ouch.",
 			IsRemovedAfterTripped = removeAfterTrip,
+			DisarmLoot = disarmLoot ?? [],
 		};
 
 	private static GameSessionState SessionWithRoom(DungeonRoom room)
@@ -74,7 +75,7 @@ public sealed class TrapServiceDisarmTests
 	}
 
 	[Fact]
-	public void TryDisarm_Success_RemovesTrapFeature_AndGrantsSnareRope()
+	public void TryDisarm_Success_RemovesTrap_StagesSalvageWithRope()
 	{
 		var ropeDef = new ItemDefinition { Id = InventoryIds.Rope, Name = "Rope", MaxStackSize = 99 };
 		var svc = Service(new ItemRepo(ropeDef), seed: 2);
@@ -87,7 +88,9 @@ public sealed class TrapServiceDisarmTests
 				{
 					IsRevealed = true,
 					CurrentHp = 1,
-					Definition = Trap(TrapIds.Snare, dc: -100, damage: 2)
+					Definition = Trap(TrapIds.Snare, dc: -100, damage: 2,
+						disarmLoot:
+						[new LootableItemDefinition { ItemDefinitionId = InventoryIds.Rope, Quantity = 1 }])
 				}
 			]
 		};
@@ -99,9 +102,80 @@ public sealed class TrapServiceDisarmTests
 
 		Assert.Equal(TrapDisarmResultCode.DisarmCheckResolved, result.ResultCode);
 		Assert.True(result.TrapFeatureRemoved);
-		Assert.Contains(InventoryIds.Rope, result.GrantedInventoryItemDefinitionIds);
+		Assert.Empty(result.GrantedInventoryItemDefinitionIds);
 		Assert.DoesNotContain(room.Features, f => f is TrapFeature);
-		Assert.Equal(1, session.Player.InventoryState.SumQuantityForDefinitionId(InventoryIds.Rope));
+		Assert.Equal(0, session.Player.InventoryState.SumQuantityForDefinitionId(InventoryIds.Rope));
+
+		var salvage = Assert.Single(room.Features.OfType<SalvageFeature>());
+		var row = Assert.Single(salvage.Contents);
+		Assert.Equal(InventoryIds.Rope, row.ItemDefinitionId);
+		Assert.Equal(1, row.Quantity);
+	}
+
+	[Fact]
+	public void TryDisarm_Success_EmptyDisarmLoot_NoSalvage()
+	{
+		var svc = Service(new ItemRepo(), seed: 4);
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		var trapFeature = new TrapFeature
+		{
+			Traps =
+			[
+				new TrapInstance
+				{
+					IsRevealed = true,
+					CurrentHp = 1,
+					Definition = Trap("bare", dc: -100, damage: 1, disarmLoot: [])
+				}
+			]
+		};
+		room.Features.Add(trapFeature);
+		var session = SessionWithRoom(room);
+		session.Player.AbilityScores.Dexterity = 0;
+
+		var result = svc.TryDisarm(session);
+
+		Assert.Equal(TrapDisarmResultCode.DisarmCheckResolved, result.ResultCode);
+		Assert.Empty(room.Features.OfType<SalvageFeature>());
+	}
+
+	[Fact]
+	public void TryDisarm_Success_UnknownLootId_Omitted_ValidStillStaged()
+	{
+		var ropeDef = new ItemDefinition { Id = InventoryIds.Rope, Name = "Rope", MaxStackSize = 99 };
+		var svc = Service(new ItemRepo(ropeDef), seed: 5);
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		const string unknownId = "nope_item_xyz";
+		var trapFeature = new TrapFeature
+		{
+			Traps =
+			[
+				new TrapInstance
+				{
+					IsRevealed = true,
+					CurrentHp = 1,
+					Definition = Trap("mixed", dc: -100, damage: 1,
+						disarmLoot:
+						[
+							new LootableItemDefinition { ItemDefinitionId = unknownId, Quantity = 1 },
+							new LootableItemDefinition { ItemDefinitionId = InventoryIds.Rope, Quantity = 2 },
+						])
+				}
+			]
+		};
+		room.Features.Add(trapFeature);
+		var session = SessionWithRoom(room);
+		session.Player.AbilityScores.Dexterity = 0;
+
+		svc.TryDisarm(session);
+
+		Assert.Contains(session.LogEntries,
+			e => e.Text.Contains($"[Loot] Item definition '{unknownId}' not found.", System.StringComparison.Ordinal));
+
+		var salvage = Assert.Single(room.Features.OfType<SalvageFeature>());
+		var row = Assert.Single(salvage.Contents);
+		Assert.Equal(InventoryIds.Rope, row.ItemDefinitionId);
+		Assert.Equal(2, row.Quantity);
 	}
 
 	[Fact]

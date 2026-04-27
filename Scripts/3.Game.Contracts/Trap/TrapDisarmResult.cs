@@ -13,7 +13,7 @@ public sealed class TrapDisarmResult
 
 	public int DamageDealtToPlayer { get; init; }
 
-	/// <summary>Item definition ids granted on success (e.g. rope from snare).</summary>
+	/// <summary>Item definition ids added directly to the backpack on disarm success. Disarm loot staged in a <c>SalvageFeature</c> is not listed here.</summary>
 	public IReadOnlyList<string> GrantedInventoryItemDefinitionIds { get; init; } =
 		Array.Empty<string>();
 

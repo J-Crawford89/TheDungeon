@@ -1,5 +1,7 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 /// <summary>Trap disarm checks, tripped-trap resolution, and room-exit tripwires (rolls in <see cref="ResolutionService"/>).</summary>
@@ -189,17 +191,40 @@ public sealed class TrapService
 		session.AppendGameLog(_narrative.ForTrapDisarmSuccess(trapDef.Name));
 		_experience?.GrantExperience(session, trapDef.ExperienceReward);
 
-		var grantedIds = new List<string>();
-
-		switch (trapDef.Id)
+		var salvageRows = new List<LootableItemDefinition>();
+		if (trapDef.DisarmLoot is { Count: > 0 })
 		{
-			case TrapIds.Snare:
-				AddInventoryItemById(session, InventoryIds.Rope);
-				grantedIds.Add(InventoryIds.Rope);
-				break;
+			foreach (var row in trapDef.DisarmLoot)
+			{
+				var id = row.ItemDefinitionId?.Trim() ?? "";
+				var qty = row.Quantity < 0 ? 0 : row.Quantity;
+				if (qty <= 0 || string.IsNullOrWhiteSpace(id))
+					continue;
+
+				if (_items.TryGetById(id) == null)
+				{
+					session.AppendGameLog(_narrative.ForTrapDisarmGrantItemMissing(id));
+					// Use trace (not Godot GD) so unit tests run without the Godot runtime.
+					Trace.TraceWarning(
+						"TrapService: trap '{0}' ({1}) disarm loot references unknown item id '{2}'.",
+						trapDef.Id,
+						trapDef.Name,
+						id);
+					continue;
+				}
+
+				salvageRows.Add(new LootableItemDefinition { ItemDefinitionId = id, Quantity = qty });
+			}
 		}
 
 		room.Features.Remove(trapFeature);
+
+		if (salvageRows.Count > 0)
+		{
+			var salvage = new SalvageFeature();
+			salvage.Contents.AddRange(salvageRows);
+			room.Features.Add(salvage);
+		}
 
 		return new TrapDisarmResult
 		{
@@ -207,7 +232,7 @@ public sealed class TrapService
 			ResolvedCheck = resolution,
 			TrapFeatureRemoved = true,
 			DamageDealtToPlayer = 0,
-			GrantedInventoryItemDefinitionIds = grantedIds,
+			GrantedInventoryItemDefinitionIds = Array.Empty<string>(),
 		};
 	}
 
@@ -218,16 +243,4 @@ public sealed class TrapService
 			room.Features.Remove(trapFeature);
 	}
 
-	private void AddInventoryItemById(GameSessionState session, string itemId)
-	{
-		var itemDef = _items.TryGetById(itemId);
-		if (itemDef == null)
-		{
-			session.AppendGameLog(_narrative.ForTrapDisarmGrantItemMissing(itemId));
-			return;
-		}
-
-		session.Player.InventoryState.AddOrStackOne(itemDef);
-		session.AppendGameLog(_narrative.ForTrapDisarmGrantedItem(itemDef.Name));
-	}
 }
