@@ -22,6 +22,15 @@ public static class PlayerAttackRollBuilder
 			if ((int)prof.Rank != 0)
 				modifiers.Add(new ModifierWithSource { Modifier = (int)prof.Rank, Source = prof.ModifierSourceLabel });
 		}
+		else
+		{
+			var ov = input.Attack.ProficiencyLookupOverride;
+			var profRes = ov.HasValue
+				? ProficiencyLookupResolution.ResolveSingleKey(player.Proficiencies, ov.Value)
+				: UnarmedProficiencyResolver.Resolve(player.Proficiencies, input.Attack.Id);
+			if ((int)profRes.Rank != 0)
+				modifiers.Add(new ModifierWithSource { Modifier = (int)profRes.Rank, Source = profRes.ModifierSourceLabel });
+		}
 
 		if (input.Attack.AttackModifier != 0)
 			modifiers.Add(new ModifierWithSource { Modifier = input.Attack.AttackModifier, Source = "Attack" });

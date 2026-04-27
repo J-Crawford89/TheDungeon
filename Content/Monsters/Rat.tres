@@ -5,6 +5,8 @@
 [ext_resource type="Script" uid="uid://cp4x0wf1unxo7" path="res://Resources/AttackResource.cs" id="1_kqecf"]
 [ext_resource type="Resource" uid="uid://khjg6aq0tt0o" path="res://Content/World/DamageType/Piercing.tres" id="2_2vcak"]
 [ext_resource type="Script" uid="uid://l11npu0nk6bm" path="res://Resources/DamageComponentResource.cs" id="3_mj8ll"]
+[ext_resource type="Script" uid="uid://bt2ebxv7822cs" path="res://Resources/ProficiencyGrantResource.cs" id="5_mj8ll"]
+[ext_resource type="Resource" uid="uid://0lsca6nnsyr5" path="res://Content/World/UnarmedProficiency/UnarmedStrikeTrained.tres" id="6_1o3sb"]
 
 [sub_resource type="Resource" id="Resource_kqecf"]
 script = ExtResource("3_mj8ll")
@@ -33,6 +35,7 @@ Intelligence = -3
 Wisdom = 1
 Gravitas = -4
 Attacks = Array[ExtResource("1_kqecf")]([SubResource("Resource_8svrn")])
+ProficiencyGrants = Array[ExtResource("5_mj8ll")]([ExtResource("6_1o3sb")])
 Defense = 12
 ExperienceReward = 2
 RandomizerWeight = 50

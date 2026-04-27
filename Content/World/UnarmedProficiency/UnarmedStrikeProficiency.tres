@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnarmedStrikesProficiencyTargetResource" format=3 uid="uid://hj1xconqvaa3"]
+
+[ext_resource type="Script" uid="uid://crd0afmfdkaiv" path="res://Resources/NamedResource/UnarmedStrikesProficiencyTargetResource.cs" id="1_gq218"]
+
+[resource]
+script = ExtResource("1_gq218")
+Id = "all"
+Name = "All"
+Description = "You gain a Proficiency rank in all Unarmed Strikes."
+metadata/_custom_type_script = "uid://crd0afmfdkaiv"

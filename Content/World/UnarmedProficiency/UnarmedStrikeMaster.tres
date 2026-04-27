@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ProficiencyGrantResource" format=3 uid="uid://bb1yjdk1md6p2"]
+
+[ext_resource type="Resource" uid="uid://hj1xconqvaa3" path="res://Content/World/UnarmedProficiency/UnarmedStrikeProficiency.tres" id="1_0e8j1"]
+[ext_resource type="Script" uid="uid://bt2ebxv7822cs" path="res://Resources/ProficiencyGrantResource.cs" id="1_crvcy"]
+
+[resource]
+script = ExtResource("1_crvcy")
+Target = ExtResource("1_0e8j1")
+Rank = 6
+metadata/_custom_type_script = "uid://bt2ebxv7822cs"

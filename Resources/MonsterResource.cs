@@ -17,6 +17,7 @@ public partial class MonsterResource : Resource
 	[Export] public int Gravitas { get; set; }
 	[Export] public int Luck { get; set; }
 	[Export] public Array<AttackResource> Attacks { get; set; } = [];
+	[Export] public Array<ProficiencyGrantResource> ProficiencyGrants { get; set; } = [];
 	[Export] public int Defense { get; set; }
 	[Export] public int ExperienceReward { get; set; }
 	[Export] public bool IsBoss { get; set; }

@@ -5,19 +5,23 @@ using Godot.Collections;
 
 public static class MonsterMapper
 {
-	public static MonsterDefinition ToDomain(MonsterResource resource) =>
-		new()
+	public static MonsterDefinition ToDomain(MonsterResource resource)
+	{
+		var grants = ProficiencyGrantMapper.ToDomainList(resource.ProficiencyGrants);
+		return new MonsterDefinition
 		{
 			Id = resource.Id,
 			Name = resource.Name,
 			MaxHp = resource.MaxHp,
 			AbilityScores = MapAbilityScores(resource),
+			Proficiencies = ProficiencyGrantMerge.Merge(grants),
 			Attacks = MapAttacks(resource),
 			Defense = resource.Defense,
 			ExperienceReward = resource.ExperienceReward,
 			IsBoss = resource.IsBoss,
 			RandomizerWeight = resource.RandomizerWeight
 		};
+	}
 
 	private static AbilityScores MapAbilityScores(MonsterResource resource) =>
 		new()

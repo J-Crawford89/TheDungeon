@@ -5,6 +5,8 @@
 [ext_resource type="Script" uid="uid://h3kt4eef0b3n" path="res://Resources/MonsterResource.cs" id="1_u437f"]
 [ext_resource type="Resource" uid="uid://khjg6aq0tt0o" path="res://Content/World/DamageType/Piercing.tres" id="2_rwhse"]
 [ext_resource type="Script" uid="uid://l11npu0nk6bm" path="res://Resources/DamageComponentResource.cs" id="3_wpf37"]
+[ext_resource type="Script" uid="uid://bt2ebxv7822cs" path="res://Resources/ProficiencyGrantResource.cs" id="5_wpf37"]
+[ext_resource type="Resource" uid="uid://bqhg344avaug" path="res://Content/World/UnarmedProficiency/UnarmedStrikeExpert.tres" id="6_bf1os"]
 
 [sub_resource type="Resource" id="Resource_m5iwf"]
 script = ExtResource("3_wpf37")
@@ -32,6 +34,7 @@ Intelligence = -2
 Wisdom = 2
 Gravitas = -2
 Attacks = Array[ExtResource("1_m5iwf")]([SubResource("Resource_dqoug")])
+ProficiencyGrants = Array[ExtResource("5_wpf37")]([ExtResource("6_bf1os")])
 Defense = 13
 ExperienceReward = 15
 IsBoss = true

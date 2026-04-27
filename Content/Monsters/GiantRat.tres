@@ -5,6 +5,8 @@
 [ext_resource type="Texture2D" uid="uid://bq7fkrinl6s1c" path="res://Assets/PrototypeAssets/GiantRat.png" id="1_ustx4"]
 [ext_resource type="Resource" uid="uid://khjg6aq0tt0o" path="res://Content/World/DamageType/Piercing.tres" id="2_hbwqt"]
 [ext_resource type="Script" uid="uid://l11npu0nk6bm" path="res://Resources/DamageComponentResource.cs" id="3_fevfy"]
+[ext_resource type="Script" uid="uid://bt2ebxv7822cs" path="res://Resources/ProficiencyGrantResource.cs" id="5_fevfy"]
+[ext_resource type="Resource" uid="uid://0lsca6nnsyr5" path="res://Content/World/UnarmedProficiency/UnarmedStrikeTrained.tres" id="6_5f6kq"]
 
 [sub_resource type="Resource" id="Resource_c3vaw"]
 script = ExtResource("3_fevfy")
@@ -31,6 +33,7 @@ Intelligence = -3
 Wisdom = 1
 Gravitas = -4
 Attacks = Array[ExtResource("1_c3vaw")]([SubResource("Resource_iogdg")])
+ProficiencyGrants = Array[ExtResource("5_fevfy")]([ExtResource("6_5f6kq")])
 Defense = 10
 ExperienceReward = 8
 RandomizerWeight = 15

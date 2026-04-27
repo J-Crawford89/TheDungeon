@@ -14,4 +14,7 @@ public enum ProficiencyTargetType
 
 
     // Saves
+
+    // Other
+    UnarmedStrikes,
 }

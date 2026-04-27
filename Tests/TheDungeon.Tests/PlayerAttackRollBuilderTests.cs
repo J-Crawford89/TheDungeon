@@ -83,6 +83,36 @@ public sealed class PlayerAttackRollBuilderTests
 	}
 
 	[Fact]
+	public void BuildToHitRequest_Unarmed_AllUnarmedGrant_AddsProficiencyModifier()
+	{
+		var physical = new DamageTypeDefinition("p", "Physical", DamageFamily.Physical);
+		var session = new GameSessionState();
+		session.Player.Proficiencies = new Dictionary<ProficiencyKey, ProficiencyRank>
+		{
+			[new ProficiencyKey(ProficiencyTargetType.UnarmedStrikes, UnarmedProficiencyIds.All)] = ProficiencyRank.Trained,
+		};
+		var attack = new AttackDefinition
+		{
+			Id = "test_strike",
+			AbilityScore = AbilityScore.Might,
+			AttackModifier = 0,
+			DamageComponents =
+			[
+				new DamageComponent(
+					new DiceExpression { NumberOfDice = 1, DieType = DieType.d4, InD20CheckPool = false },
+					0,
+					physical),
+			],
+		};
+
+		var req = PlayerAttackRollBuilder.BuildToHitRequest(RollInput(session, attack, null, null), "roll", 10);
+
+		Assert.Contains(
+			req.ModifiersWithSources,
+			m => m.Modifier == (int)ProficiencyRank.Trained && m.Source.Contains("Unarmed", System.StringComparison.Ordinal));
+	}
+
+	[Fact]
 	public void RollDamageTotal_WhenAddAbilityToDamageFalse_OmitsAbilityFromSum()
 	{
 		var dice = new DiceRollService(new System.Random(42));
