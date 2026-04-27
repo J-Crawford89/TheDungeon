@@ -1,7 +1,14 @@
 [gd_resource type="Resource" script_class="TrapResource" format=3 uid="uid://nk1sow88pe05"]
 
 [ext_resource type="Texture2D" uid="uid://4s2xtg0vthh4" path="res://Assets/PrototypeAssets/Trap.png" id="1_6haao"]
+[ext_resource type="Script" uid="uid://b6nle4bl0xxf" path="res://Resources/LootableItemResource.cs" id="1_dp0rt"]
 [ext_resource type="Script" uid="uid://bmvsqkv3o05c4" path="res://Resources/TrapResource.cs" id="1_pjoa2"]
+[ext_resource type="Resource" uid="uid://c1oyad26ywhqk" path="res://Content/Item/Consumable/Rope.tres" id="2_150mr"]
+
+[sub_resource type="Resource" id="Resource_r4ctv"]
+script = ExtResource("1_dp0rt")
+ItemResource = ExtResource("2_150mr")
+metadata/_custom_type_script = "uid://b6nle4bl0xxf"
 
 [resource]
 script = ExtResource("1_pjoa2")
@@ -12,4 +19,5 @@ DisarmDc = 8
 ExperienceReward = 3
 Damage = 2
 Effect = "Snared"
+DisarmLoot = Array[ExtResource("1_dp0rt")]([SubResource("Resource_r4ctv")])
 Icon = ExtResource("1_6haao")

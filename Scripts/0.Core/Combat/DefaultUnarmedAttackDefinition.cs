@@ -9,7 +9,7 @@ public static class DefaultUnarmedAttackDefinition
 		new()
 		{
 			Id = Id,
-			Name = "Unarmed strike",
+			Name = "Unarmed Strike",
 			AttackModifier = 0,
 			AbilityScore = AbilityScore.Might,
 			AddAbilityScoreToDamage = true,

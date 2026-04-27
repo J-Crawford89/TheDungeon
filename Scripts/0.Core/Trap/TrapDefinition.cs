@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 public sealed class TrapDefinition
 {
     public string Id { get; set; } = string.Empty;
@@ -10,4 +12,7 @@ public sealed class TrapDefinition
 
     /// <summary>If true, after the trap fires (failed disarm or leaving room), the trap instance is removed from the room.</summary>
     public bool IsRemovedAfterTripped { get; set; } = true;
+
+	/// <summary>Loot recoverable after a successful disarm (matches trap resource authoring).</summary>
+	public List<LootableItemDefinition> DisarmLoot { get; set; } = new();
 }

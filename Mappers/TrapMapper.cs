@@ -11,5 +11,6 @@ public static class TrapMapper
 			Damage = resource.Damage,
 			Effect = resource.Effect,
 			IsRemovedAfterTripped = resource.IsRemovedAfterTripped,
+			DisarmLoot = LootableItemMapper.ToDomainList(resource.DisarmLoot),
 		};
 }

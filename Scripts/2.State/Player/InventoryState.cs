@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -72,5 +73,39 @@ public sealed class InventoryState
 		};
 		Items.Add(created);
 		return created;
+	}
+
+	/// <summary>Adds <paramref name="quantity"/> units, filling existing non-full stacks first, then new rows, honoring <see cref="ItemDefinition.MaxStackSize"/>.</summary>
+	/// <returns>Count that was not added (0 when the full amount was placed).</returns>
+	public int AddOrStack(ItemDefinition definition, int quantity)
+	{
+		if (definition == null || quantity <= 0)
+			return Math.Max(0, quantity);
+
+		var cap = Math.Max(1, definition.MaxStackSize);
+		var remaining = quantity;
+		while (remaining > 0)
+		{
+			var existing = Items.FirstOrDefault(i =>
+				i.Definition.Id == definition.Id && i.Quantity < cap);
+			if (existing != null)
+			{
+				var space = cap - existing.Quantity;
+				var add = Math.Min(remaining, space);
+				existing.Quantity += add;
+				remaining -= add;
+				continue;
+			}
+
+			var chunk = Math.Min(remaining, cap);
+			Items.Add(new ItemInstance
+			{
+				Definition = definition,
+				Quantity = chunk,
+			});
+			remaining -= chunk;
+		}
+
+		return 0;
 	}
 }
