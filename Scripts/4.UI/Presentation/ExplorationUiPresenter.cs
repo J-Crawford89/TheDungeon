@@ -8,6 +8,7 @@ public sealed class ExplorationUiPresenter
 	private readonly NarrativeService _narrativeService;
 	private readonly DungeonBootstrap _dungeonBootstrap;
 	private readonly TreasurePickupService _treasurePickup;
+	private readonly ContainerLootInteractionService _containerLoot;
 	private readonly TrapService _trapService;
 	private readonly PotionEffectApplicationService _potionEffects;
 	private readonly Action<UiRefreshFlags> _refreshHud;
@@ -19,6 +20,7 @@ public sealed class ExplorationUiPresenter
 		ExplorationService explorationService,
 		NarrativeService narrativeService,
 		TreasurePickupService treasurePickup,
+		ContainerLootInteractionService containerLoot,
 		TrapService trapService,
 		PotionEffectApplicationService potionEffects,
 		DungeonBootstrap dungeonBootstrap,
@@ -28,6 +30,7 @@ public sealed class ExplorationUiPresenter
 		_explorationService = explorationService;
 		_narrativeService = narrativeService;
 		_treasurePickup = treasurePickup;
+		_containerLoot = containerLoot;
 		_trapService = trapService;
 		_potionEffects = potionEffects;
 		_dungeonBootstrap = dungeonBootstrap;
@@ -64,6 +67,9 @@ public sealed class ExplorationUiPresenter
 				break;
 			case TargetPayloadKind.TakeAllEligibleTreasure:
 				_treasurePickup.TakeAllEligibleFromCurrentRoom(_session);
+				break;
+			case TargetPayloadKind.LootContainerAll:
+				_containerLoot.TryLootAll(_session, payload.ContainerOrdinal);
 				break;
 			default:
 				return;

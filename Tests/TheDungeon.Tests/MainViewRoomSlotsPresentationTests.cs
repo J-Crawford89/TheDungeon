@@ -112,6 +112,21 @@ public sealed class MainViewRoomSlotsPresentationTests
 		Assert.Equal(PresentationIconKeys.MainView.Item("health_potion"), slots[0].PresentationIconKey);
 	}
 
+	[Fact]
+	public void Enumerate_Salvage_UsesContainerIconKeyAndHighlight()
+	{
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		room.Features.Add(new SalvageFeature
+		{
+			Contents = [new LootableItemDefinition { ItemDefinitionId = "rope", Quantity = 1 }],
+		});
+
+		var slots = MainViewRoomSlots.Enumerate(room);
+		Assert.Single(slots);
+		Assert.Equal($"{MainViewRoomSlots.ContainerKeyPrefix}0", slots[0].HighlightKey);
+		Assert.Equal(PresentationIconKeys.MainView.ContainerSalvage(), slots[0].PresentationIconKey);
+	}
+
 	private static AttackDefinition TestAttack() =>
 		new()
 		{

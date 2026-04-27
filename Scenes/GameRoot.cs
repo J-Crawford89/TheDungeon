@@ -181,6 +181,7 @@ public partial class GameRoot : Control
 		var gameOverDownedHandler = new GameOverDownedHandler(narrativeService);
 		var playerDownedResolutionService = new PlayerDownedResolutionService(new IPlayerDownedOutcomeHandler[] { gameOverDownedHandler });
 		var trapService = new TrapService(resolutionService, narrativeService, vitalsService, itemRepo, experienceService);
+		var containerLootInteraction = new ContainerLootInteractionService(itemRepo, narrativeService, proficiencyAggregation);
 		var combatService = new CombatService(
 			diceRollService,
 			resolutionService,
@@ -190,6 +191,8 @@ public partial class GameRoot : Control
 			treasurePickupService,
 			potionEffectApplicationService,
 			trapService,
+			containerLootInteraction,
+			itemRepo,
 			experienceService);
 		var inspectService = new InspectService(diceRollService, resolutionService, narrativeService);
 		var explorationService = new ExplorationService(
@@ -236,6 +239,7 @@ public partial class GameRoot : Control
 			experienceService,
 			potionEffectApplicationService,
 			trapService,
+			containerLootInteraction,
 			trapRepo,
 			treasureRepo,
 			icons,

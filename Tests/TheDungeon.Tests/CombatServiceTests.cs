@@ -57,7 +57,8 @@ public sealed class CombatServiceTests
 		var treasure = new TreasurePickupService(narrative, items, TestPlayerProficiencyAggregation.CreateEmpty());
 		var potionFx = new PotionEffectApplicationService(dice, narrative, items);
 		var traps = new TrapService(resolution, narrative, vitals, items);
-		return new CombatService(dice, resolution, narrative, vitals, downed, treasure, potionFx, traps);
+		var containerLoot = new ContainerLootInteractionService(items, narrative, TestPlayerProficiencyAggregation.CreateEmpty());
+		return new CombatService(dice, resolution, narrative, vitals, downed, treasure, potionFx, traps, containerLoot, items);
 	}
 
 	private static CombatService CreateCombatServiceWithPotionRepo(Random? random = null)
@@ -72,7 +73,8 @@ public sealed class CombatServiceTests
 		var treasure = new TreasurePickupService(narrative, items, TestPlayerProficiencyAggregation.CreateEmpty());
 		var potionFx = new PotionEffectApplicationService(dice, narrative, items);
 		var traps = new TrapService(resolution, narrative, vitals, items);
-		return new CombatService(dice, resolution, narrative, vitals, downed, treasure, potionFx, traps);
+		var containerLoot = new ContainerLootInteractionService(items, narrative, TestPlayerProficiencyAggregation.CreateEmpty());
+		return new CombatService(dice, resolution, narrative, vitals, downed, treasure, potionFx, traps, containerLoot, items);
 	}
 
 	private static GameSessionState SessionWithWeaponCombat(WeaponDefinition? weapon, ItemInstance? weaponRow)

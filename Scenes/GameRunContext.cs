@@ -28,6 +28,7 @@ public sealed class GameRunContext
 	public PlayerExperienceService PlayerExperienceService { get; }
 	public PotionEffectApplicationService PotionEffects { get; }
 	public TrapService TrapService { get; }
+	public ContainerLootInteractionService ContainerLootInteraction { get; }
 	public ITrapDefinitionRepository TrapDefinitions { get; }
 	public ITreasureDefinitionRepository TreasureDefinitions { get; }
 
@@ -59,6 +60,7 @@ public sealed class GameRunContext
 		PlayerExperienceService playerExperienceService,
 		PotionEffectApplicationService potionEffects,
 		TrapService trapService,
+		ContainerLootInteractionService containerLootInteraction,
 		ITrapDefinitionRepository trapDefinitions,
 		ITreasureDefinitionRepository treasureDefinitions,
 		IconResolver icons,
@@ -88,6 +90,7 @@ public sealed class GameRunContext
 		PlayerExperienceService = playerExperienceService;
 		PotionEffects = potionEffects;
 		TrapService = trapService;
+		ContainerLootInteraction = containerLootInteraction;
 		TrapDefinitions = trapDefinitions;
 		TreasureDefinitions = treasureDefinitions;
 		Icons = icons;

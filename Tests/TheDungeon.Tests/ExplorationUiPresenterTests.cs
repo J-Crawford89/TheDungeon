@@ -38,7 +38,8 @@ public sealed class ExplorationUiPresenterTests
 		var treasure = new TreasurePickupService(narrative, new EmptyItems(), TestPlayerProficiencyAggregation.CreateEmpty());
 		var potionFx = new PotionEffectApplicationService(dice, narrative, new EmptyItems());
 		var bootstrap = new DungeonBootstrap(population);
-		return new ExplorationUiPresenter(session, exploration, narrative, treasure, trapService, potionFx, bootstrap, refreshHud);
+		var containerLoot = new ContainerLootInteractionService(new EmptyItems(), narrative, TestPlayerProficiencyAggregation.CreateEmpty());
+		return new ExplorationUiPresenter(session, exploration, narrative, treasure, containerLoot, trapService, potionFx, bootstrap, refreshHud);
 	}
 
 	[Fact]

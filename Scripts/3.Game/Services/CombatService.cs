@@ -7,11 +7,13 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 	private readonly DiceRollService _dice;
 	private readonly ResolutionService _resolution;
 	private readonly NarrativeService _narrative;
+	private readonly IItemDefinitionRepository _items;
 	private readonly PlayerVitalsService _vitals;
 	private readonly PlayerDownedResolutionService _playerDowned;
 	private readonly TreasurePickupService _treasurePickup;
 	private readonly PotionEffectApplicationService _potionEffects;
 	private readonly TrapService _trapService;
+	private readonly ContainerLootInteractionService _containerLoot;
 	private readonly PlayerExperienceService? _experience;
 	private readonly CombatAbilityEffectsRegistry _combatAbilities = new();
 	private readonly CombatEncounterLifecycle _lifecycle;
@@ -29,16 +31,20 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		TreasurePickupService treasurePickup,
 		PotionEffectApplicationService potionEffects,
 		TrapService trapService,
+		ContainerLootInteractionService containerLoot,
+		IItemDefinitionRepository itemDefinitions,
 		PlayerExperienceService? experience = null,
 		IAttackRollAbilityOverlay? attackRollAbilityOverlay = null)
 	{
 		_dice = dice;
 		_resolution = resolution;
 		_narrative = narrative;
+		_items = itemDefinitions;
 		_vitals = vitals;
 		_playerDowned = playerDowned;
 		_treasurePickup = treasurePickup;
 		_trapService = trapService;
+		_containerLoot = containerLoot;
 		_experience = experience;
 		_attackRollAbilityOverlay = attackRollAbilityOverlay;
 		_lifecycle = new CombatEncounterLifecycle(_narrative);
@@ -196,7 +202,10 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			monster.CurrentHp -= dmg;
 			session.AppendGameLog(_narrative.ForDamageDealt(monster.Definition.Name, dmg, monster.CurrentHp, damageDetail));
 			if (monsterWasAlive && monster.CurrentHp <= 0)
+			{
 				_experience?.GrantExperience(session, monster.Definition.ExperienceReward);
+				CombatCorpseHelper.SpawnCorpseOnMonsterDeath(session, room, monster.Definition, _items, _narrative);
+			}
 		}
 		else
 			session.AppendGameLog(_narrative.ForAttackMiss("You", monster.Definition.Name));
@@ -257,6 +266,10 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			TargetPayloadKind.TakeTreasureItem => _treasurePickup.TakeTreasureInstanceAtSlot(session,
 				payload.TreasureFeatureOrdinal, payload.TreasureItemIndexInFeature),
 			TargetPayloadKind.TakeAllEligibleTreasure => _treasurePickup.TakeAllEligibleFromCurrentRoom(session),
+			TargetPayloadKind.LootContainerAll =>
+				_containerLoot.TryLootAll(session, payload.ContainerOrdinal).ErrorCode == ContainerLootErrorCode.None
+					? TakeTreasureOutcome.TookItems
+					: TakeTreasureOutcome.NothingToTake,
 			_ => TakeTreasureOutcome.NothingToTake
 		};
 		if (outcome != TakeTreasureOutcome.TookItems)

@@ -71,6 +71,7 @@ public sealed class IconResolver
 			"trap" => ResolveTrap(key, id),
 			"item" => ResolveItem(key, id),
 			"treasure" => ResolveTreasure(key, id),
+			"container" => ResolveContainer(key, id),
 			"npc" => ResolveNpc(key, id),
 			"lore" => ResolveLore(key, id),
 			"vertical" => ResolveVertical(key, id),
@@ -170,6 +171,13 @@ public sealed class IconResolver
 		if (row.Icon == null)
 			WarnOnce($"{fullKey}|nullicon", $"ItemResource '{id}' has no Icon assigned.");
 		return row.Icon;
+	}
+
+	private Texture2D? ResolveContainer(string fullKey, string id)
+	{
+		WarnOnce(fullKey,
+			$"No texture wired for container icon variant '{id}'. Extend IconResolver or assign icons in MainViewTraversalIcons / resources.");
+		return null;
 	}
 
 	private Texture2D? ResolveTreasure(string fullKey, string id)

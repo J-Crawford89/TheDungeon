@@ -10,6 +10,7 @@ public static class MainViewRoomSlots
 	public const string NpcKeyPrefix = "npc:";
 	public const string LoreKeyPrefix = "lore:";
 	public const string ExitKeyPrefix = "exit:";
+	public const string ContainerKeyPrefix = "container:";
 
 	public static IReadOnlyList<MainViewFeatureSlot> Enumerate(DungeonRoom room)
 	{
@@ -20,6 +21,7 @@ public static class MainViewRoomSlots
 		var npcFeatureOrdinal = 0;
 		var loreFeatureOrdinal = 0;
 		var exitOrdinal = 0;
+		var containerOrdinal = 0;
 
 		foreach (var feature in room.Features)
 		{
@@ -102,6 +104,16 @@ public static class MainViewRoomSlots
 						});
 					}
 
+					break;
+				}
+				case ContainerFeature cf:
+				{
+					list.Add(new MainViewFeatureSlot
+					{
+						HighlightKey = $"{ContainerKeyPrefix}{containerOrdinal}",
+						PresentationIconKey = PresentationIconKeys.MainView.ForContainer(cf)
+					});
+					containerOrdinal++;
 					break;
 				}
 				case FloorExitFeature exit:

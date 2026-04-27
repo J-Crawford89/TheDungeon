@@ -36,6 +36,76 @@ public sealed class ExplorationServiceTests
 	}
 
 	[Fact]
+	public void Inspect_IncludesCorpseFeatureLine()
+	{
+		var service = Service();
+		var session = new GameSessionState();
+		var floor = new DungeonFloor { Level = 1, Entrance = DirectionHelper.Origin };
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		room.Features.Add(new CorpseFeature
+		{
+			HarvestDc = 12,
+			Contents = [new LootableItemDefinition { ItemDefinitionId = "coin", Quantity = 1 }],
+		});
+		floor.Rooms[DirectionHelper.Origin] = room;
+		session.Dungeon.CurrentFloor = floor;
+		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
+
+		var result = service.Inspect(session);
+
+		Assert.True(result.Success);
+		var line = Assert.Single(result.InspectData!.FeatureLines, l => l.Text.StartsWith("Remains:"));
+		Assert.Contains("1 stack", line.Text);
+		Assert.Contains("harvest DC 12", line.Text);
+	}
+
+	[Fact]
+	public void Inspect_IncludesSalvageFeatureLine()
+	{
+		var service = Service();
+		var session = new GameSessionState();
+		var floor = new DungeonFloor { Level = 1, Entrance = DirectionHelper.Origin };
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		room.Features.Add(new SalvageFeature
+		{
+			Contents = [new LootableItemDefinition { ItemDefinitionId = "rope", Quantity = 2 }],
+		});
+		floor.Rooms[DirectionHelper.Origin] = room;
+		session.Dungeon.CurrentFloor = floor;
+		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
+
+		var result = service.Inspect(session);
+
+		Assert.True(result.Success);
+		var line = Assert.Single(result.InspectData!.FeatureLines, l => l.Text.StartsWith("Salvage:"));
+		Assert.Contains("1 stack", line.Text);
+	}
+
+	[Fact]
+	public void Inspect_IncludesChestFeatureLine()
+	{
+		var service = Service();
+		var session = new GameSessionState();
+		var floor = new DungeonFloor { Level = 1, Entrance = DirectionHelper.Origin };
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		room.Features.Add(new ChestFeature
+		{
+			Locked = true,
+			Contents = [],
+		});
+		floor.Rooms[DirectionHelper.Origin] = room;
+		session.Dungeon.CurrentFloor = floor;
+		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
+
+		var result = service.Inspect(session);
+
+		Assert.True(result.Success);
+		var line = Assert.Single(result.InspectData!.FeatureLines, l => l.Text.StartsWith("Chest:"));
+		Assert.Contains("nothing inside", line.Text);
+		Assert.Contains("(locked)", line.Text);
+	}
+
+	[Fact]
 	public void MoveForward_NoCurrentFloor_FailsWithCode()
 	{
 		var service = Service();

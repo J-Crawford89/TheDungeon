@@ -23,5 +23,11 @@ public partial class MonsterResource : Resource
 	[Export] public bool IsBoss { get; set; }
 	[Export] public int RandomizerWeight { get; set; }
 
+	/// <summary>Loot on death; validated when spawning <see cref="CorpseFeature"/>.</summary>
+	[Export] public Array<LootableItemResource> DeathLoot { get; set; } = [];
+
+	/// <summary>Optional harvesting DC on the corpse; 0 = none.</summary>
+	[Export] public int HarvestDc { get; set; }
+
 	[Export] public Texture2D? Icon { get; set; }
 }

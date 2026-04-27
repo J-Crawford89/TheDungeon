@@ -39,38 +39,13 @@ public static class PlayerActionTargetResolvers
 	{
 		if (session.Dungeon.CurrentRoom is not { } room)
 			return [];
-		var perItem = new List<TargetDescriptor>();
-		var treasureFeatureOrdinal = 0;
-		foreach (var f in room.Features)
-		{
-			if (f is not TreasureFeature tf)
-				continue;
-			for (var ti = 0; ti < tf.TreasureItems.Count; ti++)
-			{
-				var inst = tf.TreasureItems[ti];
-				if (!TreasurePickupService.IsInstanceEligibleForRoomTake(inst))
-					continue;
-				var key = $"{MainViewRoomSlots.TreasureKeyPrefix}{treasureFeatureOrdinal}:{ti}";
-				perItem.Add(new TargetDescriptor
-				{
-					Label = inst.Definition.Name,
-					HighlightKey = key,
-					Payload = new TargetPayload
-					{
-						Kind = TargetPayloadKind.TakeTreasureItem,
-						TreasureFeatureOrdinal = treasureFeatureOrdinal,
-						TreasureItemIndexInFeature = ti
-					}
-				});
-			}
 
-			treasureFeatureOrdinal++;
-		}
-
-		if (perItem.Count <= 1 || mode != DungeonMode.Exploration)
-			return perItem;
+		var flat = BuildFlatTakeTargets(room);
 
 		var takeAllKeys = MainViewRoomSlots.CollectTakeAllTreasureHighlightKeys(room);
+		if (takeAllKeys.Count < 2 || mode != DungeonMode.Exploration)
+			return flat;
+
 		var aggregate = new TargetDescriptor
 		{
 			Label = "Take all",
@@ -80,9 +55,77 @@ public static class PlayerActionTargetResolvers
 		};
 
 		var combined = new List<TargetDescriptor> { aggregate };
-		combined.AddRange(perItem);
+		combined.AddRange(flat);
 		return combined;
 	}
+
+	private static List<TargetDescriptor> BuildFlatTakeTargets(DungeonRoom room)
+	{
+		var list = new List<TargetDescriptor>();
+		var treasureFeatureOrdinal = 0;
+		var containerOrdinal = 0;
+
+		foreach (var f in room.Features)
+		{
+			switch (f)
+			{
+				case TreasureFeature tf:
+				{
+					for (var ti = 0; ti < tf.TreasureItems.Count; ti++)
+					{
+						var inst = tf.TreasureItems[ti];
+						if (!TreasurePickupService.IsInstanceEligibleForRoomTake(inst))
+							continue;
+						var key = $"{MainViewRoomSlots.TreasureKeyPrefix}{treasureFeatureOrdinal}:{ti}";
+						list.Add(new TargetDescriptor
+						{
+							Label = inst.Definition.Name,
+							HighlightKey = key,
+							Payload = new TargetPayload
+							{
+								Kind = TargetPayloadKind.TakeTreasureItem,
+								TreasureFeatureOrdinal = treasureFeatureOrdinal,
+								TreasureItemIndexInFeature = ti
+							}
+						});
+					}
+
+					treasureFeatureOrdinal++;
+					break;
+				}
+				case ContainerFeature cf:
+				{
+					if (RoomContainerLocator.HasLootableStacks(cf))
+					{
+						list.Add(new TargetDescriptor
+						{
+							Label = ContainerTakeLabel(cf),
+							HighlightKey = $"{MainViewRoomSlots.ContainerKeyPrefix}{containerOrdinal}",
+							Payload = new TargetPayload
+							{
+								Kind = TargetPayloadKind.LootContainerAll,
+								ContainerOrdinal = containerOrdinal
+							}
+						});
+					}
+
+					containerOrdinal++;
+					break;
+				}
+			}
+		}
+
+		return list;
+	}
+
+	private static string ContainerTakeLabel(ContainerFeature cf) =>
+		cf switch
+		{
+			SalvageFeature => "Salvage pile",
+			CorpseFeature => "Remains",
+			ChestFeature ch => ch.Locked ? "Chest (locked)" : "Chest",
+			_ => "Loot"
+		};
 
 	public static IReadOnlyList<TargetDescriptor> ResolveDisarmTargets(GameSessionState session)
 	{

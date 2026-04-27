@@ -206,7 +206,8 @@ public sealed class GameUiCoordinator
 			}
 
 			var inPlay = mode == DungeonMode.Exploration || mode == DungeonMode.Combat;
-			_commandPanel.ApplyTakeButtonVisible(inPlay && TreasurePickupService.HasTakeableLootInCurrentRoom(_session));
+			_commandPanel.ApplyTakeButtonVisible(inPlay && (TreasurePickupService.HasTakeableLootInCurrentRoom(_session) ||
+			                                            RoomContainerLocator.CurrentRoomHasLootableContainers(_session)));
 			_commandPanel.ApplyDisarmButtonVisible(inPlay && TrapService.CurrentRoomHasTrap(_session));
 		}
 

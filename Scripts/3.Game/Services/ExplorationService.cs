@@ -386,6 +386,36 @@ public sealed class ExplorationService
                     }
 
                     break;
+                case CorpseFeature corpse:
+                {
+                    var stacks = corpse.Contents.Count(static c =>
+                        !string.IsNullOrWhiteSpace(c.ItemDefinitionId) && c.Quantity > 0);
+                    var lootPart = stacks == 0 ? "nothing recoverable" : $"{stacks} stack(s)";
+                    var line = $"Remains: {lootPart}";
+                    if (corpse.HarvestDc > 0)
+                        line += $" (harvest DC {corpse.HarvestDc})";
+                    inspectData.FeatureLines.Add(new InspectRoomFeatureLine { Text = line });
+                    break;
+                }
+                case SalvageFeature salvage:
+                {
+                    var stacks = salvage.Contents.Count(static c =>
+                        !string.IsNullOrWhiteSpace(c.ItemDefinitionId) && c.Quantity > 0);
+                    var lootPart = stacks == 0 ? "nothing left" : $"{stacks} stack(s)";
+                    inspectData.FeatureLines.Add(new InspectRoomFeatureLine { Text = $"Salvage: {lootPart}" });
+                    break;
+                }
+                case ChestFeature chestFeature:
+                {
+                    var stacks = chestFeature.Contents.Count(static c =>
+                        !string.IsNullOrWhiteSpace(c.ItemDefinitionId) && c.Quantity > 0);
+                    var lootPart = stacks == 0 ? "nothing inside" : $"{stacks} stack(s)";
+                    var line = $"Chest: {lootPart}";
+                    if (chestFeature.Locked)
+                        line += " (locked)";
+                    inspectData.FeatureLines.Add(new InspectRoomFeatureLine { Text = line });
+                    break;
+                }
                 case TrapFeature trapFeature:
                     foreach (var t in trapFeature.Traps.Where(x => x.IsRevealed))
                         inspectData.FeatureLines.Add(new InspectRoomFeatureLine { Text = $"Trap: {t.Definition.Name}" });

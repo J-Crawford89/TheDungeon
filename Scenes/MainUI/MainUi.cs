@@ -68,6 +68,7 @@ public partial class MainUi : Control
 			explorationService,
 			narrativeService,
 			treasurePickupService,
+			_runContext.ContainerLootInteraction,
 			trapService,
 			potionEffects,
 			dungeonBootstrap,

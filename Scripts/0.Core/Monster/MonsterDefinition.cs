@@ -12,4 +12,10 @@ public sealed class MonsterDefinition
     public int ExperienceReward { get; set; }
     public bool IsBoss { get; set; }
     public int RandomizerWeight { get; set; }
+
+	/// <summary>Loot placed in a <see cref="CorpseFeature"/> when this creature dies (authoring; filtered at spawn time).</summary>
+	public List<LootableItemDefinition> DeathLoot { get; set; } = new();
+
+	/// <summary>Optional skill check DC for harvesting the corpse; 0 = none. Copied to <see cref="CorpseFeature.HarvestDc"/>.</summary>
+	public int HarvestDc { get; set; }
 }

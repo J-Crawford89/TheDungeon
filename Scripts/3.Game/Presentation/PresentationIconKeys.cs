@@ -32,6 +32,24 @@ public static class PresentationIconKeys
 
 		public static bool IsVerticalExitIcon(FloorConnectionType t) =>
 			t is FloorConnectionType.Stairs or FloorConnectionType.Hole or FloorConnectionType.Ladder;
+
+		public static string ContainerSalvage() => $"{Root}/container/salvage";
+
+		public static string ContainerCorpse() => $"{Root}/container/corpse";
+
+		public static string ContainerChest(bool locked) =>
+			locked ? $"{Root}/container/chest_locked" : $"{Root}/container/chest";
+
+		public static string ContainerOther() => $"{Root}/container/other";
+
+		public static string ForContainer(ContainerFeature cf) =>
+			cf switch
+			{
+				SalvageFeature => ContainerSalvage(),
+				CorpseFeature => ContainerCorpse(),
+				ChestFeature ch => ContainerChest(ch.Locked),
+				_ => ContainerOther()
+			};
 	}
 
 	public static class Inventory

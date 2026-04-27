@@ -57,6 +57,25 @@ public sealed class PlayerActionTargetResolversTests
 	}
 
 	[Fact]
+	public void ResolveTakeTargets_IncludesLootContainerAll_WithOrdinalMatchingLocator()
+	{
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		room.Features.Add(new SalvageFeature
+		{
+			Contents = [new LootableItemDefinition { ItemDefinitionId = "rope", Quantity = 1 }],
+		});
+		var session = SessionWithRoom(room);
+
+		var list = PlayerActionTargetResolvers.ResolveTakeTargets(session, DungeonMode.Exploration);
+
+		Assert.Single(list);
+		Assert.Equal(TargetPayloadKind.LootContainerAll, list[0].Payload.Kind);
+		Assert.Equal(0, list[0].Payload.ContainerOrdinal);
+		Assert.Equal($"{MainViewRoomSlots.ContainerKeyPrefix}0", list[0].HighlightKey);
+		Assert.Contains("Salvage", list[0].Label, System.StringComparison.Ordinal);
+	}
+
+	[Fact]
 	public void ResolveTakeTargets_SingleItem_NoTakeAllAggregate()
 	{
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };

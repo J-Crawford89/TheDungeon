@@ -11,10 +11,12 @@ Single checklist for container-backed loot. Reference in chats: `@docs/LOOT_CONT
 
 **Goal:** `LootableItemDefinition`, `LootableItemResource`, mappers, `ContainerFeature` hierarchy (`SalvageFeature`, `CorpseFeature`, `ChestFeature`), `InventoryState.AddOrStack` for quantities, `ContainerLootOperations` + narrative lines, capacity peek helper, unit tests.
 
+Successful trap disarm stages a **`SalvageFeature`** with loot rows ([`TrapService.ApplySuccess`](../Scripts/3.Game/Services/TrapService.cs)); transfer to inventory uses **`ContainerLootInteractionService`** / **`ContainerLootOperations`** — nothing is added directly to the backpack at disarm time.
+
 **Exit criteria**
 
-- [ ] Types and services compile; `dotnet test` green.
-- [ ] Transfer from container to inventory is **explicit** (no silent backpack fills from disarm—that remains Phase 2).
+- [x] Types and services compile; `dotnet test` green.
+- [x] Transfer from container to inventory is **explicit** (no silent backpack fills from disarm—that remains Phase 2).
 
 **Key files**
 
@@ -52,12 +54,63 @@ Single checklist for container-backed loot. Reference in chats: `@docs/LOOT_CONT
 
 **Exit criteria**
 
-- [ ] Dead monsters leave loot only while rules allow.
+- [x] Death loot on player kill ([`CombatCorpseHelper`](../Scripts/3.Game/Services/CombatCorpseHelper.cs)); corpses persist in the room after successful flee ([`CombatEncounterLifecycle.RestoreExplorationAfterFlee`](../Scripts/3.Game/Combat/CombatEncounterLifecycle.cs)); validation mirrors trap salvage; inspect lines for **`CorpseFeature`**; tests ([`CombatCorpseHelperTests`](../Tests/TheDungeon.Tests/CombatCorpseHelperTests.cs)).
+
+**Key files**
+
+- [`MonsterDefinition.DeathLoot` / `HarvestDc`](../Scripts/0.Core/Monster/MonsterDefinition.cs), [`MonsterResource`](../Resources/MonsterResource.cs), [`MonsterMapper`](../Mappers/MonsterMapper.cs)
+- [`CombatService.ExecutePlayerAttack`](../Scripts/3.Game/Services/CombatService.cs), [`CombatCorpseHelper`](../Scripts/3.Game/Services/CombatCorpseHelper.cs)
+- [`ExplorationService`](../Scripts/3.Game/Services/ExplorationService.cs) (inspect — corpse lines)
 
 ## Phase 5 — Treasure unification
 
 **Goal:** Align [`TreasureFeature`](../Scripts/0.Core/Treasure/TreasureFeature.cs) / [`TreasurePickupService`](../Scripts/3.Game/Services/TreasurePickupService.cs) with **`ChestFeature`** where payoff exceeds migration cost (gold piles vs inventory items documented).
 
+### Migration boundary (Phase 5 decision)
+
+We **keep a dual model** for now. Moving **gold piles** or **inspect-driven reveal** onto [`ChestFeature`](../Scripts/0.Core/Dungeon/ChestFeature.cs) would need new domain shapes (for example GP as loot rows or richer rules on [`LootableItemDefinition`](../Scripts/0.Core/Inventory/LootableItemDefinition.cs)), plus rewiring **Take** targeting, presenters, and tests. That cost exceeds Phase 5 scope.
+
+| Concern | **Treasure** | **Chest / containers** |
+|--------|--------------|-------------------------|
+| **Payload** | [`TreasureInstance`](../Scripts/0.Core/Treasure/TreasureInstance.cs) + [`TreasureDefinition`](../Scripts/0.Core/Treasure/TreasureDefinition.cs) ([`TreasureKind`](../Scripts/0.Core/Enums/TreasureKind.cs)) | [`LootableItemDefinition`](../Scripts/0.Core/Inventory/LootableItemDefinition.cs) rows in `Contents` |
+| **Gold** | [`TreasureKind.Gold`](../Scripts/0.Core/Enums/TreasureKind.cs) adds GP in [`TreasurePickupService`](../Scripts/3.Game/Services/TreasurePickupService.cs) | Not representable today (items are id + quantity only) |
+| **Discovery** | Per-instance `IsRevealed` + `DiscoverDc`; [`InspectService`](../Scripts/3.Game/Services/InspectService.cs) reveals hidden treasure | No hidden/reveal model on [`ContainerFeature`](../Scripts/0.Core/Dungeon/ContainerFeature.cs) |
+| **Pickup UX** | **Take**: [`MainViewRoomSlots`](../Scripts/3.Game/Presentation/MainViewRoomSlots.cs), [`PlayerActionTargetResolvers`](../Scripts/3.Game/Targeting/PlayerActionTargetResolvers.cs), [`GameUiCoordinator`](../Scenes/MainUI/GameUiCoordinator.cs) | **Open container** by ordinal: [`RoomContainerLocator`](../Scripts/3.Game/Services/RoomContainerLocator.cs), [`ContainerLootInteractionService`](../Scripts/3.Game/Services/ContainerLootInteractionService.cs) |
+| **Procedural rooms** | [`RoomFeaturePopulationService`](../Scripts/3.Game/Services/RoomFeaturePopulationService.cs) → [`RoomFeatureFactories.CreateTreasureFeature`](../Scripts/3.Game/Features/RoomFeatureFactories.cs) | Population does **not** create [`ChestFeature`](../Scripts/0.Core/Dungeon/ChestFeature.cs) today (type exists for authored/container flows) |
+
+**Treasure** remains responsible for: GP grants, hidden-then-revealed piles, and the current **Take** UI.
+
+**ChestFeature** / **`ContainerFeature`** remains responsible for: explicit container loot (**items only**), ordinal resolution alongside salvage/corpse/chest, and the [`ContainerLootInteractionService`](../Scripts/3.Game/Services/ContainerLootInteractionService.cs) contract.
+
+### Acceptable regressions (if we merge models later)
+
+Any design that **drops per-pile reveal** without replacing it changes inspect difficulty and the fantasy of “finding” treasure—that is a **product** trade-off, not a free mechanical merge.
+
+### Follow-up ideas (not committed)
+
+- Extend loot rows (or a sibling type) to represent **GP in a chest** if gold-in-container is required.
+- Route **inventory-only** treasure definitions through a chest-like feature **only** if paired with a clear reveal/hidden story (large UX and code change).
+
 **Exit criteria**
 
-- [ ] Migration notes and acceptable regressions documented.
+- [x] Migration notes and acceptable regressions documented.
+
+**Key files**
+
+- [`TreasureFeature`](../Scripts/0.Core/Treasure/TreasureFeature.cs), [`TreasureDefinition`](../Scripts/0.Core/Treasure/TreasureDefinition.cs) / [`TreasureKind`](../Scripts/0.Core/Enums/TreasureKind.cs), [`TreasurePickupService`](../Scripts/3.Game/Services/TreasurePickupService.cs)
+- [`InspectService`](../Scripts/3.Game/Services/InspectService.cs) (treasure discovery), [`RoomFeatureFactories`](../Scripts/3.Game/Features/RoomFeatureFactories.cs), [`RoomFeaturePopulationService`](../Scripts/3.Game/Services/RoomFeaturePopulationService.cs)
+- [`ChestFeature`](../Scripts/0.Core/Dungeon/ChestFeature.cs), [`ContainerLootInteractionService`](../Scripts/3.Game/Services/ContainerLootInteractionService.cs), [`RoomContainerLocator`](../Scripts/3.Game/Services/RoomContainerLocator.cs)
+
+---
+
+## Post-roadmap follow-ups (not committed)
+
+**Take / main view — containers**
+
+- Exploration **Take** lists treasure plus [**LootContainerAll**](../Scripts/3.Game/Targeting/TargetPayload.cs) targets for each **lootable** [`ContainerFeature`](../Scripts/0.Core/Dungeon/ContainerFeature.cs) (ordinal matches [`RoomContainerLocator`](../Scripts/3.Game/Services/RoomContainerLocator.cs)); [`MainViewRoomSlots`](../Scripts/3.Game/Presentation/MainViewRoomSlots.cs) draws one row per container with highlight `container:N`.
+- **Godot:** [`IconResolver`](../Scenes/IconResolver.cs) logs once for `mainview/container/*` keys until you wire textures (extend resolver or add resource-backed icons—no `*.tscn` edits required for wiring resolver code).
+
+### Deferred epics (product-gated)
+
+- **GP / treasure → chest:** See Phase 5 “Follow-up ideas” ([GP-in-container representation](../Scripts/0.Core/Inventory/LootableItemDefinition.cs), inventory treasure → chest + reveal story).
+- **Procedural [`ChestFeature`](../Scripts/0.Core/Dungeon/ChestFeature.cs):** New [`PopulateableFeatureKind`](../Scripts/3.Game/Services/RoomFeaturePopulationService.cs) + population rules + content pipeline when designers want random chests alongside [`TreasureFeature`](../Scripts/0.Core/Treasure/TreasureFeature.cs).
