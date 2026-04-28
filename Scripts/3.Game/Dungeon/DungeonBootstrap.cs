@@ -4,25 +4,26 @@ using System.Diagnostics;
 public class DungeonBootstrap
 {
 	private readonly RoomFeaturePopulationService _roomFeaturePopulation;
+	private readonly RoomFeaturePopulationParameters _handBuiltPopulationParameters;
+	private readonly Func<FloorGenerationParameters> _createProceduralParameters;
 
-	public DungeonBootstrap(RoomFeaturePopulationService roomFeaturePopulation) =>
+	public DungeonBootstrap(
+		RoomFeaturePopulationService roomFeaturePopulation,
+		RoomFeaturePopulationParameters handBuiltPopulationParameters,
+		Func<FloorGenerationParameters> createProceduralParameters)
+	{
 		_roomFeaturePopulation = roomFeaturePopulation;
+		_handBuiltPopulationParameters = handBuiltPopulationParameters;
+		_createProceduralParameters = createProceduralParameters;
+	}
 
 	public DungeonFloor CreateInitialFloor(bool useProceduralFloor = false)
 	{
 		if (useProceduralFloor)
-		{
 			return new FloorGenerator(_roomFeaturePopulation).Generate(
-				new FloorGenerationParameters
-				{
-					MinRooms = 6,
-					MaxRooms = 12,
-					Seed = Random.Shared.Next(),
-					CurrentFloorCount = 0,
-				},
+				_createProceduralParameters(),
 				logDiagnostic: static message => Debug.WriteLine(message));
-		}
 
-		return HandBuiltDungeonFloor.CreateSample(_roomFeaturePopulation);
+		return HandBuiltDungeonFloor.CreateSample(_roomFeaturePopulation, _handBuiltPopulationParameters);
 	}
 }

@@ -42,6 +42,13 @@ public sealed class RoomFeaturePopulationParameters
 				},
 				new FeatureTypeRule
 				{
+					Kind = PopulateableFeatureKind.Chest,
+					Weight = 2,
+					MinPerRoom = 0,
+					MaxPerRoom = 1
+				},
+				new FeatureTypeRule
+				{
 					Kind = PopulateableFeatureKind.Npc,
 					Weight = 1,
 					MinPerRoom = 0,

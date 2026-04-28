@@ -9,6 +9,16 @@ public sealed class HandBuiltDungeonFloorTests
 	private sealed class EmptyNpc : INpcDefinitionRepository { public IReadOnlyList<NpcDefinition> All => []; }
 	private sealed class EmptyLore : ILoreDefinitionRepository { public IReadOnlyList<LoreDefinition> All => []; }
 
+	private sealed class EmptyItems : IItemDefinitionRepository
+	{
+		public IReadOnlyList<ItemDefinition> All => [];
+		public ItemDefinition? TryGetById(string id) => null;
+		public IReadOnlyList<T> GetDefinitionsOfType<T>() where T : ItemDefinition => [];
+	}
+
+	private static ChestLootGenerator ChestLoot() =>
+		new(new EmptyItems(), ChestLootGenerationParameters.Default);
+
 	private static RoomFeaturePopulationParameters NoRandomFeatures =>
 		new()
 		{
@@ -21,7 +31,7 @@ public sealed class HandBuiltDungeonFloorTests
 	public void CreateSample_WithEmptyDefinitionRepos_ProducesLinkedFloorWithEntrance()
 	{
 		var population = new RoomFeaturePopulationService(
-			new EmptyMonsters(), new EmptyTraps(), new EmptyTreasure(), new EmptyNpc(), new EmptyLore());
+			new EmptyMonsters(), new EmptyTraps(), new EmptyTreasure(), new EmptyNpc(), new EmptyLore(), ChestLoot());
 
 		var floor = HandBuiltDungeonFloor.CreateSample(population, NoRandomFeatures);
 
@@ -35,7 +45,7 @@ public sealed class HandBuiltDungeonFloorTests
 	public void CreateSample_AllRoomsReachableFromEntrance()
 	{
 		var population = new RoomFeaturePopulationService(
-			new EmptyMonsters(), new EmptyTraps(), new EmptyTreasure(), new EmptyNpc(), new EmptyLore());
+			new EmptyMonsters(), new EmptyTraps(), new EmptyTreasure(), new EmptyNpc(), new EmptyLore(), ChestLoot());
 		var floor = HandBuiltDungeonFloor.CreateSample(population, NoRandomFeatures);
 		var start = floor.Entrance;
 		var seen = new HashSet<RoomCoord> { start };

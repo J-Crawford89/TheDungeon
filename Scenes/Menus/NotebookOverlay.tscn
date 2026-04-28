@@ -73,7 +73,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.654902)
+color = Color(0, 0, 0, 0.6666667)
 
 [node name="NotebookMargin" type="MarginContainer" parent="." unique_id=1226160460]
 layout_mode = 1

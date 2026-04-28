@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -29,7 +30,9 @@ public sealed class ExplorationUiPresenterTests
 
 	private static ExplorationUiPresenter CreatePresenter(GameSessionState session, System.Action<UiRefreshFlags> refreshHud)
 	{
-		var population = new RoomFeaturePopulationService(new EmptyMonsters(), new EmptyTraps(), new EmptyTreasure(), new EmptyNpc(), new EmptyLore());
+		var chestLoot = new ChestLootGenerator(new EmptyItems(), ChestLootGenerationParameters.Default);
+		var population = new RoomFeaturePopulationService(
+			new EmptyMonsters(), new EmptyTraps(), new EmptyTreasure(), new EmptyNpc(), new EmptyLore(), chestLoot);
 		var dice = new DiceRollService(new System.Random(1));
 		var narrative = new NarrativeService();
 		var inspect = new InspectService(dice, new ResolutionService(dice), narrative);
@@ -37,7 +40,17 @@ public sealed class ExplorationUiPresenterTests
 		var exploration = new ExplorationService(population, new NoopCombatService(), inspect, trapService);
 		var treasure = new TreasurePickupService(narrative, new EmptyItems(), TestPlayerProficiencyAggregation.CreateEmpty());
 		var potionFx = new PotionEffectApplicationService(dice, narrative, new EmptyItems());
-		var bootstrap = new DungeonBootstrap(population);
+		var bootstrap = new DungeonBootstrap(
+			population,
+			RoomFeaturePopulationParameters.CreateDefault(),
+			() => new FloorGenerationParameters
+			{
+				Seed = 1,
+				CurrentFloorCount = 0,
+				MinRooms = 6,
+				MaxRooms = 12,
+				RoomFeatures = RoomFeaturePopulationParameters.CreateDefault(),
+			});
 		var containerLoot = new ContainerLootInteractionService(new EmptyItems(), narrative, TestPlayerProficiencyAggregation.CreateEmpty());
 		return new ExplorationUiPresenter(session, exploration, narrative, treasure, containerLoot, trapService, potionFx, bootstrap, refreshHud);
 	}

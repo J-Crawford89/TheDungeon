@@ -1,9 +1,78 @@
 [gd_resource type="Resource" script_class="GameBalanceSettingsResource" format=3 uid="uid://di5bscavcplik"]
 
+[ext_resource type="Script" uid="uid://cspllfsh50n0d" path="res://Resources/ChestLootCategoryWeightResource.cs" id="1_anxwm"]
 [ext_resource type="Script" uid="uid://c82k0313gfr82" path="res://Resources/GameBalanceSettingsResource.cs" id="1_t0gwv"]
+[ext_resource type="Script" uid="uid://ps3wiw6as78r" path="res://Resources/FeaturePopulationRuleResource.cs" id="2_mmyeh"]
+
+[sub_resource type="Resource" id="Resource_0sb6q"]
+script = ExtResource("1_anxwm")
+metadata/_custom_type_script = "uid://cspllfsh50n0d"
+
+[sub_resource type="Resource" id="Resource_c2j0v"]
+script = ExtResource("1_anxwm")
+Category = 1
+metadata/_custom_type_script = "uid://cspllfsh50n0d"
+
+[sub_resource type="Resource" id="Resource_i4eu8"]
+script = ExtResource("1_anxwm")
+Category = 2
+metadata/_custom_type_script = "uid://cspllfsh50n0d"
+
+[sub_resource type="Resource" id="Resource_d1d01"]
+script = ExtResource("1_anxwm")
+Category = 3
+Weight = 0.1
+metadata/_custom_type_script = "uid://cspllfsh50n0d"
+
+[sub_resource type="Resource" id="Resource_x06fe"]
+script = ExtResource("1_anxwm")
+Category = 4
+Weight = 0.0
+metadata/_custom_type_script = "uid://cspllfsh50n0d"
+
+[sub_resource type="Resource" id="Resource_20nfw"]
+script = ExtResource("2_mmyeh")
+Weight = 5.0
+CannotCoexistWith = Array[int]([4])
+metadata/_custom_type_script = "uid://ps3wiw6as78r"
+
+[sub_resource type="Resource" id="Resource_7w4ox"]
+script = ExtResource("2_mmyeh")
+Kind = 1
+Weight = 2.0
+MaxPerRoom = 3
+metadata/_custom_type_script = "uid://ps3wiw6as78r"
+
+[sub_resource type="Resource" id="Resource_yogtf"]
+script = ExtResource("2_mmyeh")
+Kind = 2
+Weight = 4.0
+MaxPerRoom = 3
+CannotCoexistWith = Array[int]([3])
+metadata/_custom_type_script = "uid://ps3wiw6as78r"
+
+[sub_resource type="Resource" id="Resource_b2rn1"]
+script = ExtResource("2_mmyeh")
+Kind = 3
+Weight = 3.0
+CannotCoexistWith = Array[int]([2])
+metadata/_custom_type_script = "uid://ps3wiw6as78r"
+
+[sub_resource type="Resource" id="Resource_d1nq0"]
+script = ExtResource("2_mmyeh")
+Kind = 4
+CannotCoexistWith = Array[int]([0])
+metadata/_custom_type_script = "uid://ps3wiw6as78r"
+
+[sub_resource type="Resource" id="Resource_7u0tq"]
+script = ExtResource("2_mmyeh")
+Kind = 5
+metadata/_custom_type_script = "uid://ps3wiw6as78r"
 
 [resource]
 script = ExtResource("1_t0gwv")
 ExperiencePerFirstRoomVisit = 1
 ExperiencePerFloorEntry = 5
+FeatureRules = Array[ExtResource("2_mmyeh")]([SubResource("Resource_20nfw"), SubResource("Resource_7w4ox"), SubResource("Resource_yogtf"), SubResource("Resource_b2rn1"), SubResource("Resource_d1nq0"), SubResource("Resource_7u0tq")])
+ChestLootCategoryWeights = Array[ExtResource("1_anxwm")]([SubResource("Resource_0sb6q"), SubResource("Resource_c2j0v"), SubResource("Resource_i4eu8"), SubResource("Resource_d1d01"), SubResource("Resource_x06fe")])
 metadata/_custom_type_script = "uid://c82k0313gfr82"

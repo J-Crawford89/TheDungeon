@@ -8,8 +8,12 @@
 [ext_resource type="Script" uid="uid://c027v8qr0q08n" path="res://Scenes/MainUI/MapPanel.cs" id="5_ksueo"]
 [ext_resource type="Script" uid="uid://t7duod6dlknd" path="res://Scenes/Components/MapView.cs" id="6_jr3w4"]
 [ext_resource type="PackedScene" uid="uid://btjn7k3t3388k" path="res://Scenes/Components/LogEntryControl.tscn" id="8_jr3w4"]
+[ext_resource type="PackedScene" uid="uid://b3cj8ikmbjrhb" path="res://Scenes/Components/LootableItemControl.tscn" id="9_8jwe3"]
 [ext_resource type="PackedScene" uid="uid://c6a5ctuwo5260" path="res://Scenes/Menus/NotebookOverlay.tscn" id="10_fo6o3"]
 [ext_resource type="Script" uid="uid://dhxmgcg1n3vmh" path="res://Scenes/MainUI/GameOverOverlay.cs" id="14_pl31g"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hnx6b"]
+bg_color = Color(0.27752772, 0.27752775, 0.27752757, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4u3ra"]
 content_margin_left = 8.0
@@ -304,6 +308,102 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 4
+
+[node name="ContainerLootOverlay" type="Control" parent="." unique_id=1916478978]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LootDimmer" type="ColorRect" parent="ContainerLootOverlay" unique_id=412263264]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6666667)
+
+[node name="LootCenter" type="CenterContainer" parent="ContainerLootOverlay" unique_id=1526859518]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LootPanel" type="PanelContainer" parent="ContainerLootOverlay/LootCenter" unique_id=763677737]
+custom_minimum_size = Vector2(475, 361)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hnx6b")
+
+[node name="LootMargin" type="MarginContainer" parent="ContainerLootOverlay/LootCenter/LootPanel" unique_id=716468682]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="LootRoot" type="VBoxContainer" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin" unique_id=1717304738]
+layout_mode = 2
+
+[node name="LootTitle" type="Label" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin/LootRoot" unique_id=1382962369]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Loot"
+
+[node name="LootSubtitle" type="Label" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin/LootRoot" unique_id=1751753128]
+layout_mode = 2
+text = "Subtitle"
+
+[node name="LootWarning" type="Label" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin/LootRoot" unique_id=2092263849]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.81497014, 0.2911616, 0.16922244, 1)
+text = "Warning"
+
+[node name="LootScroll" type="ScrollContainer" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin/LootRoot" unique_id=323072195]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LootGrid" type="GridContainer" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin/LootRoot/LootScroll" unique_id=2146764952]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 5
+
+[node name="LootableItemControl" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin/LootRoot/LootScroll/LootGrid" unique_id=1201818451 instance=ExtResource("9_8jwe3")]
+layout_mode = 2
+
+[node name="LootableItemControl2" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin/LootRoot/LootScroll/LootGrid" unique_id=1466677407 instance=ExtResource("9_8jwe3")]
+layout_mode = 2
+
+[node name="LootableItemControl3" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin/LootRoot/LootScroll/LootGrid" unique_id=742173181 instance=ExtResource("9_8jwe3")]
+layout_mode = 2
+
+[node name="LootableItemControl4" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin/LootRoot/LootScroll/LootGrid" unique_id=1178417352 instance=ExtResource("9_8jwe3")]
+layout_mode = 2
+
+[node name="LootableItemControl5" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin/LootRoot/LootScroll/LootGrid" unique_id=1318241326 instance=ExtResource("9_8jwe3")]
+layout_mode = 2
+
+[node name="LootButtons" type="HBoxContainer" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin/LootRoot" unique_id=1877981588]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="LootSelectedButton" type="Button" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin/LootRoot/LootButtons" unique_id=1259165135]
+layout_mode = 2
+text = "Take Selected"
+
+[node name="LootAllButton" type="Button" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin/LootRoot/LootButtons" unique_id=1742900311]
+layout_mode = 2
+text = "Take All"
+
+[node name="CloseButton" type="Button" parent="ContainerLootOverlay/LootCenter/LootPanel/LootMargin/LootRoot/LootButtons" unique_id=1149396549]
+layout_mode = 2
+text = "Close"
 
 [node name="GameOverOverlay" type="Control" parent="." unique_id=1700814972 node_paths=PackedStringArray("_titleLabel", "_bodyLabel", "_returnToStartMenuButton", "_quitButton")]
 visible = false

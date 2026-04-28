@@ -103,6 +103,15 @@ Any design that **drops per-pile reveal** without replacing it changes inspect d
 
 ---
 
+## Procedural chests & balance hub (architecture)
+
+- **`TreasureFeature` vs `ChestFeature`:** Procedural **treasure** (gold / inspect / Take) still comes from [`ITreasureDefinitionRepository`](../Scripts/0.Core/Treasure/TreasureDefinition.cs) and [`RoomFeatureFactories.CreateTreasureFeature`](../Scripts/3.Game/Features/RoomFeatureFactories.cs). **Item stacks** in a **chest** use [`ChestFeature`](../Scripts/0.Core/Dungeon/ChestFeature.cs) + [`ContainerLootInteractionService`](../Scripts/3.Game/Services/ContainerLootInteractionService.cs) for **Take** / loot-all. A room can have both if [`FeatureTypeRule`](../Scripts/3.Game.Contracts/Dungeon/FeatureTypeRule.cs) / **CannotCoexistWith** allows it.
+- **`PopulateableFeatureKind.Chest`:** [`RoomFeaturePopulationService`](../Scripts/3.Game/Services/RoomFeaturePopulationService.cs) can place chests alongside other kinds. **What spawns** is only [`RoomFeaturePopulationParameters`](../Scripts/3.Game.Contracts/Dungeon/RoomFeaturePopulationParameters.cs) (feature mix). **How a chest is filled** is **not** on that type: use [`ChestLootGenerationParameters`](../Scripts/3.Game.Contracts/Dungeon/ChestLootGenerationParameters.cs) + [`ChestLootGenerator`](../Scripts/3.Game/Services/ChestLootGenerator.cs) (category weights, stack/quantity bounds) when `CreateChestFeature` runs.
+- **Single [`GameBalanceSettingsResource`](../Resources/GameBalanceSettingsResource.cs):** Inspector-tunable **XP**, **floor generation** (room count, door chance, vertical exit weights), **feature rules** ([`FeaturePopulationRuleResource`](../Resources/FeaturePopulationRuleResource.cs) array), and **chest loot** (scalars + [`ChestLootCategoryWeightResource`](../Resources/ChestLootCategoryWeightResource.cs) rows). [`GameBalanceSettingsMapper`](../Mappers/GameBalanceSettingsMapper.cs) (host) maps the resource to **three** runtime DTOs: [`RoomFeaturePopulationParameters`](../Scripts/3.Game.Contracts/Dungeon/RoomFeaturePopulationParameters.cs), [`ChestLootGenerationParameters`](../Scripts/3.Game.Contracts/Dungeon/ChestLootGenerationParameters.cs), and [`FloorGenerationParameters`](../Scripts/3.Game.Contracts/Dungeon/FloorGenerationParameters.cs). [`GameRoot`](../Scenes/GameRoot.cs) builds [`DungeonBootstrap`](../Scripts/3.Game/Dungeon/DungeonBootstrap.cs) with pre-mapped hand-built + procedural floor factories.
+- **Authoring:** Assign `GameBalanceSettings` on `GameRoot`. Add a **Chest** row to **Feature rules** and tune **Chest loot** category weights. Do not hand-edit `*.tres` in the agent; use the Godot Inspector per repo rules.
+
+---
+
 ## Post-roadmap follow-ups (not committed)
 
 **Take / main view — containers**
@@ -113,4 +122,4 @@ Any design that **drops per-pile reveal** without replacing it changes inspect d
 ### Deferred epics (product-gated)
 
 - **GP / treasure → chest:** See Phase 5 “Follow-up ideas” ([GP-in-container representation](../Scripts/0.Core/Inventory/LootableItemDefinition.cs), inventory treasure → chest + reveal story).
-- **Procedural [`ChestFeature`](../Scripts/0.Core/Dungeon/ChestFeature.cs):** New [`PopulateableFeatureKind`](../Scripts/3.Game/Services/RoomFeaturePopulationService.cs) + population rules + content pipeline when designers want random chests alongside [`TreasureFeature`](../Scripts/0.Core/Treasure/TreasureFeature.cs).
+- Procedural **chests** with item loot: **implemented** — see [Procedural chests & balance hub](#procedural-chests--balance-hub-architecture).

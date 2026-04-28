@@ -1,0 +1,79 @@
+[gd_scene format=3 uid="uid://b3cj8ikmbjrhb"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_efdvw"]
+content_margin_left = 2.0
+content_margin_right = 2.0
+bg_color = Color(0.10747974, 0.10747973, 0.107479684, 0.91764706)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p78ox"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.87494326, 0.7863134, 0.6634701, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+corner_detail = 10
+
+[node name="LootableItemControl" type="PanelContainer" unique_id=1201818451]
+custom_minimum_size = Vector2(85, 102)
+
+[node name="LootableItemMargin" type="MarginContainer" parent="." unique_id=489411136]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="LootableItemRoot" type="VBoxContainer" parent="LootableItemMargin" unique_id=1614388275]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="LootableItemIconContainer" type="Control" parent="LootableItemMargin/LootableItemRoot" unique_id=1578673660]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LootableItemIcon" type="TextureRect" parent="LootableItemMargin/LootableItemRoot/LootableItemIconContainer" unique_id=357032575]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="QuantityLabel" type="Label" parent="LootableItemMargin/LootableItemRoot/LootableItemIconContainer" unique_id=1605464666]
+layout_mode = 0
+offset_left = 61.0
+offset_top = 2.0
+offset_right = 79.0
+offset_bottom = 19.0
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxFlat_efdvw")
+text = "3"
+horizontal_alignment = 2
+
+[node name="SelectionBorder" type="Panel" parent="LootableItemMargin/LootableItemRoot/LootableItemIconContainer" unique_id=1181602571]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_p78ox")
+
+[node name="ItemName" type="Label" parent="LootableItemMargin/LootableItemRoot" unique_id=1616802987]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Name"
+horizontal_alignment = 1
+clip_text = true
+text_overrun_behavior = 3

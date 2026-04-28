@@ -28,7 +28,9 @@ public sealed class ExplorationServiceTests
 
 	private static ExplorationService Service()
 	{
-		var population = new RoomFeaturePopulationService(new EmptyMonsters(), new EmptyTraps(), new EmptyTreasure(), new EmptyNpc(), new EmptyLore());
+		var chestLoot = new ChestLootGenerator(new EmptyItems(), ChestLootGenerationParameters.Default);
+		var population = new RoomFeaturePopulationService(
+			new EmptyMonsters(), new EmptyTraps(), new EmptyTreasure(), new EmptyNpc(), new EmptyLore(), chestLoot);
 		var dice = new DiceRollService(new System.Random(1));
 		var inspect = new InspectService(dice, new ResolutionService(dice), new NarrativeService());
 		var trapService = new TrapService(new ResolutionService(dice), new NarrativeService(), new PlayerVitalsService(), new EmptyItems());

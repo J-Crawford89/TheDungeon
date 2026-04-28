@@ -9,19 +9,22 @@ public sealed class RoomFeaturePopulationService
 	private readonly ITreasureDefinitionRepository _treasures;
 	private readonly INpcDefinitionRepository _npcs;
 	private readonly ILoreDefinitionRepository _lore;
+	private readonly ChestLootGenerator _chestLoot;
 
 	public RoomFeaturePopulationService(
 		IMonsterDefinitionRepository monsters,
 		ITrapDefinitionRepository traps,
 		ITreasureDefinitionRepository treasures,
 		INpcDefinitionRepository npcs,
-		ILoreDefinitionRepository lore)
+		ILoreDefinitionRepository lore,
+		ChestLootGenerator chestLoot)
 	{
 		_monsters = monsters;
 		_traps = traps;
 		_treasures = treasures;
 		_npcs = npcs;
 		_lore = lore;
+		_chestLoot = chestLoot;
 	}
 
 	public void Populate(
@@ -188,6 +191,7 @@ public sealed class RoomFeaturePopulationService
 			MonsterFeature => PopulateableFeatureKind.Monster,
 			TrapFeature => PopulateableFeatureKind.Trap,
 			TreasureFeature => PopulateableFeatureKind.Treasure,
+			ChestFeature => PopulateableFeatureKind.Chest,
 			NpcFeature => PopulateableFeatureKind.Npc,
 			LoreFeature => PopulateableFeatureKind.Lore,
 			_ => null
@@ -199,6 +203,7 @@ public sealed class RoomFeaturePopulationService
 			PopulateableFeatureKind.Monster => CreateMonsterFeature(random),
 			PopulateableFeatureKind.Trap => CreateTrapFeature(random),
 			PopulateableFeatureKind.Treasure => CreateTreasureFeature(random),
+			PopulateableFeatureKind.Chest => CreateChestFeature(random),
 			PopulateableFeatureKind.Npc => CreateNpcFeature(random),
 			PopulateableFeatureKind.Lore => CreateLoreFeature(random),
 			_ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
@@ -223,6 +228,14 @@ public sealed class RoomFeaturePopulationService
 		var weighted = _treasures.All.Select(t => (t, 1.0)).ToList();
 		var def = WeightedRandomSelection.Pick(random, weighted);
 		return RoomFeatureFactories.CreateTreasureFeature(def);
+	}
+
+	private ChestFeature CreateChestFeature(Random random)
+	{
+		var chest = new ChestFeature();
+		foreach (var row in _chestLoot.GenerateLootRows(random))
+			chest.Contents.Add(row);
+		return chest;
 	}
 
 	private NpcFeature CreateNpcFeature(Random random)

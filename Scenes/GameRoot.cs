@@ -170,8 +170,18 @@ public partial class GameRoot : Control
 
 		var proficiencyAggregation = new PlayerProficiencyAggregationService(raceRepo, classRepo, backgroundRepo);
 
-		var roomFeaturePopulation = new RoomFeaturePopulationService(monsterRepo, trapRepo, treasureRepo, npcRepo, loreRepo);
-		var dungeonBootstrap = new DungeonBootstrap(roomFeaturePopulation);
+		var chestLootParameters = GameBalanceSettingsMapper.ToChestLootGenerationParameters(GameBalanceSettings);
+		var chestLootGenerator = new ChestLootGenerator(itemRepo, chestLootParameters);
+		var roomFeaturePopulation = new RoomFeaturePopulationService(
+			monsterRepo, trapRepo, treasureRepo, npcRepo, loreRepo, chestLootGenerator);
+		var handBuiltPopulation = GameBalanceSettingsMapper.ToRoomFeaturePopulationParameters(GameBalanceSettings);
+		System.Func<FloorGenerationParameters> proceduralFloorFactory = () =>
+			GameBalanceSettingsMapper.BuildFloorGenerationParameters(
+				GameBalanceSettings,
+				System.Random.Shared.Next(),
+				0,
+				FloorConnectionType.None);
+		var dungeonBootstrap = new DungeonBootstrap(roomFeaturePopulation, handBuiltPopulation, proceduralFloorFactory);
 		var diceRollService = new DiceRollService(random);
 		var resolutionService = new ResolutionService(diceRollService);
 		var experienceService = new PlayerExperienceService(narrativeService);
