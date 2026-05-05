@@ -57,6 +57,29 @@ public sealed class PlayerActionTargetResolversTests
 	}
 
 	[Fact]
+	public void ResolveTakeTargets_Combat_ExcludesContainers_KeepsTreasureOnly()
+	{
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		room.Features.Add(new SalvageFeature
+		{
+			Contents = [new LootableItemDefinition { ItemDefinitionId = "rope", Quantity = 1 }],
+		});
+		room.Features.Add(new TreasureFeature
+		{
+			TreasureItems =
+			[
+				new TreasureInstance { IsRevealed = true, Definition = Gold("a", "Gold") },
+			],
+		});
+		var session = SessionWithRoom(room);
+
+		var list = PlayerActionTargetResolvers.ResolveTakeTargets(session, DungeonMode.Combat);
+
+		Assert.Single(list);
+		Assert.Equal(TargetPayloadKind.TakeTreasureItem, list[0].Payload.Kind);
+	}
+
+	[Fact]
 	public void ResolveTakeTargets_IncludesLootContainerAll_WithOrdinalMatchingLocator()
 	{
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };

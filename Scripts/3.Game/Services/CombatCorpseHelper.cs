@@ -13,7 +13,11 @@ public static class CombatCorpseHelper
 		IItemDefinitionRepository items,
 		NarrativeService narrative)
 	{
-		var corpse = new CorpseFeature { HarvestDc = definition.HarvestDc };
+		var corpse = new CorpseFeature
+		{
+			HarvestDc = definition.HarvestDc,
+			SourceMonsterDefinitionId = definition.Id ?? string.Empty,
+		};
 		var validRows = new List<LootableItemDefinition>();
 
 		if (definition.DeathLoot is { Count: > 0 })

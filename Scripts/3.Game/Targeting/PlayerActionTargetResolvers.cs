@@ -40,7 +40,7 @@ public static class PlayerActionTargetResolvers
 		if (session.Dungeon.CurrentRoom is not { } room)
 			return [];
 
-		var flat = BuildFlatTakeTargets(room);
+		var flat = BuildFlatTakeTargets(room, mode);
 
 		var takeAllKeys = MainViewRoomSlots.CollectTakeAllTreasureHighlightKeys(room);
 		if (takeAllKeys.Count < 2 || mode != DungeonMode.Exploration)
@@ -59,7 +59,7 @@ public static class PlayerActionTargetResolvers
 		return combined;
 	}
 
-	private static List<TargetDescriptor> BuildFlatTakeTargets(DungeonRoom room)
+	private static List<TargetDescriptor> BuildFlatTakeTargets(DungeonRoom room, DungeonMode mode)
 	{
 		var list = new List<TargetDescriptor>();
 		var treasureFeatureOrdinal = 0;
@@ -95,7 +95,8 @@ public static class PlayerActionTargetResolvers
 				}
 				case ContainerFeature cf:
 				{
-					if (RoomContainerLocator.HasLootableStacks(cf))
+					if (mode != DungeonMode.Combat &&
+					    RoomContainerLocator.HasLootableStacks(cf))
 					{
 						list.Add(new TargetDescriptor
 						{

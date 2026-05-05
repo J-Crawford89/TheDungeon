@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://t7duod6dlknd" path="res://Scenes/Components/MapView.cs" id="6_jr3w4"]
 [ext_resource type="PackedScene" uid="uid://btjn7k3t3388k" path="res://Scenes/Components/LogEntryControl.tscn" id="8_jr3w4"]
 [ext_resource type="PackedScene" uid="uid://b3cj8ikmbjrhb" path="res://Scenes/Components/LootableItemControl.tscn" id="9_8jwe3"]
+[ext_resource type="Script" uid="uid://bu6sqdijxfqyr" path="res://Scenes/Components/ContainerLootOverlay.cs" id="9_hnx6b"]
 [ext_resource type="PackedScene" uid="uid://c6a5ctuwo5260" path="res://Scenes/Menus/NotebookOverlay.tscn" id="10_fo6o3"]
 [ext_resource type="Script" uid="uid://dhxmgcg1n3vmh" path="res://Scenes/MainUI/GameOverOverlay.cs" id="14_pl31g"]
 
@@ -37,7 +38,7 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="MainUI" type="Control" unique_id=1749426459 node_paths=PackedStringArray("_mainViewPanel", "_characterPanel", "_commandPanel", "_logPanel", "_mapPanel", "_gameOverOverlay", "_notebookOverlay")]
+[node name="MainUI" type="Control" unique_id=1749426459 node_paths=PackedStringArray("_mainViewPanel", "_characterPanel", "_commandPanel", "_logPanel", "_mapPanel", "_gameOverOverlay", "_notebookOverlay", "_containerLootOverlay")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -52,6 +53,7 @@ _logPanel = NodePath("RootMargin/MainVBox/Row2/LogPanel")
 _mapPanel = NodePath("RootMargin/MainVBox/Row2/MapPanel")
 _gameOverOverlay = NodePath("GameOverOverlay")
 _notebookOverlay = NodePath("NotebookOverlay")
+_containerLootOverlay = NodePath("ContainerLootOverlay")
 
 [node name="RootMargin" type="MarginContainer" parent="." unique_id=864533212]
 layout_mode = 1
@@ -309,7 +311,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 4
 
-[node name="ContainerLootOverlay" type="Control" parent="." unique_id=1916478978]
+[node name="ContainerLootOverlay" type="Control" parent="." unique_id=1916478978 node_paths=PackedStringArray("_lootTitle", "_lootSubtitle", "_lootWarning", "_lootGrid", "_lootSelectedButton", "_lootAllButton", "_closeButton")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -317,6 +319,15 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("9_hnx6b")
+_lootTitle = NodePath("LootCenter/LootPanel/LootMargin/LootRoot/LootTitle")
+_lootSubtitle = NodePath("LootCenter/LootPanel/LootMargin/LootRoot/LootSubtitle")
+_lootWarning = NodePath("LootCenter/LootPanel/LootMargin/LootRoot/LootWarning")
+_lootGrid = NodePath("LootCenter/LootPanel/LootMargin/LootRoot/LootScroll/LootGrid")
+_lootSelectedButton = NodePath("LootCenter/LootPanel/LootMargin/LootRoot/LootButtons/LootSelectedButton")
+_lootAllButton = NodePath("LootCenter/LootPanel/LootMargin/LootRoot/LootButtons/LootAllButton")
+_closeButton = NodePath("LootCenter/LootPanel/LootMargin/LootRoot/LootButtons/CloseButton")
+_lootableItemScene = ExtResource("9_8jwe3")
 
 [node name="LootDimmer" type="ColorRect" parent="ContainerLootOverlay" unique_id=412263264]
 layout_mode = 1

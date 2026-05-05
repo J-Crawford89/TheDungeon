@@ -12,6 +12,7 @@ public sealed class ExplorationUiPresenter
 	private readonly TrapService _trapService;
 	private readonly PotionEffectApplicationService _potionEffects;
 	private readonly Action<UiRefreshFlags> _refreshHud;
+	private readonly IContainerLootOverlayOpener? _lootOverlay;
 
 	private readonly bool _useProceduralFloor = true; //Set this bool to true in order to use procedural generation, or false to use prototype hand built floor.
 
@@ -24,7 +25,8 @@ public sealed class ExplorationUiPresenter
 		TrapService trapService,
 		PotionEffectApplicationService potionEffects,
 		DungeonBootstrap dungeonBootstrap,
-		Action<UiRefreshFlags> refreshHud)
+		Action<UiRefreshFlags> refreshHud,
+		IContainerLootOverlayOpener? lootOverlay = null)
 	{
 		_session = session;
 		_explorationService = explorationService;
@@ -35,6 +37,7 @@ public sealed class ExplorationUiPresenter
 		_potionEffects = potionEffects;
 		_dungeonBootstrap = dungeonBootstrap;
 		_refreshHud = refreshHud;
+		_lootOverlay = lootOverlay;
 	}
 
 	public void OnPotionPressed()
@@ -69,6 +72,12 @@ public sealed class ExplorationUiPresenter
 				_treasurePickup.TakeAllEligibleFromCurrentRoom(_session);
 				break;
 			case TargetPayloadKind.LootContainerAll:
+				if (_lootOverlay != null)
+				{
+					_lootOverlay.OpenLootPanel(payload.ContainerOrdinal);
+					return;
+				}
+
 				_containerLoot.TryLootAll(_session, payload.ContainerOrdinal);
 				break;
 			default:

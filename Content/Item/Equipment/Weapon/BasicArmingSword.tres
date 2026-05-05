@@ -24,7 +24,7 @@ Name = "Attack"
 DamageComponents = Array[ExtResource("1_l1w0c")]([SubResource("Resource_12woj")])
 metadata/_custom_type_script = "uid://cp4x0wf1unxo7"
 
-[sub_resource type="Resource" id="Resource_2d80b"]
+[sub_resource type="Resource" id="Resource_q5pct"]
 script = ExtResource("9_vd7w4")
 
 [resource]

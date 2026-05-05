@@ -221,7 +221,7 @@ public sealed class TrapService
 
 		if (salvageRows.Count > 0)
 		{
-			var salvage = new SalvageFeature();
+			var salvage = new SalvageFeature { SourceTrapDefinitionId = trapDef.Id ?? string.Empty };
 			salvage.Contents.AddRange(salvageRows);
 			room.Features.Add(salvage);
 		}

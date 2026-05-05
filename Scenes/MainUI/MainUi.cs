@@ -12,6 +12,8 @@ public partial class MainUi : Control
 	[Export] private GameOverOverlay _gameOverOverlay = null!;
 	[Export] private NotebookOverlay? _notebookOverlay;
 
+	[Export] private ContainerLootOverlay? _containerLootOverlay;
+
 	public event Action? QuitRequested;
 	public event Action? ReturnToStartMenuRequested;
 
@@ -63,6 +65,8 @@ public partial class MainUi : Control
 			UpdateGameOverPanel();
 		}
 
+		_containerLootOverlay?.Bind(_runContext, RefreshHudAndGameOver);
+
 		_explorationPresenter = new ExplorationUiPresenter(
 			session,
 			explorationService,
@@ -72,7 +76,8 @@ public partial class MainUi : Control
 			trapService,
 			potionEffects,
 			dungeonBootstrap,
-			RefreshHudAndGameOver);
+			RefreshHudAndGameOver,
+			_containerLootOverlay);
 		_combatPresenter = new CombatUiPresenter(session, combatService, RefreshHudAndGameOver);
 		coordinator = new GameUiCoordinator(
 			session,

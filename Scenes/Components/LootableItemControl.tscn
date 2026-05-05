@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://b3cj8ikmbjrhb"]
 
+[ext_resource type="Script" uid="uid://c2c4kx4ayblp8" path="res://Scenes/Components/LootableItemControl.cs" id="1_p78ox"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_efdvw"]
 content_margin_left = 2.0
 content_margin_right = 2.0
@@ -22,8 +24,13 @@ corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 corner_detail = 10
 
-[node name="LootableItemControl" type="PanelContainer" unique_id=1201818451]
+[node name="LootableItemControl" type="PanelContainer" unique_id=1201818451 node_paths=PackedStringArray("_icon", "_qty", "_selectionBorder", "_itemName")]
 custom_minimum_size = Vector2(85, 102)
+script = ExtResource("1_p78ox")
+_icon = NodePath("LootableItemMargin/LootableItemRoot/LootableItemIconContainer/LootableItemIcon")
+_qty = NodePath("LootableItemMargin/LootableItemRoot/LootableItemIconContainer/QuantityLabel")
+_selectionBorder = NodePath("LootableItemMargin/LootableItemRoot/LootableItemIconContainer/SelectionBorder")
+_itemName = NodePath("LootableItemMargin/LootableItemRoot/ItemName")
 
 [node name="LootableItemMargin" type="MarginContainer" parent="." unique_id=489411136]
 layout_mode = 2

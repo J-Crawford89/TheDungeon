@@ -28,6 +28,8 @@ public partial class GameRoot : Control
 
 	[Export] public MainViewTraversalIcons? MainViewTraversalIcons { get; set; }
 
+	[Export] public ChestIconsResource? ChestIcons { get; set; }
+
 	[Export] public bool CaptureDebugDiagnostics { get; set; }
 	[Export] public bool DebugToolsEnabled { get; set; }
 
@@ -191,7 +193,12 @@ public partial class GameRoot : Control
 		var gameOverDownedHandler = new GameOverDownedHandler(narrativeService);
 		var playerDownedResolutionService = new PlayerDownedResolutionService(new IPlayerDownedOutcomeHandler[] { gameOverDownedHandler });
 		var trapService = new TrapService(resolutionService, narrativeService, vitalsService, itemRepo, experienceService);
-		var containerLootInteraction = new ContainerLootInteractionService(itemRepo, narrativeService, proficiencyAggregation);
+		var containerLootInteraction = new ContainerLootInteractionService(
+			itemRepo,
+			narrativeService,
+			proficiencyAggregation,
+			monsters: monsterRepo,
+			traps: trapRepo);
 		var combatService = new CombatService(
 			diceRollService,
 			resolutionService,
@@ -222,7 +229,8 @@ public partial class GameRoot : Control
 			TrapDatabase,
 			NpcDatabase,
 			LoreDatabase,
-			MainViewTraversalIcons);
+			MainViewTraversalIcons,
+			ChestIcons);
 
 		return new GameRunContext(
 			session,

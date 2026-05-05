@@ -1,11 +1,11 @@
 [gd_resource type="Resource" script_class="MonsterResource" format=3 uid="uid://8xwnbf8nrx4k"]
 
 [ext_resource type="Texture2D" uid="uid://b3n8mh18joiyc" path="res://Assets/PrototypeAssets/RatKing.png" id="1_12p7m"]
-[ext_resource type="Script" uid="uid://cp4x0wf1unxo7" path="res://Resources/AttackResource.cs" id="1_m5iwf"]
 [ext_resource type="Script" uid="uid://h3kt4eef0b3n" path="res://Resources/MonsterResource.cs" id="1_u437f"]
 [ext_resource type="Resource" uid="uid://khjg6aq0tt0o" path="res://Content/World/DamageType/Piercing.tres" id="2_rwhse"]
 [ext_resource type="Script" uid="uid://l11npu0nk6bm" path="res://Resources/DamageComponentResource.cs" id="3_wpf37"]
 [ext_resource type="Script" uid="uid://cim33xbbm276o" path="res://Resources/MonsterAttackResource.cs" id="4_rwhse"]
+[ext_resource type="Script" uid="uid://b6nle4bl0xxf" path="res://Resources/LootableItemResource.cs" id="4_wpf37"]
 
 [sub_resource type="Resource" id="Resource_wpf37"]
 script = ExtResource("3_wpf37")
@@ -33,7 +33,7 @@ Agility = 3
 Intelligence = -2
 Wisdom = 2
 Gravitas = -2
-Attacks = Array[ExtResource("1_m5iwf")]([SubResource("Resource_bf1os")])
+Attacks = Array[ExtResource("4_rwhse")]([SubResource("Resource_bf1os")])
 Defense = 13
 ExperienceReward = 15
 IsBoss = true

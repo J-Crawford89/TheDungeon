@@ -30,4 +30,7 @@ public partial class MonsterResource : Resource
 	[Export] public int HarvestDc { get; set; }
 
 	[Export] public Texture2D? Icon { get; set; }
+
+	/// <summary>Main-view icon for this monster&apos;s <see cref="CorpseFeature"/>; falls back to <see cref="Icon"/> when unset.</summary>
+	[Export] public Texture2D? CorpseIcon { get; set; }
 }

@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,6 +7,8 @@ using System.Linq;
 public sealed class ContainerLootInteractionService
 {
 	private readonly IItemDefinitionRepository _items;
+	private readonly IMonsterDefinitionRepository? _monsters;
+	private readonly ITrapDefinitionRepository? _traps;
 	private readonly NarrativeService _narrative;
 	private readonly PlayerProficiencyAggregationService _proficiency;
 	private readonly int _maxUnequippedBackpackRows;
@@ -14,9 +17,13 @@ public sealed class ContainerLootInteractionService
 		IItemDefinitionRepository items,
 		NarrativeService narrative,
 		PlayerProficiencyAggregationService proficiency,
-		int maxUnequippedBackpackRows = 16)
+		int maxUnequippedBackpackRows = 16,
+		IMonsterDefinitionRepository? monsters = null,
+		ITrapDefinitionRepository? traps = null)
 	{
 		_items = items;
+		_monsters = monsters;
+		_traps = traps;
 		_narrative = narrative;
 		_proficiency = proficiency;
 		_maxUnequippedBackpackRows = maxUnequippedBackpackRows;
@@ -33,6 +40,7 @@ public sealed class ContainerLootInteractionService
 			return ContainerLootPanelResult.Fail(ContainerLootErrorCode.ContainerOrdinalOutOfRange);
 
 		var (kind, label) = Describe(container);
+		var (panelTitle, panelSubtitle) = BuildPanelHeadings(container, kind);
 		var rows = new List<ContainerLootStackRowDto>();
 		for (var i = 0; i < container.Contents.Count; i++)
 		{
@@ -64,6 +72,8 @@ public sealed class ContainerLootInteractionService
 		{
 			Kind = kind,
 			ContainerKindLabel = label,
+			PanelTitle = panelTitle,
+			PanelSubtitle = panelSubtitle,
 			Rows = rows,
 			LikelyCrowdedAfterTakeAll = crowded,
 		});
@@ -163,4 +173,58 @@ public sealed class ContainerLootInteractionService
 			ChestFeature => (ContainerLootKind.Chest, "chest"),
 			_ => (ContainerLootKind.Other, "container"),
 		};
+
+	private (string PanelTitle, string PanelSubtitle) BuildPanelHeadings(ContainerFeature container, ContainerLootKind kind)
+	{
+		var title = kind switch
+		{
+			ContainerLootKind.Chest => "Chest",
+			ContainerLootKind.Corpse => "Corpse",
+			ContainerLootKind.Salvage => "Salvage",
+			_ => "Container",
+		};
+
+		var subtitle = string.Empty;
+		switch (container)
+		{
+			case ChestFeature:
+				break;
+			case CorpseFeature corpse:
+				subtitle = ResolveMonsterDisplayName(corpse.SourceMonsterDefinitionId);
+				break;
+			case SalvageFeature salvage:
+				subtitle = ResolveTrapDisplayName(salvage.SourceTrapDefinitionId);
+				break;
+		}
+
+		return (title, subtitle);
+	}
+
+	private string ResolveMonsterDisplayName(string monsterDefinitionId)
+	{
+		var id = monsterDefinitionId.Trim();
+		if (string.IsNullOrEmpty(id) || _monsters == null)
+			return string.Empty;
+		foreach (var m in _monsters.All)
+		{
+			if (string.Equals(m.Id, id, StringComparison.Ordinal))
+				return m.Name ?? string.Empty;
+		}
+
+		return string.Empty;
+	}
+
+	private string ResolveTrapDisplayName(string trapDefinitionId)
+	{
+		var id = trapDefinitionId.Trim();
+		if (string.IsNullOrEmpty(id) || _traps == null)
+			return string.Empty;
+		foreach (var t in _traps.All)
+		{
+			if (string.Equals(t.Id, id, StringComparison.Ordinal))
+				return t.Name ?? string.Empty;
+		}
+
+		return string.Empty;
+	}
 }

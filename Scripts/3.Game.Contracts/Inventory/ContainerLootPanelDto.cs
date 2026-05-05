@@ -9,6 +9,12 @@ public sealed class ContainerLootPanelDto
 	/// <summary>Narrative label derived from kind (e.g. &quot;salvage pile&quot;).</summary>
 	public required string ContainerKindLabel { get; init; }
 
+	/// <summary>Panel heading: Chest, Corpse, Salvage, …</summary>
+	public required string PanelTitle { get; init; }
+
+	/// <summary>Source context (trap name, monster name); empty for chest.</summary>
+	public required string PanelSubtitle { get; init; }
+
 	public required IReadOnlyList<ContainerLootStackRowDto> Rows { get; init; }
 
 	/// <summary>Best-effort hint when taking all stacks would crowd the backpack grid.</summary>

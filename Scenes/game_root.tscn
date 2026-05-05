@@ -17,6 +17,7 @@
 [ext_resource type="Resource" uid="uid://b4nsdqvaj1meg" path="res://Content/Databases/ItemDatabase.tres" id="14_hpb24"]
 [ext_resource type="Resource" uid="uid://c8v5ckgmqi3u1" path="res://Content/World/VerticalTraversalIcons.tres" id="15_nf18g"]
 [ext_resource type="Resource" uid="uid://di5bscavcplik" path="res://Content/World/GameBalanceSettings.tres" id="16_4ygev"]
+[ext_resource type="Resource" uid="uid://nuneyh60wcap" path="res://Content/World/ContainerIcons.tres" id="18_4ygev"]
 
 [node name="GameRoot" type="Control" unique_id=1615480598 node_paths=PackedStringArray("_screenHost")]
 layout_mode = 3
@@ -43,6 +44,7 @@ DamageTypeDatabase = ExtResource("14_ghees")
 ItemDatabase = ExtResource("14_hpb24")
 GameBalanceSettings = ExtResource("16_4ygev")
 MainViewTraversalIcons = ExtResource("15_nf18g")
+ChestIcons = ExtResource("18_4ygev")
 CaptureDebugDiagnostics = true
 DebugToolsEnabled = true
 

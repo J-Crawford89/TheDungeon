@@ -35,7 +35,10 @@ public static class PresentationIconKeys
 
 		public static string ContainerSalvage() => $"{Root}/container/salvage";
 
-		public static string ContainerCorpse() => $"{Root}/container/corpse";
+		public static string ContainerCorpse(string monsterDefinitionId) =>
+			string.IsNullOrWhiteSpace(monsterDefinitionId)
+				? $"{Root}/container/corpse/unknown"
+				: $"{Root}/container/corpse/{monsterDefinitionId.Trim()}";
 
 		public static string ContainerChest(bool locked) =>
 			locked ? $"{Root}/container/chest_locked" : $"{Root}/container/chest";
@@ -46,7 +49,7 @@ public static class PresentationIconKeys
 			cf switch
 			{
 				SalvageFeature => ContainerSalvage(),
-				CorpseFeature => ContainerCorpse(),
+				CorpseFeature corpse => ContainerCorpse(corpse.SourceMonsterDefinitionId),
 				ChestFeature ch => ContainerChest(ch.Locked),
 				_ => ContainerOther()
 			};

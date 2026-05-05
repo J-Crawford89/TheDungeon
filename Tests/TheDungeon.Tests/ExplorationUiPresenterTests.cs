@@ -28,7 +28,18 @@ public sealed class ExplorationUiPresenterTests
 		public void ExecutePlayerDisarmTrap(GameSessionState session, TargetPayload payload) { }
 	}
 
-	private static ExplorationUiPresenter CreatePresenter(GameSessionState session, System.Action<UiRefreshFlags> refreshHud)
+	private sealed class RecordingLootOpener : IContainerLootOverlayOpener
+	{
+		public int? LastOrdinal { get; private set; }
+
+		public void OpenLootPanel(int containerOrdinal) =>
+			LastOrdinal = containerOrdinal;
+	}
+
+	private static ExplorationUiPresenter CreatePresenter(
+		GameSessionState session,
+		System.Action<UiRefreshFlags> refreshHud,
+		IContainerLootOverlayOpener? lootOverlay = null)
 	{
 		var chestLoot = new ChestLootGenerator(new EmptyItems(), ChestLootGenerationParameters.Default);
 		var population = new RoomFeaturePopulationService(
@@ -52,7 +63,36 @@ public sealed class ExplorationUiPresenterTests
 				RoomFeatures = RoomFeaturePopulationParameters.CreateDefault(),
 			});
 		var containerLoot = new ContainerLootInteractionService(new EmptyItems(), narrative, TestPlayerProficiencyAggregation.CreateEmpty());
-		return new ExplorationUiPresenter(session, exploration, narrative, treasure, containerLoot, trapService, potionFx, bootstrap, refreshHud);
+		return new ExplorationUiPresenter(
+			session,
+			exploration,
+			narrative,
+			treasure,
+			containerLoot,
+			trapService,
+			potionFx,
+			bootstrap,
+			refreshHud,
+			lootOverlay);
+	}
+
+	[Fact]
+	public void OnTakeWithTarget_LootContainerWithOpener_DoesNotRefresh_OpensOverlay()
+	{
+		var refreshes = new List<UiRefreshFlags>();
+		var session = new GameSessionState();
+		session.Dungeon.DungeonMode = DungeonMode.Exploration;
+		var opener = new RecordingLootOpener();
+		var presenter = CreatePresenter(session, f => refreshes.Add(f), opener);
+
+		presenter.OnTakeWithTarget(new TargetPayload
+		{
+			Kind = TargetPayloadKind.LootContainerAll,
+			ContainerOrdinal = 2,
+		});
+
+		Assert.Empty(refreshes);
+		Assert.Equal(2, opener.LastOrdinal);
 	}
 
 	[Fact]

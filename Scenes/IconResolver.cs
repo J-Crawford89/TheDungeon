@@ -12,6 +12,7 @@ public sealed class IconResolver
 	private readonly NpcResourceDatabase? _npcs;
 	private readonly LoreResourceDatabase? _lore;
 	private readonly MainViewTraversalIcons? _traversal;
+	private readonly ChestIconsResource? _chestIcons;
 	private readonly HashSet<string> _warned = new(StringComparer.Ordinal);
 
 	public IconResolver(
@@ -21,7 +22,8 @@ public sealed class IconResolver
 		TrapResourceDatabase? traps,
 		NpcResourceDatabase? npcs,
 		LoreResourceDatabase? lore,
-		MainViewTraversalIcons? traversal)
+		MainViewTraversalIcons? traversal,
+		ChestIconsResource? chestIcons)
 	{
 		_monsters = monsters;
 		_items = items;
@@ -30,6 +32,7 @@ public sealed class IconResolver
 		_npcs = npcs;
 		_lore = lore;
 		_traversal = traversal;
+		_chestIcons = chestIcons;
 	}
 
 	public Texture2D? Resolve(string key)
@@ -175,9 +178,48 @@ public sealed class IconResolver
 
 	private Texture2D? ResolveContainer(string fullKey, string id)
 	{
-		WarnOnce(fullKey,
-			$"No texture wired for container icon variant '{id}'. Extend IconResolver or assign icons in MainViewTraversalIcons / resources.");
-		return null;
+		if (id.StartsWith("corpse/", StringComparison.Ordinal))
+		{
+			var monsterId = id["corpse/".Length..];
+			if (string.IsNullOrWhiteSpace(monsterId) || monsterId.Equals("unknown", StringComparison.OrdinalIgnoreCase))
+			{
+				WarnOnce($"{fullKey}|corpseunknown", "Corpse has no monster id for icon.");
+				return null;
+			}
+
+			var m = FindMonsterById(monsterId.Trim());
+			if (m == null)
+			{
+				WarnOnce(fullKey, $"No MonsterResource with Id '{monsterId}' for corpse icon.");
+				return null;
+			}
+
+			var tex = m.CorpseIcon ?? m.Icon;
+			if (tex == null)
+				WarnOnce($"{fullKey}|nullicon", $"MonsterResource '{monsterId}' has no CorpseIcon or Icon for corpse.");
+			return tex;
+		}
+
+		if (_chestIcons == null)
+		{
+			WarnOnce($"{fullKey}|nochesticons", "Assign ChestIconsResource on GameRoot for container icons.");
+			return null;
+		}
+
+		switch (id)
+		{
+			case "chest":
+				return _chestIcons.ChestIcon;
+			case "chest_locked":
+				return _chestIcons.ChestLockedIcon ?? _chestIcons.ChestIcon;
+			case "salvage":
+				return _chestIcons.SalvageIcon;
+			case "other":
+				return _chestIcons.OtherContainerIcon;
+			default:
+				WarnOnce(fullKey, $"Unknown container icon id '{id}'.");
+				return null;
+		}
 	}
 
 	private Texture2D? ResolveTreasure(string fullKey, string id)

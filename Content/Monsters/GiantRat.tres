@@ -1,10 +1,10 @@
 [gd_resource type="Resource" script_class="MonsterResource" format=3 uid="uid://bhplrng7sf8ix"]
 
 [ext_resource type="Script" uid="uid://h3kt4eef0b3n" path="res://Resources/MonsterResource.cs" id="1_0vblb"]
-[ext_resource type="Script" uid="uid://cp4x0wf1unxo7" path="res://Resources/AttackResource.cs" id="1_c3vaw"]
 [ext_resource type="Texture2D" uid="uid://bq7fkrinl6s1c" path="res://Assets/PrototypeAssets/GiantRat.png" id="1_ustx4"]
 [ext_resource type="Resource" uid="uid://khjg6aq0tt0o" path="res://Content/World/DamageType/Piercing.tres" id="2_hbwqt"]
 [ext_resource type="Script" uid="uid://l11npu0nk6bm" path="res://Resources/DamageComponentResource.cs" id="3_fevfy"]
+[ext_resource type="Script" uid="uid://b6nle4bl0xxf" path="res://Resources/LootableItemResource.cs" id="4_fevfy"]
 [ext_resource type="Script" uid="uid://cim33xbbm276o" path="res://Resources/MonsterAttackResource.cs" id="4_hbwqt"]
 
 [sub_resource type="Resource" id="Resource_fevfy"]
@@ -31,7 +31,7 @@ Agility = 2
 Intelligence = -3
 Wisdom = 1
 Gravitas = -4
-Attacks = Array[ExtResource("1_c3vaw")]([SubResource("Resource_5f6kq")])
+Attacks = Array[ExtResource("4_hbwqt")]([SubResource("Resource_5f6kq")])
 Defense = 10
 ExperienceReward = 8
 RandomizerWeight = 15
