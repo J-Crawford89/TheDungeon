@@ -33,4 +33,7 @@ public partial class MonsterResource : Resource
 
 	/// <summary>Main-view icon for this monster&apos;s <see cref="CorpseFeature"/>; falls back to <see cref="Icon"/> when unset.</summary>
 	[Export] public Texture2D? CorpseIcon { get; set; }
+
+	/// <summary>Main-view icon after the corpse container has been opened at least once; falls back to <see cref="CorpseIcon"/> then <see cref="Icon"/>.</summary>
+	[Export] public Texture2D? CorpseOpenedIcon { get; set; }
 }

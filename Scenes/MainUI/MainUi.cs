@@ -114,6 +114,7 @@ public partial class MainUi : Control
 		_commandPanel.AttackPressed += OnCommandAttack;
 		_commandPanel.FleePressed += OnCommandFlee;
 		_commandPanel.TakePressed += OnCommandTake;
+		_commandPanel.OpenPressed += OnCommandOpen;
 		_commandPanel.PotionPressed += OnCommandPotion;
 		_commandPanel.DefendPressed += OnCommandDefend;
 		_commandPanel.DisarmPressed += OnCommandDisarm;
@@ -183,6 +184,7 @@ public partial class MainUi : Control
 	private void OnCommandAttack() => _coordinator.OnAttackPressed();
 	private void OnCommandFlee() => _coordinator.OnFleePressed();
 	private void OnCommandTake() => _coordinator.OnTakePressed();
+	private void OnCommandOpen() => _coordinator.OnOpenPressed();
 	private void OnCommandPotion() => _coordinator.OnPotionPressed();
 	private void OnCommandDefend() => _coordinator.OnDefendPressed();
 	private void OnCommandDisarm() => _coordinator.OnDisarmPressed();
@@ -236,6 +238,7 @@ public partial class MainUi : Control
 			_commandPanel.AttackPressed -= OnCommandAttack;
 			_commandPanel.FleePressed -= OnCommandFlee;
 			_commandPanel.TakePressed -= OnCommandTake;
+			_commandPanel.OpenPressed -= OnCommandOpen;
 			_commandPanel.PotionPressed -= OnCommandPotion;
 			_commandPanel.DefendPressed -= OnCommandDefend;
 			_commandPanel.DisarmPressed -= OnCommandDisarm;

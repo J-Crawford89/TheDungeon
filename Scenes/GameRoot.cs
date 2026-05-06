@@ -208,7 +208,6 @@ public partial class GameRoot : Control
 			treasurePickupService,
 			potionEffectApplicationService,
 			trapService,
-			containerLootInteraction,
 			itemRepo,
 			experienceService);
 		var inspectService = new InspectService(diceRollService, resolutionService, narrativeService);

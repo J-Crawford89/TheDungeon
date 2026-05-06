@@ -13,7 +13,6 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 	private readonly TreasurePickupService _treasurePickup;
 	private readonly PotionEffectApplicationService _potionEffects;
 	private readonly TrapService _trapService;
-	private readonly ContainerLootInteractionService _containerLoot;
 	private readonly PlayerExperienceService? _experience;
 	private readonly CombatAbilityEffectsRegistry _combatAbilities = new();
 	private readonly CombatEncounterLifecycle _lifecycle;
@@ -31,7 +30,6 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		TreasurePickupService treasurePickup,
 		PotionEffectApplicationService potionEffects,
 		TrapService trapService,
-		ContainerLootInteractionService containerLoot,
 		IItemDefinitionRepository itemDefinitions,
 		PlayerExperienceService? experience = null,
 		IAttackRollAbilityOverlay? attackRollAbilityOverlay = null)
@@ -44,7 +42,6 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		_playerDowned = playerDowned;
 		_treasurePickup = treasurePickup;
 		_trapService = trapService;
-		_containerLoot = containerLoot;
 		_experience = experience;
 		_attackRollAbilityOverlay = attackRollAbilityOverlay;
 		_lifecycle = new CombatEncounterLifecycle(_narrative);
@@ -266,10 +263,6 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			TargetPayloadKind.TakeTreasureItem => _treasurePickup.TakeTreasureInstanceAtSlot(session,
 				payload.TreasureFeatureOrdinal, payload.TreasureItemIndexInFeature),
 			TargetPayloadKind.TakeAllEligibleTreasure => _treasurePickup.TakeAllEligibleFromCurrentRoom(session),
-			TargetPayloadKind.LootContainerAll =>
-				_containerLoot.TryLootAll(session, payload.ContainerOrdinal).ErrorCode == ContainerLootErrorCode.None
-					? TakeTreasureOutcome.TookItems
-					: TakeTreasureOutcome.NothingToTake,
 			_ => TakeTreasureOutcome.NothingToTake
 		};
 		if (outcome != TakeTreasureOutcome.TookItems)

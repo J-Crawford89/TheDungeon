@@ -99,8 +99,7 @@ public sealed class CombatCorpseHelperTests
 		var treasure = new TreasurePickupService(narrative, items, TestPlayerProficiencyAggregation.CreateEmpty());
 		var potionFx = new PotionEffectApplicationService(dice, narrative, items);
 		var traps = new TrapService(resolution, narrative, vitals, items);
-		var containerLoot = new ContainerLootInteractionService(items, narrative, TestPlayerProficiencyAggregation.CreateEmpty());
-		var combat = new CombatService(dice, resolution, narrative, vitals, downed, treasure, potionFx, traps, containerLoot, items);
+		var combat = new CombatService(dice, resolution, narrative, vitals, downed, treasure, potionFx, traps, items);
 
 		var pierce = new DamageTypeDefinition("p", "Piercing", DamageFamily.Physical);
 		var club = new WeaponDefinition

@@ -9,6 +9,7 @@ public sealed class GameUiCoordinator
 		Attack,
 		AttackWeapon,
 		Take,
+		OpenContainer,
 		Disarm,
 	}
 
@@ -95,6 +96,10 @@ public sealed class GameUiCoordinator
 					_exploration.OnTakeWithTarget(d.Payload);
 				else
 					_combat.OnTakeWithTarget(d.Payload);
+				break;
+			case TargetingKind.OpenContainer:
+				if (_session.Dungeon.DungeonMode == DungeonMode.Exploration)
+					_exploration.OnOpenContainerWithTarget(d.Payload);
 				break;
 			case TargetingKind.Disarm:
 				if (_session.Dungeon.DungeonMode == DungeonMode.Exploration)
@@ -206,8 +211,10 @@ public sealed class GameUiCoordinator
 			}
 
 			var inPlay = mode == DungeonMode.Exploration || mode == DungeonMode.Combat;
-			_commandPanel.ApplyTakeButtonVisible(inPlay && (TreasurePickupService.HasTakeableLootInCurrentRoom(_session) ||
-			                                            RoomContainerLocator.CurrentRoomHasLootableContainers(_session)));
+			_commandPanel.ApplyTakeButtonVisible(inPlay &&
+			                                     TreasurePickupService.HasTakeableLootInCurrentRoom(_session));
+			_commandPanel.ApplyOpenButtonVisible(mode == DungeonMode.Exploration &&
+			                                     RoomContainerLocator.CurrentRoomHasAnyContainer(_session));
 			_commandPanel.ApplyDisarmButtonVisible(inPlay && TrapService.CurrentRoomHasTrap(_session));
 		}
 
@@ -390,6 +397,34 @@ public sealed class GameUiCoordinator
 		}
 
 		_targeting = new ActiveTargeting { Kind = TargetingKind.Take, Descriptors = list };
+		_targetHoverDescriptorIndex = null;
+		_commandPanel.EnterTargetSelection(list);
+		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
+	}
+
+	public void OnOpenPressed()
+	{
+		if (_session.Phase != GamePlayPhase.InProgress)
+			return;
+		if (IsTargetingActive)
+			return;
+		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
+			return;
+
+		var list = PlayerActionTargetResolvers.ResolveOpenContainerTargets(_session, _session.Dungeon.DungeonMode);
+		if (list.Count == 0)
+		{
+			_session.AppendGameLog("There is nothing here to open.");
+			return;
+		}
+
+		if (list.Count == 1)
+		{
+			_exploration.OnOpenContainerWithTarget(list[0].Payload);
+			return;
+		}
+
+		_targeting = new ActiveTargeting { Kind = TargetingKind.OpenContainer, Descriptors = list };
 		_targetHoverDescriptorIndex = null;
 		_commandPanel.EnterTargetSelection(list);
 		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);

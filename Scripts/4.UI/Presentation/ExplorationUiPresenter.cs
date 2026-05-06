@@ -71,19 +71,26 @@ public sealed class ExplorationUiPresenter
 			case TargetPayloadKind.TakeAllEligibleTreasure:
 				_treasurePickup.TakeAllEligibleFromCurrentRoom(_session);
 				break;
-			case TargetPayloadKind.LootContainerAll:
-				if (_lootOverlay != null)
-				{
-					_lootOverlay.OpenLootPanel(payload.ContainerOrdinal);
-					return;
-				}
-
-				_containerLoot.TryLootAll(_session, payload.ContainerOrdinal);
-				break;
 			default:
 				return;
 		}
 
+		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
+	}
+
+	public void OnOpenContainerWithTarget(TargetPayload payload)
+	{
+		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
+			return;
+		if (payload.Kind != TargetPayloadKind.LootContainerAll)
+			return;
+		if (_lootOverlay != null)
+		{
+			_lootOverlay.OpenLootPanel(payload.ContainerOrdinal);
+			return;
+		}
+
+		_containerLoot.TryLootAll(_session, payload.ContainerOrdinal);
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
 

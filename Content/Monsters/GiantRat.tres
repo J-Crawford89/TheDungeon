@@ -4,8 +4,10 @@
 [ext_resource type="Texture2D" uid="uid://bq7fkrinl6s1c" path="res://Assets/PrototypeAssets/GiantRat.png" id="1_ustx4"]
 [ext_resource type="Resource" uid="uid://khjg6aq0tt0o" path="res://Content/World/DamageType/Piercing.tres" id="2_hbwqt"]
 [ext_resource type="Script" uid="uid://l11npu0nk6bm" path="res://Resources/DamageComponentResource.cs" id="3_fevfy"]
+[ext_resource type="Texture2D" uid="uid://b40xo4pd56ek4" path="res://Assets/PrototypeAssets/RatCorpse.png" id="4_5f6kq"]
 [ext_resource type="Script" uid="uid://b6nle4bl0xxf" path="res://Resources/LootableItemResource.cs" id="4_fevfy"]
 [ext_resource type="Script" uid="uid://cim33xbbm276o" path="res://Resources/MonsterAttackResource.cs" id="4_hbwqt"]
+[ext_resource type="Texture2D" uid="uid://dwyyppxwutfdg" path="res://Assets/PrototypeAssets/RatCorpseOpened.png" id="5_iogdg"]
 
 [sub_resource type="Resource" id="Resource_fevfy"]
 script = ExtResource("3_fevfy")
@@ -36,3 +38,5 @@ Defense = 10
 ExperienceReward = 8
 RandomizerWeight = 15
 Icon = ExtResource("1_ustx4")
+CorpseIcon = ExtResource("4_5f6kq")
+CorpseOpenedIcon = ExtResource("5_iogdg")

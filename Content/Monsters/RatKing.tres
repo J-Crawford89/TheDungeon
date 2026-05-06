@@ -4,8 +4,10 @@
 [ext_resource type="Script" uid="uid://h3kt4eef0b3n" path="res://Resources/MonsterResource.cs" id="1_u437f"]
 [ext_resource type="Resource" uid="uid://khjg6aq0tt0o" path="res://Content/World/DamageType/Piercing.tres" id="2_rwhse"]
 [ext_resource type="Script" uid="uid://l11npu0nk6bm" path="res://Resources/DamageComponentResource.cs" id="3_wpf37"]
+[ext_resource type="Texture2D" uid="uid://b40xo4pd56ek4" path="res://Assets/PrototypeAssets/RatCorpse.png" id="4_bf1os"]
 [ext_resource type="Script" uid="uid://cim33xbbm276o" path="res://Resources/MonsterAttackResource.cs" id="4_rwhse"]
 [ext_resource type="Script" uid="uid://b6nle4bl0xxf" path="res://Resources/LootableItemResource.cs" id="4_wpf37"]
+[ext_resource type="Texture2D" uid="uid://dwyyppxwutfdg" path="res://Assets/PrototypeAssets/RatCorpseOpened.png" id="5_dqoug"]
 
 [sub_resource type="Resource" id="Resource_wpf37"]
 script = ExtResource("3_wpf37")
@@ -39,3 +41,5 @@ ExperienceReward = 15
 IsBoss = true
 RandomizerWeight = 5
 Icon = ExtResource("1_12p7m")
+CorpseIcon = ExtResource("4_bf1os")
+CorpseOpenedIcon = ExtResource("5_dqoug")

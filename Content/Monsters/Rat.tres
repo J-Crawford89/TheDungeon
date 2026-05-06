@@ -4,8 +4,10 @@
 [ext_resource type="Script" uid="uid://h3kt4eef0b3n" path="res://Resources/MonsterResource.cs" id="1_80rr7"]
 [ext_resource type="Resource" uid="uid://khjg6aq0tt0o" path="res://Content/World/DamageType/Piercing.tres" id="2_2vcak"]
 [ext_resource type="Script" uid="uid://l11npu0nk6bm" path="res://Resources/DamageComponentResource.cs" id="3_mj8ll"]
+[ext_resource type="Texture2D" uid="uid://b40xo4pd56ek4" path="res://Assets/PrototypeAssets/RatCorpse.png" id="4_1o3sb"]
 [ext_resource type="Script" uid="uid://cim33xbbm276o" path="res://Resources/MonsterAttackResource.cs" id="4_2vcak"]
 [ext_resource type="Script" uid="uid://b6nle4bl0xxf" path="res://Resources/LootableItemResource.cs" id="4_mj8ll"]
+[ext_resource type="Texture2D" uid="uid://dwyyppxwutfdg" path="res://Assets/PrototypeAssets/RatCorpseOpened.png" id="5_8svrn"]
 
 [sub_resource type="Resource" id="Resource_mj8ll"]
 script = ExtResource("3_mj8ll")
@@ -39,3 +41,5 @@ Defense = 12
 ExperienceReward = 2
 RandomizerWeight = 50
 Icon = ExtResource("1_5mlta")
+CorpseIcon = ExtResource("4_1o3sb")
+CorpseOpenedIcon = ExtResource("5_8svrn")

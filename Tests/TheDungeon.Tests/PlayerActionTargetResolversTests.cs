@@ -80,7 +80,7 @@ public sealed class PlayerActionTargetResolversTests
 	}
 
 	[Fact]
-	public void ResolveTakeTargets_IncludesLootContainerAll_WithOrdinalMatchingLocator()
+	public void ResolveTakeTargets_Exploration_ExcludesContainers_WhenOnlyContainersPresent()
 	{
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
 		room.Features.Add(new SalvageFeature
@@ -91,11 +91,42 @@ public sealed class PlayerActionTargetResolversTests
 
 		var list = PlayerActionTargetResolvers.ResolveTakeTargets(session, DungeonMode.Exploration);
 
-		Assert.Single(list);
-		Assert.Equal(TargetPayloadKind.LootContainerAll, list[0].Payload.Kind);
-		Assert.Equal(0, list[0].Payload.ContainerOrdinal);
-		Assert.Equal($"{MainViewRoomSlots.ContainerKeyPrefix}0", list[0].HighlightKey);
-		Assert.Contains("Salvage", list[0].Label, System.StringComparison.Ordinal);
+		Assert.Empty(list);
+	}
+
+	[Fact]
+	public void ResolveOpenContainerTargets_Exploration_SkipsTreasure_KeepsContainerOrdinals()
+	{
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		room.Features.Add(new SalvageFeature { Contents = [] });
+		room.Features.Add(new TreasureFeature
+		{
+			TreasureItems =
+			[
+				new TreasureInstance { IsRevealed = true, Definition = Gold("a", "Gold") },
+			],
+		});
+		room.Features.Add(new ChestFeature { Locked = false, Contents = [] });
+		var session = SessionWithRoom(room);
+
+		var open = PlayerActionTargetResolvers.ResolveOpenContainerTargets(session, DungeonMode.Exploration);
+
+		Assert.Equal(2, open.Count);
+		Assert.Equal(0, open[0].Payload.ContainerOrdinal);
+		Assert.Equal($"{MainViewRoomSlots.ContainerKeyPrefix}0", open[0].HighlightKey);
+		Assert.Equal(1, open[1].Payload.ContainerOrdinal);
+		Assert.Equal($"{MainViewRoomSlots.ContainerKeyPrefix}1", open[1].HighlightKey);
+		Assert.All(open, d => Assert.Equal(TargetPayloadKind.LootContainerAll, d.Payload.Kind));
+	}
+
+	[Fact]
+	public void ResolveOpenContainerTargets_Combat_ReturnsEmpty()
+	{
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		room.Features.Add(new SalvageFeature { Contents = [] });
+		var session = SessionWithRoom(room);
+
+		Assert.Empty(PlayerActionTargetResolvers.ResolveOpenContainerTargets(session, DungeonMode.Combat));
 	}
 
 	[Fact]

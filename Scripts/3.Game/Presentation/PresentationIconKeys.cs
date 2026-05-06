@@ -35,22 +35,37 @@ public static class PresentationIconKeys
 
 		public static string ContainerSalvage() => $"{Root}/container/salvage";
 
+		public static string ContainerSalvageOpened() => $"{Root}/container/salvage_opened";
+
 		public static string ContainerCorpse(string monsterDefinitionId) =>
 			string.IsNullOrWhiteSpace(monsterDefinitionId)
 				? $"{Root}/container/corpse/unknown"
 				: $"{Root}/container/corpse/{monsterDefinitionId.Trim()}";
 
+		public static string ContainerCorpseOpened(string monsterDefinitionId) =>
+			string.IsNullOrWhiteSpace(monsterDefinitionId)
+				? $"{Root}/container/corpse_opened/unknown"
+				: $"{Root}/container/corpse_opened/{monsterDefinitionId.Trim()}";
+
 		public static string ContainerChest(bool locked) =>
 			locked ? $"{Root}/container/chest_locked" : $"{Root}/container/chest";
+
+		public static string ContainerChestOpened() => $"{Root}/container/chest_opened";
 
 		public static string ContainerOther() => $"{Root}/container/other";
 
 		public static string ForContainer(ContainerFeature cf) =>
 			cf switch
 			{
-				SalvageFeature => ContainerSalvage(),
-				CorpseFeature corpse => ContainerCorpse(corpse.SourceMonsterDefinitionId),
-				ChestFeature ch => ContainerChest(ch.Locked),
+				SalvageFeature sf => sf.WasOpened ? ContainerSalvageOpened() : ContainerSalvage(),
+				CorpseFeature corpse => corpse.WasOpened
+					? ContainerCorpseOpened(corpse.SourceMonsterDefinitionId)
+					: ContainerCorpse(corpse.SourceMonsterDefinitionId),
+				ChestFeature ch => ch.Locked
+					? ContainerChest(true)
+					: ch.WasOpened
+						? ContainerChestOpened()
+						: ContainerChest(false),
 				_ => ContainerOther()
 			};
 	}

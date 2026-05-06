@@ -28,6 +28,19 @@ public static class RoomContainerLocator
 		return false;
 	}
 
+	public static bool CurrentRoomHasAnyContainer(GameSessionState session)
+	{
+		if (session.Dungeon.CurrentRoom is not { } room)
+			return false;
+		foreach (var f in room.Features)
+		{
+			if (f is ContainerFeature)
+				return true;
+		}
+
+		return false;
+	}
+
 	public static bool TryGetNthContainer(DungeonRoom room, int ordinal, out ContainerFeature? container)
 	{
 		container = null;

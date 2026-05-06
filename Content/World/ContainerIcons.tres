@@ -4,12 +4,15 @@
 [ext_resource type="Texture2D" uid="uid://dtlnk0tmlsrpy" path="res://Assets/PrototypeAssets/Chest.png" id="1_kp0qb"]
 [ext_resource type="Script" uid="uid://c2wxo11h0vfoi" path="res://Resources/ChestIconsResource.cs" id="1_qbtr8"]
 [ext_resource type="Texture2D" uid="uid://vd6y6q6c3x5s" path="res://Assets/PrototypeAssets/Barrell.png" id="2_kp0qb"]
+[ext_resource type="Texture2D" uid="uid://cp0uufnf1ubu6" path="res://Assets/PrototypeAssets/ChestOpened.png" id="3_21rqf"]
 [ext_resource type="Texture2D" uid="uid://dsjhwdvgio3sl" path="res://Assets/PrototypeAssets/Salvage.png" id="3_lij74"]
 
 [resource]
 script = ExtResource("1_qbtr8")
 ChestIcon = ExtResource("1_kp0qb")
+ChestOpenedIcon = ExtResource("3_21rqf")
 ChestLockedIcon = ExtResource("1_eabug")
 SalvageIcon = ExtResource("3_lij74")
+SalvageOpenedIcon = ExtResource("3_lij74")
 OtherContainerIcon = ExtResource("2_kp0qb")
 metadata/_custom_type_script = "uid://c2wxo11h0vfoi"

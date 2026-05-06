@@ -16,6 +16,7 @@ public partial class CommandPanel : PanelContainer
 	[Export] private Button _attackButton = null!;
 	[Export] private Button _fleeButton = null!;
 	[Export] private Button _takeButton = null!;
+	[Export] private Button? _openButton;
 	[Export] private Button _potionButton = null!;
 	[Export] private Button? _defendButton;
 	[Export] private Button? _disarmButton;
@@ -33,6 +34,7 @@ public partial class CommandPanel : PanelContainer
 	public event Action? AttackPressed;
 	public event Action? FleePressed;
 	public event Action? TakePressed;
+	public event Action? OpenPressed;
 	public event Action? PotionPressed;
 	public event Action? DefendPressed;
 	public event Action? DisarmPressed;
@@ -55,6 +57,8 @@ public partial class CommandPanel : PanelContainer
 		_attackButton.Pressed += () => AttackPressed?.Invoke();
 		_fleeButton.Pressed += () => FleePressed?.Invoke();
 		_takeButton.Pressed += () => TakePressed?.Invoke();
+		if (_openButton != null)
+			_openButton.Pressed += () => OpenPressed?.Invoke();
 		_potionButton.Pressed += () => PotionPressed?.Invoke();
 		if (_defendButton != null)
 			_defendButton.Pressed += () => DefendPressed?.Invoke();
@@ -142,6 +146,12 @@ public partial class CommandPanel : PanelContainer
 		_takeButton.Visible = visible;
 	}
 
+	public void ApplyOpenButtonVisible(bool visible)
+	{
+		if (_openButton != null)
+			_openButton.Visible = visible;
+	}
+
 	public void ApplyDisarmButtonVisible(bool visible)
 	{
 		if (_disarmButton != null)
@@ -160,6 +170,8 @@ public partial class CommandPanel : PanelContainer
 		_attackButton.Disabled = disabled;
 		_fleeButton.Disabled = disabled;
 		_takeButton.Disabled = disabled;
+		if (_openButton != null)
+			_openButton.Disabled = disabled;
 		_potionButton.Disabled = disabled;
 		if (_defendButton != null)
 			_defendButton.Disabled = disabled;
@@ -179,6 +191,8 @@ public partial class CommandPanel : PanelContainer
 		_attackButton.Visible = false;
 		_fleeButton.Visible = false;
 		_takeButton.Visible = false;
+		if (_openButton != null)
+			_openButton.Visible = false;
 		_potionButton.Visible = false;
 		if (_defendButton != null)
 			_defendButton.Visible = false;

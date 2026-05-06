@@ -176,29 +176,38 @@ public sealed class IconResolver
 		return row.Icon;
 	}
 
+	private Texture2D? ResolveCorpseTexture(string fullKey, string monsterIdSegment, bool opened)
+	{
+		var monsterId = monsterIdSegment.Trim();
+		if (string.IsNullOrWhiteSpace(monsterId) || monsterId.Equals("unknown", StringComparison.OrdinalIgnoreCase))
+		{
+			WarnOnce($"{fullKey}|corpseunknown", "Corpse has no monster id for icon.");
+			return null;
+		}
+
+		var m = FindMonsterById(monsterId);
+		if (m == null)
+		{
+			WarnOnce(fullKey, $"No MonsterResource with Id '{monsterId}' for corpse icon.");
+			return null;
+		}
+
+		Texture2D? tex = opened
+			? m.CorpseOpenedIcon ?? m.CorpseIcon ?? m.Icon
+			: m.CorpseIcon ?? m.Icon;
+		if (tex == null)
+			WarnOnce($"{fullKey}|nullicon",
+				$"MonsterResource '{monsterId}' has no {(opened ? "CorpseOpenedIcon or CorpseIcon or Icon" : "CorpseIcon or Icon")} for corpse.");
+		return tex;
+	}
+
 	private Texture2D? ResolveContainer(string fullKey, string id)
 	{
 		if (id.StartsWith("corpse/", StringComparison.Ordinal))
-		{
-			var monsterId = id["corpse/".Length..];
-			if (string.IsNullOrWhiteSpace(monsterId) || monsterId.Equals("unknown", StringComparison.OrdinalIgnoreCase))
-			{
-				WarnOnce($"{fullKey}|corpseunknown", "Corpse has no monster id for icon.");
-				return null;
-			}
+			return ResolveCorpseTexture(fullKey, id["corpse/".Length..], opened: false);
 
-			var m = FindMonsterById(monsterId.Trim());
-			if (m == null)
-			{
-				WarnOnce(fullKey, $"No MonsterResource with Id '{monsterId}' for corpse icon.");
-				return null;
-			}
-
-			var tex = m.CorpseIcon ?? m.Icon;
-			if (tex == null)
-				WarnOnce($"{fullKey}|nullicon", $"MonsterResource '{monsterId}' has no CorpseIcon or Icon for corpse.");
-			return tex;
-		}
+		if (id.StartsWith("corpse_opened/", StringComparison.Ordinal))
+			return ResolveCorpseTexture(fullKey, id["corpse_opened/".Length..], opened: true);
 
 		if (_chestIcons == null)
 		{
@@ -210,10 +219,14 @@ public sealed class IconResolver
 		{
 			case "chest":
 				return _chestIcons.ChestIcon;
+			case "chest_opened":
+				return _chestIcons.ChestOpenedIcon ?? _chestIcons.ChestIcon;
 			case "chest_locked":
 				return _chestIcons.ChestLockedIcon ?? _chestIcons.ChestIcon;
 			case "salvage":
 				return _chestIcons.SalvageIcon;
+			case "salvage_opened":
+				return _chestIcons.SalvageOpenedIcon ?? _chestIcons.SalvageIcon;
 			case "other":
 				return _chestIcons.OtherContainerIcon;
 			default:

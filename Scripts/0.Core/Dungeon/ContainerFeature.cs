@@ -7,4 +7,7 @@ public abstract class ContainerFeature : RoomFeature
 
 	/// <summary>When true, the feature is removed from the room once <see cref="Contents"/> is empty.</summary>
 	public bool RemoveFeatureWhenEmpty { get; set; } = true;
+
+	/// <summary>Set when the player has opened this container's loot UI at least once.</summary>
+	public bool WasOpened { get; set; }
 }

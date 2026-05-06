@@ -68,6 +68,11 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 			return;
 		}
 
+		if (session.Dungeon.CurrentRoom is { } room &&
+		    RoomContainerLocator.TryGetNthContainer(room, containerOrdinal, out var openedContainer) &&
+		    openedContainer != null)
+			openedContainer.WasOpened = true;
+
 		_containerOrdinal = containerOrdinal;
 		_selectedStackIndices.Clear();
 		ClearGrid();
@@ -151,7 +156,11 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
 
-	private void OnClosePressed() => ClosePanel();
+	private void OnClosePressed()
+	{
+		ClosePanel();
+		_refreshHud?.Invoke(UiRefreshFlags.MainView);
+	}
 
 	private void ClosePanel()
 	{

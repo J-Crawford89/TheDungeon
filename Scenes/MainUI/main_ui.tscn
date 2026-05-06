@@ -159,7 +159,7 @@ text = "Inventory"
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="CommandPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row2" unique_id=786944443 node_paths=PackedStringArray("_forwardButton", "_backwardButton", "_leftButton", "_rightButton", "_inspectButton", "_floorUpButton", "_floorDownButton", "_attackButton", "_fleeButton", "_takeButton", "_potionButton", "_defendButton", "_disarmButton")]
+[node name="CommandPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row2" unique_id=786944443 node_paths=PackedStringArray("_forwardButton", "_backwardButton", "_leftButton", "_rightButton", "_inspectButton", "_floorUpButton", "_floorDownButton", "_attackButton", "_fleeButton", "_takeButton", "_openButton", "_potionButton", "_defendButton", "_disarmButton")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.2
@@ -174,6 +174,7 @@ _floorDownButton = NodePath("CommandMargin/CommandContent/ButtonGrid/FloorDownBu
 _attackButton = NodePath("CommandMargin/CommandContent/ButtonGrid/AttackButton")
 _fleeButton = NodePath("CommandMargin/CommandContent/ButtonGrid/FleeButton")
 _takeButton = NodePath("CommandMargin/CommandContent/ButtonGrid/TakeButton")
+_openButton = NodePath("CommandMargin/CommandContent/ButtonGrid/OpenButton")
 _potionButton = NodePath("CommandMargin/CommandContent/ButtonGrid/PotionButton")
 _defendButton = NodePath("CommandMargin/CommandContent/ButtonGrid/DefendButton")
 _disarmButton = NodePath("CommandMargin/CommandContent/ButtonGrid/DisarmButton")
@@ -237,6 +238,10 @@ text = "Flee"
 [node name="TakeButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=373204308]
 layout_mode = 2
 text = "Take"
+
+[node name="OpenButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=463333779]
+layout_mode = 2
+text = "Open"
 
 [node name="PotionButton" type="Button" parent="RootMargin/MainVBox/Row2/CommandPanel/CommandMargin/CommandContent/ButtonGrid" unique_id=942607446]
 layout_mode = 2

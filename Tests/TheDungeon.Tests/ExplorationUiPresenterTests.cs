@@ -77,7 +77,7 @@ public sealed class ExplorationUiPresenterTests
 	}
 
 	[Fact]
-	public void OnTakeWithTarget_LootContainerWithOpener_DoesNotRefresh_OpensOverlay()
+	public void OnOpenContainerWithTarget_LootContainerWithOpener_DoesNotRefresh_OpensOverlay()
 	{
 		var refreshes = new List<UiRefreshFlags>();
 		var session = new GameSessionState();
@@ -85,7 +85,7 @@ public sealed class ExplorationUiPresenterTests
 		var opener = new RecordingLootOpener();
 		var presenter = CreatePresenter(session, f => refreshes.Add(f), opener);
 
-		presenter.OnTakeWithTarget(new TargetPayload
+		presenter.OnOpenContainerWithTarget(new TargetPayload
 		{
 			Kind = TargetPayloadKind.LootContainerAll,
 			ContainerOrdinal = 2,
