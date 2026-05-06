@@ -1,0 +1,29 @@
+---
+description: New features and bugfixes require tests; regression tests for edge cases.
+alwaysApply: true
+---
+
+# Tests and regression coverage
+
+## New features
+
+- **Ship tests with the feature** in [`Tests/TheDungeon.Tests/`](Tests/TheDungeon.Tests) (xUnit). Coverage should be **meaningful**: exercise the new behavior, important branches, and invariants—not only happy path.
+- **Prefer testable seams:** keep rules/resolve/mapping/presenter decision logic in tiered C# (`Scripts/**`) with unit tests. Godot scene scripts under `Scenes/**` that contain non-trivial behavior should be covered where practical (pure helpers extracted if needed).
+- **End of work:** run **`dotnet test`** (or the project’s test command) and fix failures before considering the feature done.
+
+## Bugs and edge-case tweaks
+
+- **Every bug fix or edge-case change** that touches behavior should include a **regression test** (new test or extended test) that would have failed before the fix or that locks the intended edge case.
+- If the issue was “no behavior change, only editor wiring,” document that in the PR/commit instead of a fake test; still add a test when any **C#** behavior changed.
+
+## What “robust” means here
+
+- At least: **one focused test per public behavior** added or fixed; for resolvers/mappers, cover **null/empty/no-match** paths where relevant.
+- Avoid huge integration tests unless necessary; **small, fast unit tests** over duplicate suites.
+
+## Exceptions (use sparingly)
+
+- **Serialized Godot assets** (`*.tscn`, `*.tres`)-only changes—no C# test (editor-owned; see the Godot serialized resources rule in this repo); manual or play-test note instead.
+- Truly **cosmetic** UI with zero logic change—no test required.
+
+When in doubt, **add the test.**
