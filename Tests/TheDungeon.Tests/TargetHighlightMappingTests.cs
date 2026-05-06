@@ -46,4 +46,16 @@ public sealed class TargetHighlightMappingTests
 		Assert.Null(TargetHighlightMapping.TryGetDescriptorIndex(list, "monster:9"));
 		Assert.Null(TargetHighlightMapping.TryGetDescriptorIndex(list, ""));
 	}
+
+	[Fact]
+	public void TryGetDescriptorIndex_FirstDescriptorWins_WhenSameHighlightKeyListedTwice()
+	{
+		TargetDescriptor[] list =
+		[
+			new TargetDescriptor { Label = "First", HighlightKey = "monster:0", Payload = DummyPayload() },
+			new TargetDescriptor { Label = "Second", HighlightKey = "monster:0", Payload = DummyPayload() },
+		];
+
+		Assert.Equal(0, TargetHighlightMapping.TryGetDescriptorIndex(list, "monster:0"));
+	}
 }

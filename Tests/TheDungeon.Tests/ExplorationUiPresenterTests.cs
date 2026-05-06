@@ -96,6 +96,48 @@ public sealed class ExplorationUiPresenterTests
 	}
 
 	[Fact]
+	public void OnOpenContainerWithTarget_WithoutOverlay_InvokesRefresh_IncludingMainView()
+	{
+		var refreshes = new List<UiRefreshFlags>();
+		var session = new GameSessionState();
+		session.Dungeon.DungeonMode = DungeonMode.Exploration;
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		room.Features.Add(new SalvageFeature { Contents = [] });
+		var floor = new DungeonFloor { Level = 1, Entrance = DirectionHelper.Origin };
+		floor.Rooms[DirectionHelper.Origin] = room;
+		session.Dungeon.CurrentFloor = floor;
+		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
+
+		var presenter = CreatePresenter(session, f => refreshes.Add(f), lootOverlay: null);
+
+		presenter.OnOpenContainerWithTarget(new TargetPayload
+		{
+			Kind = TargetPayloadKind.LootContainerAll,
+			ContainerOrdinal = 0,
+		});
+
+		Assert.NotEmpty(refreshes);
+		Assert.Contains(refreshes, f => f.HasFlag(UiRefreshFlags.MainView));
+	}
+
+	[Fact]
+	public void OnTakeWithTarget_IgnoresLootContainerAll()
+	{
+		var refreshes = new List<UiRefreshFlags>();
+		var session = new GameSessionState();
+		session.Dungeon.DungeonMode = DungeonMode.Exploration;
+		var presenter = CreatePresenter(session, f => refreshes.Add(f));
+
+		presenter.OnTakeWithTarget(new TargetPayload
+		{
+			Kind = TargetPayloadKind.LootContainerAll,
+			ContainerOrdinal = 0,
+		});
+
+		Assert.Empty(refreshes);
+	}
+
+	[Fact]
 	public void OnPotionPressed_InCombat_DoesNotInvokeRefresh()
 	{
 		var refreshes = new List<UiRefreshFlags>();
