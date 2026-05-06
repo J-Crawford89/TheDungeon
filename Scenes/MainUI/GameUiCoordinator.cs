@@ -130,6 +130,7 @@ public sealed class GameUiCoordinator
 		    idx < 0 || idx >= _targeting.Descriptors.Count)
 		{
 			_mainViewPanel.ClearTargetingHighlight();
+			_commandPanel.ApplyTargetButtonHover(null);
 			return;
 		}
 
@@ -138,6 +139,30 @@ public sealed class GameUiCoordinator
 			_mainViewPanel.SetTargetingHighlight(d.HighlightKey);
 		else
 			_mainViewPanel.SetTargetingHighlight(d.TakeAllHighlightKeys);
+		_commandPanel.ApplyTargetButtonHover(idx);
+	}
+
+	public void OnMainViewTargetHover(string? highlightKey)
+	{
+		if (!IsTargetingActive || _targeting == null)
+			return;
+		if (highlightKey == null)
+		{
+			OnTargetSelectionHoverChanged(null);
+			return;
+		}
+
+		var idx = TargetHighlightMapping.TryGetDescriptorIndex(_targeting.Descriptors, highlightKey);
+		OnTargetSelectionHoverChanged(idx);
+	}
+
+	public void OnMainViewTargetClick(string highlightKey)
+	{
+		if (!IsTargetingActive || _targeting == null)
+			return;
+		var idx = TargetHighlightMapping.TryGetDescriptorIndex(_targeting.Descriptors, highlightKey);
+		if (idx is int i)
+			OnTargetSelectionPicked(i);
 	}
 
 	private static Dictionary<string, string> BuildTargetingLabels(ActiveTargeting targeting)

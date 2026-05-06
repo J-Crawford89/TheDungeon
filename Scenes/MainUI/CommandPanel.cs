@@ -23,6 +23,9 @@ public partial class CommandPanel : PanelContainer
 
 	private GridContainer? _gameplayButtonGrid;
 	private Control? _targetingButtonHost;
+	private Button[]? _targetingPickButtons;
+
+	private static readonly Color TargetButtonHoverModulate = new(1.35f, 1.35f, 0.85f);
 
 	public event Action? ForwardPressed;
 	public event Action? BackwardPressed;
@@ -85,6 +88,7 @@ public partial class CommandPanel : PanelContainer
 		host.AddThemeConstantOverride("h_separation", 8);
 		host.AddThemeConstantOverride("v_separation", 8);
 
+		var pickButtons = new Button[descriptors.Count];
 		for (var i = 0; i < descriptors.Count; i++)
 		{
 			var index = i;
@@ -96,7 +100,10 @@ public partial class CommandPanel : PanelContainer
 			b.MouseEntered += () => TargetSelectHoverChanged?.Invoke(index);
 			b.MouseExited += () => TargetSelectHoverChanged?.Invoke(null);
 			host.AddChild(b);
+			pickButtons[i] = b;
 		}
+
+		_targetingPickButtons = pickButtons;
 
 		var cancel = new Button { Text = "Cancel" };
 		cancel.SizeFlagsHorizontal = Control.SizeFlags.ShrinkBegin;
@@ -108,8 +115,22 @@ public partial class CommandPanel : PanelContainer
 		_targetingButtonHost = host;
 	}
 
+	public void ApplyTargetButtonHover(int? descriptorIndex)
+	{
+		if (_targetingPickButtons == null)
+			return;
+		for (var i = 0; i < _targetingPickButtons.Length; i++)
+		{
+			var b = _targetingPickButtons[i];
+			if (!GodotObject.IsInstanceValid(b))
+				continue;
+			b.Modulate = descriptorIndex == i ? TargetButtonHoverModulate : Colors.White;
+		}
+	}
+
 	public void ExitTargetSelection()
 	{
+		_targetingPickButtons = null;
 		if (_targetingButtonHost != null)
 		{
 			_targetingButtonHost.QueueFree();

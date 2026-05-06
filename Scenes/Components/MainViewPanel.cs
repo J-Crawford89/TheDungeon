@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using Godot;
 using System.Collections.Generic;
 
@@ -24,6 +25,12 @@ public partial class MainViewPanel : PanelContainer
 
 	private readonly Dictionary<string, Control> _slotRootByHighlightKey = new();
 	private IReadOnlyList<string>? _activeHighlightKeys;
+
+	/// <summary>Emitted when the pointer enters/exits a feature slot (highlight key, or <c>null</c> on exit).</summary>
+	public event Action<string?>? TargetSlotHoverChanged;
+
+	/// <summary>Emitted on left-button press on a feature slot while it is a valid target.</summary>
+	public event Action<string>? TargetSlotClicked;
 
 	public void BindIconResolver(IconResolver resolver) =>
 		_iconResolver = resolver;
@@ -138,12 +145,14 @@ public partial class MainViewPanel : PanelContainer
 		var root = new VBoxContainer();
 		root.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
 		root.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+		root.MouseFilter = Control.MouseFilterEnum.Stop;
 
 		var tex = _iconResolver?.Resolve(slot.PresentationIconKey);
 		if (tex != null)
 		{
 			var textureRect = new TextureRect();
 			textureRect.Texture = tex;
+			textureRect.MouseFilter = Control.MouseFilterEnum.Ignore;
 			textureRect.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
 			textureRect.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
 			textureRect.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
@@ -154,6 +163,7 @@ public partial class MainViewPanel : PanelContainer
 		else
 		{
 			var placeholder = new Control();
+			placeholder.MouseFilter = Control.MouseFilterEnum.Ignore;
 			placeholder.CustomMinimumSize = new Vector2(80, 80);
 			root.AddChild(placeholder);
 		}
@@ -161,6 +171,7 @@ public partial class MainViewPanel : PanelContainer
 		if (!string.IsNullOrEmpty(slot.TargetingLabel))
 		{
 			var panel = new PanelContainer();
+			panel.MouseFilter = Control.MouseFilterEnum.Ignore;
 			panel.SizeFlagsHorizontal = Control.SizeFlags.ShrinkCenter;
 			panel.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
 			var backing = new StyleBoxFlat
@@ -171,6 +182,7 @@ public partial class MainViewPanel : PanelContainer
 			panel.AddThemeStyleboxOverride("panel", backing);
 
 			var label = new Label();
+			label.MouseFilter = Control.MouseFilterEnum.Ignore;
 			label.Text = slot.TargetingLabel;
 			// Word wrap uses the parent's width budget; in a tight HBox slot that can collapse to ~1 char wide.
 			label.AutowrapMode = TextServer.AutowrapMode.Off;
@@ -181,6 +193,15 @@ public partial class MainViewPanel : PanelContainer
 			panel.AddChild(label);
 			root.AddChild(panel);
 		}
+
+		var hk = slot.HighlightKey;
+		root.MouseEntered += () => TargetSlotHoverChanged?.Invoke(hk);
+		root.MouseExited += () => TargetSlotHoverChanged?.Invoke(null);
+		root.GuiInput += ev =>
+		{
+			if (ev is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left)
+				TargetSlotClicked?.Invoke(hk);
+		};
 
 		_featureContainer.AddChild(root);
 		_slotRootByHighlightKey[slot.HighlightKey] = root;

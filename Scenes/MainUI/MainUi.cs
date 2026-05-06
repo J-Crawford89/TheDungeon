@@ -92,6 +92,9 @@ public partial class MainUi : Control
 			_mapPanel);
 		_coordinator = coordinator;
 
+		_mainViewPanel.TargetSlotHoverChanged += OnMainViewTargetHover;
+		_mainViewPanel.TargetSlotClicked += OnMainViewTargetClick;
+
 		if (_notebookOverlay == null)
 			GD.PushError("MainUi: assign the Notebook Overlay export to your NotebookOverlay node.");
 		else
@@ -195,6 +198,10 @@ public partial class MainUi : Control
 
 	private void OnTargetSelectHoverChanged(int? index) => _coordinator.OnTargetSelectionHoverChanged(index);
 
+	private void OnMainViewTargetHover(string? highlightKey) => _coordinator.OnMainViewTargetHover(highlightKey);
+
+	private void OnMainViewTargetClick(string highlightKey) => _coordinator.OnMainViewTargetClick(highlightKey);
+
 	private void OnGameOverReturnToMenu() => ReturnToStartMenu();
 
 	private void OnGameOverQuitPressed() => QuitRequested?.Invoke();
@@ -225,6 +232,12 @@ public partial class MainUi : Control
 
 		_characterPanel.InventoryPressed -= OnCharacterInventoryPressed;
 		_characterPanel.CharacterPressed -= OnCharacterCharacterPressed;
+
+		if (_mainViewPanel != null)
+		{
+			_mainViewPanel.TargetSlotHoverChanged -= OnMainViewTargetHover;
+			_mainViewPanel.TargetSlotClicked -= OnMainViewTargetClick;
+		}
 
 		if (_commandPanel != null)
 		{
