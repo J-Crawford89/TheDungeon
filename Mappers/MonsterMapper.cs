@@ -23,7 +23,6 @@ public static class MonsterMapper
 			IsBoss = resource.IsBoss,
 			RandomizerWeight = resource.RandomizerWeight,
 			DeathLoot = LootableItemMapper.ToDomainList(resource.DeathLoot),
-			HarvestDc = resource.HarvestDc,
 		};
 
 	private static AbilityScores MapAbilityScores(MonsterResource resource) =>

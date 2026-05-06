@@ -26,14 +26,14 @@ public sealed class CombatCorpseHelperTests
 	{
 		var session = new GameSessionState();
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
-		var def = new MonsterDefinition { Id = "m", Name = "M", DeathLoot = [], HarvestDc = 5 };
+		var def = new MonsterDefinition { Id = "m", Name = "M", DeathLoot = [] };
 		var repo = new MapItemRepo();
 
 		CombatCorpseHelper.SpawnCorpseOnMonsterDeath(session, room, def, repo, new NarrativeService());
 
 		var corpse = Assert.Single(room.Features.OfType<CorpseFeature>());
 		Assert.Empty(corpse.Contents);
-		Assert.Equal(5, corpse.HarvestDc);
+		Assert.Equal("m", corpse.SourceMonsterDefinitionId);
 	}
 
 	[Fact]
@@ -56,6 +56,37 @@ public sealed class CombatCorpseHelperTests
 		var row = Assert.Single(corpse.Contents);
 		Assert.Equal("coin", row.ItemDefinitionId);
 		Assert.Equal(3, row.Quantity);
+	}
+
+	[Fact]
+	public void Spawn_CopiesHarvestRequirementOntoCorpseLoot()
+	{
+		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
+		var repo = new MapItemRepo(coin);
+		var session = new GameSessionState();
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		var def = new MonsterDefinition
+		{
+			Id = "rat",
+			Name = "Rat",
+			DeathLoot =
+			[
+				new LootableItemDefinition
+				{
+					ItemDefinitionId = "coin",
+					Quantity = 2,
+					Harvest = new HarvestRequirement { HarvestDc = 14, HarvestAbility = AbilityScore.Wisdom },
+				},
+			],
+		};
+
+		CombatCorpseHelper.SpawnCorpseOnMonsterDeath(session, room, def, repo, new NarrativeService());
+
+		var corpse = Assert.Single(room.Features.OfType<CorpseFeature>());
+		var row = Assert.Single(corpse.Contents);
+		Assert.NotNull(row.Harvest);
+		Assert.Equal(14, row.Harvest!.HarvestDc);
+		Assert.Equal(AbilityScore.Wisdom, row.Harvest.HarvestAbility);
 	}
 
 	[Fact]
@@ -202,7 +233,8 @@ public sealed class CombatCorpseHelperTests
 		session.Dungeon.CurrentFloor = floor;
 		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
 
-		var svc = new ContainerLootInteractionService(repo, new NarrativeService(), TestPlayerProficiencyAggregation.CreateEmpty());
+		var svc = new ContainerLootInteractionService(repo, new NarrativeService(), TestPlayerProficiencyAggregation.CreateEmpty(),
+			new ResolutionService(new DiceRollService(new System.Random(1))));
 		var result = svc.TryLootAll(session, 0);
 
 		Assert.Equal(ContainerLootErrorCode.None, result.ErrorCode);

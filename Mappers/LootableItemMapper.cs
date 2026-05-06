@@ -9,7 +9,17 @@ public static class LootableItemMapper
 	{
 		var id = resource.ItemResource?.Id?.Trim() ?? "";
 		var qty = resource.Quantity < 0 ? 0 : resource.Quantity;
-		return new LootableItemDefinition { ItemDefinitionId = id, Quantity = qty };
+		HarvestRequirement? harvest = null;
+		if (resource.Harvest is { HarvestDc: > 0 } hr)
+		{
+			harvest = new HarvestRequirement
+			{
+				HarvestDc = hr.HarvestDc,
+				HarvestAbility = hr.HarvestAbility,
+			};
+		}
+
+		return new LootableItemDefinition { ItemDefinitionId = id, Quantity = qty, Harvest = harvest };
 	}
 
 	public static List<LootableItemDefinition> ToDomainList(Array<LootableItemResource>? loot)

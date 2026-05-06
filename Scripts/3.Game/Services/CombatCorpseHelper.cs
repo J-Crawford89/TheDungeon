@@ -15,7 +15,6 @@ public static class CombatCorpseHelper
 	{
 		var corpse = new CorpseFeature
 		{
-			HarvestDc = definition.HarvestDc,
 			SourceMonsterDefinitionId = definition.Id ?? string.Empty,
 		};
 		var validRows = new List<LootableItemDefinition>();
@@ -40,11 +39,21 @@ public static class CombatCorpseHelper
 					continue;
 				}
 
-				validRows.Add(new LootableItemDefinition { ItemDefinitionId = id, Quantity = qty });
+				validRows.Add(new LootableItemDefinition
+				{
+					ItemDefinitionId = id,
+					Quantity = qty,
+					Harvest = CloneHarvest(row.Harvest),
+				});
 			}
 		}
 
 		corpse.Contents.AddRange(validRows);
 		room.Features.Add(corpse);
 	}
+
+	private static HarvestRequirement? CloneHarvest(HarvestRequirement? h) =>
+		h == null
+			? null
+			: new HarvestRequirement { HarvestDc = h.HarvestDc, HarvestAbility = h.HarvestAbility };
 }

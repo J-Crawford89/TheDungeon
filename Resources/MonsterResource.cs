@@ -26,9 +26,6 @@ public partial class MonsterResource : Resource
 	/// <summary>Loot on death; validated when spawning <see cref="CorpseFeature"/>.</summary>
 	[Export] public Array<LootableItemResource> DeathLoot { get; set; } = [];
 
-	/// <summary>Optional harvesting DC on the corpse; 0 = none.</summary>
-	[Export] public int HarvestDc { get; set; }
-
 	[Export] public Texture2D? Icon { get; set; }
 
 	/// <summary>Main-view icon for this monster&apos;s <see cref="CorpseFeature"/>; falls back to <see cref="Icon"/> when unset.</summary>

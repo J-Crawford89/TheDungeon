@@ -24,13 +24,14 @@ corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 corner_detail = 10
 
-[node name="LootableItemControl" type="PanelContainer" unique_id=1201818451 node_paths=PackedStringArray("_icon", "_qty", "_selectionBorder", "_itemName")]
+[node name="LootableItemControl" type="PanelContainer" unique_id=1201818451 node_paths=PackedStringArray("_icon", "_qty", "_selectionBorder", "_itemName", "_harvestHint")]
 custom_minimum_size = Vector2(85, 102)
 script = ExtResource("1_p78ox")
 _icon = NodePath("LootableItemMargin/LootableItemRoot/LootableItemIconContainer/LootableItemIcon")
 _qty = NodePath("LootableItemMargin/LootableItemRoot/LootableItemIconContainer/QuantityLabel")
 _selectionBorder = NodePath("LootableItemMargin/LootableItemRoot/LootableItemIconContainer/SelectionBorder")
 _itemName = NodePath("LootableItemMargin/LootableItemRoot/ItemName")
+_harvestHint = NodePath("LootableItemMargin/LootableItemRoot/LootableItemIconContainer/HarvestHint")
 
 [node name="LootableItemMargin" type="MarginContainer" parent="." unique_id=489411136]
 layout_mode = 2
@@ -76,6 +77,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_p78ox")
+
+[node name="HarvestHint" type="Label" parent="LootableItemMargin/LootableItemRoot/LootableItemIconContainer" unique_id=2140401991]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 66.0
+offset_right = 79.0
+offset_bottom = 79.0
+theme_override_colors/font_color = Color(0.98376805, 0.78087425, 0.8336222, 1)
+theme_override_font_sizes/font_size = 9
+text = "HarvestHint"
+horizontal_alignment = 1
 
 [node name="ItemName" type="Label" parent="LootableItemMargin/LootableItemRoot" unique_id=1616802987]
 layout_mode = 2

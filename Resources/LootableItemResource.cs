@@ -8,4 +8,6 @@ public partial class LootableItemResource : Resource
 	[Export] public ItemResource? ItemResource { get; set; }
 
 	[Export] public int Quantity { get; set; } = 1;
+
+	[Export] public HarvestRequirementResource? Harvest { get; set; }
 }

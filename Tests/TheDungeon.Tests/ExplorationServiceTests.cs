@@ -46,7 +46,6 @@ public sealed class ExplorationServiceTests
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
 		room.Features.Add(new CorpseFeature
 		{
-			HarvestDc = 12,
 			Contents = [new LootableItemDefinition { ItemDefinitionId = "coin", Quantity = 1 }],
 		});
 		floor.Rooms[DirectionHelper.Origin] = room;
@@ -58,7 +57,7 @@ public sealed class ExplorationServiceTests
 		Assert.True(result.Success);
 		var line = Assert.Single(result.InspectData!.FeatureLines, l => l.Text.StartsWith("Remains:"));
 		Assert.Contains("1 stack", line.Text);
-		Assert.Contains("harvest DC 12", line.Text);
+		Assert.DoesNotContain("harvest DC", line.Text, System.StringComparison.OrdinalIgnoreCase);
 	}
 
 	[Fact]

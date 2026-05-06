@@ -1,9 +1,28 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
 public sealed class ContainerLootOperationsTests
 {
+	private sealed class QueueRandom : Random
+	{
+		private readonly Queue<int> _values;
+
+		public QueueRandom(params int[] values) => _values = new Queue<int>(values);
+
+		public override int Next(int minValue, int maxValue)
+		{
+			if (_values.Count == 0)
+				return minValue;
+			var v = _values.Dequeue();
+			return Math.Clamp(v, minValue, maxValue - 1);
+		}
+	}
+
+	private static ResolutionService DefaultResolution() =>
+		new ResolutionService(new DiceRollService(new Random(1)));
+
 	private sealed class MapItemRepo : IItemDefinitionRepository
 	{
 		private readonly Dictionary<string, ItemDefinition> _map = new();
@@ -45,6 +64,7 @@ public sealed class ContainerLootOperationsTests
 			repo,
 			new NarrativeService(),
 			TestPlayerProficiencyAggregation.CreateEmpty(),
+			DefaultResolution(),
 			"salvage pile");
 
 		Assert.Equal(1, result.StacksGranted);
@@ -78,6 +98,7 @@ public sealed class ContainerLootOperationsTests
 			repo,
 			new NarrativeService(),
 			TestPlayerProficiencyAggregation.CreateEmpty(),
+			DefaultResolution(),
 			"remains");
 
 		Assert.Equal(1, result.StacksGranted);
@@ -116,6 +137,7 @@ public sealed class ContainerLootOperationsTests
 			repo,
 			new NarrativeService(),
 			TestPlayerProficiencyAggregation.CreateEmpty(),
+			DefaultResolution(),
 			"salvage pile");
 
 		Assert.Equal(1, result.StacksGranted);
@@ -150,6 +172,7 @@ public sealed class ContainerLootOperationsTests
 				repo,
 				new NarrativeService(),
 				TestPlayerProficiencyAggregation.CreateEmpty(),
+				DefaultResolution(),
 				"pile"));
 	}
 
@@ -181,6 +204,7 @@ public sealed class ContainerLootOperationsTests
 			repo,
 			new NarrativeService(),
 			TestPlayerProficiencyAggregation.CreateEmpty(),
+			DefaultResolution(),
 			"heap");
 
 		Assert.Equal(1, result.StacksGranted);
@@ -188,6 +212,94 @@ public sealed class ContainerLootOperationsTests
 		Assert.Single(salvage.Contents);
 		Assert.Equal("nope", salvage.Contents[0].ItemDefinitionId);
 		Assert.False(result.RemovedContainerFromRoom);
+	}
+
+	[Fact]
+	public void TransferAllContents_Harvest_PartialSuccess_GrantsSuccessCountOnly()
+	{
+		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
+		var repo = new MapItemRepo(coin);
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		var salvage = new SalvageFeature
+		{
+			Contents =
+			[
+				new LootableItemDefinition
+				{
+					ItemDefinitionId = "coin",
+					Quantity = 7,
+					Harvest = new HarvestRequirement { HarvestDc = 10, HarvestAbility = AbilityScore.Wisdom },
+				},
+			],
+		};
+		room.Features.Add(salvage);
+		var session = new GameSessionState();
+		var floor = new DungeonFloor { Level = 1, Entrance = DirectionHelper.Origin };
+		floor.Rooms[DirectionHelper.Origin] = room;
+		session.Dungeon.CurrentFloor = floor;
+		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
+
+		var dice = new DiceRollService(new QueueRandom(10, 10, 10, 10, 5, 5, 5));
+		var resolution = new ResolutionService(dice);
+
+		var result = ContainerLootOperations.TransferAllContents(
+			session,
+			room,
+			salvage,
+			repo,
+			new NarrativeService(),
+			TestPlayerProficiencyAggregation.CreateEmpty(),
+			resolution,
+			"salvage pile");
+
+		Assert.Equal(1, result.StacksGranted);
+		Assert.Equal(4, session.Player.InventoryState.SumQuantityForDefinitionId("coin"));
+		Assert.Empty(salvage.Contents);
+		Assert.True(result.RemovedContainerFromRoom);
+	}
+
+	[Fact]
+	public void TransferAllContents_Harvest_AllFail_GrantsNothing()
+	{
+		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
+		var repo = new MapItemRepo(coin);
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		var salvage = new SalvageFeature
+		{
+			Contents =
+			[
+				new LootableItemDefinition
+				{
+					ItemDefinitionId = "coin",
+					Quantity = 3,
+					Harvest = new HarvestRequirement { HarvestDc = 15, HarvestAbility = AbilityScore.Might },
+				},
+			],
+		};
+		room.Features.Add(salvage);
+		var session = new GameSessionState();
+		var floor = new DungeonFloor { Level = 1, Entrance = DirectionHelper.Origin };
+		floor.Rooms[DirectionHelper.Origin] = room;
+		session.Dungeon.CurrentFloor = floor;
+		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
+
+		var dice = new DiceRollService(new QueueRandom(5, 5, 5));
+		var resolution = new ResolutionService(dice);
+
+		var result = ContainerLootOperations.TransferAllContents(
+			session,
+			room,
+			salvage,
+			repo,
+			new NarrativeService(),
+			TestPlayerProficiencyAggregation.CreateEmpty(),
+			resolution,
+			"heap");
+
+		Assert.Equal(0, result.StacksGranted);
+		Assert.Equal(0, session.Player.InventoryState.SumQuantityForDefinitionId("coin"));
+		Assert.Empty(salvage.Contents);
+		Assert.True(result.RemovedContainerFromRoom);
 	}
 
 	[Fact]

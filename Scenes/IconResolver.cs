@@ -335,12 +335,31 @@ public sealed class IconResolver
 	private ItemResource? FindItemById(string id)
 	{
 		var items = _items?.Items;
-		if (items == null)
-			return null;
-		for (var i = 0; i < items.Count; i++)
+		if (items != null)
 		{
-			if (items[i] is { } it && it.Id == id)
-				return it;
+			for (var i = 0; i < items.Count; i++)
+			{
+				if (items[i] is { } it && it.Id == id)
+					return it;
+			}
+		}
+
+		// Items authored only as embedded ItemResources on MonsterResource.DeathLoot are omitted from
+		// ItemDatabase on purpose; align lookup with GodotItemDefinitionRepository merge behavior.
+		if (_monsters?.Monsters != null)
+		{
+			foreach (var monster in _monsters.Monsters)
+			{
+				if (monster?.DeathLoot == null)
+					continue;
+				foreach (var row in monster.DeathLoot)
+				{
+					if (row?.ItemResource == null)
+						continue;
+					if (row.ItemResource.Id == id)
+						return row.ItemResource;
+				}
+			}
 		}
 
 		return null;

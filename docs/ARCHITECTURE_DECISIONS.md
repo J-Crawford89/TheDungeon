@@ -68,3 +68,13 @@ This file records concrete, agreed decisions so implementation stays consistent 
 - **Revisit condition:** Revisit this boundary when a reliable Godot-hosted integration test workflow is available, then add mapper/repository/resource coverage there.
 - **Reference:** `docs/TESTING_POLICY.md`
 
+## ADR-0009: Monster death loot — embedded vs standalone items
+
+- **Status:** Accepted
+- **Decision:**
+  - **Embedded** `ItemResource` sub-resources on `MonsterResource.DeathLoot` are allowed **only** for **trash / purely sellable** drops (no crafting, alchemy, quests, or other cross-system use).
+  - Items that **have or may gain** other uses (e.g. alchemy, recipes, shared loot tables, NPC scripting) must live as **standalone** item `.tres` files under `Content/Item/…` and be registered in **`ItemDatabase`** (and referenced from death loot), so there is one authoritative definition.
+- **Rationale:** Fewer files for simple junk loot; central catalog and reuse when an item matters beyond “sell from corpse.”
+- **Implementation note:** `GodotItemDefinitionRepository` merges embedded death-loot item resources into lookup when absent from `ItemDatabase`; `ItemDatabase` wins on duplicate ids.
+- **Reference:** `docs/MONSTER_DEATH_LOOT.md`
+

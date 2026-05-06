@@ -8,6 +8,11 @@
 [ext_resource type="Script" uid="uid://b6nle4bl0xxf" path="res://Resources/LootableItemResource.cs" id="4_fevfy"]
 [ext_resource type="Script" uid="uid://cim33xbbm276o" path="res://Resources/MonsterAttackResource.cs" id="4_hbwqt"]
 [ext_resource type="Texture2D" uid="uid://dwyyppxwutfdg" path="res://Assets/PrototypeAssets/RatCorpseOpened.png" id="5_iogdg"]
+[ext_resource type="Script" uid="uid://61h88b5ekxca" path="res://Resources/HarvestRequirementResource.cs" id="7_mlyw2"]
+[ext_resource type="Script" uid="uid://cjbkth835rns8" path="res://Resources/ItemEffectResource.cs" id="8_yee8b"]
+[ext_resource type="Texture2D" uid="uid://cffjhncvfpr4k" path="res://Assets/PrototypeAssets/RatTooth.png" id="9_ohs0j"]
+[ext_resource type="Script" uid="uid://2bdywe1406xv" path="res://Resources/ItemResource.cs" id="10_a8axw"]
+[ext_resource type="Texture2D" uid="uid://dv7x4be1micbn" path="res://Assets/PrototypeAssets/RatTail.png" id="11_y4oae"]
 
 [sub_resource type="Resource" id="Resource_fevfy"]
 script = ExtResource("3_fevfy")
@@ -20,6 +25,50 @@ script = ExtResource("4_hbwqt")
 Name = "Bite"
 DamageComponents = Array[ExtResource("3_fevfy")]([SubResource("Resource_fevfy")])
 metadata/_custom_type_script = "uid://cim33xbbm276o"
+
+[sub_resource type="Resource" id="Resource_edyxw"]
+script = ExtResource("7_mlyw2")
+HarvestDc = 8
+HarvestAbility = 2
+metadata/_custom_type_script = "uid://61h88b5ekxca"
+
+[sub_resource type="Resource" id="Resource_pot80"]
+script = ExtResource("10_a8axw")
+Id = "rat_teeth"
+Name = "Rat Teeth"
+ValueInGold = 1
+MaxStackSize = 20
+Icon = ExtResource("9_ohs0j")
+InventoryIcon = ExtResource("9_ohs0j")
+metadata/_custom_type_script = "uid://2bdywe1406xv"
+
+[sub_resource type="Resource" id="Resource_rkdee"]
+script = ExtResource("4_fevfy")
+ItemResource = SubResource("Resource_pot80")
+Harvest = SubResource("Resource_edyxw")
+metadata/_custom_type_script = "uid://b6nle4bl0xxf"
+
+[sub_resource type="Resource" id="Resource_vhmmn"]
+script = ExtResource("7_mlyw2")
+HarvestDc = 4
+HarvestAbility = 2
+metadata/_custom_type_script = "uid://61h88b5ekxca"
+
+[sub_resource type="Resource" id="Resource_1eno8"]
+script = ExtResource("10_a8axw")
+Id = "rat_tail"
+Name = "Rat Tail"
+ValueInGold = 1
+MaxStackSize = 10
+Icon = ExtResource("11_y4oae")
+InventoryIcon = ExtResource("11_y4oae")
+metadata/_custom_type_script = "uid://2bdywe1406xv"
+
+[sub_resource type="Resource" id="Resource_c4lpb"]
+script = ExtResource("4_fevfy")
+ItemResource = SubResource("Resource_1eno8")
+Harvest = SubResource("Resource_vhmmn")
+metadata/_custom_type_script = "uid://b6nle4bl0xxf"
 
 [resource]
 script = ExtResource("1_0vblb")
@@ -37,6 +86,7 @@ Attacks = Array[ExtResource("4_hbwqt")]([SubResource("Resource_5f6kq")])
 Defense = 10
 ExperienceReward = 8
 RandomizerWeight = 15
+DeathLoot = Array[ExtResource("4_fevfy")]([SubResource("Resource_rkdee"), SubResource("Resource_c4lpb")])
 Icon = ExtResource("1_ustx4")
 CorpseIcon = ExtResource("4_5f6kq")
 CorpseOpenedIcon = ExtResource("5_iogdg")

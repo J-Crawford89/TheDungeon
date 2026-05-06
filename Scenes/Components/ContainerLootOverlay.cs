@@ -97,7 +97,8 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 		{
 			var node = _lootableItemScene.Instantiate<LootableItemControl>();
 			var tex = _ctx.Icons.Resolve(PresentationIconKeys.MainView.Item(stack.ItemDefinitionId));
-			node.Configure(stack.RowIndex, stack.DisplayName, stack.Quantity, tex, OnLootItemToggled);
+			node.Configure(stack.RowIndex, stack.DisplayName, stack.Quantity, tex, stack.HarvestDc, stack.HarvestAbility,
+				OnLootItemToggled);
 			_lootGrid.AddChild(node);
 			_lootableItemsByStackIndex[stack.RowIndex] = node;
 		}

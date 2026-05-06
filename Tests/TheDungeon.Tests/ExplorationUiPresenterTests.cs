@@ -62,7 +62,8 @@ public sealed class ExplorationUiPresenterTests
 				MaxRooms = 12,
 				RoomFeatures = RoomFeaturePopulationParameters.CreateDefault(),
 			});
-		var containerLoot = new ContainerLootInteractionService(new EmptyItems(), narrative, TestPlayerProficiencyAggregation.CreateEmpty());
+		var containerLoot = new ContainerLootInteractionService(new EmptyItems(), narrative,
+			TestPlayerProficiencyAggregation.CreateEmpty(), new ResolutionService(dice));
 		return new ExplorationUiPresenter(
 			session,
 			exploration,

@@ -11,12 +11,14 @@ public sealed class ContainerLootInteractionService
 	private readonly ITrapDefinitionRepository? _traps;
 	private readonly NarrativeService _narrative;
 	private readonly PlayerProficiencyAggregationService _proficiency;
+	private readonly ResolutionService _resolution;
 	private readonly int _maxUnequippedBackpackRows;
 
 	public ContainerLootInteractionService(
 		IItemDefinitionRepository items,
 		NarrativeService narrative,
 		PlayerProficiencyAggregationService proficiency,
+		ResolutionService resolution,
 		int maxUnequippedBackpackRows = 16,
 		IMonsterDefinitionRepository? monsters = null,
 		ITrapDefinitionRepository? traps = null)
@@ -26,6 +28,7 @@ public sealed class ContainerLootInteractionService
 		_traps = traps;
 		_narrative = narrative;
 		_proficiency = proficiency;
+		_resolution = resolution;
 		_maxUnequippedBackpackRows = maxUnequippedBackpackRows;
 	}
 
@@ -51,12 +54,22 @@ public sealed class ContainerLootInteractionService
 
 			var def = _items.TryGetById(id);
 			var display = def?.Name ?? "?";
+			int? harvestDc = null;
+			AbilityScore? harvestAbility = null;
+			if (row.Harvest is { HarvestDc: > 0 } h)
+			{
+				harvestDc = h.HarvestDc;
+				harvestAbility = h.HarvestAbility;
+			}
+
 			rows.Add(new ContainerLootStackRowDto
 			{
 				RowIndex = i,
 				ItemDefinitionId = id,
 				DisplayName = display,
 				Quantity = row.Quantity,
+				HarvestDc = harvestDc,
+				HarvestAbility = harvestAbility,
 			});
 		}
 
@@ -97,6 +110,7 @@ public sealed class ContainerLootInteractionService
 			_items,
 			_narrative,
 			_proficiency,
+			_resolution,
 			label);
 
 		return ContainerLootTransferResult.Ok(
@@ -108,9 +122,9 @@ public sealed class ContainerLootInteractionService
 	public ContainerLootTransferResult TryLootSelected(
 		GameSessionState session,
 		int containerOrdinal,
-		IReadOnlyList<int> rowIndices)
+		IReadOnlyList<int> contentIndices)
 	{
-		if (rowIndices == null || rowIndices.Count == 0)
+		if (contentIndices == null || contentIndices.Count == 0)
 			return ContainerLootTransferResult.Fail(ContainerLootErrorCode.EmptyRowSelection);
 
 		if (!TryResolveRoom(session, out var room, out var err))
@@ -121,7 +135,7 @@ public sealed class ContainerLootInteractionService
 		    container == null)
 			return ContainerLootTransferResult.Fail(ContainerLootErrorCode.ContainerOrdinalOutOfRange);
 
-		var distinct = rowIndices.Distinct().ToList();
+		var distinct = contentIndices.Distinct().ToList();
 		foreach (var idx in distinct)
 		{
 			if (idx < 0 || idx >= container.Contents.Count)
@@ -137,6 +151,7 @@ public sealed class ContainerLootInteractionService
 			_items,
 			_narrative,
 			_proficiency,
+			_resolution,
 			label);
 
 		return ContainerLootTransferResult.Ok(

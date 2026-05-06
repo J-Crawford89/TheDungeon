@@ -168,7 +168,7 @@ public partial class GameRoot : Control
 
 		var abilityRepo = new GodotAbilityDefinitionRepository(AbilityDatabase);
 		var damageTypeRepo = new GodotDamageTypeDefinitionRepository(DamageTypeDatabase);
-		var itemRepo = new GodotItemDefinitionRepository(ItemDatabase);
+		var itemRepo = new GodotItemDefinitionRepository(ItemDatabase, MonsterDatabase);
 
 		var proficiencyAggregation = new PlayerProficiencyAggregationService(raceRepo, classRepo, backgroundRepo);
 
@@ -197,6 +197,7 @@ public partial class GameRoot : Control
 			itemRepo,
 			narrativeService,
 			proficiencyAggregation,
+			resolutionService,
 			monsters: monsterRepo,
 			traps: trapRepo);
 		var combatService = new CombatService(

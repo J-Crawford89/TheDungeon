@@ -392,8 +392,6 @@ public sealed class ExplorationService
                         !string.IsNullOrWhiteSpace(c.ItemDefinitionId) && c.Quantity > 0);
                     var lootPart = stacks == 0 ? "nothing recoverable" : $"{stacks} stack(s)";
                     var line = $"Remains: {lootPart}";
-                    if (corpse.HarvestDc > 0)
-                        line += $" (harvest DC {corpse.HarvestDc})";
                     inspectData.FeatureLines.Add(new InspectRoomFeatureLine { Text = line });
                     break;
                 }

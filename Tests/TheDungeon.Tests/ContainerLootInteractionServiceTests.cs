@@ -1,9 +1,13 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
 public sealed class ContainerLootInteractionServiceTests
 {
+	private static ResolutionService TestResolution() =>
+		new ResolutionService(new DiceRollService(new Random(1)));
+
 	private sealed class MapItemRepo : IItemDefinitionRepository
 	{
 		private readonly Dictionary<string, ItemDefinition> _map = new();
@@ -37,7 +41,7 @@ public sealed class ContainerLootInteractionServiceTests
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var gem = new ItemDefinition { Id = "gem", Name = "Gem", MaxStackSize = 1 };
 		var repo = new MapItemRepo(coin, gem);
-		var svc = new ContainerLootInteractionService(repo, new NarrativeService(), TestPlayerProficiencyAggregation.CreateEmpty());
+		var svc = new ContainerLootInteractionService(repo, new NarrativeService(), TestPlayerProficiencyAggregation.CreateEmpty(), TestResolution());
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
 		var salvage = new SalvageFeature
 		{
@@ -68,7 +72,7 @@ public sealed class ContainerLootInteractionServiceTests
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var repo = new MapItemRepo(coin);
-		var svc = new ContainerLootInteractionService(repo, new NarrativeService(), TestPlayerProficiencyAggregation.CreateEmpty());
+		var svc = new ContainerLootInteractionService(repo, new NarrativeService(), TestPlayerProficiencyAggregation.CreateEmpty(), TestResolution());
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
 		var salvage = new SalvageFeature
 		{
@@ -89,10 +93,40 @@ public sealed class ContainerLootInteractionServiceTests
 	}
 
 	[Fact]
+	public void TryBuildPanel_IncludesHarvestFromStack()
+	{
+		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
+		var repo = new MapItemRepo(coin);
+		var svc = new ContainerLootInteractionService(repo, new NarrativeService(), TestPlayerProficiencyAggregation.CreateEmpty(), TestResolution());
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		var salvage = new SalvageFeature
+		{
+			Contents =
+			[
+				new LootableItemDefinition
+				{
+					ItemDefinitionId = "coin",
+					Quantity = 1,
+					Harvest = new HarvestRequirement { HarvestDc = 12, HarvestAbility = AbilityScore.Dexterity },
+				},
+			],
+		};
+		room.Features.Add(salvage);
+		var session = SessionInRoom(room);
+
+		var result = svc.TryBuildPanel(session, 0);
+
+		Assert.Equal(ContainerLootErrorCode.None, result.ErrorCode);
+		var row = Assert.Single(result.Panel!.Rows);
+		Assert.Equal(12, row.HarvestDc);
+		Assert.Equal(AbilityScore.Dexterity, row.HarvestAbility);
+	}
+
+	[Fact]
 	public void TryBuildPanel_OrdinalOutOfRange_Fails()
 	{
 		var svc = new ContainerLootInteractionService(new MapItemRepo(), new NarrativeService(),
-			TestPlayerProficiencyAggregation.CreateEmpty());
+			TestPlayerProficiencyAggregation.CreateEmpty(), TestResolution());
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
 		room.Features.Add(new SalvageFeature());
 		var session = SessionInRoom(room);
@@ -108,7 +142,7 @@ public sealed class ContainerLootInteractionServiceTests
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var repo = new MapItemRepo(coin);
-		var svc = new ContainerLootInteractionService(repo, new NarrativeService(), TestPlayerProficiencyAggregation.CreateEmpty());
+		var svc = new ContainerLootInteractionService(repo, new NarrativeService(), TestPlayerProficiencyAggregation.CreateEmpty(), TestResolution());
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
 		var salvage = new SalvageFeature
 		{
@@ -132,7 +166,7 @@ public sealed class ContainerLootInteractionServiceTests
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var gem = new ItemDefinition { Id = "gem", Name = "Gem", MaxStackSize = 1 };
 		var repo = new MapItemRepo(coin, gem);
-		var svc = new ContainerLootInteractionService(repo, new NarrativeService(), TestPlayerProficiencyAggregation.CreateEmpty());
+		var svc = new ContainerLootInteractionService(repo, new NarrativeService(), TestPlayerProficiencyAggregation.CreateEmpty(), TestResolution());
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
 		var salvage = new SalvageFeature
 		{
@@ -159,7 +193,7 @@ public sealed class ContainerLootInteractionServiceTests
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var repo = new MapItemRepo(coin);
-		var svc = new ContainerLootInteractionService(repo, new NarrativeService(), TestPlayerProficiencyAggregation.CreateEmpty());
+		var svc = new ContainerLootInteractionService(repo, new NarrativeService(), TestPlayerProficiencyAggregation.CreateEmpty(), TestResolution());
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
 		var salvage = new SalvageFeature
 		{
@@ -178,7 +212,7 @@ public sealed class ContainerLootInteractionServiceTests
 	public void TryLootSelected_EmptySelection_Fails()
 	{
 		var svc = new ContainerLootInteractionService(new MapItemRepo(), new NarrativeService(),
-			TestPlayerProficiencyAggregation.CreateEmpty());
+			TestPlayerProficiencyAggregation.CreateEmpty(), TestResolution());
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
 		room.Features.Add(new SalvageFeature { Contents = [new LootableItemDefinition { ItemDefinitionId = "x", Quantity = 1 }] });
 		var session = SessionInRoom(room);
@@ -192,7 +226,7 @@ public sealed class ContainerLootInteractionServiceTests
 	public void TryBuildPanel_NoFloor_Fails()
 	{
 		var svc = new ContainerLootInteractionService(new MapItemRepo(), new NarrativeService(),
-			TestPlayerProficiencyAggregation.CreateEmpty());
+			TestPlayerProficiencyAggregation.CreateEmpty(), TestResolution());
 		var session = new GameSessionState();
 
 		var result = svc.TryBuildPanel(session, 0);
