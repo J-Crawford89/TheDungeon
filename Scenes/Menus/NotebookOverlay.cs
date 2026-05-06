@@ -59,6 +59,10 @@ public partial class NotebookOverlay : Control
 	[Export] private InventorySlotControl? _offHand2SlotControl;
 
 	[Export] private Control? _inventoryPageRoot;
+	[Export] private Label? _inventoryCopperCoinLabel;
+	[Export] private Label? _inventorySilverCoinLabel;
+	[Export] private Label? _inventoryGoldCoinLabel;
+	[Export] private Label? _inventoryPlatinumCoinLabel;
 	[Export] private CharacterPage? _characterPage;
 
 	private InventoryNotebookCoordinator? _coordinator;
@@ -504,6 +508,13 @@ public partial class NotebookOverlay : Control
 
 			ApplySelectionVisuals();
 			UpdateDetailPanel();
+
+			CoinPurseLabelHelper.ApplyDenominationLabels(
+				_o._inventoryCopperCoinLabel,
+				_o._inventorySilverCoinLabel,
+				_o._inventoryGoldCoinLabel,
+				_o._inventoryPlatinumCoinLabel,
+				_session.Player.Purse);
 		}
 
 		private void OnEquipPressed()

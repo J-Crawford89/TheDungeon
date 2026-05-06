@@ -9,7 +9,7 @@ public static class CharacterBackgroundMapper
 			Id = resource.Id,
 			Name = resource.Name,
 			Description = resource.Description,
-			StartingGold = resource.StartingGold,
+			StartingCoinPurse = CoinPurseMapper.ToDomain(resource.StartingCoinPurse),
 			AbilityGrants = LevelAbilityGrantMapper.ToDomainList(resource.AbilityGrants),
 			StartingEquipment = ItemResourceListMapper.ToDefinitionIds(resource.StartingEquipment),
 			ProficiencyGrants = ProficiencyGrantMapper.ToDomainList(resource.ProficiencyGrants),

@@ -20,7 +20,7 @@ public sealed class PlayerState
 	public int TotalArmorBonus { get; set; }
 	public int TotalDamageReduction { get; set; }
 	public int TotalAgilityPenalty { get; set; }
-	public int Gold { get; set; }
+	public CoinPurse Purse { get; set; } = new();
 	public HorizontalDirection Facing { get; set; } = HorizontalDirection.North;
 	public AbilityScores AbilityScores { get; set; } = new();
 
@@ -55,7 +55,7 @@ public sealed class PlayerState
 		TotalArmorBonus = 0;
 		TotalDamageReduction = 0;
 		TotalAgilityPenalty = 0;
-		Gold = 0;
+		Purse = new CoinPurse();
 		Facing = HorizontalDirection.North;
 		AbilityScores = new AbilityScores();
 		GrantedAbilities = new List<GrantedAbility>();

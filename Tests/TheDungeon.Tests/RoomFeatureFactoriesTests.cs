@@ -38,8 +38,8 @@ public sealed class RoomFeatureFactoriesTests
 			Id = "gold",
 			Name = "Coins",
 			DiscoverDc = 10,
-			GrantKind = TreasureKind.Gold,
-			ValueInGp = 5,
+			GrantKind = TreasureKind.Currency,
+			CurrencyGrant = new CoinPurse { Copper = 5 },
 		});
 
 		Assert.False(treasure.TreasureItems[0].IsRevealed);

@@ -7,7 +7,10 @@ public partial class CharacterPanel : PanelContainer
 {
 	[Export] private Label _hpLabel = null!;
 	[Export] private Label _levelLabel = null!;
-	[Export] private Label _goldLabel = null!;
+	[Export] private Label? _copperCoinLabel;
+	[Export] private Label? _silverCoinLabel;
+	[Export] private Label? _goldCoinLabel;
+	[Export] private Label? _platinumCoinLabel;
 	[Export] private Label _equipmentLabel = null!;
 	[Export] private Label _nameLabel = null!;
 	[Export] private Label? _spLabel;
@@ -48,8 +51,12 @@ public partial class CharacterPanel : PanelContainer
 		_nameLabel.Text = $"Name: {player.Name}";
 		_hpLabel.Text = $"HP: {player.CurrentHp} / {player.MaxHp}";
 		_levelLabel.Text = $"LEVEL: {player.Level}  XP: {player.Experience}";
-		if (_goldLabel != null)
-			_goldLabel.Text = $"GOLD: {player.Gold}";
+		CoinPurseLabelHelper.ApplyDenominationLabels(
+			_copperCoinLabel,
+			_silverCoinLabel,
+			_goldCoinLabel,
+			_platinumCoinLabel,
+			player.Purse);
 		var hpQty = player.InventoryState.SumQuantityForDefinitionId(InventoryIds.HealthPotion);
 		var ropeQty = player.InventoryState.SumQuantityForDefinitionId(InventoryIds.Rope);
 		var segments = new List<string>();

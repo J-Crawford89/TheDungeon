@@ -44,8 +44,8 @@ public sealed class MainViewRoomSlotsPresentationTests
 					{
 						Id = "gold_pile",
 						Name = "Coins",
-						GrantKind = TreasureKind.Gold,
-						ValueInGp = 5,
+						GrantKind = TreasureKind.Currency,
+						CurrencyGrant = new CoinPurse { Copper = 5 },
 						InventoryItemId = string.Empty,
 					},
 				},
@@ -72,8 +72,8 @@ public sealed class MainViewRoomSlotsPresentationTests
 					{
 						Id = "copper_coins",
 						Name = "A few copper coins",
-						GrantKind = TreasureKind.Gold,
-						ValueInGp = 2,
+						GrantKind = TreasureKind.Currency,
+						CurrencyGrant = new CoinPurse { Copper = 2 },
 						InventoryItemId = "copper_coins",
 					},
 				},

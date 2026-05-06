@@ -11,7 +11,7 @@ public partial class ItemResource : Resource
 
 	[Export] public ItemRarity Rarity { get; set; } = ItemRarity.Common;
 
-	[Export] public int ValueInGold { get; set; }
+	[Export] public int ValueInCopper { get; set; }
 	[Export] public int MaxStackSize { get; set; } = 1;
 
 	[Export] public bool CanDrop { get; set; } = true;

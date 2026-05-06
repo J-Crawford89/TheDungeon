@@ -58,8 +58,8 @@ public sealed class TreasurePickupServiceTests
 					{
 						Id = "gold",
 						Name = "Gold",
-						GrantKind = TreasureKind.Gold,
-						ValueInGp = 3,
+						GrantKind = TreasureKind.Currency,
+						CurrencyGrant = new CoinPurse { Copper = 3 },
 					},
 				}
 			]
@@ -70,11 +70,11 @@ public sealed class TreasurePickupServiceTests
 		var outcome = svc.TakeTreasureInstanceAtSlot(session, 0, 0);
 
 		Assert.Equal(TakeTreasureOutcome.NothingToTake, outcome);
-		Assert.Equal(0, session.Player.Gold);
+		Assert.Equal(0, session.Player.Purse.Copper);
 	}
 
 	[Fact]
-	public void TakeTreasureInstanceAtSlot_Gold_AddsGold()
+	public void TakeTreasureInstanceAtSlot_Currency_AddsCopper()
 	{
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
 		room.Features.Add(new TreasureFeature
@@ -88,8 +88,8 @@ public sealed class TreasurePickupServiceTests
 					{
 						Id = "gold",
 						Name = "Gold pile",
-						GrantKind = TreasureKind.Gold,
-						ValueInGp = 7,
+						GrantKind = TreasureKind.Currency,
+						CurrencyGrant = new CoinPurse { Copper = 7 },
 					},
 				}
 			]
@@ -100,7 +100,7 @@ public sealed class TreasurePickupServiceTests
 		var outcome = svc.TakeTreasureInstanceAtSlot(session, 0, 0);
 
 		Assert.Equal(TakeTreasureOutcome.TookItems, outcome);
-		Assert.Equal(7, session.Player.Gold);
+		Assert.Equal(7, session.Player.Purse.Copper);
 	}
 
 	[Fact]
@@ -119,8 +119,8 @@ public sealed class TreasurePickupServiceTests
 					{
 						Id = "gold",
 						Name = "Gold pile",
-						GrantKind = TreasureKind.Gold,
-						ValueInGp = 1,
+						GrantKind = TreasureKind.Currency,
+						CurrencyGrant = new CoinPurse { Copper = 1 },
 					},
 				}
 			]

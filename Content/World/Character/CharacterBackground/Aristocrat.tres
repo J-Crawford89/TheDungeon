@@ -1,10 +1,19 @@
 [gd_resource type="Resource" script_class="CharacterBackgroundResource" format=3 uid="uid://24xy8l8l5tvr"]
 
 [ext_resource type="Script" uid="uid://dgxwvbumstmik" path="res://Resources/CharacterBackgroundResource.cs" id="1_23k12"]
+[ext_resource type="Script" uid="uid://rr8vsheybc0y" path="res://Resources/LevelAbilityGrantResource.cs" id="1_yrm8s"]
+[ext_resource type="Script" uid="uid://bt2ebxv7822cs" path="res://Resources/ProficiencyGrantResource.cs" id="2_khd3i"]
+[ext_resource type="Script" uid="uid://cmf3er164boxo" path="res://Resources/CoinPurseResource.cs" id="3_7xabc"]
+[ext_resource type="Script" uid="uid://2bdywe1406xv" path="res://Resources/ItemResource.cs" id="4_fh20e"]
+
+[sub_resource type="Resource" id="Resource_asnb2"]
+script = ExtResource("3_7xabc")
+Silver = 15
+metadata/_custom_type_script = "uid://cmf3er164boxo"
 
 [resource]
 script = ExtResource("1_23k12")
 Id = "aristocrat"
 Name = "Aristocrat"
 Description = "Aristocrats are the stodgy upper-crest of society. Whether due to boredom, vanity, or some other such motive, you left the life of luxory behind to find adventure out in the world. You are well versed among the high class of society and your name carries weight among those who have heard of you or your family. Additionally, your excessive leisure time growing up allowed you to hone in on a few specialities."
-StartingGold = 36
+StartingCoinPurse = SubResource("Resource_asnb2")

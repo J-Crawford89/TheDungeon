@@ -38,7 +38,7 @@ metadata/_custom_type_script = "uid://61h88b5ekxca"
 script = ExtResource("10_6kdta")
 Id = "rat_teeth"
 Name = "Rat Teeth"
-ValueInGold = 1
+ValueInCopper = 2
 MaxStackSize = 20
 Icon = ExtResource("9_3bhjt")
 InventoryIcon = ExtResource("9_3bhjt")
@@ -47,6 +47,7 @@ metadata/_custom_type_script = "uid://2bdywe1406xv"
 [sub_resource type="Resource" id="Resource_o18ip"]
 script = ExtResource("4_wpf37")
 ItemResource = SubResource("Resource_pot80")
+Quantity = 10
 Harvest = SubResource("Resource_edyxw")
 metadata/_custom_type_script = "uid://b6nle4bl0xxf"
 
@@ -60,7 +61,7 @@ metadata/_custom_type_script = "uid://61h88b5ekxca"
 script = ExtResource("10_6kdta")
 Id = "rat_tail"
 Name = "Rat Tail"
-ValueInGold = 1
+ValueInCopper = 2
 MaxStackSize = 10
 Icon = ExtResource("11_7kg21")
 InventoryIcon = ExtResource("11_7kg21")

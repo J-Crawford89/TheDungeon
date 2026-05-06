@@ -16,7 +16,7 @@ public static class PresentationIconKeys
 		public static string Item(string inventoryItemId) => $"{Root}/item/{inventoryItemId}";
 
 		/// <summary>
-		/// Gold piles may still set <see cref="TreasureDefinition.InventoryItemId"/> for content parity; pile art is keyed
+		/// Currency treasures may still set <see cref="TreasureDefinition.InventoryItemId"/> for content parity; pile art is keyed
 		/// by treasure id. Only <see cref="TreasureKind.InventoryItem"/> grants use the item presentation key.
 		/// </summary>
 		public static string ForTreasureInstance(TreasureDefinition def) =>

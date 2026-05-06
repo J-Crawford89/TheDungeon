@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="TreasureResourceDatabase" format=3 uid="uid://dfoopnyl6hx5a"]
 
 [ext_resource type="Script" uid="uid://cnod6aldlemvr" path="res://Resources/TreasureResource.cs" id="1_qvlxh"]
-[ext_resource type="Resource" uid="uid://b2ly604b8c0t1" path="res://Content/Treasure/FewGoldCoins.tres" id="2_ehh05"]
+[ext_resource type="Resource" uid="uid://b2ly604b8c0t1" path="res://Content/Treasure/FewCopperCoins.tres" id="2_ehh05"]
 [ext_resource type="Script" uid="uid://bgaakjixvdmv" path="res://Resources/Databases/TreasureResourceDatabase.cs" id="2_ulals"]
 [ext_resource type="Resource" uid="uid://d0rnl18h3cqlk" path="res://Content/Treasure/HealthPotion.tres" id="3_1g5uc"]
 

@@ -95,7 +95,7 @@ public sealed class CharacterCreationService
 		player.MaxHp = maxHp;
 		player.CurrentHp = maxHp;
 
-		player.Gold = state.SelectedBackground?.StartingGold ?? 0;
+		player.Purse = state.SelectedBackground?.StartingCoinPurse?.Clone() ?? new CoinPurse();
 		player.Level = 1;
 		player.Experience = 0;
 		player.Facing = HorizontalDirection.North;

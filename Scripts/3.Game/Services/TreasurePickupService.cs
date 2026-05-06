@@ -101,9 +101,9 @@ public sealed class TreasurePickupService
 		var def = instance.Definition;
 		switch (def.GrantKind)
 		{
-			case TreasureKind.Gold:
-				session.Player.Gold += def.ValueInGp;
-				session.AppendGameLog(_narrative.ForTookGold(def.ValueInGp, def.Name, session.Player.Gold));
+			case TreasureKind.Currency:
+				CurrencyMath.AddInPlace(session.Player.Purse, def.CurrencyGrant);
+				session.AppendGameLog(_narrative.ForTookCurrency(def.CurrencyGrant, def.Name, session.Player.Purse));
 				break;
 			case TreasureKind.InventoryItem:
 				AddInventoryItem(session, def);

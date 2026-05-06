@@ -28,7 +28,7 @@ public sealed class RoomContainerLocatorTests
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
 		room.Features.Add(new TreasureFeature
 		{
-			TreasureItems = [new TreasureInstance { IsRevealed = true, Definition = new TreasureDefinition { Id = "g", Name = "G", GrantKind = TreasureKind.Gold, ValueInGp = 1 } }],
+			TreasureItems = [new TreasureInstance { IsRevealed = true, Definition = new TreasureDefinition { Id = "g", Name = "G", GrantKind = TreasureKind.Currency, CurrencyGrant = new CoinPurse { Copper = 1 } } }],
 		});
 		var session = SessionInRoom(room);
 
@@ -60,7 +60,7 @@ public sealed class RoomContainerLocatorTests
 				new TreasureInstance
 				{
 					IsRevealed = true,
-					Definition = new TreasureDefinition { Id = "g", Name = "G", GrantKind = TreasureKind.Gold, ValueInGp = 1 },
+					Definition = new TreasureDefinition { Id = "g", Name = "G", GrantKind = TreasureKind.Currency, CurrencyGrant = new CoinPurse { Copper = 1 } },
 				},
 			],
 		});

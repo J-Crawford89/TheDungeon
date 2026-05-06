@@ -293,7 +293,7 @@ public partial class CharacterCreationScreen : Control
 		var con = _state.FinalAbilityScores.Constitution;
 		var hp = classHp + raceHp + con;
 
-		var gold = _state.SelectedBackground?.StartingGold ?? 0;
+		var startingCoins = _state.SelectedBackground?.StartingCoinPurse ?? new CoinPurse();
 
 		var sb = new StringBuilder();
 		sb.Append($"You are {name}. {pronoun} is a {raceName}, {className} who was a {bgName} before becoming an adventurer.\n\n");
@@ -309,7 +309,10 @@ public partial class CharacterCreationScreen : Control
 		sb.Append("You have no special abilities.\n\n");
 		// TODO: list definition-granted abilities when the player ability pipeline exists.
 		sb.Append("[b]EQUIPMENT[/b]\n");
-		sb.Append($"You start with {gold} gold and no other equipment.");
+		var coinsSummary = CurrencyMath.TotalEquivalentCopper(startingCoins) == 0
+			? "no coins"
+			: CurrencyFormatter.DescribeCompact(startingCoins);
+		sb.Append($"You start with {coinsSummary} and no other equipment.");
 		// TODO: list StartingEquipment from class/race/background when inventory exists.
 
 		return sb.ToString();

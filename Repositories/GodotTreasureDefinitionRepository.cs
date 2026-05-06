@@ -23,8 +23,8 @@ public sealed class GodotTreasureDefinitionRepository : ITreasureDefinitionRepos
 			{
 				Id = TreasureIds.CopperCoins,
 				Name = "A pouch of copper coins",
-				GrantKind = TreasureKind.Gold,
-				ValueInGp = 5
+				GrantKind = TreasureKind.Currency,
+				CurrencyGrant = new CoinPurse { Copper = 5 },
 			},
 			new TreasureDefinition
 			{

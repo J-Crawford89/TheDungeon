@@ -6,7 +6,7 @@ public static class TreasureMapper
 			Id = resource.Id,
 			Name = resource.Name,
 			GrantKind = resource.GrantKind,
-			ValueInGp = resource.ValueInGp,
+			CurrencyGrant = CoinPurseMapper.ToDomain(resource.CurrencyGrant),
 			InventoryItemId = resource.InventoryItemId,
 			DiscoverDc = resource.DiscoverDc,
 		};

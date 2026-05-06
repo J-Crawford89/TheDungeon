@@ -15,8 +15,8 @@ public sealed partial class NarrativeService
 
 	public string ForTakeNothingHere() => "There is nothing here to take.";
 
-	public string ForTookGold(int amountGp, string treasureName, int totalGoldAfter) =>
-		$"You take {treasureName} and gain {amountGp} gp. You now have {totalGoldAfter} gp.";
+	public string ForTookCurrency(CoinPurse grant, string treasureName, CoinPurse purseAfter) =>
+		$"You take {treasureName} ({CurrencyFormatter.DescribeSentenceGrant(grant)}). You now carry {CurrencyFormatter.DescribeSentenceTotal(purseAfter)}.";
 
 	public string ForTookItem(string itemName) => $"You take {itemName}.";
 

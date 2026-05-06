@@ -1,12 +1,13 @@
 [gd_resource type="Resource" script_class="ConsumableResource" format=3 uid="uid://c1oyad26ywhqk"]
 
 [ext_resource type="Script" uid="uid://masii0db56rb" path="res://Resources/ConsumableResource.cs" id="1_0lpa4"]
+[ext_resource type="Script" uid="uid://cjbkth835rns8" path="res://Resources/ItemEffectResource.cs" id="1_08xxu"]
 [ext_resource type="Texture2D" uid="uid://4s2xtg0vthh4" path="res://Assets/PrototypeAssets/Trap.png" id="1_gjecl"]
 
 [resource]
 script = ExtResource("1_0lpa4")
 Id = "rope"
 Name = "Rope"
-ValueInGold = 1
+ValueInCopper = 23
 Icon = ExtResource("1_gjecl")
 metadata/_custom_type_script = "uid://masii0db56rb"

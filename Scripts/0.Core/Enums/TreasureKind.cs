@@ -1,5 +1,5 @@
 public enum TreasureKind
 {
-	Gold,
+	Currency,
 	InventoryItem
 }

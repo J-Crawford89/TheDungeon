@@ -73,8 +73,8 @@ public sealed class InspectDiscoveryTests
 						Id = "a",
 						Name = "Pouch A",
 						DiscoverDc = 12,
-						GrantKind = TreasureKind.Gold,
-						ValueInGp = 1,
+						GrantKind = TreasureKind.Currency,
+						CurrencyGrant = new CoinPurse { Copper = 1 },
 					},
 					IsRevealed = false,
 				},
@@ -85,8 +85,8 @@ public sealed class InspectDiscoveryTests
 						Id = "b",
 						Name = "Pouch B",
 						DiscoverDc = 14,
-						GrantKind = TreasureKind.Gold,
-						ValueInGp = 1,
+						GrantKind = TreasureKind.Currency,
+						CurrencyGrant = new CoinPurse { Copper = 1 },
 					},
 					IsRevealed = false,
 				},
@@ -97,8 +97,8 @@ public sealed class InspectDiscoveryTests
 						Id = "c",
 						Name = "Pouch C",
 						DiscoverDc = 18,
-						GrantKind = TreasureKind.Gold,
-						ValueInGp = 1,
+						GrantKind = TreasureKind.Currency,
+						CurrencyGrant = new CoinPurse { Copper = 1 },
 					},
 					IsRevealed = false,
 				},
@@ -152,7 +152,7 @@ public sealed class InspectDiscoveryTests
 						Id = "a",
 						Name = "Pouch",
 						DiscoverDc = 20,
-						GrantKind = TreasureKind.Gold
+						GrantKind = TreasureKind.Currency
 					}
 				}
 			]

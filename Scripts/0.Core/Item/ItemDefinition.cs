@@ -8,7 +8,7 @@ public class ItemDefinition
 
     public ItemRarity Rarity { get; set; } = ItemRarity.Common;
 
-    public int ValueInGold { get; set; }
+    public int ValueInCopper { get; set; }
     public int MaxStackSize { get; set; } = 1;
 
     public bool CanDrop { get; set; } = true;

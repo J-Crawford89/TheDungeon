@@ -103,7 +103,7 @@ public sealed class PlayerAbilityGrantFutureTests
 			FinalAbilityScores = new AbilityScores { Constitution = 0 },
 			SelectedRace = new CharacterRaceDefinition { Id = "race1", Name = "R", BaseHp = 1 },
 			SelectedClass = new CharacterClassDefinition { Id = "class1", Name = "C", BaseHp = 2 },
-			SelectedBackground = new CharacterBackgroundDefinition { Id = "bg1", Name = "B", StartingGold = 3 }
+			SelectedBackground = new CharacterBackgroundDefinition { Id = "bg1", Name = "B", StartingCoinPurse = new CoinPurse { Copper = 3 } }
 		};
 
 		var player = new PlayerState();

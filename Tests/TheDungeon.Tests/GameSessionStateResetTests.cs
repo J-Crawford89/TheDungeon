@@ -27,7 +27,7 @@ public sealed class GameSessionStateResetTests
 		session.Player.Name = "Changed";
 		session.Player.CurrentHp = 1;
 		session.Player.MaxHp = 20;
-		session.Player.Gold = 99;
+		session.Player.Purse.Copper = 99;
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
 		session.Dungeon.CurrentFloor = new DungeonFloor { Level = 9, Entrance = DirectionHelper.Origin };
 		session.Dungeon.Floors.Add(session.Dungeon.CurrentFloor);

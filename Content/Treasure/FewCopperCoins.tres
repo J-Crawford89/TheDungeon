@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="TreasureResource" format=3 uid="uid://b2ly604b8c0t1"]
+
+[ext_resource type="Script" uid="uid://cmf3er164boxo" path="res://Resources/CoinPurseResource.cs" id="1_efmog"]
+[ext_resource type="Texture2D" uid="uid://ttxdxm54rnj4" path="res://Assets/PrototypeAssets/Coins.png" id="2_hbag6"]
+[ext_resource type="Script" uid="uid://cnod6aldlemvr" path="res://Resources/TreasureResource.cs" id="3_s8pns"]
+
+[sub_resource type="Resource" id="Resource_7sewx"]
+script = ExtResource("1_efmog")
+Copper = 26
+metadata/_custom_type_script = "uid://cmf3er164boxo"
+
+[resource]
+script = ExtResource("3_s8pns")
+Id = "copper_coins"
+Name = "A few copper coins"
+CurrencyGrant = SubResource("Resource_7sewx")
+InventoryItemId = "copper_coins"
+Icon = ExtResource("2_hbag6")

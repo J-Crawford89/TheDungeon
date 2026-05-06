@@ -3,10 +3,17 @@
 [ext_resource type="Script" uid="uid://dgxwvbumstmik" path="res://Resources/CharacterBackgroundResource.cs" id="1_ily7t"]
 [ext_resource type="Script" uid="uid://rr8vsheybc0y" path="res://Resources/LevelAbilityGrantResource.cs" id="1_liskd"]
 [ext_resource type="Script" uid="uid://2bdywe1406xv" path="res://Resources/ItemResource.cs" id="2_g8ouu"]
+[ext_resource type="Script" uid="uid://bt2ebxv7822cs" path="res://Resources/ProficiencyGrantResource.cs" id="2_j5ob4"]
+[ext_resource type="Script" uid="uid://cmf3er164boxo" path="res://Resources/CoinPurseResource.cs" id="3_1vvnj"]
+
+[sub_resource type="Resource" id="Resource_es01i"]
+script = ExtResource("3_1vvnj")
+Copper = 90
+metadata/_custom_type_script = "uid://cmf3er164boxo"
 
 [resource]
 script = ExtResource("1_ily7t")
 Id = "farmboy"
 Name = "Farmboy"
 Description = "Farmboys are exactly what they sound like. Before heading off on adventurers, you were a simple farmboy or farmgirl, tending to another's farm, be that your parents or some other employer. Farmboys are great with animals and agriculture and have a knack for intense physical labor."
-StartingGold = 12
+StartingCoinPurse = SubResource("Resource_es01i")

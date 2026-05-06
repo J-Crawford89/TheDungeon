@@ -8,8 +8,8 @@ public sealed class PlayerActionTargetResolversTests
 		{
 			Id = id,
 			Name = name,
-			GrantKind = TreasureKind.Gold,
-			ValueInGp = 1,
+			GrantKind = TreasureKind.Currency,
+			CurrencyGrant = new CoinPurse { Copper = 1 },
 		};
 
 	private static GameSessionState SessionWithRoom(DungeonRoom room)

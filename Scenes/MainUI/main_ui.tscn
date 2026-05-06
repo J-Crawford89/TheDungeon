@@ -80,13 +80,16 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 3.0
 
-[node name="CharacterPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row1" unique_id=308191709 node_paths=PackedStringArray("_hpLabel", "_levelLabel", "_goldLabel", "_equipmentLabel", "_nameLabel", "_spLabel", "_defendActiveIndicator", "_inventoryButton", "_characterButton")]
+[node name="CharacterPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row1" unique_id=308191709 node_paths=PackedStringArray("_hpLabel", "_levelLabel", "_copperCoinLabel", "_silverCoinLabel", "_goldCoinLabel", "_platinumCoinLabel", "_equipmentLabel", "_nameLabel", "_spLabel", "_defendActiveIndicator", "_inventoryButton", "_characterButton")]
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("3_day7x")
 _hpLabel = NodePath("CharacterMargin/CharacterContent/HpLabel")
 _levelLabel = NodePath("CharacterMargin/CharacterContent/LevelLabel")
-_goldLabel = NodePath("CharacterMargin/CharacterContent/GoldLabel")
+_copperCoinLabel = NodePath("CharacterMargin/CharacterContent/CopperLabel")
+_silverCoinLabel = NodePath("CharacterMargin/CharacterContent/SilverLabel")
+_goldCoinLabel = NodePath("CharacterMargin/CharacterContent/GoldLabel")
+_platinumCoinLabel = NodePath("CharacterMargin/CharacterContent/PlatinumLabel")
 _equipmentLabel = NodePath("CharacterMargin/CharacterContent/EquipmentLabel")
 _nameLabel = NodePath("CharacterMargin/CharacterContent/CharacterNameLabel")
 _spLabel = NodePath("CharacterMargin/CharacterContent/SpLabel")
@@ -112,31 +115,58 @@ horizontal_alignment = 1
 
 [node name="CharacterNameLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1906269824]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "NAME: Testy McTestface"
 
 [node name="HpLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=693056844]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "HP: 10/10"
 
 [node name="SpLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1664566050]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "SP: 10/10"
 
 [node name="LevelLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1023744068]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "Level: 1"
 
 [node name="EquipmentLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1702742806]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "Items: None"
 
-[node name="GoldLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1278620353]
+[node name="CoinPurseLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=791672362]
 layout_mode = 2
+text = "COIN PURSE"
+horizontal_alignment = 1
+
+[node name="CopperLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=2146436780]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Copper: 0"
+
+[node name="SilverLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1723210785]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Silver: 0"
+
+[node name="GoldLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1361354659]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "Gold: 0"
+
+[node name="PlatinumLabel" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1278620353]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Platinum: 0"
 
 [node name="DefendPlaceholder" type="Label" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=1487792610]
 layout_mode = 2
 text = "DEFENDING PLACEHOLDER"
+horizontal_alignment = 1
 
 [node name="PanelSpacer" type="Control" parent="RootMargin/MainVBox/Row1/CharacterPanel/CharacterMargin/CharacterContent" unique_id=577786300]
 layout_mode = 2
