@@ -3,6 +3,8 @@ description: Never edit Godot .tscn/.tres; give exact Godot Editor steps; no wor
 alwaysApply: true
 ---
 
+**Canonical doc:** [docs/TECHNICAL_DESIGN_DOCUMENT.md](../docs/TECHNICAL_DESIGN_DOCUMENT.md) — Godot integration boundaries (serialized assets); ADR-0001 in appendix.
+
 # Godot scenes and serialized resources
 
 ## Non-negotiable

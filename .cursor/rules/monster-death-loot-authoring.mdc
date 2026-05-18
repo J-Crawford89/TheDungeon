@@ -3,9 +3,11 @@ description: Where monster death-loot items live — embedded trash vs standalon
 alwaysApply: false
 ---
 
+**Canonical docs:** [docs/TECHNICAL_DESIGN_DOCUMENT.md](../docs/TECHNICAL_DESIGN_DOCUMENT.md) — section **Monster death loot authoring (embedded vs standalone)** + appendix **ADR-0009**; [docs/GAME_DESIGN_DOCUMENT.md](../docs/GAME_DESIGN_DOCUMENT.md) — Itemization philosophy (product intent only).
+
 # Monster death loot (authoring)
 
-Follow **`docs/MONSTER_DEATH_LOOT.md`** and **ADR-0009** in **`docs/ARCHITECTURE_DECISIONS.md`**.
+Follow the **Monster death loot authoring** section and **ADR-0009** in **`docs/TECHNICAL_DESIGN_DOCUMENT.md`**. **GDD** states design intent only. Legacy stub **`docs/MONSTER_DEATH_LOOT.md`** redirects to those anchors.
 
 - **Embedded** under `MonsterResource.DeathLoot` — **only** for **trash / vendor fodder** with **no** crafting, alchemy, quests, or other shared systems.
 - **Standalone** `Content/Item/…` **.tres** + **`ItemDatabase`** — when the item has **any** non-trash role now or you expect it later (alchemy, recipes, shared drops, NPCs).

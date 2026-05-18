@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://bvw5xpfx81ncx"]
+
+[ext_resource type="PackedScene" uid="uid://d3g1nkrc6gd4w" path="res://Assets/Dice/d10.glb" id="1_qovqe"]
+
+[node name="d102" unique_id=809531797 instance=ExtResource("1_qovqe")]

@@ -3,6 +3,8 @@ description: Tiered assemblies, dumb domain/DTOs, DI, UI events, object initiali
 alwaysApply: true
 ---
 
+**Canonical doc:** [docs/TECHNICAL_DESIGN_DOCUMENT.md](../docs/TECHNICAL_DESIGN_DOCUMENT.md) — Assembly tiers through C# object construction (same rules below).
+
 # Architecture and coding preferences
 
 ## Tiered projects (dependency direction)

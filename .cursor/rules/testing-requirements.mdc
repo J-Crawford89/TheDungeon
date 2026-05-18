@@ -3,6 +3,8 @@ description: New features and bugfixes require tests; regression tests for edge 
 alwaysApply: true
 ---
 
+**Canonical doc:** [docs/TECHNICAL_DESIGN_DOCUMENT.md](../docs/TECHNICAL_DESIGN_DOCUMENT.md) — Testing strategy; ADR-0008 in appendix.
+
 # Tests and regression coverage
 
 ## New features
