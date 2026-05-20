@@ -31,6 +31,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		PotionEffectApplicationService potionEffects,
 		TrapService trapService,
 		IItemDefinitionRepository itemDefinitions,
+		DiceRollPresenterHost? dicePresenterHost = null,
 		PlayerExperienceService? experience = null,
 		IAttackRollAbilityOverlay? attackRollAbilityOverlay = null)
 	{
@@ -46,7 +47,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		_attackRollAbilityOverlay = attackRollAbilityOverlay;
 		_lifecycle = new CombatEncounterLifecycle(_narrative);
 		_monsterTurn = new CombatMonsterTurn(_resolution, _dice, _narrative, _vitals, _playerDowned);
-		_initiative = new CombatInitiative(_dice, _narrative);
+		_initiative = new CombatInitiative(_dice, _narrative, dicePresenterHost);
 		_turnLoop = new CombatTurnLoop(this, _lifecycle, _monsterTurn);
 		_potionEffects = potionEffects;
 		RegisterCombatAbilityHandlers();

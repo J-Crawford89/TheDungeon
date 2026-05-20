@@ -1,5 +1,74 @@
 [gd_scene format=3 uid="uid://dtmjxub4xl0v6"]
 
 [ext_resource type="PackedScene" uid="uid://o0c7qbugbxia" path="res://Assets/Dice/d_percentile.glb" id="1_tmse7"]
+[ext_resource type="Script" uid="uid://dbtqualonrkmw" path="res://Scenes/Components/Dice/DieFaceCalibrationEntry.cs" id="2_sal54"]
 
-[node name="d_percentile2" unique_id=1301158583 instance=ExtResource("1_tmse7")]
+[sub_resource type="Resource" id="Resource_8dt1e"]
+script = ExtResource("2_sal54")
+Face = 0
+FaceOrientation = Quaternion(0.776394, 0, 0.252266, 0.577559)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_v7iag"]
+script = ExtResource("2_sal54")
+Face = 10
+FaceOrientation = Quaternion(0.33948, 0, 0.467255, 0.816349)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_fdr4y"]
+script = ExtResource("2_sal54")
+Face = 20
+FaceOrientation = Quaternion(0, 0, 0.816349, 0.577559)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_ead22"]
+script = ExtResource("2_sal54")
+Face = 30
+FaceOrientation = Quaternion(0.549291, 0, -0.178475, 0.816349)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_h2uiq"]
+script = ExtResource("2_sal54")
+Face = 40
+FaceOrientation = Quaternion(-0.776394, 0, 0.252266, 0.577559)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_2okwa"]
+script = ExtResource("2_sal54")
+Face = 50
+FaceOrientation = Quaternion(0, 0, -0.577559, 0.816349)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_kdcub"]
+script = ExtResource("2_sal54")
+Face = 60
+FaceOrientation = Quaternion(-0.479838, 0, -0.660441, 0.577559)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_i1ypo"]
+script = ExtResource("2_sal54")
+Face = 70
+FaceOrientation = Quaternion(-0.549291, 0, -0.178475, 0.816349)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_wmwn8"]
+script = ExtResource("2_sal54")
+Face = 80
+FaceOrientation = Quaternion(0.479838, 0, -0.660441, 0.577559)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_rxfdr"]
+script = ExtResource("2_sal54")
+Face = 90
+FaceOrientation = Quaternion(-0.33948, 0, 0.467255, 0.816349)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_tmse7"]
+points = PackedVector3Array(-0.2534808, -0.071887195, -0.77986634, -0.0001604557, -0.68, -0.0001526475, -0.82, -0.071887195, -0.0001526475, -0.6634808, 0.07175416, -0.48199648, 0.2533204, 0.07175416, -0.77986634, 0.66332036, -0.071887195, -0.48199648, -0.2534808, -0.071887195, 0.77986634, 0.66332036, -0.071887195, 0.48184383, -0.6634808, 0.07175416, 0.48184383, -0.0001604557, 0.68, -0.0001526475, 0.8200001, 0.07175416, -0.0001526475, 0.2533204, 0.07175416, 0.77986634)
+
+[node name="d_percentile2" unique_id=1502442766 instance=ExtResource("1_tmse7")]
+Faces = Array[ExtResource("2_sal54")]([SubResource("Resource_8dt1e"), SubResource("Resource_v7iag"), SubResource("Resource_fdr4y"), SubResource("Resource_ead22"), SubResource("Resource_h2uiq"), SubResource("Resource_2okwa"), SubResource("Resource_kdcub"), SubResource("Resource_i1ypo"), SubResource("Resource_wmwn8"), SubResource("Resource_rxfdr")])
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." index="1" unique_id=403626757]
+transform = Transform3D(1.04, 0, 0, 0, 1.04, 0, 0, 0, 1.04, 0, 0, 0)
+shape = SubResource("ConvexPolygonShape3D_tmse7")

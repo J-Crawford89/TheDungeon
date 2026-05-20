@@ -13,9 +13,9 @@ dest_files=["res://.godot/imported/d10.glb-43ef217dd500ee406f65c084be2b5ed0.scn"
 
 [params]
 
-nodes/root_type=""
+nodes/root_type="RigidBody3D"
 nodes/root_name=""
-nodes/root_script=null
+nodes/root_script=Resource("uid://kk1rkbxivfbj", "res://Scenes/Components/Dice/DieFaceCalibration.cs")
 nodes/apply_root_scale=true
 nodes/root_scale=1.0
 nodes/import_as_skeleton_bones=false

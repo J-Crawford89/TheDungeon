@@ -65,7 +65,7 @@ public sealed class CombatMonsterTurn
 			},
 			ModifiersWithSources = modifiers,
 		};
-		var result = _resolution.RollAgainstTarget(req);
+		var result = _resolution.RollAgainstTarget(req, DieRollVisualKind.Monster);
 		session.AppendLog(new LogEntry
 		{
 			Kind = LogEntryKind.Roll,

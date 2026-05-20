@@ -1,24 +1,8 @@
 [gd_scene format=3 uid="uid://c33ob4cqx7t6p"]
 
 [ext_resource type="Script" uid="uid://bqmadopqqiqa5" path="res://Scenes/Components/Dice/RollingDie.cs" id="1_sbacc"]
-[ext_resource type="PackedScene" uid="uid://duc82uwc877w4" path="res://Scenes/Components/Dice/d20_visual.tscn" id="2_sbacc"]
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_6qrqq"]
-friction = 0.2
-bounce = 0.45
-
-[sub_resource type="SphereShape3D" id="SphereShape3D_sbacc"]
-radius = 0.965
-
-[node name="RollingDie" type="RigidBody3D" unique_id=108621252]
-physics_material_override = SubResource("PhysicsMaterial_6qrqq")
-gravity_scale = 1.5
-angular_damp = 0.1
+[node name="RollingDie" type="Node3D" unique_id=1996846719]
 script = ExtResource("1_sbacc")
 
 [node name="ModelAnchor" type="Node3D" parent="." unique_id=409548741]
-
-[node name="d202" parent="ModelAnchor" unique_id=1278836092 instance=ExtResource("2_sbacc")]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=457847028]
-shape = SubResource("SphereShape3D_sbacc")

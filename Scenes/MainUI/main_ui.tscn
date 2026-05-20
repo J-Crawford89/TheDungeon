@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://b3cj8ikmbjrhb" path="res://Scenes/Components/LootableItemControl.tscn" id="9_8jwe3"]
 [ext_resource type="Script" uid="uid://bu6sqdijxfqyr" path="res://Scenes/Components/ContainerLootOverlay.cs" id="9_hnx6b"]
 [ext_resource type="PackedScene" uid="uid://c6a5ctuwo5260" path="res://Scenes/Menus/NotebookOverlay.tscn" id="10_fo6o3"]
+[ext_resource type="PackedScene" uid="uid://chgqdbjnwt8i5" path="res://Scenes/Components/Dice/dice_roll_overlay.tscn" id="13_oha01"]
 [ext_resource type="Script" uid="uid://dhxmgcg1n3vmh" path="res://Scenes/MainUI/GameOverOverlay.cs" id="14_pl31g"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hnx6b"]
@@ -38,7 +39,7 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="MainUI" type="Control" unique_id=1749426459 node_paths=PackedStringArray("_mainViewPanel", "_characterPanel", "_commandPanel", "_logPanel", "_mapPanel", "_gameOverOverlay", "_notebookOverlay", "_containerLootOverlay")]
+[node name="MainUI" type="Control" unique_id=1749426459 node_paths=PackedStringArray("_mainViewPanel", "_characterPanel", "_commandPanel", "_logPanel", "_mapPanel", "_gameOverOverlay", "_notebookOverlay", "_containerLootOverlay", "_diceRollOverlay")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -54,6 +55,7 @@ _mapPanel = NodePath("RootMargin/MainVBox/Row2/MapPanel")
 _gameOverOverlay = NodePath("GameOverOverlay")
 _notebookOverlay = NodePath("NotebookOverlay")
 _containerLootOverlay = NodePath("ContainerLootOverlay")
+_diceRollOverlay = NodePath("DiceRollOverlay")
 
 [node name="RootMargin" type="MarginContainer" parent="." unique_id=864533212]
 layout_mode = 1
@@ -532,4 +534,7 @@ text = "Quit Game"
 
 [node name="NotebookOverlay" parent="." unique_id=1051656938 instance=ExtResource("10_fo6o3")]
 visible = false
+layout_mode = 1
+
+[node name="DiceRollOverlay" parent="." unique_id=352711561 instance=ExtResource("13_oha01")]
 layout_mode = 1

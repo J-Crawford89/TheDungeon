@@ -1,32 +1,42 @@
 public sealed class ResolutionService
 {
-    private readonly IDiceRollRequestExecutor _diceRollService;
+	private readonly IDiceRollRequestExecutor _diceRollService;
+	private readonly DiceRollPresenterHost? _dicePresenterHost;
 
-    public ResolutionService(IDiceRollRequestExecutor diceRollService)
-    {
-        _diceRollService = diceRollService;
-    }
+	public ResolutionService(IDiceRollRequestExecutor diceRollService, DiceRollPresenterHost? dicePresenterHost = null)
+	{
+		_diceRollService = diceRollService;
+		_dicePresenterHost = dicePresenterHost;
+	}
 
-    public ResolutionResult RollAgainstTarget(DiceRollRequest request)
-    {
-        var roll = _diceRollService.Roll(request);
+	public ResolutionResult RollAgainstTarget(DiceRollRequest request, DieRollVisualKind visualKind = DieRollVisualKind.Player)
+	{
+		var roll = _diceRollService.Roll(request);
+		PresentRollVisual(roll, request, visualKind);
 
-        return new ResolutionResult()
-        {
-            Roll = roll,
-            TargetNumber = request.TargetNumber,
-            Outcome = ParseOutcome(roll, request.TargetNumber)
-        };
-    }
+		return new ResolutionResult()
+		{
+			Roll = roll,
+			TargetNumber = request.TargetNumber,
+			Outcome = ParseOutcome(roll, request.TargetNumber)
+		};
+	}
 
-    /// <summary>Uses the same rules as <see cref="RollAgainstTarget"/> for an existing roll vs a DC.</summary>
-    public ResolutionOutcome ResolveOutcomeAgainstTarget(DiceRollResult roll, int targetNumber) =>
-        ParseOutcome(roll, targetNumber);
+	public void PresentRollVisual(DiceRollResult roll, DiceRollRequest request, DieRollVisualKind visualKind)
+	{
+		if (_dicePresenterHost == null)
+			return;
+		DiceRollPresentation.PresentRollFireAndForget(_dicePresenterHost.Presenter, roll, request, visualKind);
+	}
 
-    private ResolutionOutcome ParseOutcome(DiceRollResult roll, int targetNumber)
-    {
-        if (IsCritical(roll, out var outcome))
-            return outcome;
+	/// <summary>Uses the same rules as <see cref="RollAgainstTarget"/> for an existing roll vs a DC.</summary>
+	public ResolutionOutcome ResolveOutcomeAgainstTarget(DiceRollResult roll, int targetNumber) =>
+		ParseOutcome(roll, targetNumber);
+
+	private ResolutionOutcome ParseOutcome(DiceRollResult roll, int targetNumber)
+	{
+		if (IsCritical(roll, out var outcome))
+			return outcome;
 
         int variance = roll.Total - targetNumber;
         switch (variance)
@@ -38,23 +48,23 @@ public sealed class ResolutionService
         }
     }
 
-    private bool IsCritical(DiceRollResult roll, out ResolutionOutcome outcome)
-    {
-        outcome = ResolutionOutcome.None;
-        if (roll.ResolvedD20CheckValue is not { } v)
-            return false;
-        if (v == 20)
-        {
-            outcome = ResolutionOutcome.CriticalSuccess;
-            return true;
-        }
+	private bool IsCritical(DiceRollResult roll, out ResolutionOutcome outcome)
+	{
+		outcome = ResolutionOutcome.None;
+		if (roll.ResolvedD20CheckValue is not { } v)
+			return false;
+		if (v == 20)
+		{
+			outcome = ResolutionOutcome.CriticalSuccess;
+			return true;
+		}
 
-        if (v == 1)
-        {
-            outcome = ResolutionOutcome.CriticalFail;
-            return true;
-        }
+		if (v == 1)
+		{
+			outcome = ResolutionOutcome.CriticalFail;
+			return true;
+		}
 
-        return false;
-    }
+		return false;
+	}
 }

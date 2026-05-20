@@ -1,0 +1,66 @@
+[gd_resource type="Resource" script_class="DieVisualCatalog" format=3 uid="uid://b2tr5vcrebhmg"]
+
+[ext_resource type="Script" uid="uid://hgngvu32y7r1" path="res://Resources/DieVisualCatalogEntry.cs" id="1_py7de"]
+[ext_resource type="Script" uid="uid://omcoscosycip" path="res://Resources/DieVisualCatalog.cs" id="1_yg2m2"]
+[ext_resource type="PackedScene" uid="uid://dcmucm7rq2syy" path="res://Scenes/Components/Dice/d3_visual.tscn" id="2_uvujm"]
+[ext_resource type="PackedScene" uid="uid://bfgxreuje1sjc" path="res://Scenes/Components/Dice/d4_visual.tscn" id="3_jdnr3"]
+[ext_resource type="PackedScene" uid="uid://bsp8d50byml6k" path="res://Scenes/Components/Dice/d6_visual.tscn" id="4_w42ls"]
+[ext_resource type="PackedScene" uid="uid://bke8arhijbv6n" path="res://Scenes/Components/Dice/d8_visual.tscn" id="5_fldec"]
+[ext_resource type="PackedScene" uid="uid://bvw5xpfx81ncx" path="res://Scenes/Components/Dice/d10_visual.tscn" id="6_esblj"]
+[ext_resource type="PackedScene" uid="uid://03cxpojxthpq" path="res://Scenes/Components/Dice/d12_visual.tscn" id="7_7nky1"]
+[ext_resource type="PackedScene" uid="uid://duc82uwc877w4" path="res://Scenes/Components/Dice/d20_visual.tscn" id="8_lu7s0"]
+[ext_resource type="PackedScene" uid="uid://dtmjxub4xl0v6" path="res://Scenes/Components/Dice/d10_percentile_visual.tscn" id="9_sdoas"]
+
+[sub_resource type="Resource" id="Resource_bmix5"]
+script = ExtResource("1_py7de")
+DieType = 3
+VisualScene = ExtResource("2_uvujm")
+metadata/_custom_type_script = "uid://hgngvu32y7r1"
+
+[sub_resource type="Resource" id="Resource_kde22"]
+script = ExtResource("1_py7de")
+DieType = 4
+VisualScene = ExtResource("3_jdnr3")
+metadata/_custom_type_script = "uid://hgngvu32y7r1"
+
+[sub_resource type="Resource" id="Resource_chds5"]
+script = ExtResource("1_py7de")
+DieType = 6
+VisualScene = ExtResource("4_w42ls")
+metadata/_custom_type_script = "uid://hgngvu32y7r1"
+
+[sub_resource type="Resource" id="Resource_3q0bo"]
+script = ExtResource("1_py7de")
+DieType = 8
+VisualScene = ExtResource("5_fldec")
+metadata/_custom_type_script = "uid://hgngvu32y7r1"
+
+[sub_resource type="Resource" id="Resource_c1tph"]
+script = ExtResource("1_py7de")
+DieType = 10
+VisualScene = ExtResource("6_esblj")
+metadata/_custom_type_script = "uid://hgngvu32y7r1"
+
+[sub_resource type="Resource" id="Resource_yoaly"]
+script = ExtResource("1_py7de")
+DieType = 12
+VisualScene = ExtResource("7_7nky1")
+metadata/_custom_type_script = "uid://hgngvu32y7r1"
+
+[sub_resource type="Resource" id="Resource_vfbc6"]
+script = ExtResource("1_py7de")
+DieType = 20
+VisualScene = ExtResource("8_lu7s0")
+metadata/_custom_type_script = "uid://hgngvu32y7r1"
+
+[sub_resource type="Resource" id="Resource_v7g5f"]
+script = ExtResource("1_py7de")
+DieType = 100
+Role = 1
+VisualScene = ExtResource("9_sdoas")
+metadata/_custom_type_script = "uid://hgngvu32y7r1"
+
+[resource]
+script = ExtResource("1_yg2m2")
+Entries = Array[ExtResource("1_py7de")]([SubResource("Resource_bmix5"), SubResource("Resource_kde22"), SubResource("Resource_chds5"), SubResource("Resource_3q0bo"), SubResource("Resource_c1tph"), SubResource("Resource_yoaly"), SubResource("Resource_vfbc6"), SubResource("Resource_v7g5f")])
+metadata/_custom_type_script = "uid://omcoscosycip"

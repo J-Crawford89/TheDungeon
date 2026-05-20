@@ -9,12 +9,18 @@ public sealed class InspectService
 	private readonly IDiceRollRequestExecutor _dice;
 	private readonly ResolutionService _resolution;
 	private readonly NarrativeService _narrative;
+	private readonly DiceRollPresenterHost? _dicePresenterHost;
 
-	public InspectService(IDiceRollRequestExecutor dice, ResolutionService resolution, NarrativeService narrative)
+	public InspectService(
+		IDiceRollRequestExecutor dice,
+		ResolutionService resolution,
+		NarrativeService narrative,
+		DiceRollPresenterHost? dicePresenterHost = null)
 	{
 		_dice = dice;
 		_resolution = resolution;
 		_narrative = narrative;
+		_dicePresenterHost = dicePresenterHost;
 	}
 
 	/// <summary>
@@ -50,6 +56,7 @@ public sealed class InspectService
 		};
 
 		var diceRoll = _dice.Roll(req);
+		_resolution.PresentRollVisual(diceRoll, req, DieRollVisualKind.Player);
 		session.AppendLog(new LogEntry
 		{
 			Kind = LogEntryKind.Roll,

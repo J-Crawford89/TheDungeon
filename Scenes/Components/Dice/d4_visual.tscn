@@ -1,5 +1,36 @@
 [gd_scene format=3 uid="uid://bfgxreuje1sjc"]
 
 [ext_resource type="PackedScene" uid="uid://cg2j6j68d0gr6" path="res://Assets/Dice/d4.glb" id="1_6liog"]
+[ext_resource type="Script" uid="uid://dbtqualonrkmw" path="res://Scenes/Components/Dice/DieFaceCalibrationEntry.cs" id="2_lu00m"]
 
-[node name="d42" unique_id=1354510126 instance=ExtResource("1_6liog")]
+[sub_resource type="Resource" id="Resource_tqymw"]
+script = ExtResource("2_lu00m")
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_csydn"]
+script = ExtResource("2_lu00m")
+Face = 2
+FaceOrientation = Quaternion(0, 0, 0.816768, 0.576966)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_ium7f"]
+script = ExtResource("2_lu00m")
+Face = 3
+FaceOrientation = Quaternion(0.707342, 0, -0.408384, 0.576966)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_a82cl"]
+script = ExtResource("2_lu00m")
+Face = 4
+FaceOrientation = Quaternion(-0.707342, 0, -0.408384, 0.576966)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_6liog"]
+points = PackedVector3Array(0.93999994, -0.33333334, -0.00015938282, -0.47, -0.33333334, 0.8140639, -0.47, -0.33333334, -0.8140639, -4.6014786e-05, 1.0000001, -0.00015938282)
+
+[node name="d42" unique_id=260746781 instance=ExtResource("1_6liog")]
+Faces = Array[ExtResource("2_lu00m")]([SubResource("Resource_tqymw"), SubResource("Resource_csydn"), SubResource("Resource_ium7f"), SubResource("Resource_a82cl")])
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." index="1" unique_id=1416808317]
+transform = Transform3D(1.04, 0, 0, 0, 1.04, 0, 0, 0, 1.04, 0, 0, 0)
+shape = SubResource("ConvexPolygonShape3D_6liog")

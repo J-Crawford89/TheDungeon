@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="DieVisualCatalogLibrary" format=3 uid="uid://bdenbq3xdg05r"]
+
+[ext_resource type="Script" uid="uid://omcoscosycip" path="res://Resources/DieVisualCatalog.cs" id="1_wdmy4"]
+[ext_resource type="Script" uid="uid://c8jnvw86fa6y1" path="res://Resources/DieVisualCatalogLibrary.cs" id="2_3str8"]
+[ext_resource type="Resource" uid="uid://bleqoxntc3nt7" path="res://Content/Dice/MonsterDiceSet.tres" id="2_lvofx"]
+[ext_resource type="Resource" uid="uid://b2tr5vcrebhmg" path="res://Content/Dice/PlayerDiceSet.tres" id="3_h8vsv"]
+
+[resource]
+script = ExtResource("2_3str8")
+Catalogs = Array[ExtResource("1_wdmy4")]([ExtResource("2_lvofx"), ExtResource("3_h8vsv")])
+metadata/_custom_type_script = "uid://c8jnvw86fa6y1"

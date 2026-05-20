@@ -185,7 +185,8 @@ public partial class GameRoot : Control
 				FloorConnectionType.None);
 		var dungeonBootstrap = new DungeonBootstrap(roomFeaturePopulation, handBuiltPopulation, proceduralFloorFactory);
 		var diceRollService = new DiceRollService(random);
-		var resolutionService = new ResolutionService(diceRollService);
+		var dicePresenterHost = new DiceRollPresenterHost();
+		var resolutionService = new ResolutionService(diceRollService, dicePresenterHost);
 		var experienceService = new PlayerExperienceService(narrativeService);
 		var treasurePickupService = new TreasurePickupService(narrativeService, itemRepo, proficiencyAggregation);
 		var potionEffectApplicationService = new PotionEffectApplicationService(diceRollService, narrativeService, itemRepo);
@@ -210,8 +211,9 @@ public partial class GameRoot : Control
 			potionEffectApplicationService,
 			trapService,
 			itemRepo,
+			dicePresenterHost,
 			experienceService);
-		var inspectService = new InspectService(diceRollService, resolutionService, narrativeService);
+		var inspectService = new InspectService(diceRollService, resolutionService, narrativeService, dicePresenterHost);
 		var explorationService = new ExplorationService(
 			roomFeaturePopulation,
 			combatService,
@@ -241,6 +243,7 @@ public partial class GameRoot : Control
 			explorationService,
 			diceRollService,
 			resolutionService,
+			dicePresenterHost,
 			treasurePickupService,
 			vitalsService,
 			gameOverDownedHandler,

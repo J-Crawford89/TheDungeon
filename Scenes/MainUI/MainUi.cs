@@ -13,6 +13,7 @@ public partial class MainUi : Control
 	[Export] private NotebookOverlay? _notebookOverlay;
 
 	[Export] private ContainerLootOverlay? _containerLootOverlay;
+	[Export] private DiceRollOverlay? _diceRollOverlay;
 
 	public event Action? QuitRequested;
 	public event Action? ReturnToStartMenuRequested;
@@ -42,6 +43,8 @@ public partial class MainUi : Control
 		}
 
 		_mainViewPanel.BindIconResolver(_runContext.Icons);
+
+		_runContext.DicePresenterHost.Presenter = new GodotDiceRollPresenter(_diceRollOverlay);
 
 		var session = _runContext.Session;
 		var narrativeService = _runContext.NarrativeService;

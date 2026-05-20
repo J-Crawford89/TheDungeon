@@ -2,21 +2,34 @@
 
 [ext_resource type="PackedScene" uid="uid://c33ob4cqx7t6p" path="res://Scenes/Components/Dice/RollingDie.tscn" id="1_0mbuc"]
 [ext_resource type="Script" uid="uid://djoqrvgr8jrig" path="res://Scenes/Components/Dice/DiceTestScene.cs" id="1_4tsla"]
+[ext_resource type="Resource" uid="uid://bdenbq3xdg05r" path="res://Content/Dice/BaseDiceSets.tres" id="3_i1o4d"]
+[ext_resource type="Script" uid="uid://xvccaq1yj0yp" path="res://Scenes/Components/Dice/DicePlayAreaWalls.cs" id="4_dyah1"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4tsla"]
 friction = 0.25
 bounce = 0.35
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_4tsla"]
+size = Vector3(18, 0.25, 10)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dyah1"]
+albedo_color = Color(0.70352215, 0.78494036, 0.87997353, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_i1o4d"]
+material = SubResource("StandardMaterial3D_dyah1")
+size = Vector3(18, 0.25, 10)
 
-[node name="DiceTestScene" type="Node3D" unique_id=421213174 node_paths=PackedStringArray("Die")]
+[node name="DiceTestScene" type="Node3D" unique_id=421213174]
 script = ExtResource("1_4tsla")
-Die = NodePath("RollingDie")
+RollingDieScene = ExtResource("1_0mbuc")
+VisualCatalogLibrary = ExtResource("3_i1o4d")
+SpawnRootPath = NodePath("DiceSpawn")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=979057572]
-transform = Transform3D(1, 0, 0, 0, 0.819152, 0.5735764, 0, -0.5735764, 0.819152, 0, 4, 6)
+transform = Transform3D(1, 0, 0, 0, -4.3711385e-08, 0.99999994, 0, -0.99999994, -4.3711385e-08, 0, 10, 0)
+projection = 1
+current = true
+size = 10.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1656718887]
 transform = Transform3D(0.70710677, -0.49999997, 0.49999997, 0, 0.70710677, 0.70710677, -0.70710677, -0.49999997, 0.49999997, 0, 0, 0)
@@ -26,12 +39,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.01, 0)
 physics_material_override = SubResource("PhysicsMaterial_4tsla")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=958415708]
-transform = Transform3D(10, 0, 0, 0, 0.2, 0, 0, 0, 10, 0, 0, 0)
 shape = SubResource("BoxShape3D_4tsla")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Floor" unique_id=1140521462]
-transform = Transform3D(10, 0, 0, 0, 0.2, 0, 0, 0, 10, 0, 0, 0)
 mesh = SubResource("BoxMesh_i1o4d")
 
-[node name="RollingDie" parent="." unique_id=108621252 instance=ExtResource("1_0mbuc")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+[node name="DiceSpawn" type="Node3D" parent="." unique_id=1274348059]
+
+[node name="PlayAreaWalls" type="Node3D" parent="." unique_id=1103236949]
+script = ExtResource("4_dyah1")

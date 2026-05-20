@@ -1,5 +1,73 @@
 [gd_scene format=3 uid="uid://bvw5xpfx81ncx"]
 
 [ext_resource type="PackedScene" uid="uid://d3g1nkrc6gd4w" path="res://Assets/Dice/d10.glb" id="1_qovqe"]
+[ext_resource type="Script" uid="uid://dbtqualonrkmw" path="res://Scenes/Components/Dice/DieFaceCalibrationEntry.cs" id="2_7hl12"]
 
-[node name="d102" unique_id=809531797 instance=ExtResource("1_qovqe")]
+[sub_resource type="Resource" id="Resource_srqtu"]
+script = ExtResource("2_7hl12")
+FaceOrientation = Quaternion(0.33948, 0, 0.467255, 0.816349)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_ru8rx"]
+script = ExtResource("2_7hl12")
+Face = 2
+FaceOrientation = Quaternion(0, 0, 0.816349, 0.577559)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_tu714"]
+script = ExtResource("2_7hl12")
+Face = 3
+FaceOrientation = Quaternion(0.549291, 0, -0.178475, 0.816349)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_dummy"]
+script = ExtResource("2_7hl12")
+Face = 4
+FaceOrientation = Quaternion(-0.776394, 0, 0.252266, 0.577559)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_0fkwf"]
+script = ExtResource("2_7hl12")
+Face = 5
+FaceOrientation = Quaternion(0, 0, -0.577559, 0.816349)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_yct1f"]
+script = ExtResource("2_7hl12")
+Face = 6
+FaceOrientation = Quaternion(-0.479838, 0, -0.66044, 0.577559)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_u8ug4"]
+script = ExtResource("2_7hl12")
+Face = 7
+FaceOrientation = Quaternion(-0.549291, 0, -0.178475, 0.816349)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_e41d2"]
+script = ExtResource("2_7hl12")
+Face = 8
+FaceOrientation = Quaternion(0.479838, 0, -0.66044, 0.577559)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_fav8y"]
+script = ExtResource("2_7hl12")
+Face = 9
+FaceOrientation = Quaternion(-0.33948, 0, 0.467255, 0.816349)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_jq7ak"]
+script = ExtResource("2_7hl12")
+Face = 10
+FaceOrientation = Quaternion(0.776394, 0, 0.252266, 0.577559)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_qovqe"]
+points = PackedVector3Array(-0.2534808, -0.071887195, -0.77986634, -0.0001604557, -0.68, -0.0001526475, -0.82, -0.071887195, -0.0001526475, -0.6634808, 0.07175416, -0.48199648, 0.2533204, 0.07175416, -0.77986634, 0.66332036, -0.071887195, -0.48199648, -0.2534808, -0.071887195, 0.77986634, 0.66332036, -0.071887195, 0.48184383, -0.6634808, 0.07175416, 0.48184383, -0.0001604557, 0.68, -0.0001526475, 0.8200001, 0.07175416, -0.0001526475, 0.2533204, 0.07175416, 0.77986634)
+
+[node name="d102" unique_id=1075223880 instance=ExtResource("1_qovqe")]
+Faces = Array[ExtResource("2_7hl12")]([SubResource("Resource_srqtu"), SubResource("Resource_ru8rx"), SubResource("Resource_tu714"), SubResource("Resource_dummy"), SubResource("Resource_0fkwf"), SubResource("Resource_yct1f"), SubResource("Resource_u8ug4"), SubResource("Resource_e41d2"), SubResource("Resource_fav8y"), SubResource("Resource_jq7ak")])
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." index="1" unique_id=1139146544]
+transform = Transform3D(1.04, 0, 0, 0, 1.04, 0, 0, 0, 1.04, 0, 0, 0)
+shape = SubResource("ConvexPolygonShape3D_qovqe")

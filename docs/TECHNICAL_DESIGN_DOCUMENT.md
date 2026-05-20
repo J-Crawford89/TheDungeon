@@ -169,6 +169,54 @@ Keep scene scripts thin; move orchestration and heavy interaction logic into coo
 
 ---
 
+## 3D dice presentation
+
+Authoritative rolls stay in [`DiceRollService`](../Scripts/3.Game/Services/DiceRollService.cs). The overlay only **displays** already-resolved faces. Presentation is **fire-and-forget** today (narrative/combat do not await dice); gating outcomes on animation completes is deferred to the game-wide async feature.
+
+### Flow
+
+1. Game code rolls (`DiceRollService` / `ResolutionService.RollAgainstTarget`).
+2. [`PhysicalDieRollExtractor`](../Scripts/3.Game/Helpers/PhysicalDieRollExtractor.cs) maps `DiceRollResult` → [`PhysicalDieRollSpec`](../Scripts/3.Game.Contracts/Dice/PhysicalDieRollSpec.cs) (d100 → percentile tens + ones d10).
+3. [`IDiceRollPresenter`](../Scripts/3.Game.Contracts/Dice/IDiceRollPresenter.cs) (`GodotDiceRollPresenter` → [`DiceRollOverlay`](../Scenes/Components/Dice/DiceRollOverlay.cs)) spawns [`RollingDie`](../Scenes/Components/Dice/RollingDie.cs) wrappers concurrently.
+4. Each roll: physics toss → optional face snap → `PostSnapDisplaySeconds` freeze → overlay `DieLingerSeconds` → `QueueFree`.
+
+### Scene model
+
+- **`RollingDie`**: `Node3D` wrapper (spawn offset, orchestration).
+- **`*_visual.tscn`**: root **`RigidBody3D`** with mesh, **convex `CollisionShape3D`**, and [`DieFaceCalibration`](../Scenes/Components/Dice/DieFaceCalibration.cs) on the same node (or child).
+- **No** nested `RigidBody3D` under another `RigidBody3D`. Containment uses **floor + [`DicePlayAreaWalls`](../Scenes/Components/Dice/DicePlayAreaWalls.cs)** (no post-roll teleport clamp).
+
+### Visual catalogs
+
+- [`DieVisualCatalog`](../Resources/DieVisualCatalog.cs): one **situation** (`DieRollVisualKind` — Player, Monster) + entries (`DieType`, `DieVisualRole`, `PackedScene`).
+- [`DieVisualCatalogLibrary`](../Resources/DieVisualCatalogLibrary.cs): array of catalogs; overlay resolves `(situation, dieType, role)`.
+- d100 percentile tens may be keyed as `d10` + `PercentileTens` or `d100` + `PercentileTens` ([`DieVisualCatalogKeys`](../Scripts/3.Game/Helpers/DieVisualCatalogKeys.cs)).
+
+### Face calibration (Quaternion, not Euler)
+
+Per face on `DieFaceCalibration`: **`FaceOrientation` (`Quaternion` x,y,z,w)** — die rotation where that face is the intended “up” read face before camera snap. **Do not** enter Euler degrees (X,Y,Z); those are not face directions.
+
+Snap: calibration quaternion → align face toward camera → random spin around camera axis ([`DieFaceOrientationSolver`](../Scripts/3.Game/Helpers/DieFaceOrientationSolver.cs)).
+
+### d100 display rules
+
+[`PercentileDiceFaceMapper`](../Scripts/3.Game/Helpers/PercentileDiceFaceMapper.cs): e.g. 24 → tens 20 + ones 4; 6 → 00 + 6; 30 → 30 + 10; 100 → 00 + 10.
+
+### Godot editor checklist (human-owned)
+
+1. **`RollingDie.tscn`**: root `Node3D`; remove generic sphere collider and baked visual children.
+2. **Each `*_visual.tscn`**: root `RigidBody3D`; convex collider; `DieFaceCalibration` with `FaceOrientation` per face.
+3. **`dice_roll_overlay`**: assign `RollingDieScene`, `DiceSpawnPath`, `CameraPath` (→ `DiceWorld/Camera3D`), `VisualCatalogLibrary`; add `DicePlayAreaWalls` under `DiceWorld`; tune wall half-extents to spawn bounds.
+4. **`main_ui.tscn`**: export `DiceRollOverlay` on `MainUi`.
+5. **Catalog `.tres`**: `PlayerDieVisualCatalog`, `MonsterDieVisualCatalog`, wrapped in `DieVisualCatalogLibrary`.
+6. **`dice_test_scene`**: wire script exports; remove baked `RollingDie` under spawn root; floor + walls + camera.
+
+### Test harness
+
+[`dice_test_scene`](../Scenes/Components/Dice/dice_test_scene.tscn) + [`DiceTestScene.cs`](../Scenes/Components/Dice/DiceTestScene.cs): per-die spawn, free roll, gameplay roll (forced face), d100 pair, calibration verify, **Clear all**. `PersistDiceUntilClear` (default on) vs overlay-style auto-remove with linger.
+
+---
+
 ## Testing strategy
 
 This section incorporates the former [`docs/TESTING_POLICY.md`](./TESTING_POLICY.md) (stub) and **ADR-0008**.

@@ -1,6 +1,15 @@
 [gd_scene format=3 uid="uid://chgqdbjnwt8i5"]
 
 [ext_resource type="Script" uid="uid://cpi0ojmf7cw18" path="res://Scenes/Components/Dice/DiceRollOverlay.cs" id="1_4otwk"]
+[ext_resource type="PackedScene" uid="uid://c33ob4cqx7t6p" path="res://Scenes/Components/Dice/RollingDie.tscn" id="2_oaku6"]
+[ext_resource type="Resource" uid="uid://bdenbq3xdg05r" path="res://Content/Dice/BaseDiceSets.tres" id="3_kr1rg"]
+[ext_resource type="Script" uid="uid://xvccaq1yj0yp" path="res://Scenes/Components/Dice/DicePlayAreaWalls.cs" id="4_kr1rg"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_oaku6"]
+size = Vector3(18, 0.25, 10)
+
+[sub_resource type="BoxMesh" id="BoxMesh_oaku6"]
+size = Vector3(18, 0.25, 10)
 
 [node name="DiceRollOverlay" type="Control" unique_id=352711561]
 layout_mode = 3
@@ -10,6 +19,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_4otwk")
+RollingDieScene = ExtResource("2_oaku6")
+DiceSpawnPath = NodePath("SubViewportContainer/SubViewport/DiceWorld/DiceSpawn")
+CameraPath = NodePath("SubViewportContainer/SubViewport/DiceWorld/Camera3D")
+VisualCatalogLibrary = ExtResource("3_kr1rg")
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=776835778]
 layout_mode = 1
@@ -21,18 +34,30 @@ grow_vertical = 2
 
 [node name="SubViewport" type="SubViewport" parent="SubViewportContainer" unique_id=497238685]
 transparent_bg = true
+handle_input_locally = false
 size = Vector2i(1280, 720)
+render_target_update_mode = 4
 
 [node name="DiceWorld" type="Node3D" parent="SubViewportContainer/SubViewport" unique_id=1550514072]
 
 [node name="Camera3D" type="Camera3D" parent="SubViewportContainer/SubViewport/DiceWorld" unique_id=20458006]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 10, 0)
+projection = 1
+current = true
+size = 10.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport/DiceWorld" unique_id=1856448599]
 
 [node name="Floor" type="StaticBody3D" parent="SubViewportContainer/SubViewport/DiceWorld" unique_id=1292313147]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewportContainer/SubViewport/DiceWorld/Floor" unique_id=1753639533]
+shape = SubResource("BoxShape3D_oaku6")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewportContainer/SubViewport/DiceWorld/Floor" unique_id=725262611]
+visible = false
+mesh = SubResource("BoxMesh_oaku6")
 
 [node name="DiceSpawn" type="Node3D" parent="SubViewportContainer/SubViewport/DiceWorld" unique_id=265719382]
+
+[node name="PlayAreaWalls" type="Node3D" parent="SubViewportContainer/SubViewport/DiceWorld" unique_id=2008837266]
+script = ExtResource("4_kr1rg")

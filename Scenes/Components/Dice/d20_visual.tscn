@@ -1,5 +1,133 @@
 [gd_scene format=3 uid="uid://duc82uwc877w4"]
 
 [ext_resource type="PackedScene" uid="uid://c5yb5c0sc0m1k" path="res://Assets/Dice/d20.glb" id="1_hbovu"]
+[ext_resource type="Script" uid="uid://dbtqualonrkmw" path="res://Scenes/Components/Dice/DieFaceCalibrationEntry.cs" id="2_onfmf"]
 
-[node name="d202" unique_id=1278836092 instance=ExtResource("1_hbovu")]
+[sub_resource type="Resource" id="Resource_r7wbv"]
+script = ExtResource("2_onfmf")
+FaceOrientation = Quaternion(0, 0, -0.983405, 0.181421)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_iqd21"]
+script = ExtResource("2_onfmf")
+Face = 2
+FaceOrientation = Quaternion(0, 0, 0.983405, 0.181421)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_3xu1p"]
+script = ExtResource("2_onfmf")
+Face = 3
+FaceOrientation = Quaternion(-0.823657, 0, 0, 0.567088)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_uw3ay"]
+script = ExtResource("2_onfmf")
+Face = 4
+FaceOrientation = Quaternion(-0.627962, 0, -0.627964, 0.459701)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_p3ppo"]
+script = ExtResource("2_onfmf")
+Face = 5
+FaceOrientation = Quaternion(-0.627962, 0, 0.627964, 0.459701)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_d55gu"]
+script = ExtResource("2_onfmf")
+Face = 6
+FaceOrientation = Quaternion(-0.567088, 0, 0, 0.823657)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_5wmho"]
+script = ExtResource("2_onfmf")
+Face = 7
+FaceOrientation = Quaternion(-0.325058, 0, -0.325057, 0.888074)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_aqrr0"]
+script = ExtResource("2_onfmf")
+Face = 8
+FaceOrientation = Quaternion(-0.325057, 0, 0.325058, 0.888074)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_18l76"]
+script = ExtResource("2_onfmf")
+Face = 9
+FaceOrientation = Quaternion(-0.252311, 0, -0.66056, 0.707107)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_w4g4q"]
+script = ExtResource("2_onfmf")
+Face = 10
+FaceOrientation = Quaternion(0.252311, 0, -0.66056, 0.707107)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_a4med"]
+script = ExtResource("2_onfmf")
+Face = 11
+FaceOrientation = Quaternion(-0.252311, 0, 0.66056, 0.707107)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_jdwem"]
+script = ExtResource("2_onfmf")
+Face = 12
+FaceOrientation = Quaternion(0.252311, 0, 0.66056, 0.707107)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_5hep5"]
+script = ExtResource("2_onfmf")
+Face = 13
+FaceOrientation = Quaternion(0.627963, 0, -0.627963, 0.459701)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_8nedn"]
+script = ExtResource("2_onfmf")
+Face = 14
+FaceOrientation = Quaternion(0.627962, 0, 0.627964, 0.459701)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_ww8ex"]
+script = ExtResource("2_onfmf")
+Face = 15
+FaceOrientation = Quaternion(0.823657, 0, 0, 0.567088)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_e1j3c"]
+script = ExtResource("2_onfmf")
+Face = 16
+FaceOrientation = Quaternion(0.325057, 0, -0.325058, 0.888074)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_ca63h"]
+script = ExtResource("2_onfmf")
+Face = 17
+FaceOrientation = Quaternion(0.325057, 0, 0.325058, 0.888074)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_apchp"]
+script = ExtResource("2_onfmf")
+Face = 18
+FaceOrientation = Quaternion(0.567088, 0, 0, 0.823657)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_eeyks"]
+script = ExtResource("2_onfmf")
+Face = 19
+FaceOrientation = Quaternion(0, 0, -0.181421, 0.983405)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="Resource" id="Resource_3au5b"]
+script = ExtResource("2_onfmf")
+Face = 20
+FaceOrientation = Quaternion(0, 0, 0.181421, 0.983405)
+metadata/_custom_type_script = "uid://dbtqualonrkmw"
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_hbovu"]
+points = PackedVector3Array(-0.00016647577, 0.85048425, 0.5255784, 0.5255784, -0.00016647577, 0.85048425, 0.85048425, 0.5255784, -0.00016647577, -0.00016647577, 0.85048425, -0.5257448, -0.8506508, 0.5255784, -0.00016647577, -0.5257448, -0.00016647577, 0.85048425, 0.85048425, -0.5257448, -0.00016647577, -0.00016647577, -0.8506508, 0.5255784, 0.5255784, -0.00016647577, -0.8506508, -0.5257448, -0.00016647577, -0.8506508, -0.8506508, -0.5257448, -0.00016647577, -0.00016647577, -0.8506508, -0.5257448)
+
+[node name="d202" unique_id=1434020238 instance=ExtResource("1_hbovu")]
+Faces = Array[ExtResource("2_onfmf")]([SubResource("Resource_r7wbv"), SubResource("Resource_iqd21"), SubResource("Resource_3xu1p"), SubResource("Resource_uw3ay"), SubResource("Resource_p3ppo"), SubResource("Resource_d55gu"), SubResource("Resource_5wmho"), SubResource("Resource_aqrr0"), SubResource("Resource_18l76"), SubResource("Resource_w4g4q"), SubResource("Resource_a4med"), SubResource("Resource_jdwem"), SubResource("Resource_5hep5"), SubResource("Resource_8nedn"), SubResource("Resource_ww8ex"), SubResource("Resource_e1j3c"), SubResource("Resource_ca63h"), SubResource("Resource_apchp"), SubResource("Resource_eeyks"), SubResource("Resource_3au5b")])
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." index="1" unique_id=436109999]
+transform = Transform3D(1.04, 0, 0, 0, 1.04, 0, 0, 0, 1.04, 0, 0, 0)
+shape = SubResource("ConvexPolygonShape3D_hbovu")
