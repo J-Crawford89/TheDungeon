@@ -1,7 +1,11 @@
 [gd_scene format=3 uid="uid://03cxpojxthpq"]
 
 [ext_resource type="PackedScene" uid="uid://cefqrdymmrti3" path="res://Assets/Dice/d12.glb" id="1_3n81m"]
+[ext_resource type="Script" uid="uid://kk1rkbxivfbj" path="res://Scenes/Components/Dice/DieFaceCalibration.cs" id="2_1fa2r"]
 [ext_resource type="Script" uid="uid://dbtqualonrkmw" path="res://Scenes/Components/Dice/DieFaceCalibrationEntry.cs" id="2_qt32q"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_3n81m"]
+points = PackedVector3Array(0.35662407, 0.93417233, -0.00018292665, -0.00018292665, 0.35662407, -0.93417233, -0.35698992, 0.93417233, -0.00018292665, -0.00018292665, 0.35662407, 0.93417233, 0.57718235, 0.57718235, 0.57718235, 0.93417233, -0.00018292665, 0.35662407, 0.93417233, -0.00018292665, -0.35698992, 0.57718235, 0.57718235, -0.57736534, -0.00018292665, -0.35698992, -0.93417233, -0.93417233, -0.00018292665, -0.35698992, -0.57736534, 0.57718235, -0.57736534, -0.93417233, -0.00018292665, 0.35662407, -0.57736534, 0.57718235, 0.57718235, -0.00018292665, -0.35698992, 0.93417233, 0.57718235, -0.57736534, 0.57718235, 0.35662407, -0.93417233, -0.00018292665, 0.57718235, -0.57736534, -0.57736534, -0.35698992, -0.93417233, -0.00018292665, -0.57736534, -0.57736534, -0.57736534, -0.57736534, -0.57736534, 0.57718235)
 
 [sub_resource type="Resource" id="Resource_1fa2r"]
 script = ExtResource("2_qt32q")
@@ -74,12 +78,13 @@ Face = 12
 FaceOrientation = Quaternion(0.273267, 0, 0, 0.961938)
 metadata/_custom_type_script = "uid://dbtqualonrkmw"
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_3n81m"]
-points = PackedVector3Array(0.35662407, 0.93417233, -0.00018292665, -0.00018292665, 0.35662407, -0.93417233, -0.35698992, 0.93417233, -0.00018292665, -0.00018292665, 0.35662407, 0.93417233, 0.57718235, 0.57718235, 0.57718235, 0.93417233, -0.00018292665, 0.35662407, 0.93417233, -0.00018292665, -0.35698992, 0.57718235, 0.57718235, -0.57736534, -0.00018292665, -0.35698992, -0.93417233, -0.93417233, -0.00018292665, -0.35698992, -0.57736534, 0.57718235, -0.57736534, -0.93417233, -0.00018292665, 0.35662407, -0.57736534, 0.57718235, 0.57718235, -0.00018292665, -0.35698992, 0.93417233, 0.57718235, -0.57736534, 0.57718235, 0.35662407, -0.93417233, -0.00018292665, 0.57718235, -0.57736534, -0.57736534, -0.35698992, -0.93417233, -0.00018292665, -0.57736534, -0.57736534, -0.57736534, -0.57736534, -0.57736534, 0.57718235)
-
-[node name="d122" unique_id=1714698328 instance=ExtResource("1_3n81m")]
-Faces = Array[ExtResource("2_qt32q")]([SubResource("Resource_1fa2r"), SubResource("Resource_8frkk"), SubResource("Resource_ham3b"), SubResource("Resource_icttq"), SubResource("Resource_a5626"), SubResource("Resource_m0qot"), SubResource("Resource_uo83d"), SubResource("Resource_u27o3"), SubResource("Resource_8v7si"), SubResource("Resource_35n0i"), SubResource("Resource_niola"), SubResource("Resource_5yc7a")])
+[node name="d12Root" unique_id=1714698328 instance=ExtResource("1_3n81m")]
+script = null
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." index="1" unique_id=1134387852]
 transform = Transform3D(1.04, 0, 0, 0, 1.04, 0, 0, 0, 1.04, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_3n81m")
+
+[node name="DieFaceCalibration" type="Node3D" parent="." index="14" unique_id=894865173]
+script = ExtResource("2_1fa2r")
+Faces = Array[ExtResource("2_qt32q")]([SubResource("Resource_1fa2r"), SubResource("Resource_8frkk"), SubResource("Resource_ham3b"), SubResource("Resource_icttq"), SubResource("Resource_a5626"), SubResource("Resource_m0qot"), SubResource("Resource_uo83d"), SubResource("Resource_u27o3"), SubResource("Resource_8v7si"), SubResource("Resource_35n0i"), SubResource("Resource_niola"), SubResource("Resource_5yc7a")])

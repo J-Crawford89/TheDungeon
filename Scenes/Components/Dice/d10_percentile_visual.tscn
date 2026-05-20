@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://o0c7qbugbxia" path="res://Assets/Dice/d_percentile.glb" id="1_tmse7"]
 [ext_resource type="Script" uid="uid://dbtqualonrkmw" path="res://Scenes/Components/Dice/DieFaceCalibrationEntry.cs" id="2_sal54"]
+[ext_resource type="Script" uid="uid://kk1rkbxivfbj" path="res://Scenes/Components/Dice/DieFaceCalibration.cs" id="3_8dt1e"]
 
 [sub_resource type="Resource" id="Resource_8dt1e"]
 script = ExtResource("2_sal54")
@@ -66,9 +67,13 @@ metadata/_custom_type_script = "uid://dbtqualonrkmw"
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_tmse7"]
 points = PackedVector3Array(-0.2534808, -0.071887195, -0.77986634, -0.0001604557, -0.68, -0.0001526475, -0.82, -0.071887195, -0.0001526475, -0.6634808, 0.07175416, -0.48199648, 0.2533204, 0.07175416, -0.77986634, 0.66332036, -0.071887195, -0.48199648, -0.2534808, -0.071887195, 0.77986634, 0.66332036, -0.071887195, 0.48184383, -0.6634808, 0.07175416, 0.48184383, -0.0001604557, 0.68, -0.0001526475, 0.8200001, 0.07175416, -0.0001526475, 0.2533204, 0.07175416, 0.77986634)
 
-[node name="d_percentile2" unique_id=1502442766 instance=ExtResource("1_tmse7")]
+[node name="dPercentileRoot" unique_id=1502442766 instance=ExtResource("1_tmse7")]
 Faces = Array[ExtResource("2_sal54")]([SubResource("Resource_8dt1e"), SubResource("Resource_v7iag"), SubResource("Resource_fdr4y"), SubResource("Resource_ead22"), SubResource("Resource_h2uiq"), SubResource("Resource_2okwa"), SubResource("Resource_kdcub"), SubResource("Resource_i1ypo"), SubResource("Resource_wmwn8"), SubResource("Resource_rxfdr")])
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." index="1" unique_id=403626757]
 transform = Transform3D(1.04, 0, 0, 0, 1.04, 0, 0, 0, 1.04, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_tmse7")
+
+[node name="DieFaceCalibration" type="Node3D" parent="." index="12" unique_id=33293171]
+script = ExtResource("3_8dt1e")
+Faces = Array[ExtResource("2_sal54")]([SubResource("Resource_8dt1e"), SubResource("Resource_v7iag"), SubResource("Resource_fdr4y"), SubResource("Resource_ead22"), SubResource("Resource_h2uiq"), SubResource("Resource_2okwa"), SubResource("Resource_kdcub"), SubResource("Resource_i1ypo"), SubResource("Resource_wmwn8"), SubResource("Resource_rxfdr")])

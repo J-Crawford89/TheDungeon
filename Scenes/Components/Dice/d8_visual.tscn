@@ -1,7 +1,11 @@
 [gd_scene format=3 uid="uid://bke8arhijbv6n"]
 
 [ext_resource type="PackedScene" uid="uid://6ligk5ja53cj" path="res://Assets/Dice/d8.glb" id="1_cocre"]
+[ext_resource type="Script" uid="uid://kk1rkbxivfbj" path="res://Scenes/Components/Dice/DieFaceCalibration.cs" id="2_oh0sa"]
 [ext_resource type="Script" uid="uid://dbtqualonrkmw" path="res://Scenes/Components/Dice/DieFaceCalibrationEntry.cs" id="2_x6dg2"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_cocre"]
+points = PackedVector3Array(-0.00019574165, -0.00017231703, -1, -1, -0.00017231703, -0.00019574165, -0.00019574165, 0.8799999, -0.00019574165, 1, -0.00017231703, -0.00019574165, -0.00019574165, -0.88, -0.00019574165, -0.00019574165, -0.00017231703, 1)
 
 [sub_resource type="Resource" id="Resource_oh0sa"]
 script = ExtResource("2_x6dg2")
@@ -50,12 +54,13 @@ Face = 8
 FaceOrientation = Quaternion(-0.618237, 0, -0.618237, 0.485351)
 metadata/_custom_type_script = "uid://dbtqualonrkmw"
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_cocre"]
-points = PackedVector3Array(-0.00019574165, -0.00017231703, -1, -1, -0.00017231703, -0.00019574165, -0.00019574165, 0.8799999, -0.00019574165, 1, -0.00017231703, -0.00019574165, -0.00019574165, -0.88, -0.00019574165, -0.00019574165, -0.00017231703, 1)
-
-[node name="d82" unique_id=1514276264 instance=ExtResource("1_cocre")]
-Faces = Array[ExtResource("2_x6dg2")]([SubResource("Resource_oh0sa"), SubResource("Resource_majae"), SubResource("Resource_853cf"), SubResource("Resource_0l0hx"), SubResource("Resource_a8o1b"), SubResource("Resource_7xokv"), SubResource("Resource_nxjbi"), SubResource("Resource_islct")])
+[node name="d8Root" unique_id=1514276264 instance=ExtResource("1_cocre")]
+script = null
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." index="1" unique_id=850163240]
 transform = Transform3D(1.04, 0, 0, 0, 1.04, 0, 0, 0, 1.04, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_cocre")
+
+[node name="DieFaceCalibration" type="Node3D" parent="." index="10" unique_id=1750454404]
+script = ExtResource("2_oh0sa")
+Faces = Array[ExtResource("2_x6dg2")]([SubResource("Resource_oh0sa"), SubResource("Resource_majae"), SubResource("Resource_853cf"), SubResource("Resource_0l0hx"), SubResource("Resource_a8o1b"), SubResource("Resource_7xokv"), SubResource("Resource_nxjbi"), SubResource("Resource_islct")])
