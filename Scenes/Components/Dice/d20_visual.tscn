@@ -127,6 +127,9 @@ FaceOrientation = Quaternion(0, 0, 0.181421, 0.983405)
 metadata/_custom_type_script = "uid://dbtqualonrkmw"
 
 [node name="d20Root" unique_id=1434020238 instance=ExtResource("1_hbovu")]
+mass = 0.25
+linear_damp = 0.2
+angular_damp = 1.0
 script = null
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." index="1" unique_id=436109999]
