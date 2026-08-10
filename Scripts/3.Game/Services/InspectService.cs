@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 /// <summary>Inspect actions: surveying the room to reveal hidden trap/treasure/npc/lore instances.</summary>
 public sealed class InspectService
@@ -28,6 +29,9 @@ public sealed class InspectService
 	/// If hidden discoverable instances exist, rolls once and compares that roll to each instance's DiscoverDc.
 	/// </summary>
 	public void RunInspectDiscovery(GameSessionState session, DungeonRoom room)
+		=> RunInspectDiscoveryAsync(session, room).GetAwaiter().GetResult();
+
+	public async Task RunInspectDiscoveryAsync(GameSessionState session, DungeonRoom room)
 	{
 		room.InspectAttemptCount++;
 
@@ -56,7 +60,7 @@ public sealed class InspectService
 		};
 
 		var diceRoll = _dice.Roll(req);
-		_resolution.PresentRollVisual(diceRoll, req, DieRollVisualKind.Player);
+		await _resolution.PresentRollVisualAsync(diceRoll, req, DieRollVisualKind.Player);
 		session.AppendLog(new LogEntry
 		{
 			Kind = LogEntryKind.Roll,

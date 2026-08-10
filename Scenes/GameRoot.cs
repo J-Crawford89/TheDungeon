@@ -189,7 +189,7 @@ public partial class GameRoot : Control
 		var resolutionService = new ResolutionService(diceRollService, dicePresenterHost);
 		var experienceService = new PlayerExperienceService(narrativeService);
 		var treasurePickupService = new TreasurePickupService(narrativeService, itemRepo, proficiencyAggregation);
-		var potionEffectApplicationService = new PotionEffectApplicationService(diceRollService, narrativeService, itemRepo);
+		var potionEffectApplicationService = new PotionEffectApplicationService(diceRollService, narrativeService, itemRepo, resolutionService);
 		var vitalsService = new PlayerVitalsService();
 		var gameOverDownedHandler = new GameOverDownedHandler(narrativeService);
 		var playerDownedResolutionService = new PlayerDownedResolutionService(new IPlayerDownedOutcomeHandler[] { gameOverDownedHandler });

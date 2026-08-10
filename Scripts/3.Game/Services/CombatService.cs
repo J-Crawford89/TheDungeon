@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 public sealed class CombatService : ICombatService, ICombatTurnReadiness
 {
@@ -20,6 +21,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 	private readonly CombatMonsterTurn _monsterTurn;
 	private readonly CombatTurnLoop _turnLoop;
 	private readonly IAttackRollAbilityOverlay? _attackRollAbilityOverlay;
+	private bool _isResolvingAction;
 
 	public CombatService(
 		DiceRollService dice,
@@ -53,7 +55,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		RegisterCombatAbilityHandlers();
 	}
 
-	private void RunAfterSuccessfulCombatHealthPotion(GameSessionState session)
+	private async Task RunAfterSuccessfulCombatHealthPotionAsync(GameSessionState session)
 	{
 		var room = session.Dungeon.CurrentRoom;
 		if (room != null && RoomFeatureHelper.GetFeature<MonsterFeature>(room) is { } monsterFeature)
@@ -64,15 +66,18 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		}
 
 		_turnLoop.AdvanceTurn(session);
-		_turnLoop.ProcessAutomaticMonsterTurns(session);
+		await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
 	}
 
 	private void RegisterCombatAbilityHandlers()
 	{
-		_combatAbilities.Register(new DefendCombatAbilityHandler(_narrative, IsAwaitingPlayerAction));
+		_combatAbilities.Register(new DefendCombatAbilityHandler(_narrative, IsPlayerTurn));
 	}
 
-	public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel)
+	public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
+		TryBeginCombatIfHostileAsync(session, previousCoord, floorLevel).GetAwaiter().GetResult();
+
+	public async Task<bool> TryBeginCombatIfHostileAsync(GameSessionState session, RoomCoord previousCoord, int floorLevel)
 	{
 		if (session.Phase != GamePlayPhase.InProgress)
 			return false;
@@ -85,28 +90,44 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			return false;
 		if (!feature.Monsters.Any(m => m.CurrentHp > 0))
 			return false;
+		if (_isResolvingAction)
+			return false;
 
-		session.Combat = new CombatState
+		_isResolvingAction = true;
+		try
 		{
-			FleeReturnCoord = previousCoord,
-			FleeReturnFloorLevel = floorLevel,
-			FleeDc = 12,
-			TurnOrder = new List<CombatTurnSlot>(),
-			CurrentTurnIndex = 0
-		};
-		session.Dungeon.DungeonMode = DungeonMode.Combat;
 
-		session.AppendGameLog(_narrative.ForCombatStarted(feature.Monsters.Where(m => m.CurrentHp > 0).Select(m => m.Definition.Name).ToList()));
+			session.Combat = new CombatState
+			{
+				FleeReturnCoord = previousCoord,
+				FleeReturnFloorLevel = floorLevel,
+				FleeDc = 12,
+				TurnOrder = new List<CombatTurnSlot>(),
+				CurrentTurnIndex = 0
+			};
+			session.Dungeon.DungeonMode = DungeonMode.Combat;
 
-		var order = _initiative.RollInitiativeOrder(session, feature);
-		session.Combat.TurnOrder = order;
-		session.AppendGameLog(_narrative.ForCombatTurnOrderSummary(_initiative.BuildTurnOrderNames(feature, order)));
+			session.AppendGameLog(_narrative.ForCombatStarted(feature.Monsters.Where(m => m.CurrentHp > 0).Select(m => m.Definition.Name).ToList()));
 
-		_turnLoop.ProcessAutomaticMonsterTurns(session);
-		return true;
+			var order = await _initiative.RollInitiativeOrderAsync(session, feature);
+			session.Combat.TurnOrder = order;
+			session.AppendGameLog(_narrative.ForCombatTurnOrderSummary(_initiative.BuildTurnOrderNames(feature, order)));
+
+			await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
+			return true;
+		}
+		finally
+		{
+			_isResolvingAction = false;
+		}
 	}
 
 	public bool IsAwaitingPlayerAction(GameSessionState session)
+		=> !_isResolvingAction && IsPlayerTurn(session);
+
+	bool ICombatTurnReadiness.IsAwaitingPlayerAction(GameSessionState session) => IsPlayerTurn(session);
+
+	private static bool IsPlayerTurn(GameSessionState session)
 	{
 		if (session.Phase != GamePlayPhase.InProgress)
 			return false;
@@ -118,10 +139,17 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		return slot.IsPlayer;
 	}
 
-	public void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice)
+	public void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice) =>
+		ExecutePlayerAttackAsync(session, livingMonsterOrdinal, attackChoice).GetAwaiter().GetResult();
+
+	public async Task ExecutePlayerAttackAsync(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice)
 	{
 		if (!IsAwaitingPlayerAction(session))
 			return;
+
+		_isResolvingAction = true;
+		try
+		{
 		var room = session.Dungeon.CurrentRoom!;
 		if (!MainViewRoomSlots.TryGetLivingMonsterByOrdinal(room, livingMonsterOrdinal, out var feature, out var targetIndex) ||
 		    feature == null || targetIndex < 0)
@@ -175,7 +203,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			AbilityOverlay = _attackRollAbilityOverlay,
 		};
 		var req = PlayerAttackRollBuilder.BuildToHitRequest(rollInput, attackLabel, monster.Definition.Defense);
-		var result = _resolution.RollAgainstTarget(req);
+		var result = await _resolution.RollAgainstTargetAsync(req);
 		session.AppendLog(new LogEntry
 		{
 			Kind = LogEntryKind.Roll,
@@ -185,20 +213,21 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		if (result.Outcome == ResolutionOutcome.Success || result.Outcome == ResolutionOutcome.CriticalSuccess)
 		{
 			var (damageAbility, addAbilityToDamage) = PlayerAttackRollBuilder.ResolveDamageAbility(rollInput);
-			var dmg = PlayerAttackRollBuilder.RollDamageTotal(
+			var damageRoll = PlayerAttackRollBuilder.RollDamage(
 				new PlayerAttackDamageRollInput
 				{
 					Dice = _dice,
 					Roll = rollInput,
 					DamageAbility = damageAbility,
 					AddAbilityToDamage = addAbilityToDamage,
-				},
-				out var damageDetail);
+				});
+			await _resolution.PresentSpecsAsync(damageRoll.VisualDice);
+			var dmg = damageRoll.Total;
 
 			if (result.Outcome == ResolutionOutcome.CriticalSuccess)
 				dmg *= 2;
 			monster.CurrentHp -= dmg;
-			session.AppendGameLog(_narrative.ForDamageDealt(monster.Definition.Name, dmg, monster.CurrentHp, damageDetail));
+			session.AppendGameLog(_narrative.ForDamageDealt(monster.Definition.Name, dmg, monster.CurrentHp, damageRoll.Detail));
 			if (monsterWasAlive && monster.CurrentHp <= 0)
 			{
 				_experience?.GrantExperience(session, monster.Definition.ExperienceReward);
@@ -213,13 +242,25 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			return;
 
 		_turnLoop.AdvanceTurn(session);
-		_turnLoop.ProcessAutomaticMonsterTurns(session);
+		await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
+		}
+		finally
+		{
+			_isResolvingAction = false;
+		}
 	}
 
-	public void ExecutePlayerFlee(GameSessionState session)
+	public void ExecutePlayerFlee(GameSessionState session) =>
+		ExecutePlayerFleeAsync(session).GetAwaiter().GetResult();
+
+	public async Task ExecutePlayerFleeAsync(GameSessionState session)
 	{
 		if (!IsAwaitingPlayerAction(session))
 			return;
+
+		_isResolvingAction = true;
+		try
+		{
 		var combat = session.Combat!;
 		var agi = session.Player.AbilityScores.Agility;
 		var req = new DiceRollRequest
@@ -236,7 +277,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 				new() { Modifier = agi, Source = "Agility" }
 			}
 		};
-		var result = _resolution.RollAgainstTarget(req);
+		var result = await _resolution.RollAgainstTargetAsync(req);
 		session.AppendLog(new LogEntry
 		{
 			Kind = LogEntryKind.Roll,
@@ -252,13 +293,25 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 
 		session.AppendGameLog(_narrative.ForFleeFailure());
 		_turnLoop.AdvanceTurn(session);
-		_turnLoop.ProcessAutomaticMonsterTurns(session);
+		await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
+		}
+		finally
+		{
+			_isResolvingAction = false;
+		}
 	}
 
-	public void ExecutePlayerTakeTreasure(GameSessionState session, TargetPayload payload)
+	public void ExecutePlayerTakeTreasure(GameSessionState session, TargetPayload payload) =>
+		ExecutePlayerTakeTreasureAsync(session, payload).GetAwaiter().GetResult();
+
+	public async Task ExecutePlayerTakeTreasureAsync(GameSessionState session, TargetPayload payload)
 	{
 		if (!IsAwaitingPlayerAction(session))
 			return;
+
+		_isResolvingAction = true;
+		try
+		{
 		var outcome = payload.Kind switch
 		{
 			TargetPayloadKind.TakeTreasureItem => _treasurePickup.TakeTreasureInstanceAtSlot(session,
@@ -277,27 +330,51 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		}
 
 		_turnLoop.AdvanceTurn(session);
-		_turnLoop.ProcessAutomaticMonsterTurns(session);
+		await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
+		}
+		finally
+		{
+			_isResolvingAction = false;
+		}
 	}
 
-	public void ExecutePlayerUseHealthPotion(GameSessionState session)
+	public void ExecutePlayerUseHealthPotion(GameSessionState session) =>
+		ExecutePlayerUseHealthPotionAsync(session).GetAwaiter().GetResult();
+
+	public async Task ExecutePlayerUseHealthPotionAsync(GameSessionState session)
 	{
 		if (!IsAwaitingPlayerAction(session))
 			return;
 
-		var outcome = _potionEffects.TryUseHealthPotion(session);
+		_isResolvingAction = true;
+		try
+		{
+
+		var outcome = await _potionEffects.TryUseHealthPotionAsync(session);
 		if (outcome == HealthPotionUseOutcome.Applied)
-			RunAfterSuccessfulCombatHealthPotion(session);
+			await RunAfterSuccessfulCombatHealthPotionAsync(session);
+		}
+		finally
+		{
+			_isResolvingAction = false;
+		}
 	}
 
-	public void ExecutePlayerDisarmTrap(GameSessionState session, TargetPayload payload)
+	public void ExecutePlayerDisarmTrap(GameSessionState session, TargetPayload payload) =>
+		ExecutePlayerDisarmTrapAsync(session, payload).GetAwaiter().GetResult();
+
+	public async Task ExecutePlayerDisarmTrapAsync(GameSessionState session, TargetPayload payload)
 	{
 		if (!IsAwaitingPlayerAction(session))
 			return;
+
+		_isResolvingAction = true;
+		try
+		{
 
 		var result = payload.Kind != TargetPayloadKind.DisarmTrapInstance
 			? new TrapDisarmResult { ResultCode = TrapDisarmResultCode.NoTrapPresent }
-			: _trapService.TryDisarmAtSlot(session, payload.TrapFeatureOrdinal, payload.TrapIndexInFeature);
+			: await _trapService.TryDisarmAtSlotAsync(session, payload.TrapFeatureOrdinal, payload.TrapIndexInFeature);
 		if (!result.ShouldAdvanceCombatTurn)
 			return;
 
@@ -310,20 +387,35 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		}
 
 		_turnLoop.AdvanceTurn(session);
-		_turnLoop.ProcessAutomaticMonsterTurns(session);
+		await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
+		}
+		finally
+		{
+			_isResolvingAction = false;
+		}
 	}
 
-	public void ExecutePlayerDefend(GameSessionState session)
+	public void ExecutePlayerDefend(GameSessionState session) =>
+		ExecutePlayerDefendAsync(session).GetAwaiter().GetResult();
+
+	public async Task ExecutePlayerDefendAsync(GameSessionState session)
 	{
 		if (!IsAwaitingPlayerAction(session))
 			return;
 		if (!session.Player.HasAbility(AbilityIds.Defend))
 			return;
 
-		void Advance() { _turnLoop.AdvanceTurn(session); _turnLoop.ProcessAutomaticMonsterTurns(session); }
+		_isResolvingAction = true;
+		try
+		{
+
+		void Advance() => _turnLoop.AdvanceTurn(session);
 
 		if (_combatAbilities.TryExecute(AbilityIds.Defend, session, Advance))
+		{
+			await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
 			return;
+		}
 
 		if (session.Combat is not { } c)
 			return;
@@ -333,5 +425,10 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			session.AppendGameLog(_narrative.ForDefendOnCooldown());
 		else
 			session.AppendGameLog(_narrative.ForDefendCannotUse());
+		}
+		finally
+		{
+			_isResolvingAction = false;
+		}
 	}
 }

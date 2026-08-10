@@ -6,19 +6,15 @@ public static class DieFaceRotationResolver
 		DieFaceCalibration calibration,
 		int faceValue,
 		Godot.Quaternion currentBodyRotation,
-		Godot.Vector3 cameraGlobalPosition,
-		Godot.Vector3 dieGlobalPosition,
-		float spinDegrees)
+		Godot.Vector3 targetDirectionWorld)
 	{
 		if (!calibration.TryGetFaceOrientation(faceValue, out var faceOrientation))
 			return currentBodyRotation;
 
-		var target = (cameraGlobalPosition - dieGlobalPosition).Normalized();
-		var solved = DieFaceOrientationSolver.SolveFromFaceOrientation(
+		var solved = DieFaceOrientationSolver.SolveNearestFromFaceOrientation(
 			ToNumeric(faceOrientation),
 			ToNumeric(currentBodyRotation),
-			ToNumeric(target),
-			spinDegrees);
+			ToNumeric(targetDirectionWorld.Normalized()));
 		return ToGodot(solved);
 	}
 

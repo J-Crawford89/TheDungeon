@@ -57,18 +57,31 @@ public static class PlayerAttackRollBuilder
 
 	public static int RollDamageTotal(PlayerAttackDamageRollInput input, out string damageDetail)
 	{
+		var result = RollDamage(input);
+		damageDetail = result.Detail;
+		return result.Total;
+	}
+
+	public static PlayerAttackDamageRollResult RollDamage(PlayerAttackDamageRollInput input)
+	{
 		var dice = input.Dice;
 		var roll = input.Roll;
 		var attack = roll.Attack;
 		var player = roll.Session.Player;
 		var abilityScore = input.AddAbilityToDamage ? player.AbilityScores.GetScore(input.DamageAbility) : 0;
+		var visualDice = new List<PhysicalDieRollSpec>();
 
 		if (string.Equals(attack.Id, DefaultUnarmedAttackDefinition.Id, System.StringComparison.Ordinal))
 		{
 			var d6 = dice.RollDie(DieType.d6);
 			var dmg = CombatFormulas.UnarmedDamageTotal(d6.RolledValue, abilityScore);
-			damageDetail = $"½×d6 from {d6.RolledValue}";
-			return dmg;
+			visualDice.Add(ToVisualSpec(d6));
+			return new PlayerAttackDamageRollResult
+			{
+				Total = dmg,
+				Detail = $"½×d6 from {d6.RolledValue}",
+				VisualDice = visualDice,
+			};
 		}
 
 		var parts = new List<string>();
@@ -77,7 +90,11 @@ public static class PlayerAttackRollBuilder
 		{
 			var rolled = 0;
 			for (var i = 0; i < comp.DamageDice.NumberOfDice; i++)
-				rolled += dice.RollDie(comp.DamageDice.DieType).RolledValue;
+			{
+				var die = dice.RollDie(comp.DamageDice.DieType);
+				rolled += die.RolledValue;
+				visualDice.Add(ToVisualSpec(die));
+			}
 
 			var part = rolled + comp.FlatAmount;
 			sum += part;
@@ -89,15 +106,27 @@ public static class PlayerAttackRollBuilder
 		var abilityLabel = input.DamageAbility.ToString();
 		if (parts.Count > 0)
 		{
-			damageDetail = abilityScore != 0
+			var detail = abilityScore != 0
 				? $"{string.Join(", ", parts)} + {abilityLabel} {abilityScore}"
 				: string.Join(", ", parts);
+			return new PlayerAttackDamageRollResult { Total = raw, Detail = detail, VisualDice = visualDice };
 		}
-		else
-			damageDetail = abilityScore != 0 ? $"{abilityLabel} {abilityScore}" : "";
 
-		return raw;
+		return new PlayerAttackDamageRollResult
+		{
+			Total = raw,
+			Detail = abilityScore != 0 ? $"{abilityLabel} {abilityScore}" : "",
+			VisualDice = visualDice,
+		};
 	}
+
+	private static PhysicalDieRollSpec ToVisualSpec(DieRollResult die) => new()
+	{
+		Kind = DieRollVisualKind.Player,
+		DieType = die.DieType,
+		Role = DieVisualRole.Standard,
+		FaceValue = die.RolledValue,
+	};
 
 	private static string FormatRolledDiceAndFlat(int rolled, int flatAmount)
 	{

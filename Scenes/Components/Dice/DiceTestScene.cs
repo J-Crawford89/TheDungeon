@@ -10,9 +10,11 @@ public partial class DiceTestScene : Node3D
 	[Export] public DieVisualCatalogLibrary VisualCatalogLibrary { get; set; } = null!;
 	[Export] public NodePath SpawnRootPath { get; set; }
 	[Export] public NodePath CameraPath { get; set; } = new("Camera3D");
-	[Export] public Vector3 SpawnOffsetStep { get; set; } = new(1.4f, 0f, 0f);
 	[Export] public Vector3 SpawnBoundsHalfExtents { get; set; } = new(7f, 0f, 3.5f);
-	[Export] public float SpawnHeight { get; set; } = 2.5f;
+	[Export] public float SpawnHeight { get; set; } = 1.35f;
+	[Export] public float SpawnEdgeMargin { get; set; } = 0.75f;
+	[Export] public float MinimumSpawnSeparation { get; set; } = 1.25f;
+	[Export] public int RandomSpawnAttempts { get; set; } = 16;
 	[Export] public bool PersistDiceUntilClear { get; set; } = true;
 	[Export] public float AutoClearLingerSeconds { get; set; } = 1.5f;
 
@@ -24,11 +26,10 @@ public partial class DiceTestScene : Node3D
 	private SpinBox? _d100TotalSpin;
 	private TestDiePreset? _selectedPreset;
 	private RollingDie? _lastSpawnedDie;
-	private int _spawnSlot;
 
 	private readonly List<TestDiePreset> _presets =
 	[
-		new("d3", DieType.d3, DieVisualRole.Standard, 1, 6),
+		new("d3", DieType.d3, DieVisualRole.Standard, 1, 3),
 		new("d4", DieType.d4, DieVisualRole.Standard, 1, 4),
 		new("d6", DieType.d6, DieVisualRole.Standard, 1, 6),
 		new("d8", DieType.d8, DieVisualRole.Standard, 1, 8),
@@ -179,27 +180,43 @@ public partial class DiceTestScene : Node3D
 			return;
 
 		var count = (int)_spawnCountSpin!.Value;
+		var spawned = new List<RollingDie>(count);
 		for (var i = 0; i < count; i++)
 		{
 			var die = CreateDie(_selectedPreset);
 			if (die == null)
 				continue;
 			_lastSpawnedDie = die;
-			if (rollFree)
-				await RollWithOptionalClear(die, -1);
-			else if (rollGameplay)
-				await RollWithOptionalClear(die, forcedFace);
+			spawned.Add(die);
+		}
+
+		if (rollFree)
+			await Task.WhenAll(spawned.Select(die => RollWithOptionalClear(die, -1)));
+		else if (rollGameplay)
+		{
+			await RollingDie.RollPredeterminedBatchAsync(
+				spawned,
+				Enumerable.Repeat(forcedFace, spawned.Count).ToArray());
+			await Task.WhenAll(spawned.Select(ClearAfterRollIfNeededAsync));
 		}
 
 		if (!rollFree && !rollGameplay)
 			SetStatus($"Spawned {count}× {_selectedPreset.Label}.");
 		else
-			SetStatus($"Rolled {_selectedPreset.Label}.");
+		{
+			var detail = _lastSpawnedDie == null ? "" : $" {DescribeMotion(_lastSpawnedDie)}";
+			SetStatus($"Rolled {_selectedPreset.Label}.{detail}");
+		}
 	}
 
 	private async Task RollWithOptionalClear(RollingDie die, int forcedFace)
 	{
-		await die.RollAsync(forcedFace, _camera);
+		await die.RollAsync(forcedFace);
+		await ClearAfterRollIfNeededAsync(die);
+	}
+
+	private async Task ClearAfterRollIfNeededAsync(RollingDie die)
+	{
 		if (!PersistDiceUntilClear && AutoClearLingerSeconds > 0f)
 		{
 			await ToSignal(GetTree().CreateTimer(AutoClearLingerSeconds), SceneTreeTimer.SignalName.Timeout);
@@ -225,9 +242,13 @@ public partial class DiceTestScene : Node3D
 			return;
 		}
 
-		await RollWithOptionalClear(tens, faces.PercentileTensFace);
+		await RollingDie.RollPredeterminedBatchAsync(
+			[tens, ones],
+			[faces.PercentileTensFace, faces.OnesDieFace]);
+		await Task.WhenAll(
+			ClearAfterRollIfNeededAsync(tens),
+			ClearAfterRollIfNeededAsync(ones));
 		_lastSpawnedDie = ones;
-		await RollWithOptionalClear(ones, faces.OnesDieFace);
 		SetStatus($"d100 total {total} → tens {faces.PercentileTensFace}, ones {faces.OnesDieFace}");
 	}
 
@@ -241,7 +262,8 @@ public partial class DiceTestScene : Node3D
 
 		var face = gameplayRoll ? (int)_targetFaceSpin!.Value : -1;
 		await RollWithOptionalClear(_lastSpawnedDie, face);
-		SetStatus(gameplayRoll ? $"Re-rolled gameplay face {face}." : "Re-rolled free.");
+		var prefix = gameplayRoll ? $"Re-rolled gameplay face {face}." : "Re-rolled free.";
+		SetStatus($"{prefix} {DescribeMotion(_lastSpawnedDie)}");
 	}
 
 	private void SnapLastInPlace()
@@ -253,7 +275,7 @@ public partial class DiceTestScene : Node3D
 		}
 
 		var face = (int)_targetFaceSpin!.Value;
-		var ok = _lastSpawnedDie.TrySnapToFace(face, _camera);
+		var ok = _lastSpawnedDie.TrySnapToFace(face);
 		SetStatus(ok ? $"Snapped in place to face {face}." : $"Snap failed for face {face}.");
 	}
 
@@ -267,30 +289,44 @@ public partial class DiceTestScene : Node3D
 
 		var cal = _lastSpawnedDie.Calibration;
 		var body = _lastSpawnedDie.Body;
-		if (cal == null || body == null || _camera == null)
+		if (cal == null || body == null)
 		{
-			SetStatus("Last die has no calibration/body or camera missing.");
+			SetStatus("Last die has no calibration/body.");
 			return;
 		}
 
 		var targetFace = (int)_targetFaceSpin!.Value;
-		var toCamera = (_camera.GlobalPosition - body.GlobalPosition).Normalized();
 		var bodyQuat = body.GlobalTransform.Basis.GetRotationQuaternion();
 		var numericQuat = new System.Numerics.Quaternion(bodyQuat.X, bodyQuat.Y, bodyQuat.Z, bodyQuat.W);
-		var target = new System.Numerics.Vector3(toCamera.X, toCamera.Y, toCamera.Z);
+		var target = System.Numerics.Vector3.UnitY;
 
 		var normals = ToNumericNormals(cal.GetLocalFaceNormals());
 		var ranked = DieFaceCalibrationVerifier.RankFaces(normals, numericQuat, target);
 		var best = ranked[0];
 		var requested = ranked.FirstOrDefault(r => r.Face == targetFace);
-		var requestedDot = requested.Face == targetFace ? requested.DotWithCamera : float.NaN;
+		var requestedDot = requested.Face == targetFace ? requested.DotWithTarget : float.NaN;
 
 		SetStatus(
-			$"Target face {targetFace} dot={requestedDot:F3} | " +
-			$"Best: face {best.Face} dot={best.DotWithCamera:F3} | " +
-			$"Top3: {string.Join(", ", ranked.Take(3).Select(r => $"{r.Face}({r.DotWithCamera:F2})"))}");
+			$"Target face {targetFace} dot(up)={requestedDot:F3} | " +
+			$"Best: face {best.Face} dot(up)={best.DotWithTarget:F3} | " +
+			$"Top3: {string.Join(", ", ranked.Take(3).Select(r => $"{r.Face}({r.DotWithTarget:F2})"))}");
 	}
 
+	private static string DescribeMotion(RollingDie die)
+	{
+		var landing = die.LastRollUsedPredeterminedPlayback
+			? $"pre-sim natural {die.LastSimulatedNaturalFace} -> displayed {die.LastDisplayedFace}; " +
+			  $"{die.LastRollDurationSeconds:F1}s, rotation " +
+			  $"{die.LastAccumulatedRotationRadians / MathF.Tau:F1} turns, " +
+			  $"max spin {die.LastMaximumAngularSpeed:F1}, " +
+			  $"grip {die.LastTimeToGripSeconds:F2}s, avg/final slip " +
+			  $"{die.LastAverageContactSlipSpeed:F2}/{die.LastFinalContactSlipSpeed:F2}, " +
+			  $"dot {die.LastDisplayedFaceDot:F3}, settled={die.LastTrajectorySettledNaturally}"
+			: $"natural settle in {die.LastRollDurationSeconds:F1}s, max spin {die.LastMaximumAngularSpeed:F1}";
+		return $"Launch {die.LastLaunchSpeed:F1}, radius {die.LastEffectiveRollingRadius:F2}, " +
+			$"coupling {die.LastRollCoupling:F2}, initial spin {die.LastInitialAngularSpeed:F1}, " +
+			$"release slip {die.LastInitialSurfaceSlipSpeed:F2}; {landing}.";
+	}
 	private static Dictionary<int, System.Numerics.Vector3> ToNumericNormals(IReadOnlyDictionary<int, Vector3> godotNormals)
 	{
 		var map = new Dictionary<int, System.Numerics.Vector3>(godotNormals.Count);
@@ -322,14 +358,39 @@ public partial class DiceTestScene : Node3D
 
 	private Vector3 AllocateSpawnOffset()
 	{
-		var slot = _spawnSlot++;
-		const int columns = 6;
-		var column = slot % columns;
-		var row = slot / columns;
-		var centeredColumn = column - (columns - 1) * 0.5f;
-		var x = Mathf.Clamp(centeredColumn * SpawnOffsetStep.X, -SpawnBoundsHalfExtents.X, SpawnBoundsHalfExtents.X);
-		var z = Mathf.Clamp(row * SpawnOffsetStep.Z, -SpawnBoundsHalfExtents.Z, SpawnBoundsHalfExtents.Z);
-		return new Vector3(x, SpawnHeight, z);
+		var existing = new List<System.Numerics.Vector3>();
+		if (_spawnRoot != null)
+		{
+			foreach (var child in _spawnRoot.GetChildren())
+			{
+				if (child is not RollingDie die || !IsInstanceValid(die))
+					continue;
+				var position = die.SpawnPosition;
+				existing.Add(new System.Numerics.Vector3(position.X, position.Y, position.Z));
+			}
+		}
+
+		System.Numerics.Vector3 point = default;
+		var attempts = Math.Max(1, RandomSpawnAttempts);
+		for (var attempt = 0; attempt < attempts; attempt++)
+		{
+			point = DiceSpawnPositionPicker.Pick(
+				GD.Randf(),
+				GD.Randf(),
+				new System.Numerics.Vector3(
+					SpawnBoundsHalfExtents.X,
+					SpawnBoundsHalfExtents.Y,
+					SpawnBoundsHalfExtents.Z),
+				SpawnHeight,
+				SpawnEdgeMargin);
+			if (DiceSpawnPositionPicker.HasMinimumSeparation(
+				point,
+				existing,
+				MinimumSpawnSeparation))
+				break;
+		}
+
+		return new Vector3(point.X, point.Y, point.Z);
 	}
 
 	private void ClearAll()
@@ -339,7 +400,6 @@ public partial class DiceTestScene : Node3D
 		foreach (var child in _spawnRoot.GetChildren())
 			child.QueueFree();
 		_lastSpawnedDie = null;
-		_spawnSlot = 0;
 		SetStatus("Cleared all dice.");
 	}
 

@@ -25,6 +25,7 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 	private readonly Dictionary<int, LootableItemControl> _lootableItemsByStackIndex = new();
 
 	private bool _signalsConnected;
+	private bool _isResolvingLoot;
 
 	public void Bind(GameRunContext context, Action<UiRefreshFlags> refreshHud)
 	{
@@ -117,19 +118,27 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 		ctrl.SetSelected(_selectedStackIndices.Contains(stackIndex));
 	}
 
-	private void OnTakeAllPressed()
+	private async void OnTakeAllPressed()
 	{
-		if (_ctx == null || _refreshHud == null || _containerOrdinal < 0)
+		if (_isResolvingLoot || _ctx == null || _refreshHud == null || _containerOrdinal < 0)
 			return;
-		_ctx.ContainerLootInteraction.TryLootAll(_ctx.Session, _containerOrdinal);
+		SetResolvingLoot(true);
+		try
+		{
+			await _ctx.ContainerLootInteraction.TryLootAllAsync(_ctx.Session, _containerOrdinal);
 
-		ClosePanel();
-		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
+			ClosePanel();
+			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
+		}
+		finally
+		{
+			SetResolvingLoot(false);
+		}
 	}
 
-	private void OnTakeSelectedPressed()
+	private async void OnTakeSelectedPressed()
 	{
-		if (_ctx == null || _refreshHud == null || _containerOrdinal < 0)
+		if (_isResolvingLoot || _ctx == null || _refreshHud == null || _containerOrdinal < 0)
 			return;
 		if (_selectedStackIndices.Count == 0)
 		{
@@ -140,7 +149,16 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 
 		var indices = new List<int>(_selectedStackIndices);
 		indices.Sort();
-		var r = _ctx.ContainerLootInteraction.TryLootSelected(_ctx.Session, _containerOrdinal, indices);
+		SetResolvingLoot(true);
+		ContainerLootTransferResult r;
+		try
+		{
+			r = await _ctx.ContainerLootInteraction.TryLootSelectedAsync(_ctx.Session, _containerOrdinal, indices);
+		}
+		finally
+		{
+			SetResolvingLoot(false);
+		}
 		if (r.ErrorCode != ContainerLootErrorCode.None)
 		{
 			_lootWarning.Visible = true;
@@ -155,6 +173,14 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 
 		ClosePanel();
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
+	}
+
+	private void SetResolvingLoot(bool resolving)
+	{
+		_isResolvingLoot = resolving;
+		_lootSelectedButton.Disabled = resolving;
+		_lootAllButton.Disabled = resolving;
+		_closeButton.Disabled = resolving;
 	}
 
 	private void OnClosePressed()

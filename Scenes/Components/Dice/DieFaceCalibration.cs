@@ -24,9 +24,15 @@ public partial class DieFaceCalibration : Node
 		foreach (var (face, quat) in _orientations)
 		{
 			var basis = new Basis(quat);
-			map[face] = basis.Y;
+			map[face] = basis.Inverse().Y;
 		}
 		return map;
+	}
+
+	public IReadOnlyDictionary<int, Quaternion> GetFaceUpOrientations()
+	{
+		_orientations ??= BuildLookup();
+		return new Dictionary<int, Quaternion>(_orientations);
 	}
 
 	private Dictionary<int, Quaternion> BuildLookup()

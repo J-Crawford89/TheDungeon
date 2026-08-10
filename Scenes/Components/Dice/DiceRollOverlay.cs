@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,10 +10,11 @@ public partial class DiceRollOverlay : Control
 	[Export] public NodePath DiceSpawnPath { get; set; }
 	[Export] public NodePath CameraPath { get; set; }
 	[Export] public DieVisualCatalogLibrary VisualCatalogLibrary { get; set; } = null!;
-	[Export] public Vector3 SpawnOffsetStep { get; set; } = new(1.4f, 0f, 0f);
 	[Export] public Vector3 SpawnBoundsHalfExtents { get; set; } = new(7f, 0f, 3.5f);
-	[Export] public float SpawnHeight { get; set; } = 2.5f;
-	[Export] public int MaxSpawnColumns { get; set; } = 6;
+	[Export] public float SpawnHeight { get; set; } = 1.35f;
+	[Export] public float SpawnEdgeMargin { get; set; } = 0.75f;
+	[Export] public float MinimumSpawnSeparation { get; set; } = 1.25f;
+	[Export] public int RandomSpawnAttempts { get; set; } = 16;
 	[Export] public int MaxConcurrentDice { get; set; } = 12;
 	[Export] public float DieLingerSeconds { get; set; } = 1.5f;
 
@@ -20,7 +22,6 @@ public partial class DiceRollOverlay : Control
 	private Node3D? _spawnRoot;
 	private Camera3D? _camera;
 	private int _activeCount;
-	private int _spawnSlot;
 
 	public bool IsPresenting => _activeCount > 0;
 
@@ -55,58 +56,82 @@ public partial class DiceRollOverlay : Control
 			return;
 
 		var offsets = new Vector3[dice.Count];
+		var reserved = SnapshotReservedSpawnPositions(dice.Count);
 		for (var i = 0; i < dice.Count; i++)
-			offsets[i] = AllocateSpawnOffset();
+			offsets[i] = AllocateSpawnOffset(reserved);
 
-		var tasks = new List<Task>(dice.Count);
-		for (var i = 0; i < dice.Count; i++)
+		var spawned = new List<RollingDie>(dice.Count);
+		var faceValues = new List<int>(dice.Count);
+		try
 		{
-			ct.ThrowIfCancellationRequested();
-			tasks.Add(SpawnAndRollAsync(dice[i], offsets[i], ct));
+			for (var i = 0; i < dice.Count; i++)
+			{
+				ct.ThrowIfCancellationRequested();
+				var die = SpawnDie(dice[i], offsets[i]);
+				if (die == null)
+					continue;
+				spawned.Add(die);
+				faceValues.Add(dice[i].FaceValue);
+			}
+
+			await RollingDie.RollPredeterminedBatchAsync(spawned, faceValues, ct);
+		}
+		catch
+		{
+			foreach (var die in spawned)
+				ReleaseDie(die);
+			throw;
 		}
 
-		await Task.WhenAll(tasks);
+		foreach (var die in spawned)
+		{
+			if (DieLingerSeconds > 0f && IsInstanceValid(die))
+				_ = LingerAndReleaseAsync(die);
+			else
+				ReleaseDie(die);
+		}
 	}
 
-	private async Task SpawnAndRollAsync(PhysicalDieRollSpec spec, Vector3 spawnOffset, CancellationToken ct)
+	private RollingDie? SpawnDie(PhysicalDieRollSpec spec, Vector3 spawnOffset)
 	{
 		if (_activeCount >= MaxConcurrentDice)
 		{
 			GD.PushWarning($"{nameof(DiceRollOverlay)}: max concurrent dice ({MaxConcurrentDice}); skipping roll.");
-			return;
+			return null;
 		}
 
+		var die = RollingDieScene.Instantiate<RollingDie>();
+		die.SpawnPosition = spawnOffset;
+		die.SimulationBoundsHalfExtents = SpawnBoundsHalfExtents;
+		var visual = VisualCatalogLibrary?.Resolve(spec.Kind, spec.DieType, spec.Role);
+		if (visual == null)
+			GD.PushWarning($"{nameof(DiceRollOverlay)}: no visual for {spec.Kind} {spec.DieType} {spec.Role}.");
+		die.SetVisual(visual);
+		_spawnRoot!.AddChild(die);
 		_activeCount++;
 		UpdateOverlayVisibility();
-
-		RollingDie? die = null;
+		return die;
+	}
+	private async Task LingerAndReleaseAsync(RollingDie die)
+	{
 		try
 		{
-			die = RollingDieScene.Instantiate<RollingDie>();
-			die.SpawnPosition = spawnOffset;
-
-			var visual = VisualCatalogLibrary?.Resolve(spec.Kind, spec.DieType, spec.Role);
-			if (visual == null)
-				GD.PushWarning($"{nameof(DiceRollOverlay)}: no visual for {spec.Kind} {spec.DieType} {spec.Role}.");
-			die.SetVisual(visual);
-			_spawnRoot!.AddChild(die);
-
-			await die.RollAsync(spec.FaceValue, _camera, ct);
-
-			if (DieLingerSeconds > 0f && IsInstanceValid(die))
-			{
+			if (IsInstanceValid(die))
 				await ToSignal(die.GetTree().CreateTimer(DieLingerSeconds), SceneTreeTimer.SignalName.Timeout);
-				ct.ThrowIfCancellationRequested();
-			}
 		}
 		finally
 		{
-			_activeCount--;
-			die?.QueueFree();
-			UpdateOverlayVisibility();
-			if (_activeCount == 0)
-				_spawnSlot = 0;
+			ReleaseDie(die);
 		}
+	}
+
+	private void ReleaseDie(RollingDie? die)
+	{
+		if (_activeCount > 0)
+			_activeCount--;
+		if (IsInstanceValid(die))
+			die!.QueueFree();
+		UpdateOverlayVisibility();
 	}
 
 	private void UpdateOverlayVisibility()
@@ -128,22 +153,51 @@ public partial class DiceRollOverlay : Control
 		return false;
 	}
 
-	private Vector3 AllocateSpawnOffset()
+	private Vector3 AllocateSpawnOffset(List<System.Numerics.Vector3> reserved)
 	{
 		lock (_spawnLock)
 		{
-			var column = _spawnSlot % MaxSpawnColumns;
-			var row = _spawnSlot / MaxSpawnColumns;
-			_spawnSlot++;
+			System.Numerics.Vector3 candidate = default;
+			var attempts = Math.Max(1, RandomSpawnAttempts);
+			for (var attempt = 0; attempt < attempts; attempt++)
+			{
+				candidate = DiceSpawnPositionPicker.Pick(
+					GD.Randf(),
+					GD.Randf(),
+					new System.Numerics.Vector3(
+						SpawnBoundsHalfExtents.X,
+						SpawnBoundsHalfExtents.Y,
+						SpawnBoundsHalfExtents.Z),
+					SpawnHeight,
+					SpawnEdgeMargin);
+				if (DiceSpawnPositionPicker.HasMinimumSeparation(
+					candidate,
+					reserved,
+					MinimumSpawnSeparation))
+					break;
+			}
 
-			var centeredColumn = column - (MaxSpawnColumns - 1) * 0.5f;
-			var x = centeredColumn * SpawnOffsetStep.X;
-			var z = row * SpawnOffsetStep.Z;
+			reserved.Add(candidate);
+			return new Vector3(candidate.X, candidate.Y, candidate.Z);
+		}
+	}
 
-			x = Mathf.Clamp(x, -SpawnBoundsHalfExtents.X, SpawnBoundsHalfExtents.X);
-			z = Mathf.Clamp(z, -SpawnBoundsHalfExtents.Z, SpawnBoundsHalfExtents.Z);
+	private List<System.Numerics.Vector3> SnapshotReservedSpawnPositions(int additionalCapacity)
+	{
+		lock (_spawnLock)
+		{
+			var reserved = new List<System.Numerics.Vector3>(_activeCount + additionalCapacity);
+			if (_spawnRoot == null)
+				return reserved;
 
-			return new Vector3(x, SpawnHeight, z);
+			foreach (var child in _spawnRoot.GetChildren())
+			{
+				if (child is not RollingDie die || !IsInstanceValid(die))
+					continue;
+				var position = die.SpawnPosition;
+				reserved.Add(new System.Numerics.Vector3(position.X, position.Y, position.Z));
+			}
+			return reserved;
 		}
 	}
 

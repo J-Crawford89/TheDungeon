@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 /// <summary>Phase 3 UI-agnostic container loot API (panel snapshot, loot all, loot selected).</summary>
 public sealed class ContainerLootInteractionService
@@ -93,6 +94,9 @@ public sealed class ContainerLootInteractionService
 	}
 
 	public ContainerLootTransferResult TryLootAll(GameSessionState session, int containerOrdinal)
+		=> TryLootAllAsync(session, containerOrdinal).GetAwaiter().GetResult();
+
+	public async Task<ContainerLootTransferResult> TryLootAllAsync(GameSessionState session, int containerOrdinal)
 	{
 		if (!TryResolveRoom(session, out var room, out var err))
 			return ContainerLootTransferResult.Fail(err);
@@ -103,7 +107,7 @@ public sealed class ContainerLootInteractionService
 			return ContainerLootTransferResult.Fail(ContainerLootErrorCode.ContainerOrdinalOutOfRange);
 
 		var (_, label) = Describe(container);
-		var tr = ContainerLootOperations.TransferAllContents(
+		var tr = await ContainerLootOperations.TransferAllContentsAsync(
 			session,
 			resolvedRoom,
 			container,
@@ -120,6 +124,12 @@ public sealed class ContainerLootInteractionService
 	}
 
 	public ContainerLootTransferResult TryLootSelected(
+		GameSessionState session,
+		int containerOrdinal,
+		IReadOnlyList<int> contentIndices) =>
+		TryLootSelectedAsync(session, containerOrdinal, contentIndices).GetAwaiter().GetResult();
+
+	public async Task<ContainerLootTransferResult> TryLootSelectedAsync(
 		GameSessionState session,
 		int containerOrdinal,
 		IReadOnlyList<int> contentIndices)
@@ -143,7 +153,7 @@ public sealed class ContainerLootInteractionService
 		}
 
 		var (_, label) = Describe(container);
-		var tr = ContainerLootOperations.TransferSelectedContents(
+		var tr = await ContainerLootOperations.TransferSelectedContentsAsync(
 			session,
 			resolvedRoom,
 			container,

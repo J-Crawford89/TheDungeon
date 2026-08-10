@@ -6,8 +6,8 @@
 [ext_resource type="Script" uid="uid://xvccaq1yj0yp" path="res://Scenes/Components/Dice/DicePlayAreaWalls.cs" id="4_dyah1"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4tsla"]
-friction = 0.25
-bounce = 0.35
+friction = 0.65
+bounce = 0.2
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_4tsla"]
 size = Vector3(18, 0.25, 10)
@@ -48,3 +48,5 @@ mesh = SubResource("BoxMesh_i1o4d")
 
 [node name="PlayAreaWalls" type="Node3D" parent="." unique_id=1103236949]
 script = ExtResource("4_dyah1")
+WallHeight = 20.0
+ShowDebugWallMeshes = true

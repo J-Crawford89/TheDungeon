@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 internal interface ICombatTurnReadiness
 {
@@ -33,6 +35,11 @@ internal sealed class CombatTurnLoop
 	}
 
 	public void ProcessAutomaticMonsterTurns(GameSessionState session)
+		=> ProcessAutomaticMonsterTurnsAsync(session).GetAwaiter().GetResult();
+
+	public async Task ProcessAutomaticMonsterTurnsAsync(
+		GameSessionState session,
+		CancellationToken ct = default)
 	{
 		while (session.Phase == GamePlayPhase.InProgress && session.Dungeon.DungeonMode == DungeonMode.Combat && session.Combat is { } c && c.TurnOrder.Count > 0)
 		{
@@ -56,7 +63,7 @@ internal sealed class CombatTurnLoop
 				return;
 			}
 
-			_monsterTurn.ExecuteMonsterTurn(session, feature, slot.MonsterIndex);
+			await _monsterTurn.ExecuteMonsterTurnAsync(session, feature, slot.MonsterIndex, ct);
 			if (session.Phase != GamePlayPhase.InProgress)
 				return;
 			if (session.Dungeon.DungeonMode != DungeonMode.Combat)

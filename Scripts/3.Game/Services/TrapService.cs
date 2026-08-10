@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 
 /// <summary>Trap disarm checks, tripped-trap resolution, and room-exit tripwires (rolls in <see cref="ResolutionService"/>).</summary>
 public sealed class TrapService
@@ -82,6 +83,9 @@ public sealed class TrapService
 	}
 
 	public TrapDisarmResult TryDisarm(GameSessionState session)
+		=> TryDisarmAsync(session).GetAwaiter().GetResult();
+
+	public async Task<TrapDisarmResult> TryDisarmAsync(GameSessionState session)
 	{
 		if (session.Dungeon.CurrentFloor == null)
 			return new TrapDisarmResult { ResultCode = TrapDisarmResultCode.NoCurrentFloor };
@@ -100,10 +104,16 @@ public sealed class TrapService
 		if (trapInstance == null)
 			return new TrapDisarmResult { ResultCode = TrapDisarmResultCode.NoTrapPresent };
 
-		return TryDisarm(session, room, trapFeature, trapInstance);
+		return await TryDisarmAsync(session, room, trapFeature, trapInstance);
 	}
 
 	public TrapDisarmResult TryDisarmAtSlot(GameSessionState session, int trapFeatureOrdinal, int trapIndexInFeature)
+		=> TryDisarmAtSlotAsync(session, trapFeatureOrdinal, trapIndexInFeature).GetAwaiter().GetResult();
+
+	public async Task<TrapDisarmResult> TryDisarmAtSlotAsync(
+		GameSessionState session,
+		int trapFeatureOrdinal,
+		int trapIndexInFeature)
 	{
 		if (session.Dungeon.CurrentFloor == null)
 			return new TrapDisarmResult { ResultCode = TrapDisarmResultCode.NoCurrentFloor };
@@ -115,10 +125,17 @@ public sealed class TrapService
 		    trapFeature == null || trapInstance == null)
 			return new TrapDisarmResult { ResultCode = TrapDisarmResultCode.NoTrapPresent };
 
-		return TryDisarm(session, room, trapFeature, trapInstance);
+		return await TryDisarmAsync(session, room, trapFeature, trapInstance);
 	}
 
 	public TrapDisarmResult TryDisarm(GameSessionState session, DungeonRoom room, TrapFeature trapFeature, TrapInstance trapInstance)
+		=> TryDisarmAsync(session, room, trapFeature, trapInstance).GetAwaiter().GetResult();
+
+	public async Task<TrapDisarmResult> TryDisarmAsync(
+		GameSessionState session,
+		DungeonRoom room,
+		TrapFeature trapFeature,
+		TrapInstance trapInstance)
 	{
 		if (!trapFeature.Traps.Contains(trapInstance))
 			return new TrapDisarmResult { ResultCode = TrapDisarmResultCode.NoTrapPresent };
@@ -140,7 +157,7 @@ public sealed class TrapService
 			},
 		};
 
-		var resolution = _resolution.RollAgainstTarget(req);
+		var resolution = await _resolution.RollAgainstTargetAsync(req);
 		session.AppendLog(new LogEntry
 		{
 			Kind = LogEntryKind.Roll,

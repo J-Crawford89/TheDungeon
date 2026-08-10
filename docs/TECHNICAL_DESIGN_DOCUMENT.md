@@ -171,20 +171,28 @@ Keep scene scripts thin; move orchestration and heavy interaction logic into coo
 
 ## 3D dice presentation
 
-Authoritative rolls stay in [`DiceRollService`](../Scripts/3.Game/Services/DiceRollService.cs). The overlay only **displays** already-resolved faces. Presentation is **fire-and-forget** today (narrative/combat do not await dice); gating outcomes on animation completes is deferred to the game-wide async feature.
+Authoritative rolls stay in [`DiceRollService`](../Scripts/3.Game/Services/DiceRollService.cs). The overlay only **displays** already-resolved faces. Production roll-bearing actions use an **awaited presentation boundary**: the backend may determine the roll first, but result narration and consequential state mutation wait until the physical presentation has settled and shown the authoritative face.
 
 ### Flow
 
-1. Game code rolls (`DiceRollService` / `ResolutionService.RollAgainstTarget`).
-2. [`PhysicalDieRollExtractor`](../Scripts/3.Game/Helpers/PhysicalDieRollExtractor.cs) maps `DiceRollResult` → [`PhysicalDieRollSpec`](../Scripts/3.Game.Contracts/Dice/PhysicalDieRollSpec.cs) (d100 → percentile tens + ones d10).
-3. [`IDiceRollPresenter`](../Scripts/3.Game.Contracts/Dice/IDiceRollPresenter.cs) (`GodotDiceRollPresenter` → [`DiceRollOverlay`](../Scenes/Components/Dice/DiceRollOverlay.cs)) spawns [`RollingDie`](../Scenes/Components/Dice/RollingDie.cs) wrappers concurrently.
-4. Each roll: physics toss → optional face snap → `PostSnapDisplaySeconds` freeze → overlay `DieLingerSeconds` → `QueueFree`.
+1. Game code determines the authoritative result (`DiceRollService` / [`ResolutionService.RollAgainstTargetAsync`](../Scripts/3.Game/Services/ResolutionService.cs)).
+2. [`PhysicalDieRollExtractor`](../Scripts/3.Game/Helpers/PhysicalDieRollExtractor.cs) maps `DiceRollResult` -> [`PhysicalDieRollSpec`](../Scripts/3.Game.Contracts/Dice/PhysicalDieRollSpec.cs) (d100 -> percentile tens + ones d10).
+3. [`IDiceRollPresenter`](../Scripts/3.Game.Contracts/Dice/IDiceRollPresenter.cs) (`GodotDiceRollPresenter` -> [`DiceRollOverlay`](../Scenes/Components/Dice/DiceRollOverlay.cs)) creates all [`RollingDie`](../Scenes/Components/Dice/RollingDie.cs) wrappers for the batch before starting presentation.
+4. Each wrapper prepares a natural throw request from the visual's exact convex-hull points, face calibration, random bounded spawn, uniformly random initial orientation, and horizontal velocity (`6-9` units/second) with zero intended upward speed. [`DieTossKinematicsBuilder`](../Scripts/3.Game/Helpers/DieTossKinematicsBuilder.cs) measures the hull radius perpendicular to the roll axis and derives the release rate as `throwSpeed / rollingRadius * rollCoupling` (`0.82-0.98`), then adds at most `1.25` radians/second of off-axis tumble. Translation and rotation therefore begin close to a no-slip rolling condition without an ongoing torque source.
+5. [`PredeterminedDiceTrajectorySimulator`](../Scripts/3.Game/Helpers/PredeterminedDiceTrajectorySimulator.cs) runs the complete batch offscreen at a fixed 60 Hz using BepuPhysics 2.4. The independently stepped world contains the convex dice, floor, four walls, gravity, floor grip (`1.0`), low-friction walls (`0.15`), damping, and die-to-die collisions. Four solver substeps with four velocity iterations per substep improve short-lived edge contacts. Contact-point velocity is measured at the lowest hull vertices to report average/final surface slip and time-to-grip, while recorded quaternion deltas report total rotation. No target-seeking force or torque is applied.
+6. The simulator records every pose until the batch settles or reaches the diagnostic maximum duration. It identifies each natural upward face from the calibrated local normals, then computes the local die symmetry `inverse(naturalFaceUp) * desiredFaceUp`.
+7. That constant symmetry is applied to every recorded orientation, including frame zero. The positions, timing, collision responses, and angular path remain the natural simulation's trajectory, while the requested label occupies the naturally landed face for the entire visible roll.
+8. [`RollingDie`](../Scenes/Components/Dice/RollingDie.cs) freezes its Godot body, disables its live collision layer/mask, and replays the recorded poses. There is no predictive phase, live torque controller, result-seeking brake, recovery force, or catastrophic snap. Free rolls (`forcedFace <= 0`) remain live Godot rigid-body simulations with a deadlock timeout.
+9. After playback settles, the result remains readable for `PostRollDisplaySeconds`; then the presentation task completes. The calling service may append result narration and mutate state. Overlay cleanup independently keeps the die visible for `DieLingerSeconds`, then calls `QueueFree`.
+
+This boundary is propagated through combat entry/initiative, player and monster hit/damage, flee, potion healing, trap disarm, inspect discovery, and harvest rolls. Combat and UI presenters reject duplicate actions while an awaited action is resolving. Synchronous service methods remain compatibility paths for headless tests and non-Godot callers; production Godot callers must use the async methods.
 
 ### Scene model
 
 - **`RollingDie`**: `Node3D` wrapper (spawn offset, orchestration).
-- **`*_visual.tscn`**: root **`RigidBody3D`** with mesh, **convex `CollisionShape3D`**, and [`DieFaceCalibration`](../Scenes/Components/Dice/DieFaceCalibration.cs) on the same node (or child).
+- **`*_visual.tscn`**: root **[`DieVisualBody`](../Scenes/Components/Dice/DieVisualBody.cs)** (`RigidBody3D`) with mesh, **convex `CollisionShape3D`**, and an exported `Calibration` reference to its [`DieFaceCalibration`](../Scenes/Components/Dice/DieFaceCalibration.cs) child. Runtime child discovery is intentionally not used.
 - **No** nested `RigidBody3D` under another `RigidBody3D`. Containment uses **floor + [`DicePlayAreaWalls`](../Scenes/Components/Dice/DicePlayAreaWalls.cs)** (no post-roll teleport clamp).
+- **Walls**: [`DicePlayAreaWallLayout`](../Scripts/3.Game/Helpers/DicePlayAreaWallLayout.cs) creates all four sides with overlapping corners. `ShowDebugWallMeshes` adds translucent boxes matching collision dimensions for test-scene diagnosis; final-game walls remain invisible when false.
 
 ### Visual catalogs
 
@@ -194,9 +202,11 @@ Authoritative rolls stay in [`DiceRollService`](../Scripts/3.Game/Services/DiceR
 
 ### Face calibration (Quaternion, not Euler)
 
-Per face on `DieFaceCalibration`: **`FaceOrientation` (`Quaternion` x,y,z,w)** — die rotation where that face is the intended “up” read face before camera snap. **Do not** enter Euler degrees (X,Y,Z); those are not face directions.
+Per face on `DieFaceCalibration`: **`FaceOrientation` (`Quaternion` x,y,z,w)** — die rotation where that face is the intended “up” read face. **Do not** enter Euler degrees (X,Y,Z); those are not face directions.
 
-Snap: calibration quaternion → align face toward camera → random spin around camera axis ([`DieFaceOrientationSolver`](../Scripts/3.Game/Helpers/DieFaceOrientationSolver.cs)).
+The simulator derives each face's local normal as `inverse(FaceOrientation) * Vector3.Up`, transforms it through the final simulated rotation, and selects the normal closest to world up as the natural result. The natural and desired `FaceOrientation` values define a local symmetry that is applied to the complete recorded orientation sequence. [`DieFaceOrientationSolver`](../Scripts/3.Game/Helpers/DieFaceOrientationSolver.cs) remains only for the explicit manual **Snap in place** test action; gameplay never calls it. Camera position does not influence simulation, result selection, or mapping.
+
+The cube-shaped d3 stores one calibration per value even though each value is printed on two opposite sides. `RollingDie` recognizes the three-calibration/eight-hull-point shape, and the simulator evaluates both normal directions using a true cube half-turn symmetry.
 
 ### d100 display rules
 
@@ -204,16 +214,21 @@ Snap: calibration quaternion → align face toward camera → random spin around
 
 ### Godot editor checklist (human-owned)
 
-1. **`RollingDie.tscn`**: root `Node3D`; remove generic sphere collider and baked visual children.
-2. **Each `*_visual.tscn`**: root `RigidBody3D`; convex collider; `DieFaceCalibration` with `FaceOrientation` per face.
-3. **`dice_roll_overlay`**: assign `RollingDieScene`, `DiceSpawnPath`, `CameraPath` (→ `DiceWorld/Camera3D`), `VisualCatalogLibrary`; add `DicePlayAreaWalls` under `DiceWorld`; tune wall half-extents to spawn bounds.
-4. **`main_ui.tscn`**: export `DiceRollOverlay` on `MainUi`.
-5. **Catalog `.tres`**: `PlayerDieVisualCatalog`, `MonsterDieVisualCatalog`, wrapped in `DieVisualCatalogLibrary`.
-6. **`dice_test_scene`**: wire script exports; remove baked `RollingDie` under spawn root; floor + walls + camera.
+1. **`RollingDie.tscn`**: root `Node3D`; remove generic sphere collider and baked visual children. The remaining exports are intentionally high-level: throw-speed range, roll-coupling range, maximum tumble jitter, predetermined surface grip, and post-roll display time. Internal bounds, damping, settling, and solver constants are not exposed on each wrapper.
+2. **Each `*_visual.tscn`**: root `RigidBody3D`; attach `DieVisualBody.cs`; assign its exported `Calibration` field to the existing `DieFaceCalibration` child; retain the convex collider and per-face `FaceOrientation` entries. Baseline: mass `0.25`, linear/angular damping `0.35`, collider scale `1.01`.
+3. **Both dice floors**: use equivalent `PhysicsMaterial` settings so live/free rolls in the harness and production overlay behave alike. Baseline: friction `0.65`, bounce `0.20`. Predetermined rolls use the independent offscreen floor grip (`1.0`) and wall friction (`0.15`) described above.
+4. **`dice_roll_overlay`**: assign `RollingDieScene`, `DiceSpawnPath`, `CameraPath` (→ `DiceWorld/Camera3D`), `VisualCatalogLibrary`; add `DicePlayAreaWalls` under `DiceWorld`; tune wall half-extents to spawn bounds.
+5. **`main_ui.tscn`**: export `DiceRollOverlay` on `MainUi`.
+6. **Catalog `.tres`**: `PlayerDieVisualCatalog`, `MonsterDieVisualCatalog`, wrapped in `DieVisualCatalogLibrary`.
+7. **`dice_test_scene`**: wire script exports; remove baked `RollingDie` under spawn root; floor + walls + camera. The status panel reports launch speed, effective radius, roll coupling, release/contact slip, time-to-grip, initial/max spin, accumulated turns, natural/displayed face, final face dot, duration, and whether the offscreen trajectory settled naturally.
 
 ### Test harness
 
 [`dice_test_scene`](../Scenes/Components/Dice/dice_test_scene.tscn) + [`DiceTestScene.cs`](../Scenes/Components/Dice/DiceTestScene.cs): per-die spawn, free roll, gameplay roll (forced face), d100 pair, calibration verify, **Clear all**. `PersistDiceUntilClear` (default on) vs overlay-style auto-remove with linger.
+
+### Current implementation status (2026-08-10)
+
+Random bounded spawning, hull-aware velocity/rotation coupling, contact-slip telemetry, higher-quality fixed-step predetermined simulation, live free-roll settling, batch collisions, whole-trajectory face symmetry mapping, frozen pose replay, four-wall layout, explicit calibration, awaited gameplay boundaries, and ordering regression tests are implemented. The former under-spun release, predictive torque/braking/recovery controller, and catastrophic snap fallback have been removed. Calibration wiring and the shared visual/floor/wall values were completed by the human editor. Remaining work is visual play-testing across every die shape in the harness and production overlay. See the dated [Development Baseline](./PROJECT_STATUS.md) for exact values and verification steps.
 
 ---
 

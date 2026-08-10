@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 public sealed class ExplorationService
 {
@@ -32,6 +33,9 @@ public sealed class ExplorationService
 
     public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
         _combat.TryBeginCombatIfHostile(session, previousCoord, floorLevel);
+
+    public Task<bool> TryBeginCombatIfHostileAsync(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
+        _combat.TryBeginCombatIfHostileAsync(session, previousCoord, floorLevel);
 
     public ExplorationServiceResult MoveForward(GameSessionState session)
     {
@@ -109,6 +113,9 @@ public sealed class ExplorationService
     }
 
     public ExplorationServiceResult Inspect(GameSessionState session)
+        => InspectAsync(session).GetAwaiter().GetResult();
+
+    public async Task<ExplorationServiceResult> InspectAsync(GameSessionState session)
     {
         var dungeon = session.Dungeon;
         var floor = dungeon.CurrentFloor;
@@ -132,7 +139,7 @@ public sealed class ExplorationService
                     $"playerCoord={dungeon.PlayerCoord}, roomCount={floor.Rooms.Count}"));
         }
 
-        _inspect.RunInspectDiscovery(session, currentRoom);
+        await _inspect.RunInspectDiscoveryAsync(session, currentRoom);
 
         var inspectData = BuildInspectRoomData(currentRoom);
         foreach (var roomExit in currentRoom.Exits.All())

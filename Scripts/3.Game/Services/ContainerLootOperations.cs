@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 /// <summary>Moves loot from an in-room <see cref="ContainerFeature"/> into the player inventory with narrative feedback.</summary>
 public static class ContainerLootOperations
@@ -15,6 +16,18 @@ public static class ContainerLootOperations
 
 	/// <summary>Takes every valid stack from <paramref name="container"/>; stacks with unknown item ids remain in the container.</summary>
 	public static TransferResult TransferAllContents(
+		GameSessionState session,
+		DungeonRoom room,
+		ContainerFeature container,
+		IItemDefinitionRepository items,
+		NarrativeService narrative,
+		PlayerProficiencyAggregationService proficiency,
+		ResolutionService resolution,
+		string containerKindLabel) =>
+		TransferAllContentsAsync(session, room, container, items, narrative, proficiency, resolution, containerKindLabel)
+			.GetAwaiter().GetResult();
+
+	public static async Task<TransferResult> TransferAllContentsAsync(
 		GameSessionState session,
 		DungeonRoom room,
 		ContainerFeature container,
@@ -47,7 +60,8 @@ public static class ContainerLootOperations
 				continue;
 			}
 
-			TryGrantStack(session, stack, def, containerKindLabel, narrative, resolution, ref granted);
+			if (await TryGrantStackAsync(session, stack, def, containerKindLabel, narrative, resolution))
+				granted++;
 		}
 
 		container.Contents.Clear();
@@ -72,6 +86,19 @@ public static class ContainerLootOperations
 
 	/// <summary>Takes selected stacks by content index into <paramref name="container.Contents"/>; unknown definition ids are returned to the container.</summary>
 	public static TransferResult TransferSelectedContents(
+		GameSessionState session,
+		DungeonRoom room,
+		ContainerFeature container,
+		IReadOnlyList<int> contentIndices,
+		IItemDefinitionRepository items,
+		NarrativeService narrative,
+		PlayerProficiencyAggregationService proficiency,
+		ResolutionService resolution,
+		string containerKindLabel) =>
+		TransferSelectedContentsAsync(session, room, container, contentIndices, items, narrative, proficiency, resolution, containerKindLabel)
+			.GetAwaiter().GetResult();
+
+	public static async Task<TransferResult> TransferSelectedContentsAsync(
 		GameSessionState session,
 		DungeonRoom room,
 		ContainerFeature container,
@@ -118,7 +145,8 @@ public static class ContainerLootOperations
 				continue;
 			}
 
-			TryGrantStack(session, stack, def, containerKindLabel, narrative, resolution, ref granted);
+			if (await TryGrantStackAsync(session, stack, def, containerKindLabel, narrative, resolution))
+				granted++;
 		}
 
 		proficiency.Recompute(session.Player);
@@ -144,22 +172,20 @@ public static class ContainerLootOperations
 	private static bool IsHarvestSuccess(ResolutionOutcome outcome) =>
 		outcome is ResolutionOutcome.Success or ResolutionOutcome.CriticalSuccess;
 
-	private static void TryGrantStack(
+	private static async Task<bool> TryGrantStackAsync(
 		GameSessionState session,
 		LootableItemDefinition stack,
 		ItemDefinition def,
 		string containerKindLabel,
 		NarrativeService narrative,
-		ResolutionService resolution,
-		ref int grantedStacks)
+		ResolutionService resolution)
 	{
 		var qty = stack.Quantity;
 		if (!RequiresHarvestRoll(stack))
 		{
 			session.Player.InventoryState.AddOrStack(def, qty);
 			session.AppendGameLog(narrative.ForLootTakenFromContainer(containerKindLabel, def.Name, qty));
-			grantedStacks++;
-			return;
+			return true;
 		}
 
 		var hr = stack.Harvest!;
@@ -168,7 +194,7 @@ public static class ContainerLootOperations
 		for (var u = 0; u < qty; u++)
 		{
 			var req = BuildHarvestDiceRequest(def.Name, hr, session.Player.AbilityScores);
-			var resolved = resolution.RollAgainstTarget(req);
+			var resolved = await resolution.RollAgainstTargetAsync(req);
 			var line =
 				$"[{u + 1}/{qty}] total {resolved.Roll.Total} vs DC {hr.HarvestDc}" +
 				(string.IsNullOrWhiteSpace(resolved.Roll.DetailText) ? "" : $" ({resolved.Roll.DetailText.Trim()})");
@@ -189,8 +215,9 @@ public static class ContainerLootOperations
 		if (successes > 0)
 		{
 			session.Player.InventoryState.AddOrStack(def, successes);
-			grantedStacks++;
 		}
+
+		return successes > 0;
 	}
 
 	private static DiceRollRequest BuildHarvestDiceRequest(string itemDisplayName, HarvestRequirement hr, AbilityScores scores)

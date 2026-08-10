@@ -3,11 +3,15 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\0.Core\TheDungeon.Core.csproj" />
     <ProjectReference Include="..\2.State\TheDungeon.State.csproj" />
     <ProjectReference Include="..\3.Game.Contracts\TheDungeon.Game.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BepuPhysics" Version="2.4.0" />
   </ItemGroup>
 
   <!-- Allow xUnit assembly to exercise internal combat orchestration (CombatTurnLoop) in isolation. -->

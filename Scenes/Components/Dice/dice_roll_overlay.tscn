@@ -5,6 +5,10 @@
 [ext_resource type="Resource" uid="uid://bdenbq3xdg05r" path="res://Content/Dice/BaseDiceSets.tres" id="3_kr1rg"]
 [ext_resource type="Script" uid="uid://xvccaq1yj0yp" path="res://Scenes/Components/Dice/DicePlayAreaWalls.cs" id="4_kr1rg"]
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_kr1rg"]
+friction = 0.65
+bounce = 0.2
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_oaku6"]
 size = Vector3(18, 0.25, 10)
 
@@ -49,6 +53,7 @@ size = 10.0
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport/DiceWorld" unique_id=1856448599]
 
 [node name="Floor" type="StaticBody3D" parent="SubViewportContainer/SubViewport/DiceWorld" unique_id=1292313147]
+physics_material_override = SubResource("PhysicsMaterial_kr1rg")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewportContainer/SubViewport/DiceWorld/Floor" unique_id=1753639533]
 shape = SubResource("BoxShape3D_oaku6")
@@ -61,3 +66,4 @@ mesh = SubResource("BoxMesh_oaku6")
 
 [node name="PlayAreaWalls" type="Node3D" parent="SubViewportContainer/SubViewport/DiceWorld" unique_id=2008837266]
 script = ExtResource("4_kr1rg")
+WallHeight = 20.0

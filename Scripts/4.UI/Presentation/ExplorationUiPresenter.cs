@@ -13,6 +13,7 @@ public sealed class ExplorationUiPresenter
 	private readonly PotionEffectApplicationService _potionEffects;
 	private readonly Action<UiRefreshFlags> _refreshHud;
 	private readonly IContainerLootOverlayOpener? _lootOverlay;
+	private bool _isResolvingAction;
 
 	private readonly bool _useProceduralFloor = true; //Set this bool to true in order to use procedural generation, or false to use prototype hand built floor.
 
@@ -40,26 +41,48 @@ public sealed class ExplorationUiPresenter
 		_lootOverlay = lootOverlay;
 	}
 
-	public void OnPotionPressed()
+	public async void OnPotionPressed()
 	{
+		if (_isResolvingAction)
+			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
 			return;
-		_potionEffects.TryUseHealthPotion(_session);
-		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command);
+		_isResolvingAction = true;
+		try
+		{
+			await _potionEffects.TryUseHealthPotionAsync(_session);
+			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command);
+		}
+		finally
+		{
+			_isResolvingAction = false;
+		}
 	}
 
-	public void OnDisarmWithTarget(TargetPayload payload)
+	public async void OnDisarmWithTarget(TargetPayload payload)
 	{
+		if (_isResolvingAction)
+			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
 			return;
 		if (payload.Kind != TargetPayloadKind.DisarmTrapInstance)
 			return;
-		_trapService.TryDisarmAtSlot(_session, payload.TrapFeatureOrdinal, payload.TrapIndexInFeature);
-		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
+		_isResolvingAction = true;
+		try
+		{
+			await _trapService.TryDisarmAtSlotAsync(_session, payload.TrapFeatureOrdinal, payload.TrapIndexInFeature);
+			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
+		}
+		finally
+		{
+			_isResolvingAction = false;
+		}
 	}
 
 	public void OnTakeWithTarget(TargetPayload payload)
 	{
+		if (_isResolvingAction)
+			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
 			return;
 		switch (payload.Kind)
@@ -78,8 +101,10 @@ public sealed class ExplorationUiPresenter
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
 
-	public void OnOpenContainerWithTarget(TargetPayload payload)
+	public async void OnOpenContainerWithTarget(TargetPayload payload)
 	{
+		if (_isResolvingAction)
+			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Exploration)
 			return;
 		if (payload.Kind != TargetPayloadKind.LootContainerAll)
@@ -90,12 +115,22 @@ public sealed class ExplorationUiPresenter
 			return;
 		}
 
-		_containerLoot.TryLootAll(_session, payload.ContainerOrdinal);
-		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
+		_isResolvingAction = true;
+		try
+		{
+			await _containerLoot.TryLootAllAsync(_session, payload.ContainerOrdinal);
+			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
+		}
+		finally
+		{
+			_isResolvingAction = false;
+		}
 	}
 
 	public void BootstrapDungeon()
 	{
+		if (_isResolvingAction)
+			return;
 		var initialFloor = _dungeonBootstrap.CreateInitialFloor(_useProceduralFloor);
 		_session.Dungeon.Floors.Clear();
 		_session.Dungeon.Floors.Add(initialFloor);
@@ -109,20 +144,32 @@ public sealed class ExplorationUiPresenter
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
 	}
 
-	public void OnForwardPressed()
+	public async void OnForwardPressed()
 	{
+		if (_isResolvingAction)
+			return;
+		_isResolvingAction = true;
+		try
+		{
 		var previousCoord = _session.Dungeon.PlayerCoord;
 		var floorLevel = _session.Dungeon.CurrentFloor?.Level ?? 0;
 		var result = _explorationService.MoveForward(_session);
 		_session.AppendGameLog(_narrativeService.ForMoveForward(result));
 		if (result.Success)
-			_explorationService.TryBeginCombatIfHostile(_session, previousCoord, floorLevel);
+			await _explorationService.TryBeginCombatIfHostileAsync(_session, previousCoord, floorLevel);
 		if (!TryReportDiagnosticAndRefreshAll(result))
 			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
+		}
+		finally
+		{
+			_isResolvingAction = false;
+		}
 	}
 
 	public void OnBackwardPressed()
 	{
+		if (_isResolvingAction)
+			return;
 		var result = _explorationService.AboutFace(_session.Player);
 		var line = _narrativeService.ForAboutFace(result);
 		if (!string.IsNullOrEmpty(line))
@@ -133,6 +180,8 @@ public sealed class ExplorationUiPresenter
 
 	public void OnTurn(DirectionTurned direction)
 	{
+		if (_isResolvingAction)
+			return;
 		var result = _explorationService.Turn(_session.Player, direction);
 		var line = _narrativeService.ForTurn(result, direction);
 		if (!string.IsNullOrEmpty(line))
@@ -141,9 +190,14 @@ public sealed class ExplorationUiPresenter
 			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView);
 	}
 
-	public void OnInspectPressed()
+	public async void OnInspectPressed()
 	{
-		var result = _explorationService.Inspect(_session);
+		if (_isResolvingAction)
+			return;
+		_isResolvingAction = true;
+		try
+		{
+		var result = await _explorationService.InspectAsync(_session);
 		_session.AppendGameLog(_narrativeService.ForInspect(result));
 		if (result.Success && result.InspectData is { } inspectData)
 		{
@@ -153,25 +207,42 @@ public sealed class ExplorationUiPresenter
 
 		if (!TryReportDiagnosticAndRefreshAll(result))
 			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Map | UiRefreshFlags.MainView | UiRefreshFlags.Command);
+		}
+		finally
+		{
+			_isResolvingAction = false;
+		}
 	}
 
 	public void OnFloorUpPressed()
 	{
+		if (_isResolvingAction)
+			return;
 		var result = _explorationService.MoveUpAFloor(_session);
 		_session.AppendGameLog(_narrativeService.ForMoveUpFloor(result));
 		if (!TryReportDiagnosticAndRefreshAll(result))
 			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
 	}
 
-	public void OnFloorDownPressed()
+	public async void OnFloorDownPressed()
 	{
+		if (_isResolvingAction)
+			return;
+		_isResolvingAction = true;
+		try
+		{
 		var previousCoord = _session.Dungeon.PlayerCoord;
 		var result = _explorationService.MoveDownAFloor(_session);
 		_session.AppendGameLog(_narrativeService.ForMoveDownFloor(result));
 		if (result.Success && result.FloorAfterMove is { } floorLevel)
-			_explorationService.TryBeginCombatIfHostile(_session, previousCoord, floorLevel);
+			await _explorationService.TryBeginCombatIfHostileAsync(_session, previousCoord, floorLevel);
 		if (!TryReportDiagnosticAndRefreshAll(result))
 			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
+		}
+		finally
+		{
+			_isResolvingAction = false;
+		}
 	}
 
 	private bool TryReportDiagnosticAndRefreshAll(ExplorationServiceResult result)

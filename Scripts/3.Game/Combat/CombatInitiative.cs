@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 public sealed class CombatInitiative
 {
@@ -23,12 +25,18 @@ public sealed class CombatInitiative
 	}
 
 	public List<CombatTurnSlot> RollInitiativeOrder(GameSessionState session, MonsterFeature feature)
+		=> RollInitiativeOrderAsync(session, feature).GetAwaiter().GetResult();
+
+	public async Task<List<CombatTurnSlot>> RollInitiativeOrderAsync(
+		GameSessionState session,
+		MonsterFeature feature,
+		CancellationToken ct = default)
 	{
 		var entries = new List<InitiativeEntry>();
 
 		var playerAgi = session.Player.AbilityScores.Agility;
 		var pRoll = _dice.RollD20Plus("Initiative (you)", playerAgi, "Agility");
-		PresentInitiativeRoll(pRoll, DieRollVisualKind.Player);
+		await PresentInitiativeRollAsync(pRoll, DieRollVisualKind.Player, ct);
 		session.AppendLog(new LogEntry { Kind = LogEntryKind.Roll, Text = _narrative.ForCombatInitiativeRoll("You", pRoll) });
 		entries.Add(new InitiativeEntry { Total = pRoll.Total, Agility = playerAgi, IsPlayer = true, MonsterIndex = -1 });
 
@@ -38,7 +46,7 @@ public sealed class CombatInitiative
 				continue;
 			var monsterAgi = 0;
 			var mRoll = _dice.RollD20Plus($"Initiative ({feature.Monsters[i].Definition.Name})", monsterAgi, "Agility");
-			PresentInitiativeRoll(mRoll, DieRollVisualKind.Monster);
+			await PresentInitiativeRollAsync(mRoll, DieRollVisualKind.Monster, ct);
 			session.AppendLog(new LogEntry { Kind = LogEntryKind.Roll, Text = _narrative.ForCombatInitiativeRoll(feature.Monsters[i].Definition.Name, mRoll) });
 			entries.Add(new InitiativeEntry { Total = mRoll.Total, Agility = monsterAgi, IsPlayer = false, MonsterIndex = i });
 		}
@@ -50,10 +58,16 @@ public sealed class CombatInitiative
 			.ToList();
 	}
 
-	private void PresentInitiativeRoll(DiceRollResult roll, DieRollVisualKind kind)
-	{
-		if (_dicePresenterHost == null)
-			return;
-		DiceRollPresentation.PresentResultFireAndForget(_dicePresenterHost.Presenter, roll, kind);
-	}
+	private Task PresentInitiativeRollAsync(
+		DiceRollResult roll,
+		DieRollVisualKind kind,
+		CancellationToken ct) =>
+		_dicePresenterHost == null
+			? Task.CompletedTask
+			: DiceRollPresentation.PresentRollAsync(
+				_dicePresenterHost.Presenter,
+				roll,
+				new DiceRollRequest(),
+				kind,
+				ct);
 }

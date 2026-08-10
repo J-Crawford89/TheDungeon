@@ -48,6 +48,23 @@ The project is an **old-school dungeon-crawl exploration RPG** built in **Godot 
 
 **TODO:** Document intended combat cadence (flee, defend, items in combat), monster roles, and any difficulty knobs exposed to design.
 
+### Dice and outcome presentation
+
+**Design decision:** Gameplay rolls are decided by the rules backend; the 3D dice communicate that already-authoritative result. Physics should make the toss feel tactile and variable, but it must not silently change a result or become dependent on camera angle, frame rate, collision quirks, or a die leaving the play area.
+
+A roll should read as one coherent beat:
+
+1. The die appears at a random usable point just above the play surface and receives a bounded horizontal throw. It drops into the floor instead of being launched into a high airborne arc. Release rotation is derived from throw speed and the die's actual rolling radius, so it meets the surface already close to a rolling condition; a small bounded off-axis component adds tumble without creating uncontrolled spin. Floor and wall contact then vary and dissipate that motion instead of being expected to create rotation from a sliding body.
+2. For an authoritative gameplay result, the game first runs the complete rigid-body throw in a fast offscreen simulation. The simulation uses the die's convex collider plus the same floor, walls, and other dice in that batch. No result-seeking force or torque is applied.
+3. Once the simulated die settles naturally, its upward face is identified from the calibrated face normals.
+4. The requested face is substituted for that natural face by applying a valid local symmetry rotation to every recorded orientation, beginning with the first frame. Position, timing, collisions, and angular motion remain those of the natural throw.
+5. The recorded trajectory is then replayed visibly. Because the result mapping exists for the whole animation, the die never displays one result and then corrects, snaps, or receives an invisible second flick.
+6. Free/test rolls may still use live Godot physics when no outcome has been predetermined.
+7. Only after the face is readable and the die is physically settled does the game reveal narration and apply consequences such as damage, death, discovery, healing, or loot.
+8. The resolved die may linger briefly while the player reads the outcome.
+
+The camera is presentational, not part of the rule for deciding "up." A gameplay face is oriented to the play surface. A simulation timeout is a diagnostic guard: it may end recording a pathological trajectory, but it must never trigger a visible result snap. Normal rolls are not cut off by a randomized animation duration.
+
 ---
 
 ## Progression

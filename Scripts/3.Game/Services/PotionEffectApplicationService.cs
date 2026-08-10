@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 /// <summary>Applies consumable potion effects from definitions (usable outside combat).
 /// </summary>
@@ -7,21 +8,27 @@ public sealed class PotionEffectApplicationService
 	private readonly DiceRollService _dice;
 	private readonly NarrativeService _narrative;
 	private readonly IItemDefinitionRepository _items;
+	private readonly ResolutionService? _resolution;
 
 	public PotionEffectApplicationService(
 		DiceRollService dice,
 		NarrativeService narrative,
-		IItemDefinitionRepository items)
+		IItemDefinitionRepository items,
+		ResolutionService? resolution = null)
 	{
 		_dice = dice;
 		_narrative = narrative;
 		_items = items;
+		_resolution = resolution;
 	}
 
 	/// <summary>Use one health potion stack from inventory (constant id).
 	/// Does not enforce combat-only; callers decide context.
 	/// </summary>
 	public HealthPotionUseOutcome TryUseHealthPotion(GameSessionState session)
+		=> TryUseHealthPotionAsync(session).GetAwaiter().GetResult();
+
+	public async Task<HealthPotionUseOutcome> TryUseHealthPotionAsync(GameSessionState session)
 	{
 		var player = session.Player;
 		var potionItemId = InventoryIds.HealthPotion;
@@ -45,7 +52,7 @@ public sealed class PotionEffectApplicationService
 			return HealthPotionUseOutcome.CannotResolveDefinition;
 		}
 
-		var healTotal = ComputeHealFromPotion(session, potionDefinition);
+		var healTotal = await ComputeHealFromPotionAsync(session, potionDefinition);
 		var missing = player.MaxHp - player.CurrentHp;
 		var raw = healTotal < 0 ? 0 : healTotal;
 		var heal = raw <= missing ? raw : missing;
@@ -62,7 +69,7 @@ public sealed class PotionEffectApplicationService
 		return HealthPotionUseOutcome.Applied;
 	}
 
-	private int ComputeHealFromPotion(GameSessionState session, PotionDefinition potion)
+	private async Task<int> ComputeHealFromPotionAsync(GameSessionState session, PotionDefinition potion)
 	{
 		var sum = 0;
 		foreach (var effect in potion.Effects)
@@ -84,6 +91,8 @@ public sealed class PotionEffectApplicationService
 				ModifiersWithSources = new List<ModifierWithSource>()
 			};
 			var roll = _dice.Roll(req);
+			if (_resolution != null)
+				await _resolution.PresentRollVisualAsync(roll, req, DieRollVisualKind.Player);
 			sum += roll.RollTotal;
 
 			session.AppendLog(new LogEntry

@@ -1,10 +1,12 @@
 using System;
+using System.Threading.Tasks;
 
 public sealed class CombatUiPresenter
 {
 	private readonly GameSessionState _session;
 	private readonly ICombatService _combatService;
 	private readonly Action<UiRefreshFlags> _refreshHud;
+	private bool _isResolvingAction;
 
 	public CombatUiPresenter(GameSessionState session, ICombatService combatService, Action<UiRefreshFlags> refreshHud)
 	{
@@ -19,8 +21,7 @@ public sealed class CombatUiPresenter
 			return;
 		if (!_combatService.IsAwaitingPlayerAction(_session))
 			return;
-		_combatService.ExecutePlayerAttack(_session, livingMonsterOrdinal, attackChoice);
-		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
+		ExecuteAsync(() => _combatService.ExecutePlayerAttackAsync(_session, livingMonsterOrdinal, attackChoice));
 	}
 
 	public void OnFleePressed()
@@ -29,8 +30,7 @@ public sealed class CombatUiPresenter
 			return;
 		if (!_combatService.IsAwaitingPlayerAction(_session))
 			return;
-		_combatService.ExecutePlayerFlee(_session);
-		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
+		ExecuteAsync(() => _combatService.ExecutePlayerFleeAsync(_session));
 	}
 
 	public void OnTakeWithTarget(TargetPayload payload)
@@ -39,8 +39,7 @@ public sealed class CombatUiPresenter
 			return;
 		if (!_combatService.IsAwaitingPlayerAction(_session))
 			return;
-		_combatService.ExecutePlayerTakeTreasure(_session, payload);
-		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
+		ExecuteAsync(() => _combatService.ExecutePlayerTakeTreasureAsync(_session, payload));
 	}
 
 	public void OnPotionPressed()
@@ -49,8 +48,7 @@ public sealed class CombatUiPresenter
 			return;
 		if (!_combatService.IsAwaitingPlayerAction(_session))
 			return;
-		_combatService.ExecutePlayerUseHealthPotion(_session);
-		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
+		ExecuteAsync(() => _combatService.ExecutePlayerUseHealthPotionAsync(_session));
 	}
 
 	public void OnDefendPressed()
@@ -59,8 +57,7 @@ public sealed class CombatUiPresenter
 			return;
 		if (!_combatService.IsAwaitingPlayerAction(_session))
 			return;
-		_combatService.ExecutePlayerDefend(_session);
-		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
+		ExecuteAsync(() => _combatService.ExecutePlayerDefendAsync(_session));
 	}
 
 	public void OnDisarmWithTarget(TargetPayload payload)
@@ -69,7 +66,22 @@ public sealed class CombatUiPresenter
 			return;
 		if (!_combatService.IsAwaitingPlayerAction(_session))
 			return;
-		_combatService.ExecutePlayerDisarmTrap(_session, payload);
-		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
+		ExecuteAsync(() => _combatService.ExecutePlayerDisarmTrapAsync(_session, payload));
+	}
+
+	private async void ExecuteAsync(Func<Task> action)
+	{
+		if (_isResolvingAction)
+			return;
+		_isResolvingAction = true;
+		try
+		{
+			await action();
+		}
+		finally
+		{
+			_isResolvingAction = false;
+			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
+		}
 	}
 }

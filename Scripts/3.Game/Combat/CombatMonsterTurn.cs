@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 public sealed class CombatMonsterTurn
 {
@@ -24,6 +26,13 @@ public sealed class CombatMonsterTurn
 	}
 
 	public void ExecuteMonsterTurn(GameSessionState session, MonsterFeature feature, int monsterIndex)
+		=> ExecuteMonsterTurnAsync(session, feature, monsterIndex).GetAwaiter().GetResult();
+
+	public async Task ExecuteMonsterTurnAsync(
+		GameSessionState session,
+		MonsterFeature feature,
+		int monsterIndex,
+		CancellationToken ct = default)
 	{
 		if (monsterIndex < 0 || monsterIndex >= feature.Monsters.Count)
 			return;
@@ -65,7 +74,7 @@ public sealed class CombatMonsterTurn
 			},
 			ModifiersWithSources = modifiers,
 		};
-		var result = _resolution.RollAgainstTarget(req, DieRollVisualKind.Monster);
+		var result = await _resolution.RollAgainstTargetAsync(req, DieRollVisualKind.Monster, ct);
 		session.AppendLog(new LogEntry
 		{
 			Kind = LogEntryKind.Roll,
@@ -75,7 +84,9 @@ public sealed class CombatMonsterTurn
 		if (result.Outcome == ResolutionOutcome.Success || result.Outcome == ResolutionOutcome.CriticalSuccess)
 		{
 			var hitArmorBand = result.Roll.Total >= playerEc && result.Roll.Total < armorThreshold;
-			var damage = RollAttackDamageSum(attack);
+			var damageRoll = RollAttackDamageSum(attack);
+			await _resolution.PresentSpecsAsync(damageRoll.VisualDice, ct);
+			var damage = damageRoll.Total;
 			if (attack.AddAbilityScoreToDamage)
 				damage += monster.Definition.AbilityScores.GetScore(attack.AbilityScore);
 			damage = Math.Max(0, damage);
@@ -142,17 +153,22 @@ public sealed class CombatMonsterTurn
 		return null;
 	}
 
-	private int RollAttackDamageSum(AttackDefinition attack)
+	private MonsterDamageRollResult RollAttackDamageSum(AttackDefinition attack)
 	{
 		var sum = 0;
+		var visualDice = new List<PhysicalDieRollSpec>();
 		foreach (var damage in attack.DamageComponents)
-			sum += RollAttackDamageOne(damage);
-		return sum;
+		{
+			var rolled = RollAttackDamageOne(damage);
+			sum += rolled.Total;
+			visualDice.AddRange(rolled.VisualDice);
+		}
+		return new MonsterDamageRollResult(sum, visualDice);
 	}
 
-	private int RollAttackDamageOne(DamageComponent damage)
+	private MonsterDamageRollResult RollAttackDamageOne(DamageComponent damage)
 	{
-		var damageRoll = _diceRolls.Roll(new DiceRollRequest
+		var request = new DiceRollRequest
 		{
 			DiceRollLabel = "Monster damage",
 			TargetNumber = 0,
@@ -162,7 +178,11 @@ public sealed class CombatMonsterTurn
 			{
 				new() { Modifier = damage.FlatAmount, Source = "Flat" }
 			}
-		});
-		return Math.Max(0, damageRoll.Total);
+		};
+		var damageRoll = _diceRolls.Roll(request);
+		var specs = PhysicalDieRollExtractor.FromDiceRollResult(damageRoll, request, DieRollVisualKind.Monster);
+		return new MonsterDamageRollResult(Math.Max(0, damageRoll.Total), specs);
 	}
+
+	private sealed record MonsterDamageRollResult(int Total, IReadOnlyList<PhysicalDieRollSpec> VisualDice);
 }

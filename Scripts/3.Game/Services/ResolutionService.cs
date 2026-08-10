@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
 public sealed class ResolutionService
 {
 	private readonly IDiceRollRequestExecutor _diceRollService;
@@ -11,27 +15,47 @@ public sealed class ResolutionService
 
 	public ResolutionResult RollAgainstTarget(DiceRollRequest request, DieRollVisualKind visualKind = DieRollVisualKind.Player)
 	{
+		_ = visualKind;
 		var roll = _diceRollService.Roll(request);
-		PresentRollVisual(roll, request, visualKind);
-
-		return new ResolutionResult()
-		{
-			Roll = roll,
-			TargetNumber = request.TargetNumber,
-			Outcome = ParseOutcome(roll, request.TargetNumber)
-		};
+		return BuildResult(roll, request.TargetNumber);
 	}
 
-	public void PresentRollVisual(DiceRollResult roll, DiceRollRequest request, DieRollVisualKind visualKind)
+	public async Task<ResolutionResult> RollAgainstTargetAsync(
+		DiceRollRequest request,
+		DieRollVisualKind visualKind = DieRollVisualKind.Player,
+		CancellationToken ct = default)
 	{
-		if (_dicePresenterHost == null)
-			return;
-		DiceRollPresentation.PresentRollFireAndForget(_dicePresenterHost.Presenter, roll, request, visualKind);
+		var roll = _diceRollService.Roll(request);
+		await PresentRollVisualAsync(roll, request, visualKind, ct);
+		return BuildResult(roll, request.TargetNumber);
 	}
+
+	public Task PresentRollVisualAsync(
+		DiceRollResult roll,
+		DiceRollRequest request,
+		DieRollVisualKind visualKind,
+		CancellationToken ct = default) =>
+		_dicePresenterHost == null
+			? Task.CompletedTask
+			: DiceRollPresentation.PresentRollAsync(_dicePresenterHost.Presenter, roll, request, visualKind, ct);
+
+	public Task PresentSpecsAsync(
+		IReadOnlyList<PhysicalDieRollSpec> specs,
+		CancellationToken ct = default) =>
+		_dicePresenterHost == null
+			? Task.CompletedTask
+			: DiceRollPresentation.PresentSpecsAsync(_dicePresenterHost.Presenter, specs, ct);
 
 	/// <summary>Uses the same rules as <see cref="RollAgainstTarget"/> for an existing roll vs a DC.</summary>
 	public ResolutionOutcome ResolveOutcomeAgainstTarget(DiceRollResult roll, int targetNumber) =>
 		ParseOutcome(roll, targetNumber);
+
+	private ResolutionResult BuildResult(DiceRollResult roll, int targetNumber) => new()
+	{
+		Roll = roll,
+		TargetNumber = targetNumber,
+		Outcome = ParseOutcome(roll, targetNumber),
+	};
 
 	private ResolutionOutcome ParseOutcome(DiceRollResult roll, int targetNumber)
 	{

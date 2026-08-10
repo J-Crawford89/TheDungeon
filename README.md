@@ -8,6 +8,7 @@ An **old-school dungeon-crawl exploration RPG** built with **Godot 4.6** and **C
 |----------|-------------|
 | [Game Design Document](docs/GAME_DESIGN_DOCUMENT.md) | Gameplay and product design — core loop, economy, itemization, UX principles, open questions. |
 | [Technical Design Document](docs/TECHNICAL_DESIGN_DOCUMENT.md) | Architecture, runtime/session model, Godot integration rules, testing strategy, ADRs. |
+| [Development Baseline (2026-08-07)](docs/PROJECT_STATUS.md) | Dated re-entry map: implemented systems, current dice milestone, editor checklist, and likely next work. |
 
 **AI-assisted contributors:** repository policy for agents (serialized Godot files, tests, architecture) lives in [`.cursor/rules/`](.cursor/rules/) and is summarized in the Technical Design Document.
 

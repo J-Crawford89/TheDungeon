@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://cefqrdymmrti3" path="res://Assets/Dice/d12.glb" id="1_3n81m"]
 [ext_resource type="Script" uid="uid://kk1rkbxivfbj" path="res://Scenes/Components/Dice/DieFaceCalibration.cs" id="2_1fa2r"]
+[ext_resource type="Script" uid="uid://c2kkrq8s2wlyc" path="res://Scenes/Components/Dice/DieVisualBody.cs" id="2_8frkk"]
 [ext_resource type="Script" uid="uid://dbtqualonrkmw" path="res://Scenes/Components/Dice/DieFaceCalibrationEntry.cs" id="2_qt32q"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_3n81m"]
@@ -78,14 +79,15 @@ Face = 12
 FaceOrientation = Quaternion(0.273267, 0, 0, 0.961938)
 metadata/_custom_type_script = "uid://dbtqualonrkmw"
 
-[node name="d12Root" unique_id=1714698328 instance=ExtResource("1_3n81m")]
+[node name="d12Root" unique_id=1714698328 node_paths=PackedStringArray("Calibration") instance=ExtResource("1_3n81m")]
 mass = 0.25
-linear_damp = 0.2
-angular_damp = 1.0
-script = null
+linear_damp = 0.35
+angular_damp = 0.35
+script = ExtResource("2_8frkk")
+Calibration = NodePath("DieFaceCalibration")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." index="1" unique_id=1134387852]
-transform = Transform3D(1.04, 0, 0, 0, 1.04, 0, 0, 0, 1.04, 0, 0, 0)
+transform = Transform3D(1.01, 0, 0, 0, 1.01, 0, 0, 0, 1.01, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_3n81m")
 
 [node name="DieFaceCalibration" type="Node3D" parent="." index="14" unique_id=894865173]
