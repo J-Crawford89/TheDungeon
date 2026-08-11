@@ -287,11 +287,11 @@ public partial class DiceTestScene : Node3D
 			return;
 		}
 
-		var cal = _lastSpawnedDie.Calibration;
 		var body = _lastSpawnedDie.Body;
-		if (cal == null || body == null)
+		if (body == null ||
+			!_lastSpawnedDie.TryGetEffectiveFaceCalibration(out var effectiveCalibration))
 		{
-			SetStatus("Last die has no calibration/body.");
+			SetStatus("Last die has no usable calibration/body/hull alignment.");
 			return;
 		}
 
@@ -300,7 +300,7 @@ public partial class DiceTestScene : Node3D
 		var numericQuat = new System.Numerics.Quaternion(bodyQuat.X, bodyQuat.Y, bodyQuat.Z, bodyQuat.W);
 		var target = System.Numerics.Vector3.UnitY;
 
-		var normals = ToNumericNormals(cal.GetLocalFaceNormals());
+		var normals = effectiveCalibration.FaceNormals;
 		var ranked = DieFaceCalibrationVerifier.RankFaces(normals, numericQuat, target);
 		var best = ranked[0];
 		var requested = ranked.FirstOrDefault(r => r.Face == targetFace);
@@ -318,6 +318,7 @@ public partial class DiceTestScene : Node3D
 			? $"pre-sim natural {die.LastSimulatedNaturalFace} -> displayed {die.LastDisplayedFace}; " +
 			  $"{die.LastRollDurationSeconds:F1}s, rotation " +
 			  $"{die.LastAccumulatedRotationRadians / MathF.Tau:F1} turns, " +
+			  $"face changes {die.LastUpwardFaceTransitions}, " +
 			  $"max spin {die.LastMaximumAngularSpeed:F1}, " +
 			  $"grip {die.LastTimeToGripSeconds:F2}s, avg/final slip " +
 			  $"{die.LastAverageContactSlipSpeed:F2}/{die.LastFinalContactSlipSpeed:F2}, " +
@@ -325,16 +326,9 @@ public partial class DiceTestScene : Node3D
 			: $"natural settle in {die.LastRollDurationSeconds:F1}s, max spin {die.LastMaximumAngularSpeed:F1}";
 		return $"Launch {die.LastLaunchSpeed:F1}, radius {die.LastEffectiveRollingRadius:F2}, " +
 			$"coupling {die.LastRollCoupling:F2}, initial spin {die.LastInitialAngularSpeed:F1}, " +
-			$"release slip {die.LastInitialSurfaceSlipSpeed:F2}; {landing}.";
+			$"release slip {die.LastInitialSurfaceSlipSpeed:F2}, calibration/hull " +
+			$"{die.LastCalibrationHullAlignmentDot:F3}; {landing}.";
 	}
-	private static Dictionary<int, System.Numerics.Vector3> ToNumericNormals(IReadOnlyDictionary<int, Vector3> godotNormals)
-	{
-		var map = new Dictionary<int, System.Numerics.Vector3>(godotNormals.Count);
-		foreach (var (face, local) in godotNormals)
-			map[face] = new System.Numerics.Vector3(local.X, local.Y, local.Z);
-		return map;
-	}
-
 	private RollingDie? CreateDie(TestDiePreset preset)
 	{
 		if (_spawnRoot == null || RollingDieScene == null || VisualCatalogLibrary == null)

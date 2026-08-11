@@ -33,6 +33,8 @@ public sealed record PredeterminedDieTrajectory(
 	float DurationSeconds,
 	float MaximumAngularSpeed,
 	float AccumulatedRotationRadians,
+	int UpwardFaceTransitions,
+	float FinalUpwardFaceDot,
 	bool SettledNaturally,
 	float AverageContactSlipSpeed,
 	float FinalContactSlipSpeed,
@@ -47,7 +49,7 @@ public sealed record PredeterminedDiceSimulationSettings
 	public Vector3 Gravity { get; init; } = new(0f, -9.8f, 0f);
 	public float LinearDamping { get; init; } = 0.18f;
 	public float AngularDamping { get; init; } = 0.18f;
-	public float Friction { get; init; } = 1f;
+	public float Friction { get; init; } = 1.25f;
 	public float WallFriction { get; init; } = 0.15f;
 	public float ContactSpringFrequency { get; init; } = 30f;
 	public float ContactDampingRatio { get; init; } = 0.35f;
@@ -58,6 +60,7 @@ public sealed record PredeterminedDiceSimulationSettings
 	public float SettleLinearSpeed { get; init; } = 0.08f;
 	public float SettleAngularSpeed { get; init; } = 0.15f;
 	public float SettleConfirmationSeconds { get; init; } = 0.2f;
+	public float MinimumLandingFaceDot { get; init; } = 0.95f;
 }
 
 /// <summary>
@@ -141,7 +144,10 @@ public static class PredeterminedDiceTrajectorySimulator
 						ref surfaceGripTrackers[i]);
 					var body = simulation.Bodies.GetBodyReference(bodies[i].Handle);
 					if (body.Velocity.Linear.Length() > settings.SettleLinearSpeed ||
-						body.Velocity.Angular.Length() > settings.SettleAngularSpeed)
+						body.Velocity.Angular.Length() > settings.SettleAngularSpeed ||
+						FindNaturalLanding(
+							requests[i],
+							Quaternion.Normalize(body.Pose.Orientation)).Dot < settings.MinimumLandingFaceDot)
 						allSlow = false;
 				}
 
@@ -184,6 +190,8 @@ public static class PredeterminedDiceTrajectorySimulator
 					MathF.Max(0f, displayFrames.Length - 1) * settings.TimeStepSeconds,
 					maximumAngularSpeeds[i],
 					MeasureAccumulatedRotation(rawFrames),
+					CountUpwardFaceTransitions(requests[i], rawFrames),
+					naturalLanding.Dot,
 					settledNaturally,
 					surfaceGripTrackers[i].AverageSlipSpeed,
 					surfaceGripTrackers[i].FinalSlipSpeed,
@@ -216,6 +224,40 @@ public static class PredeterminedDiceTrajectorySimulator
 		return radians;
 	}
 
+	private static int CountUpwardFaceTransitions(
+		PredeterminedDieThrowRequest request,
+		IReadOnlyList<PredeterminedDieTrajectoryFrame> frames)
+	{
+		var transitions = 0;
+		var previousFace = int.MinValue;
+		for (var frameIndex = 0; frameIndex < frames.Count; frameIndex++)
+		{
+			var bestFace = int.MinValue;
+			var bestDot = float.NegativeInfinity;
+			foreach (var (face, normal) in request.FaceNormals)
+			{
+				var dot = Vector3.Dot(
+					Vector3.Transform(normal, frames[frameIndex].Orientation),
+					Vector3.UnitY);
+				if (dot > bestDot)
+				{
+					bestDot = dot;
+					bestFace = face * 2;
+				}
+				if (request.OppositeFacesShareValues && -dot > bestDot)
+				{
+					bestDot = -dot;
+					bestFace = face * 2 + 1;
+				}
+			}
+
+			if (previousFace != int.MinValue && bestFace != previousFace)
+				transitions++;
+			previousFace = bestFace;
+		}
+
+		return transitions;
+	}
 	private static SimulatedBody AddDie(
 		Simulation simulation,
 		BufferPool pool,
@@ -240,7 +282,7 @@ public static class PredeterminedDiceTrajectorySimulator
 			new BodyVelocity(request.LinearVelocity, request.AngularVelocity),
 			hull.ComputeInertia(request.Mass),
 			new CollidableDescription(shapeIndex, 0.1f),
-			new BodyActivityDescription(0.005f, 20));
+			new BodyActivityDescription(-1f, byte.MaxValue));
 		var handle = simulation.Bodies.Add(description);
 		materials.Allocate(handle) = new DiceContactMaterial(1f);
 		return new SimulatedBody(handle, center);
@@ -342,7 +384,7 @@ public static class PredeterminedDiceTrajectorySimulator
 					request.FaceUpOrientations[face]);
 			}
 		}
-		return new NaturalLanding(bestFace, Quaternion.Normalize(bestFaceUp));
+		return new NaturalLanding(bestFace, Quaternion.Normalize(bestFaceUp), bestDot);
 	}
 
 	private static Quaternion CreateOppositeFaceUpOrientation(
@@ -410,10 +452,12 @@ public static class PredeterminedDiceTrajectorySimulator
 			throw new ArgumentOutOfRangeException(nameof(settings), "Simulation durations must be positive.");
 		if (settings.Friction < 0f || settings.WallFriction < 0f)
 			throw new ArgumentOutOfRangeException(nameof(settings), "Friction values cannot be negative.");
+		if (settings.MinimumLandingFaceDot < -1f || settings.MinimumLandingFaceDot > 1f)
+			throw new ArgumentOutOfRangeException(nameof(settings), "Landing face dot must be within [-1, 1].");
 	}
 
 	private readonly record struct SimulatedBody(BodyHandle Handle, Vector3 HullCenter);
-	private readonly record struct NaturalLanding(int Face, Quaternion FaceUpOrientation);
+	private readonly record struct NaturalLanding(int Face, Quaternion FaceUpOrientation, float Dot);
 	private readonly record struct DiceContactMaterial(float Friction);
 
 	private struct SurfaceGripTracker

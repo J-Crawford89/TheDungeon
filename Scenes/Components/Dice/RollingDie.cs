@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,12 +18,12 @@ public partial class RollingDie : Node3D
 	[ExportGroup("Natural Toss")]
 	[Export(PropertyHint.Range, "0,30,0.1,or_greater")] public float MinThrowSpeed { get; set; } = 6f;
 	[Export(PropertyHint.Range, "0,30,0.1,or_greater")] public float MaxThrowSpeed { get; set; } = 9f;
-	[Export(PropertyHint.Range, "0,1.25,0.01")] public float MinRollCoupling { get; set; } = 0.82f;
-	[Export(PropertyHint.Range, "0,1.25,0.01")] public float MaxRollCoupling { get; set; } = 0.98f;
+	[Export(PropertyHint.Range, "0,1.25,0.01")] public float MinRollCoupling { get; set; } = 0.98f;
+	[Export(PropertyHint.Range, "0,1.25,0.01")] public float MaxRollCoupling { get; set; } = 1f;
 	[Export(PropertyHint.Range, "0,5,0.05")] public float MaxTumbleJitter { get; set; } = 1.25f;
 
 	[ExportGroup("Predetermined Surface")]
-	[Export(PropertyHint.Range, "0,2,0.05")] public float SurfaceGrip { get; set; } = 1f;
+	[Export(PropertyHint.Range, "0,2,0.05")] public float SurfaceGrip { get; set; } = 1.25f;
 
 	[ExportGroup("Presentation")]
 	[Export] public float PostRollDisplaySeconds { get; set; } = 0.5f;
@@ -30,6 +31,7 @@ public partial class RollingDie : Node3D
 	public Vector3 SimulationBoundsHalfExtents { get; set; } = new(7f, 0f, 3.5f);
 
 	private const float SimulationFloorHeight = 0f;
+	private const float ReleaseFloorClearance = 0.05f;
 	private const float SimulationWallHeight = 20f;
 	private const float SimulationLinearDamping = 0.18f;
 	private const float SimulationAngularDamping = 0.18f;
@@ -38,11 +40,15 @@ public partial class RollingDie : Node3D
 	private const float SettleLinearSpeedThreshold = 0.1f;
 	private const float SettleAngularSpeedThreshold = 0.2f;
 	private const float SettleConfirmationSeconds = 0.25f;
+	private const int MinimumPredeterminedUpwardFaceTransitions = 1;
+	private const float MinimumPredeterminedLandingFaceDot = 0.95f;
+	private const int MaximumTrajectoryAttempts = 4;
 
 	private DieVisualBody? _body;
 	private DieFaceCalibration? _calibration;
 	private uint _liveCollisionLayer = 1;
 	private uint _liveCollisionMask = 1;
+	private IReadOnlyDictionary<int, System.Numerics.Vector3>? _effectiveFaceNormals;
 
 	public RigidBody3D? Body => _body;
 	public DieFaceCalibration? Calibration => _calibration;
@@ -57,6 +63,8 @@ public partial class RollingDie : Node3D
 	public float LastInitialSurfaceSlipSpeed { get; private set; }
 	public float LastMaximumAngularSpeed { get; private set; }
 	public float LastAccumulatedRotationRadians { get; private set; }
+	public int LastUpwardFaceTransitions { get; private set; }
+	public float LastCalibrationHullAlignmentDot { get; private set; }
 	public float LastAverageContactSlipSpeed { get; private set; }
 	public float LastFinalContactSlipSpeed { get; private set; }
 	public float LastTimeToGripSeconds { get; private set; }
@@ -113,11 +121,8 @@ public partial class RollingDie : Node3D
 		}
 
 		if (forcedFaceValue >= 0 &&
-			TryPreparePredeterminedRoll(forcedFaceValue, out var request))
+			TryBuildPredeterminedTrajectory(forcedFaceValue, out var trajectory))
 		{
-			var trajectory = PredeterminedDiceTrajectorySimulator.Simulate(
-				[request],
-				BuildSimulationSettings())[0];
 			await PlayPredeterminedTrajectoryAsync(trajectory, ct);
 			return;
 		}
@@ -141,21 +146,32 @@ public partial class RollingDie : Node3D
 		if (dice.Count == 0)
 			return;
 
-		var requests = new PredeterminedDieThrowRequest[dice.Count];
-		for (var i = 0; i < dice.Count; i++)
+		IReadOnlyList<PredeterminedDieTrajectory>? trajectories = null;
+		for (var attempt = 1; attempt <= MaximumTrajectoryAttempts; attempt++)
 		{
-			ct.ThrowIfCancellationRequested();
-			if (!dice[i].TryPreparePredeterminedRoll(faceValues[i], out requests[i]))
-				throw new InvalidOperationException(
-					$"{dice[i].Name}: cannot prepare predetermined face {faceValues[i]}.");
+			var requests = new PredeterminedDieThrowRequest[dice.Count];
+			for (var i = 0; i < dice.Count; i++)
+			{
+				ct.ThrowIfCancellationRequested();
+				if (!dice[i].TryPreparePredeterminedRoll(faceValues[i], out requests[i]))
+					throw new InvalidOperationException(
+						$"{dice[i].Name}: cannot prepare predetermined face {faceValues[i]}.");
+			}
+
+			trajectories = PredeterminedDiceTrajectorySimulator.Simulate(
+				requests,
+				dice[0].BuildSimulationSettings());
+			if (trajectories.All(MeetsPredeterminedMotionQuality))
+				break;
+			if (attempt == MaximumTrajectoryAttempts)
+				GD.PushWarning(
+					$"Dice batch did not produce an upward-face transition after {attempt} natural attempts; " +
+					"using the final physically valid trajectory.");
 		}
 
-		var trajectories = PredeterminedDiceTrajectorySimulator.Simulate(
-			requests,
-			dice[0].BuildSimulationSettings());
 		var playbackTasks = new Task[dice.Count];
 		for (var i = 0; i < dice.Count; i++)
-			playbackTasks[i] = dice[i].PlayPredeterminedTrajectoryAsync(trajectories[i], ct);
+			playbackTasks[i] = dice[i].PlayPredeterminedTrajectoryAsync(trajectories![i], ct);
 		await Task.WhenAll(playbackTasks);
 	}
 
@@ -173,16 +189,26 @@ public partial class RollingDie : Node3D
 		var startOrientation = CreateRandomInitialOrientation();
 		if (!TryGetHullPoints(out var hullPoints))
 			return false;
+		if (!TryBuildHullAlignedCalibration(hullPoints, out var effectiveCalibration))
+			return false;
+		_effectiveFaceNormals = effectiveCalibration.FaceNormals;
+		LastCalibrationHullAlignmentDot = effectiveCalibration.MinimumSourceAlignmentDot;
 		var toss = CreateRandomTossPlan(hullPoints, startOrientation);
 		CaptureTossDiagnostics(toss);
-		var faceNormals = ToNumericNormals(_calibration.GetLocalFaceNormals());
-		var faceUpOrientations = ToNumericOrientations(_calibration.GetFaceUpOrientations());
+		var startPosition = ToNumeric(SpawnPosition);
+		startPosition.Y = DieTossKinematicsBuilder.ComputeOriginHeightForFloorClearance(
+			hullPoints,
+			ToNumeric(startOrientation),
+			SimulationFloorHeight,
+			ReleaseFloorClearance);
+		var faceNormals = effectiveCalibration.FaceNormals;
+		var faceUpOrientations = effectiveCalibration.FaceUpOrientations;
 		request = new PredeterminedDieThrowRequest(
 			hullPoints,
 			faceNormals,
 			faceUpOrientations,
 			forcedFaceValue,
-			ToNumeric(SpawnPosition),
+			startPosition,
 			ToNumeric(startOrientation),
 			ToNumeric(toss.LinearVelocity),
 			ToNumeric(toss.AngularVelocity),
@@ -204,6 +230,7 @@ public partial class RollingDie : Node3D
 		LastDisplayedFace = trajectory.DisplayedFace;
 		LastMaximumAngularSpeed = trajectory.MaximumAngularSpeed;
 		LastAccumulatedRotationRadians = trajectory.AccumulatedRotationRadians;
+		LastUpwardFaceTransitions = trajectory.UpwardFaceTransitions;
 		LastAverageContactSlipSpeed = trajectory.AverageContactSlipSpeed;
 		LastFinalContactSlipSpeed = trajectory.FinalContactSlipSpeed;
 		LastTimeToGripSeconds = trajectory.TimeToGripSeconds;
@@ -223,12 +250,16 @@ public partial class RollingDie : Node3D
 			ApplyTrajectoryFrame(trajectory.Frames[i]);
 		}
 
-		if (_calibration != null &&
-			_calibration.GetLocalFaceNormals().TryGetValue(trajectory.DisplayedFace, out var localNormal))
+		if (_effectiveFaceNormals != null &&
+			_effectiveFaceNormals.TryGetValue(trajectory.DisplayedFace, out var localNormal))
 		{
-			LastDisplayedFaceDot = (_body.GlobalTransform.Basis * localNormal)
-				.Normalized()
-				.Dot(Vector3.Up);
+			var bodyOrientation = ToNumeric(
+				_body.GlobalTransform.Basis.GetRotationQuaternion());
+			LastDisplayedFaceDot = System.Numerics.Vector3.Dot(
+				System.Numerics.Vector3.Normalize(System.Numerics.Vector3.Transform(
+					localNormal,
+					bodyOrientation)),
+				System.Numerics.Vector3.UnitY);
 		}
 		if (!trajectory.SettledNaturally)
 			GD.PushWarning($"{Name}: offscreen trajectory reached {trajectory.DurationSeconds:F1}s before settling; no snap was applied.");
@@ -244,17 +275,17 @@ public partial class RollingDie : Node3D
 	{
 		if (_body == null || _calibration == null)
 			return false;
-		if (!_calibration.TryGetFaceOrientation(forcedFaceValue, out _))
+		if (!TryGetEffectiveFaceCalibration(out var effectiveCalibration) ||
+			!effectiveCalibration.FaceUpOrientations.TryGetValue(forcedFaceValue, out var faceOrientation))
 			return false;
 
 		FreezeBody();
 		var currentQuat = _body.GlobalTransform.Basis.GetRotationQuaternion();
-		var solved = DieFaceRotationResolver.Resolve(
-			_calibration,
-			forcedFaceValue,
-			currentQuat,
-			Vector3.Up);
-		_body.GlobalTransform = new Transform3D(new Basis(solved), _body.GlobalPosition);
+		var solved = DieFaceOrientationSolver.SolveNearestFromFaceOrientation(
+			faceOrientation,
+			ToNumeric(currentQuat),
+			System.Numerics.Vector3.UnitY);
+		_body.GlobalTransform = new Transform3D(new Basis(ToGodot(solved)), _body.GlobalPosition);
 		return true;
 	}
 
@@ -269,11 +300,18 @@ public partial class RollingDie : Node3D
 			return;
 		var toss = CreateRandomTossPlan(hullPoints, startOrientation);
 		CaptureTossDiagnostics(toss);
+		var releaseHeight = DieTossKinematicsBuilder.ComputeOriginHeightForFloorClearance(
+			hullPoints,
+			ToNumeric(startOrientation),
+			SimulationFloorHeight,
+			ReleaseFloorClearance);
 		Position = SpawnPosition;
 		EnableLiveCollision();
 		_body.Freeze = true;
 		_body.LockRotation = false;
-		_body.Transform = new Transform3D(new Basis(startOrientation), Vector3.Zero);
+		_body.Transform = new Transform3D(
+			new Basis(startOrientation),
+			new Vector3(0f, releaseHeight - SpawnPosition.Y, 0f));
 		_body.Sleeping = false;
 		_body.LinearVelocity = Vector3.Zero;
 		_body.AngularVelocity = Vector3.Zero;
@@ -431,12 +469,70 @@ public partial class RollingDie : Node3D
 		LastInitialSurfaceSlipSpeed = 0f;
 		LastMaximumAngularSpeed = 0f;
 		LastAccumulatedRotationRadians = 0f;
+		LastUpwardFaceTransitions = 0;
+		LastCalibrationHullAlignmentDot = 0f;
 		LastAverageContactSlipSpeed = 0f;
 		LastFinalContactSlipSpeed = 0f;
 		LastTimeToGripSeconds = 0f;
 		LastRollDurationSeconds = 0f;
 		LastDisplayedFaceDot = 0f;
+		_effectiveFaceNormals = null;
 	}
+
+	public bool TryGetEffectiveFaceCalibration(out DieFaceHullAlignmentResult calibration)
+	{
+		calibration = null!;
+		return TryGetHullPoints(out var hullPoints) &&
+			TryBuildHullAlignedCalibration(hullPoints, out calibration);
+	}
+
+	private bool TryBuildHullAlignedCalibration(
+		IReadOnlyList<System.Numerics.Vector3> hullPoints,
+		out DieFaceHullAlignmentResult calibration)
+	{
+		calibration = null!;
+		if (_calibration == null)
+			return false;
+		try
+		{
+			calibration = DieFaceHullAlignment.Align(
+				hullPoints,
+				ToNumericOrientations(_calibration.GetFaceUpOrientations()));
+			return true;
+		}
+		catch (ArgumentException ex)
+		{
+			GD.PushError($"{Name}: cannot align face calibration to convex hull: {ex.Message}");
+			return false;
+		}
+	}
+
+	private bool TryBuildPredeterminedTrajectory(
+		int forcedFaceValue,
+		out PredeterminedDieTrajectory trajectory)
+	{
+		trajectory = null!;
+		for (var attempt = 1; attempt <= MaximumTrajectoryAttempts; attempt++)
+		{
+			if (!TryPreparePredeterminedRoll(forcedFaceValue, out var request))
+				return false;
+			trajectory = PredeterminedDiceTrajectorySimulator.Simulate(
+				[request],
+				BuildSimulationSettings())[0];
+			if (MeetsPredeterminedMotionQuality(trajectory))
+				return true;
+		}
+
+		GD.PushWarning(
+			$"{Name}: roll did not change its upward face after {MaximumTrajectoryAttempts} natural attempts; " +
+			"using the final physically valid trajectory.");
+		return true;
+	}
+
+	private static bool MeetsPredeterminedMotionQuality(PredeterminedDieTrajectory trajectory) =>
+		trajectory.SettledNaturally &&
+		trajectory.FinalUpwardFaceDot >= MinimumPredeterminedLandingFaceDot &&
+		trajectory.UpwardFaceTransitions >= MinimumPredeterminedUpwardFaceTransitions;
 
 	private void EnableLiveCollision()
 	{
@@ -470,15 +566,6 @@ public partial class RollingDie : Node3D
 			return;
 		_body.QueueFree();
 		_body = null;
-	}
-
-	private static Dictionary<int, System.Numerics.Vector3> ToNumericNormals(
-		IReadOnlyDictionary<int, Vector3> godotNormals)
-	{
-		var result = new Dictionary<int, System.Numerics.Vector3>(godotNormals.Count);
-		foreach (var (face, normal) in godotNormals)
-			result[face] = ToNumeric(normal);
-		return result;
 	}
 
 	private static Dictionary<int, System.Numerics.Quaternion> ToNumericOrientations(

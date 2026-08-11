@@ -10,8 +10,8 @@ The main runtime state is `GameSessionState`. `GameRoot` constructs the services
 
 ## Re-established baseline
 
-- Branch before this work: `main_development`; last committed baseline was `069576f` (`dice tweaks`, 2026-05-22).
-- Automated baseline after the predetermined-trajectory slice: 342 xUnit tests passing and the Godot C# project building successfully.
+- Current committed baseline: `5be3247` (`Dice roll working`, 2026-08-10) on `main_development`.
+- Automated baseline after the dice surface/mapping refinement: 355 xUnit tests passing and the Godot C# project building successfully.
 - Container/corpse/loot work is substantially implemented; [`LOOT_CONTAINERS_ROADMAP.md`](./LOOT_CONTAINERS_ROADMAP.md) retains the delivery history and remaining polish.
 - Save/load is not implemented (`GameRoot.HandleLoadGame()` is still empty).
 - The GDD is useful as a system index but intentionally still contains major product-design TODOs: player fantasy, run structure, pacing, progression, item tiers, accessibility, and balance targets.
@@ -22,13 +22,15 @@ The intended architecture is now explicit:
 
 - Backend rolls are authoritative. Physics is presentation, never the source of gameplay truth.
 - Forced/gameplay rolls are simulated to completion offscreen at fixed 60 Hz with BepuPhysics 2.4. The simulation uses each visual's exact convex collider, the floor, all four walls, and every die in the batch.
-- Dice spawn at random usable points within the play area. The baseline throw is `6-9` units/second horizontally with no intended upward speed. Initial roll is calculated from that speed and the current hull radius at `0.82-0.98` coupling, plus at most `1.25` radians/second of off-axis tumble. Surface contact refines the roll instead of being expected to create rotation from a sliding release.
+- Dice spawn at random usable points within the play area. The baseline throw is `6-9` units/second horizontally with no intended upward speed. Initial roll is calculated from that speed and the vertical center-to-contact lever arm at `0.98-1.00` coupling, plus at most `1.25` radians/second of off-axis tumble. The lowest oriented hull point starts `0.05` above the floor, so contact begins before free-spin can invalidate the no-slip calculation.
 - The simulator identifies the naturally landed face, then applies the local symmetry from that face to the requested face to every recorded orientation, starting at frame zero. The visible roll therefore follows a natural trajectory and never shows a wrong result before correction.
+- A forced candidate must change its upward face at least once and finish with a physical face at dot(up) >= 0.95. Tip/ridge balances and no-tumble candidates are naturally re-thrown offscreen, up to four attempts; no visible corrective force is added.
+- Approximate label calibrations are projected onto exact convex support faces through the collider's rotational symmetry group. This corrects the d10/d100's roughly 28° label-normal/kite-normal mismatch without editing its serialized scene.
 - Visible forced rolls replay the recorded poses on a frozen, non-colliding Godot body. The predictive torque, braking, stall recovery, and catastrophic single-frame snap systems have been removed.
 - Free test rolls remain live Godot rigid-body simulations and retain only a deadlock timeout.
 - The target face is measured against world up, never the camera. Direct snapping exists only as an explicit calibration test button.
 - Hit, damage, initiative, flee, potion, trap-disarm, inspect, and harvest flows continue to await dice presentation before narration or consequential state mutation.
-- The test harness reports launch speed, effective rolling radius, coupling, theoretical release slip, measured average/final contact slip, time-to-grip, initial/max spin, accumulated rotation, natural/displayed face, duration, final face dot, and whether the trajectory settled naturally. Play-area walls remain available as translucent debug meshes.
+- The test harness reports launch speed, effective rolling radius, coupling, theoretical release slip, measured average/final contact slip, time-to-grip, initial/max spin, accumulated rotation, upward-face changes, calibration/hull alignment, natural/displayed face, duration, final face dot, and whether the trajectory settled naturally. Play-area walls remain available as translucent debug meshes.
 
 ## Godot Editor values to verify
 
@@ -43,10 +45,10 @@ Open `Scenes/Components/Dice/RollingDie.tscn` and select the root `RollingDie`. 
 | Spawn | Spawn Position | `(0, 1.35, 0)` |
 | Natural Toss | Min Throw Speed | `6.0` |
 | Natural Toss | Max Throw Speed | `9.0` |
-| Natural Toss | Min Roll Coupling | `0.82` |
-| Natural Toss | Max Roll Coupling | `0.98` |
+| Natural Toss | Min Roll Coupling | `0.98` |
+| Natural Toss | Max Roll Coupling | `1.00` |
 | Natural Toss | Max Tumble Jitter | `1.25` |
-| Predetermined Surface | Surface Grip | `1.0` |
+| Predetermined Surface | Surface Grip | `1.25` |
 | Presentation | Post Roll Display Seconds | `0.5` |
 
 The old impulse, upward launch, Euler range, targeting, raw spin, damping, timeout, and settle exports have been removed. `SimulationBoundsHalfExtents` is assigned by the overlay/test parent in code, while the remaining solver values are internal constants. If `RollingDie.tscn` has no local overrides, the C# defaults already provide the compact control set above.
@@ -69,7 +71,7 @@ These previously applied values remain the baseline for `d3_visual.tscn`, `d4_vi
 
 - In `dice_test_scene.tscn`, select `Floor`, expand **Physics Material Override**, and set **Friction** to `0.65` and **Bounce** to `0.20`.
 - In `dice_roll_overlay.tscn`, select `SubViewportContainer/SubViewport/DiceWorld/Floor`. Set **Physics Material Override** to a new `PhysicsMaterial`, then set **Friction** to `0.65` and **Bounce** to `0.20`.
-- Those Godot materials govern live/free rolls. Predetermined gameplay rolls use the independent offscreen baseline: floor grip `1.0` and wall friction `0.15`, so the floor converts residual slip into roll without making wall contact sticky.
+- Those Godot materials govern live/free rolls. Predetermined gameplay rolls use the independent offscreen baseline: floor grip `1.25` and wall friction `0.15`, so the floor converts residual slip into roll without making wall contact sticky.
 - Keep `PlayAreaWalls.WallHeight = 20` in both scenes. Keep `ShowDebugWallMeshes = true` in the test scene while diagnosing containment and `false` in the production overlay.
 
 ## Manual verification checklist
@@ -79,8 +81,8 @@ These previously applied values remain the baseline for `d3_visual.tscn`, `d4_vi
 3. Use **Spawn + free roll** repeatedly for every die. Free rolls should remain entirely physics-driven and the status should say `natural settle`.
 4. Confirm each spawn position and travel direction varies while remaining inside the walls. Dice should begin close to the floor, drop into it, and spend most of the roll in surface contact rather than following an airborne arc.
 5. Use **Spawn + gameplay roll** repeatedly for every face of every die type. The requested face must be the visible result throughout the coherent roll; there must be no wrong-face pause, corrective acceleration, second flick, or final snap.
-6. Watch the status text: launch speed should be `6.0-9.0`, coupling `0.82-0.98`, and theoretical release slip normally below about `1.6`. A d6 initial spin will usually be roughly `7-12` radians/second because it is now derived from travel speed and radius, not independently invented. Forced rolls should report grip within `1.0s` of accumulated floor contact, average slip at most `2.0`, final slip at most `0.4`, at least about `0.5` total turns for the automated d6 launch matrix, `settled=True`, and final face `dot` near `1.0`. These are diagnostic bounds, not a substitute for judging the visible motion.
-7. Use **Snap in place** and **Verify calibration** for every face. These are manual diagnostics only; the requested face should rank first with `dot(up)` near `1.0`.
+6. Watch the status text: launch speed should be `6.0-9.0`, coupling `0.98-1.00`, and measured release slip should normally remain small (bounded off-axis tumble can contribute some). Initial d6 spin may be roughly `7-16` radians/second because it is derived from the current vertical contact lever arm, not independently invented. Accepted forced rolls must show at least one upward-face change, physical face `dot` at least `0.95`, average slip at most `1.0`, final slip at most `0.2`, and `settled=True`. The `calibration/hull` value should be near `1.0` for already physical calibrations and about `0.883` for the corrected d10/d100 label directions.
+7. Use **Snap in place** and **Verify calibration** for every face. These diagnostics now use collider-aligned physical normals. The requested d10/d100 kite face should rank first unambiguously rather than leaving several neighboring faces plausibly “up.”
 8. Test simultaneous multi-die and d100 rolls, including visible die-to-die contact and repeated throws near all four walls. Both d100 dice should begin and finish together rather than rolling serially.
 9. In the main game, verify combat order: hit die resolves -> attack narration; damage die resolves -> HP/death/corpse/turn advancement. The resolved dice should still be visible briefly during narration.
 

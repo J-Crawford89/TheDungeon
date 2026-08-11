@@ -126,63 +126,82 @@ public sealed class PredeterminedDiceTrajectorySimulatorTests
 		var result = PredeterminedDiceTrajectorySimulator.Simulate([request])[0];
 
 		Assert.InRange(result.TimeToGripSeconds, 0f, 0.75f);
-		Assert.InRange(result.AverageContactSlipSpeed, 0f, 2f);
-		Assert.InRange(result.FinalContactSlipSpeed, 0f, 0.4f);
+		Assert.InRange(result.AverageContactSlipSpeed, 0f, 1f);
+		Assert.InRange(result.FinalContactSlipSpeed, 0f, 0.2f);
 		Assert.True(result.AccumulatedRotationRadians >= 3f);
+		Assert.True(result.UpwardFaceTransitions >= 1);
 		Assert.True(
 			CountUpFaceTransitions(request, result) >= 3,
 			"The d6 did not visibly tumble through at least three face transitions.");
 	}
 	[Fact]
-	public void Simulate_VariedCoupledD6ThrowsStayWithinGripBounds()
+	public void Simulate_VariedCoupledD6ThrowsFindNaturalStableCandidatesWithinFourAttempts()
 	{
 		var template = CreateD6Request(4);
 		for (var i = 0; i < 12; i++)
 		{
-			var orientation = Quaternion.CreateFromYawPitchRoll(
-				0.31f * i,
-				0.47f + 0.19f * i,
-				0.23f * i);
-			var directionAngle = 0.52f * i;
-			var speed = 6f + i % 4;
-			var direction = new Vector3(
-				MathF.Cos(directionAngle),
-				0f,
-				MathF.Sin(directionAngle));
-			var velocity = direction * speed;
-			var coupling = 0.82f + 0.04f * (i % 5);
-			var tumbleAngle = 0.71f * i;
-			var tumbleAxis = Vector3.Normalize(
-				direction * MathF.Cos(tumbleAngle) +
-				Vector3.UnitY * MathF.Sin(tumbleAngle));
-			var kinematics = DieTossKinematicsBuilder.Build(
-				template.CollisionPoints,
-				orientation,
-				velocity,
-				coupling,
-				tumbleAxis,
-				1.25f * (i % 3) / 2f);
-			var request = template with
+			PredeterminedDieTrajectory? result = null;
+			for (var attempt = 0; attempt < 4; attempt++)
 			{
-				StartPosition = new Vector3(-1.5f + 0.25f * i, 1.35f, (i % 3 - 1) * 0.5f),
-				StartOrientation = orientation,
-				LinearVelocity = velocity,
-				AngularVelocity = kinematics.AngularVelocity,
-			};
+				var orientation = Quaternion.CreateFromYawPitchRoll(
+					0.31f * i + 0.37f * attempt,
+					0.47f + 0.19f * i + 0.23f * attempt,
+					0.23f * i + 0.17f * attempt);
+				var directionAngle = 0.52f * i + 0.41f * attempt;
+				var speed = 6f + i % 4;
+				var direction = new Vector3(
+					MathF.Cos(directionAngle),
+					0f,
+					MathF.Sin(directionAngle));
+				var velocity = direction * speed;
+				var coupling = 0.98f + 0.005f * (i % 5);
+				var tumbleAngle = 0.71f * i + 0.29f * attempt;
+				var tumbleAxis = Vector3.Normalize(
+					direction * MathF.Cos(tumbleAngle) +
+					Vector3.UnitY * MathF.Sin(tumbleAngle));
+				var kinematics = DieTossKinematicsBuilder.Build(
+					template.CollisionPoints,
+					orientation,
+					velocity,
+					coupling,
+					tumbleAxis,
+					1.25f * ((i + attempt) % 3) / 2f);
+				var startPosition = new Vector3(
+					-1.5f + 0.25f * i,
+					0f,
+					(i % 3 - 1) * 0.5f);
+				startPosition.Y = DieTossKinematicsBuilder.ComputeOriginHeightForFloorClearance(
+					template.CollisionPoints,
+					orientation,
+					floorHeight: 0f,
+					clearance: 0.05f);
+				var request = template with
+				{
+					StartPosition = startPosition,
+					StartOrientation = orientation,
+					LinearVelocity = velocity,
+					AngularVelocity = kinematics.AngularVelocity,
+				};
+				var candidate = PredeterminedDiceTrajectorySimulator.Simulate([request])[0];
+				if (!candidate.SettledNaturally ||
+					candidate.FinalUpwardFaceDot < 0.95f ||
+					candidate.UpwardFaceTransitions < 1)
+					continue;
+				result = candidate;
+				break;
+			}
 
-			var result = PredeterminedDiceTrajectorySimulator.Simulate([request])[0];
-
-			Assert.True(result.SettledNaturally, $"Throw {i} did not settle.");
+			Assert.NotNull(result);
 			Assert.True(
 				result.TimeToGripSeconds <= 1f,
 				$"Throw {i}: grip={result.TimeToGripSeconds:F3}, " +
 				$"average slip={result.AverageContactSlipSpeed:F3}, " +
 				$"final slip={result.FinalContactSlipSpeed:F3}.");
 			Assert.True(
-				result.AverageContactSlipSpeed <= 2f,
+				result.AverageContactSlipSpeed <= 1f,
 				$"Throw {i} averaged {result.AverageContactSlipSpeed:F3} slip speed.");
 			Assert.True(
-				result.FinalContactSlipSpeed <= 0.4f,
+				result.FinalContactSlipSpeed <= 0.2f,
 				$"Throw {i} ended at {result.FinalContactSlipSpeed:F3} slip speed.");
 			Assert.True(
 				result.AccumulatedRotationRadians >= 3f,
@@ -237,16 +256,23 @@ public sealed class PredeterminedDiceTrajectorySimulatorTests
 			points,
 			startOrientation,
 			linearVelocity,
-			rollCoupling: 0.9f,
+			rollCoupling: 0.99f,
 			Vector3.UnitY,
 			tumbleSpeed: 0.6f);
+
+		var startPosition = new Vector3(-4f, 0f, -1f);
+		startPosition.Y = DieTossKinematicsBuilder.ComputeOriginHeightForFloorClearance(
+			points,
+			startOrientation,
+			floorHeight: 0f,
+			clearance: 0.05f);
 
 		return new PredeterminedDieThrowRequest(
 			points,
 			normals,
 			orientations,
 			desiredFace,
-			new Vector3(-4f, 1.35f, -1f),
+			startPosition,
 			startOrientation,
 			linearVelocity,
 			kinematics.AngularVelocity,

@@ -18,7 +18,7 @@ public sealed class DieTossKinematicsBuilderTests
 			Vector3.UnitY,
 			tumbleSpeed: 0f);
 
-		var expectedRadius = MathF.Sqrt(2f) * 0.57735026f;
+		const float expectedRadius = 0.57735026f;
 		Assert.Equal(expectedRadius, result.EffectiveRollingRadius, 4);
 		Assert.Equal(8f / expectedRadius, result.NominalRollingAngularSpeed, 4);
 		Assert.Equal(0f, result.AngularVelocity.X, 4);
@@ -88,10 +88,21 @@ public sealed class DieTossKinematicsBuilderTests
 			Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathF.PI * 0.5f),
 			Vector3.UnitZ);
 
-		Assert.Equal(MathF.Sqrt(1.25f), identityRadius, 4);
-		Assert.Equal(MathF.Sqrt(0.3125f), rotatedRadius, 4);
+		Assert.Equal(0.25f, identityRadius, 4);
+		Assert.Equal(1f, rotatedRadius, 4);
 	}
 
+	[Fact]
+	public void ComputeOriginHeightForFloorClearance_PlacesLowestHullPointAboveFloor()
+	{
+		var height = DieTossKinematicsBuilder.ComputeOriginHeightForFloorClearance(
+			CreateCubePoints(),
+			Quaternion.Identity,
+			floorHeight: 0f,
+			clearance: 0.05f);
+
+		Assert.Equal(0.6273503f, height, 5);
+	}
 	private static IReadOnlyList<Vector3> CreateCubePoints()
 	{
 		const float extent = 0.57735026f;
