@@ -1,6 +1,8 @@
-# TheDungeon — Development Baseline (updated 2026-08-10)
+# TheDungeon — Development Baseline (updated 2026-08-13)
 
 This is a dated re-entry map for resuming development after the project was paused. The [Game Design Document](./GAME_DESIGN_DOCUMENT.md) remains canonical for player-facing intent, and the [Technical Design Document](./TECHNICAL_DESIGN_DOCUMENT.md) remains canonical for implementation and architecture.
+
+Newly observed issues and requested follow-up work are tracked in the living [Product Backlog](./PRODUCT_BACKLOG.md).
 
 ## What the project is
 
@@ -10,8 +12,8 @@ The main runtime state is `GameSessionState`. `GameRoot` constructs the services
 
 ## Re-established baseline
 
-- Current committed baseline: `5be3247` (`Dice roll working`, 2026-08-10) on `main_development`.
-- Automated baseline after the dice surface/mapping refinement: 355 xUnit tests passing and the Godot C# project building successfully.
+- Current committed baseline: `18edcc1` (`fixed clickthrough and lighting direction`, 2026-08-13) on `main_development`.
+- Automated working-tree baseline after Improvement-001: 370 xUnit tests passing and the Godot C# project building successfully (25 existing nullable-context warnings, 0 errors).
 - Container/corpse/loot work is substantially implemented; [`LOOT_CONTAINERS_ROADMAP.md`](./LOOT_CONTAINERS_ROADMAP.md) retains the delivery history and remaining polish.
 - Save/load is not implemented (`GameRoot.HandleLoadGame()` is still empty).
 - The GDD is useful as a system index but intentionally still contains major product-design TODOs: player fantasy, run structure, pacing, progression, item tiers, accessibility, and balance targets.
@@ -27,10 +29,11 @@ The intended architecture is now explicit:
 - A forced candidate must change its upward face at least once and finish with a physical face at dot(up) >= 0.95. Tip/ridge balances and no-tumble candidates are naturally re-thrown offscreen, up to four attempts; no visible corrective force is added.
 - Approximate label calibrations are projected onto exact convex support faces through the collider's rotational symmetry group. This corrects the d10/d100's roughly 28° label-normal/kite-normal mismatch without editing its serialized scene.
 - Visible forced rolls replay the recorded poses on a frozen, non-colliding Godot body. The predictive torque, braking, stall recovery, and catastrophic single-frame snap systems have been removed.
+- Predetermined playback now samples the complete recorded path against monotonic elapsed time. Long trajectories are presentation-compressed to at most `0.75s` by the C# fallback default; the visually accepted `RollingDie.tscn` baseline overrides that cap to `1.0s`. Exact final poses are applied explicitly, and every die in a true batch shares one clock/progress value. The underlying offscreen physics is unchanged.
 - Free test rolls remain live Godot rigid-body simulations and retain only a deadlock timeout.
 - The target face is measured against world up, never the camera. Direct snapping exists only as an explicit calibration test button.
 - Hit, damage, initiative, flee, potion, trap-disarm, inspect, and harvest flows continue to await dice presentation before narration or consequential state mutation.
-- The test harness reports launch speed, effective rolling radius, coupling, theoretical release slip, measured average/final contact slip, time-to-grip, initial/max spin, accumulated rotation, upward-face changes, calibration/hull alignment, natural/displayed face, duration, final face dot, and whether the trajectory settled naturally. Play-area walls remain available as translucent debug meshes.
+- The test harness reports launch speed, effective rolling radius, coupling, theoretical release slip, measured average/final contact slip, time-to-grip, initial/max spin, accumulated rotation, upward-face changes, calibration/hull alignment, natural/displayed face, physical duration, actual visible duration, playback compression ratio/render-frame count, final face dot, and whether the trajectory settled naturally. Play-area walls remain available as translucent debug meshes.
 
 ## Godot Editor values to verify
 
@@ -38,7 +41,7 @@ Calibration wiring and the previously requested visual, floor, and wall values a
 
 ### `RollingDie.tscn`
 
-Open `Scenes/Components/Dice/RollingDie.tscn` and select the root `RollingDie`. The scene currently has no local overrides for these properties, so the new C# defaults should appear automatically; only set a value manually if Godot displays something different:
+Open `Scenes/Components/Dice/RollingDie.tscn` and select the root `RollingDie`. The user-owned scene now contains the visually accepted playback-cap override shown below; the other values continue to inherit their C# defaults unless the Inspector shows otherwise:
 
 | Group | Inspector field | Value |
 |---|---|---:|
@@ -49,9 +52,10 @@ Open `Scenes/Components/Dice/RollingDie.tscn` and select the root `RollingDie`. 
 | Natural Toss | Max Roll Coupling | `1.00` |
 | Natural Toss | Max Tumble Jitter | `1.25` |
 | Predetermined Surface | Surface Grip | `1.25` |
-| Presentation | Post Roll Display Seconds | `0.5` |
+| Presentation | Maximum Predetermined Playback Seconds | `1.0` scene override (`0.75` C# fallback) |
+| Presentation | Post Roll Display Seconds | `0.2` |
 
-The old impulse, upward launch, Euler range, targeting, raw spin, damping, timeout, and settle exports have been removed. `SimulationBoundsHalfExtents` is assigned by the overlay/test parent in code, while the remaining solver values are internal constants. If `RollingDie.tscn` has no local overrides, the C# defaults already provide the compact control set above.
+The old impulse, upward launch, Euler range, targeting, raw spin, damping, timeout, and settle exports have been removed. `SimulationBoundsHalfExtents` is assigned by the overlay/test parent in code, while the remaining solver values are internal constants. The accepted `1.0s` playback override is intentionally serialized by the user; agents must preserve it.
 
 ### Every die visual scene
 
@@ -80,11 +84,12 @@ These previously applied values remain the baseline for `d3_visual.tscn`, `d4_vi
 2. Confirm four translucent red walls appear, including the top edge, with no visible corner gaps.
 3. Use **Spawn + free roll** repeatedly for every die. Free rolls should remain entirely physics-driven and the status should say `natural settle`.
 4. Confirm each spawn position and travel direction varies while remaining inside the walls. Dice should begin close to the floor, drop into it, and spend most of the roll in surface contact rather than following an airborne arc.
-5. Use **Spawn + gameplay roll** repeatedly for every face of every die type. The requested face must be the visible result throughout the coherent roll; there must be no wrong-face pause, corrective acceleration, second flick, or final snap.
-6. Watch the status text: launch speed should be `6.0-9.0`, coupling `0.98-1.00`, and measured release slip should normally remain small (bounded off-axis tumble can contribute some). Initial d6 spin may be roughly `7-16` radians/second because it is derived from the current vertical contact lever arm, not independently invented. Accepted forced rolls must show at least one upward-face change, physical face `dot` at least `0.95`, average slip at most `1.0`, final slip at most `0.2`, and `settled=True`. The `calibration/hull` value should be near `1.0` for already physical calibrations and about `0.883` for the corrected d10/d100 label directions.
+5. Use **Spawn + gameplay roll** repeatedly for every face of every die type. The requested face must be the visible result throughout the coherent roll; there must be no wrong-face pause, corrective acceleration, second flick, or final snap. Normal long trajectories should finish their visible motion in about the configured `1.0s` cap, followed by the `0.20s` readability hold.
+6. Watch the status text: `physical A -> visible B (Cx, N frames)` must appear for gameplay rolls; `A` remains the full simulated duration while `B` should be about the configured `1.0s` cap or shorter (one render-frame of scheduling overshoot is normal). Launch speed should be `6.0-9.0`, coupling `0.98-1.00`, and measured release slip should normally remain small (bounded off-axis tumble can contribute some). Initial d6 spin may be roughly `7-16` radians/second because it is derived from the current vertical contact lever arm, not independently invented. Accepted forced rolls must show at least one upward-face change, physical face `dot` at least `0.95`, average slip at most `1.0`, final slip at most `0.2`, and `settled=True`. The `calibration/hull` value should be near `1.0` for already physical calibrations and about `0.883` for the corrected d10/d100 label directions.
 7. Use **Snap in place** and **Verify calibration** for every face. These diagnostics now use collider-aligned physical normals. The requested d10/d100 kite face should rank first unambiguously rather than leaving several neighboring faces plausibly “up.”
-8. Test simultaneous multi-die and d100 rolls, including visible die-to-die contact and repeated throws near all four walls. Both d100 dice should begin and finish together rather than rolling serially.
-9. In the main game, verify combat order: hit die resolves -> attack narration; damage die resolves -> HP/death/corpse/turn advancement. The resolved dice should still be visible briefly during narration.
+8. For the d4, also record whether gameplay rolls report `settled=True` and `dot >= 0.95`. A deterministic test experiment found that the common flat-top criterion may not represent a tetrahedron's physically resting result; this is tracked as Bug-004 and must be confirmed visually before its physics semantics change.
+9. Test simultaneous multi-die and d100 rolls, including visible die-to-die contact and repeated throws near all four walls. Both d100 dice should begin, progress, and finish together rather than rolling serially or drifting apart in playback time.
+10. In the main game, verify combat order: hit die resolves -> attack narration; damage die resolves -> HP/death/corpse/turn advancement. The resolved dice should still be visible briefly during narration.
 
 ## Likely follow-up work
 

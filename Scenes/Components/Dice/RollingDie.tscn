@@ -4,5 +4,6 @@
 
 [node name="RollingDie" type="Node3D" unique_id=1996846719]
 script = ExtResource("1_sbacc")
+MaximumPredeterminedPlaybackSeconds = 1.0
 
 [node name="ModelAnchor" type="Node3D" parent="." unique_id=409548741]

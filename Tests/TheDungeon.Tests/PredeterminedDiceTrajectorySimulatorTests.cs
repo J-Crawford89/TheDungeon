@@ -65,6 +65,40 @@ public sealed class PredeterminedDiceTrajectorySimulatorTests
 			$"Largest recorded orientation step was {largestStepRadians} radians.");
 	}
 
+
+	[Theory]
+	[InlineData(30)]
+	[InlineData(60)]
+	[InlineData(144)]
+	public void Simulate_CompressedPlaybackPreservesTheExactRequestedFinalFace(
+		int framesPerSecond)
+	{
+		var request = CreateD6Request(5);
+		var trajectory = PredeterminedDiceTrajectorySimulator.Simulate([request])[0];
+		var visibleDuration = PredeterminedTrajectoryPlaybackSampler.ResolveVisibleDuration(
+			trajectory.DurationSeconds,
+			0.75f);
+		var elapsed = 0f;
+		while (elapsed < visibleDuration)
+		{
+			_ = PredeterminedTrajectoryPlaybackSampler.SampleAtElapsedTime(
+				trajectory.Frames,
+				elapsed,
+				visibleDuration);
+			elapsed += 1f / framesPerSecond;
+		}
+
+		var finalFrame = PredeterminedTrajectoryPlaybackSampler.SampleAtElapsedTime(
+			trajectory.Frames,
+			visibleDuration,
+			visibleDuration);
+		var displayedNormal = Vector3.Transform(
+			request.FaceNormals[request.DesiredFace],
+			finalFrame.Orientation);
+
+		Assert.Equal(trajectory.Frames[^1], finalFrame);
+		Assert.True(Vector3.Dot(displayedNormal, Vector3.UnitY) > 0.98f);
+	}
 	[Fact]
 	public void Simulate_BatchPreservesCollisionsAndDisplaysEachRequestedFace()
 	{

@@ -316,7 +316,10 @@ public partial class DiceTestScene : Node3D
 	{
 		var landing = die.LastRollUsedPredeterminedPlayback
 			? $"pre-sim natural {die.LastSimulatedNaturalFace} -> displayed {die.LastDisplayedFace}; " +
-			  $"{die.LastRollDurationSeconds:F1}s, rotation " +
+			  $"physical {die.LastRollDurationSeconds:F2}s -> visible " +
+			  $"{die.LastVisiblePlaybackSeconds:F2}s " +
+			  $"({die.LastPlaybackCompressionRatio:F1}x, " +
+			  $"{die.LastVisiblePlaybackFrameCount} frames), rotation " +
 			  $"{die.LastAccumulatedRotationRadians / MathF.Tau:F1} turns, " +
 			  $"face changes {die.LastUpwardFaceTransitions}, " +
 			  $"max spin {die.LastMaximumAngularSpeed:F1}, " +

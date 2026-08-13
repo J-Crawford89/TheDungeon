@@ -26,7 +26,10 @@ public partial class RollingDie : Node3D
 	[Export(PropertyHint.Range, "0,2,0.05")] public float SurfaceGrip { get; set; } = 1.25f;
 
 	[ExportGroup("Presentation")]
-	[Export] public float PostRollDisplaySeconds { get; set; } = 0.5f;
+	[Export(PropertyHint.Range, "0,8,0.05,or_greater")]
+	public float MaximumPredeterminedPlaybackSeconds { get; set; } = 0.75f;
+	[Export(PropertyHint.Range, "0,5,0.05,or_greater")]
+	public float PostRollDisplaySeconds { get; set; } = 0.2f;
 
 	public Vector3 SimulationBoundsHalfExtents { get; set; } = new(7f, 0f, 3.5f);
 
@@ -69,6 +72,9 @@ public partial class RollingDie : Node3D
 	public float LastFinalContactSlipSpeed { get; private set; }
 	public float LastTimeToGripSeconds { get; private set; }
 	public float LastRollDurationSeconds { get; private set; }
+	public float LastVisiblePlaybackSeconds { get; private set; }
+	public float LastPlaybackCompressionRatio { get; private set; } = 1f;
+	public int LastVisiblePlaybackFrameCount { get; private set; }
 	public float LastDisplayedFaceDot { get; private set; }
 
 	public void SetVisual(PackedScene? visualScene)
@@ -169,10 +175,7 @@ public partial class RollingDie : Node3D
 					"using the final physically valid trajectory.");
 		}
 
-		var playbackTasks = new Task[dice.Count];
-		for (var i = 0; i < dice.Count; i++)
-			playbackTasks[i] = dice[i].PlayPredeterminedTrajectoryAsync(trajectories![i], ct);
-		await Task.WhenAll(playbackTasks);
+		await PlayPredeterminedTrajectoriesAsync(dice, trajectories!, ct);
 	}
 
 	public bool TryPreparePredeterminedRoll(
@@ -217,13 +220,84 @@ public partial class RollingDie : Node3D
 		return true;
 	}
 
-	public async Task PlayPredeterminedTrajectoryAsync(
+	public Task PlayPredeterminedTrajectoryAsync(
 		PredeterminedDieTrajectory trajectory,
-		CancellationToken ct = default)
+		CancellationToken ct = default) =>
+		PlayPredeterminedTrajectoriesAsync([this], [trajectory], ct);
+
+	private static async Task PlayPredeterminedTrajectoriesAsync(
+		IReadOnlyList<RollingDie> dice,
+		IReadOnlyList<PredeterminedDieTrajectory> trajectories,
+		CancellationToken ct)
 	{
-		if (_body == null || trajectory.Frames.Count == 0)
+		if (dice.Count != trajectories.Count)
+			throw new ArgumentException("Dice and trajectory counts must match.");
+		if (dice.Count == 0)
 			return;
 
+		var recordedBatchDuration = 0f;
+		var compressionDisabled = false;
+		var maximumVisibleDuration = float.PositiveInfinity;
+		for (var i = 0; i < dice.Count; i++)
+		{
+			ct.ThrowIfCancellationRequested();
+			if (dice[i]._body == null || trajectories[i].Frames.Count == 0)
+				return;
+			recordedBatchDuration = MathF.Max(recordedBatchDuration, trajectories[i].DurationSeconds);
+			if (dice[i].MaximumPredeterminedPlaybackSeconds <= 0f)
+				compressionDisabled = true;
+			else
+				maximumVisibleDuration = MathF.Min(
+					maximumVisibleDuration,
+					dice[i].MaximumPredeterminedPlaybackSeconds);
+		}
+
+		var visibleDuration = PredeterminedTrajectoryPlaybackSampler.ResolveVisibleDuration(
+			recordedBatchDuration,
+			compressionDisabled ? 0f : maximumVisibleDuration);
+		for (var i = 0; i < dice.Count; i++)
+			dice[i].BeginPredeterminedPlayback(trajectories[i]);
+
+		var playbackStartUsec = Time.GetTicksUsec();
+		var elapsedVisibleSeconds = 0f;
+		var visibleFrameCount = 1;
+		while (elapsedVisibleSeconds < visibleDuration)
+		{
+			await dice[0].ToSignal(dice[0].GetTree(), SceneTree.SignalName.ProcessFrame);
+			ct.ThrowIfCancellationRequested();
+			elapsedVisibleSeconds = (Time.GetTicksUsec() - playbackStartUsec) / 1_000_000f;
+			var progress = visibleDuration <= 0f
+				? 1f
+				: Math.Clamp(elapsedVisibleSeconds / visibleDuration, 0f, 1f);
+			for (var i = 0; i < dice.Count; i++)
+				dice[i].ApplyTrajectoryFrame(
+					PredeterminedTrajectoryPlaybackSampler.SampleAtProgress(
+						trajectories[i].Frames,
+						progress));
+			visibleFrameCount++;
+		}
+
+		for (var i = 0; i < dice.Count; i++)
+		{
+			dice[i].ApplyTrajectoryFrame(trajectories[i].Frames[^1]);
+			dice[i].CompletePredeterminedPlayback(
+				trajectories[i],
+				elapsedVisibleSeconds,
+				visibleFrameCount);
+		}
+
+		var postRollDisplaySeconds = dice.Max(die => MathF.Max(0f, die.PostRollDisplaySeconds));
+		if (postRollDisplaySeconds > 0f)
+		{
+			await dice[0].ToSignal(
+				dice[0].GetTree().CreateTimer(postRollDisplaySeconds),
+				SceneTreeTimer.SignalName.Timeout);
+			ct.ThrowIfCancellationRequested();
+		}
+	}
+
+	private void BeginPredeterminedPlayback(PredeterminedDieTrajectory trajectory)
+	{
 		LastRollUsedPredeterminedPlayback = true;
 		LastTrajectorySettledNaturally = trajectory.SettledNaturally;
 		LastSimulatedNaturalFace = trajectory.NaturalFace;
@@ -236,25 +310,29 @@ public partial class RollingDie : Node3D
 		LastTimeToGripSeconds = trajectory.TimeToGripSeconds;
 		LastRollDurationSeconds = trajectory.DurationSeconds;
 		Position = SpawnPosition;
-		_body.Freeze = true;
+		_body!.Freeze = true;
 		_body.Sleeping = false;
 		_body.LinearVelocity = Vector3.Zero;
 		_body.AngularVelocity = Vector3.Zero;
 		DisablePlaybackCollision();
-
 		ApplyTrajectoryFrame(trajectory.Frames[0]);
-		for (var i = 1; i < trajectory.Frames.Count; i++)
-		{
-			await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
-			ct.ThrowIfCancellationRequested();
-			ApplyTrajectoryFrame(trajectory.Frames[i]);
-		}
+	}
 
+	private void CompletePredeterminedPlayback(
+		PredeterminedDieTrajectory trajectory,
+		float elapsedVisibleSeconds,
+		int visibleFrameCount)
+	{
+		LastVisiblePlaybackSeconds = MathF.Max(0f, elapsedVisibleSeconds);
+		LastPlaybackCompressionRatio = LastVisiblePlaybackSeconds > 0f
+			? trajectory.DurationSeconds / LastVisiblePlaybackSeconds
+			: 1f;
+		LastVisiblePlaybackFrameCount = visibleFrameCount;
 		if (_effectiveFaceNormals != null &&
 			_effectiveFaceNormals.TryGetValue(trajectory.DisplayedFace, out var localNormal))
 		{
 			var bodyOrientation = ToNumeric(
-				_body.GlobalTransform.Basis.GetRotationQuaternion());
+				_body!.GlobalTransform.Basis.GetRotationQuaternion());
 			LastDisplayedFaceDot = System.Numerics.Vector3.Dot(
 				System.Numerics.Vector3.Normalize(System.Numerics.Vector3.Transform(
 					localNormal,
@@ -263,12 +341,6 @@ public partial class RollingDie : Node3D
 		}
 		if (!trajectory.SettledNaturally)
 			GD.PushWarning($"{Name}: offscreen trajectory reached {trajectory.DurationSeconds:F1}s before settling; no snap was applied.");
-
-		if (PostRollDisplaySeconds > 0f)
-		{
-			await ToSignal(GetTree().CreateTimer(PostRollDisplaySeconds), SceneTreeTimer.SignalName.Timeout);
-			ct.ThrowIfCancellationRequested();
-		}
 	}
 
 	public bool TrySnapToFace(int forcedFaceValue)
@@ -475,6 +547,9 @@ public partial class RollingDie : Node3D
 		LastFinalContactSlipSpeed = 0f;
 		LastTimeToGripSeconds = 0f;
 		LastRollDurationSeconds = 0f;
+		LastVisiblePlaybackSeconds = 0f;
+		LastPlaybackCompressionRatio = 1f;
+		LastVisiblePlaybackFrameCount = 0;
 		LastDisplayedFaceDot = 0f;
 		_effectiveFaceNormals = null;
 	}

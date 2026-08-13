@@ -59,12 +59,12 @@ A roll should read as one coherent beat:
 3. A candidate is accepted only after it changes its upward face at least once and settles flat on a legitimate collider face. An unstable tip/ridge balance or no-tumble result is discarded and naturally re-thrown offscreen, up to a small bounded number of attempts.
 4. Once the simulated die settles naturally, its upward physical face is identified. Approximate label directions are projected onto the collider's support faces through valid hull symmetries, which makes shapes such as the d10 visually unambiguous.
 5. The requested face is substituted for that natural face by applying a valid local symmetry rotation to every recorded orientation, beginning with the first frame. Position, timing, collisions, and angular motion remain those of the natural throw.
-6. The recorded trajectory is then replayed visibly. Because the result mapping exists for the whole animation, the die never displays one result and then corrects, snaps, or receives an invisible second flick.
+6. The complete recorded trajectory is then replayed visibly. Long trajectories may be time-compressed for pacing, but no physical frame is used as an early cutoff: visible playback samples the whole path and always ends on the exact settled pose. Dice from the same true multi-die roll share one presentation clock. Because the result mapping exists for the whole animation, a die never displays one result and then corrects, snaps, or receives an invisible second flick.
 7. Free/test rolls may still use live Godot physics when no outcome has been predetermined.
 8. Only after the face is readable and the die is physically settled does the game reveal narration and apply consequences such as damage, death, discovery, healing, or loot.
 9. The resolved die may linger briefly while the player reads the outcome.
 
-The camera is presentational, not part of the rule for deciding "up." A gameplay face is oriented to the play surface. A simulation timeout is a diagnostic guard: it may end recording a pathological trajectory, but it must never trigger a visible result snap. Normal rolls are not cut off by a randomized animation duration.
+The camera is presentational, not part of the rule for deciding "up." A gameplay face is oriented to the play surface. A simulation timeout is a diagnostic guard: it may end recording a pathological trajectory, but it must never trigger a visible result snap. Normal rolls are not cut off by a randomized animation duration; presentation pacing may compress only a complete, already-resolved trajectory.
 
 ---
 
