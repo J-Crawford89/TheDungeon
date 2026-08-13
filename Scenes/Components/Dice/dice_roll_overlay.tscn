@@ -22,6 +22,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 script = ExtResource("1_4otwk")
 RollingDieScene = ExtResource("2_oaku6")
 DiceSpawnPath = NodePath("SubViewportContainer/SubViewport/DiceWorld/DiceSpawn")
@@ -35,6 +36,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="SubViewport" type="SubViewport" parent="SubViewportContainer" unique_id=497238685]
 transparent_bg = true
@@ -51,6 +53,7 @@ current = true
 size = 10.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport/DiceWorld" unique_id=1856448599]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 12.427354, 0)
 
 [node name="Floor" type="StaticBody3D" parent="SubViewportContainer/SubViewport/DiceWorld" unique_id=1292313147]
 physics_material_override = SubResource("PhysicsMaterial_kr1rg")
