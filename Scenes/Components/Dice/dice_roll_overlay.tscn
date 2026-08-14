@@ -12,7 +12,12 @@ bounce = 0.2
 [sub_resource type="BoxShape3D" id="BoxShape3D_oaku6"]
 size = Vector3(18, 0.25, 10)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kr1rg"]
+transparency = 1
+albedo_color = Color(0, 0, 0, 0.6666667)
+
 [sub_resource type="BoxMesh" id="BoxMesh_oaku6"]
+material = SubResource("StandardMaterial3D_kr1rg")
 size = Vector3(18, 0.25, 10)
 
 [node name="DiceRollOverlay" type="Control" unique_id=352711561]
@@ -62,7 +67,6 @@ physics_material_override = SubResource("PhysicsMaterial_kr1rg")
 shape = SubResource("BoxShape3D_oaku6")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewportContainer/SubViewport/DiceWorld/Floor" unique_id=725262611]
-visible = false
 mesh = SubResource("BoxMesh_oaku6")
 
 [node name="DiceSpawn" type="Node3D" parent="SubViewportContainer/SubViewport/DiceWorld" unique_id=265719382]

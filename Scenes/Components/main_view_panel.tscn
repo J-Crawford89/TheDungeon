@@ -4,8 +4,63 @@
 [ext_resource type="Texture2D" uid="uid://dl3mwhc4s5xxk" path="res://Assets/PrototypeAssets/Background.png" id="2_ydaod"]
 [ext_resource type="Texture2D" uid="uid://dgdid3wsi11hc" path="res://Assets/PrototypeAssets/Door.png" id="3_5xurg"]
 [ext_resource type="Texture2D" uid="uid://d0f0ygfinohfb" path="res://Assets/PrototypeAssets/Passage.png" id="4_yj4sx"]
+[ext_resource type="Script" uid="uid://btb35s3dnf2hp" path="res://Scenes/Components/InitiativeStripView.cs" id="5_06h5p"]
 
-[node name="MainViewPanel" type="PanelContainer" unique_id=1544386070 node_paths=PackedStringArray("_viewArea", "_stage", "_mainViewTitle", "_backgroundRect", "_leftWallRect", "_backWallRect", "_rightWallRect", "_featureContainer")]
+[sub_resource type="Animation" id="Animation_yi2ai"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("InitiativeStrip:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_06h5p"]
+resource_name = "initiative_strip_fade_in"
+length = 0.25
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("InitiativeStrip:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.25),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_hxq3j"]
+resource_name = "initiative_strip_fade_out"
+length = 0.25
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("InitiativeStrip:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.25),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_r6p8e"]
+_data = {
+&"RESET": SubResource("Animation_yi2ai"),
+&"initiative_strip_fade_in": SubResource("Animation_06h5p"),
+&"initiative_strip_fade_out": SubResource("Animation_hxq3j")
+}
+
+[node name="MainViewPanel" type="PanelContainer" unique_id=1544386070 node_paths=PackedStringArray("_viewArea", "_stage", "_mainViewTitle", "_backgroundRect", "_leftWallRect", "_backWallRect", "_rightWallRect", "_featureContainer", "_initiativeStrip")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -20,6 +75,7 @@ _leftWallRect = NodePath("MainViewMargin/MainViewContent/ViewArea/Stage/LeftWall
 _backWallRect = NodePath("MainViewMargin/MainViewContent/ViewArea/Stage/BackWallRect")
 _rightWallRect = NodePath("MainViewMargin/MainViewContent/ViewArea/Stage/RightWallRect")
 _featureContainer = NodePath("MainViewMargin/MainViewContent/ViewArea/Stage/FeatureCenter/FeatureContainer")
+_initiativeStrip = NodePath("MainViewMargin/MainViewContent/ViewArea/InitiativeStrip")
 _backgroundTexture = ExtResource("2_ydaod")
 _doorTexture = ExtResource("3_5xurg")
 _passageTexture = ExtResource("4_yj4sx")
@@ -90,3 +146,81 @@ offset_bottom = 387.0
 
 [node name="FeatureContainer" type="HBoxContainer" parent="MainViewMargin/MainViewContent/ViewArea/Stage/FeatureCenter" unique_id=1931287618]
 layout_mode = 2
+
+[node name="InitiativeStrip" type="MarginContainer" parent="MainViewMargin/MainViewContent/ViewArea" unique_id=884710941 node_paths=PackedStringArray("_order", "_inactiveTemplate", "_activeTemplate", "_animationPlayer")]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 90.0
+grow_horizontal = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+script = ExtResource("5_06h5p")
+_order = NodePath("InitiativeOrder")
+_inactiveTemplate = NodePath("InitiativeOrder/InactiveCombatant")
+_activeTemplate = NodePath("InitiativeOrder/ActiveCombatant")
+_animationPlayer = NodePath("../InitiatvieStripAnimationPlayer")
+
+[node name="InitiativeOrder" type="HBoxContainer" parent="MainViewMargin/MainViewContent/ViewArea/InitiativeStrip" unique_id=609339436]
+layout_mode = 2
+
+[node name="InactiveCombatant" type="PanelContainer" parent="MainViewMargin/MainViewContent/ViewArea/InitiativeStrip/InitiativeOrder" unique_id=1748905696]
+custom_minimum_size = Vector2(90, 40)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="CombatantMargin" type="MarginContainer" parent="MainViewMargin/MainViewContent/ViewArea/InitiativeStrip/InitiativeOrder/InactiveCombatant" unique_id=2068293912]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="CombatantVBox" type="VBoxContainer" parent="MainViewMargin/MainViewContent/ViewArea/InitiativeStrip/InitiativeOrder/InactiveCombatant/CombatantMargin" unique_id=242488421]
+layout_mode = 2
+
+[node name="CombatantNameLabel" type="Label" parent="MainViewMargin/MainViewContent/ViewArea/InitiativeStrip/InitiativeOrder/InactiveCombatant/CombatantMargin/CombatantVBox" unique_id=431058357]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 14
+text = "Combatant"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ActiveCombatant" type="PanelContainer" parent="MainViewMargin/MainViewContent/ViewArea/InitiativeStrip/InitiativeOrder" unique_id=1249520556]
+custom_minimum_size = Vector2(90, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="CombatantMargin" type="MarginContainer" parent="MainViewMargin/MainViewContent/ViewArea/InitiativeStrip/InitiativeOrder/ActiveCombatant" unique_id=1600583125]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="CombatantVBox" type="VBoxContainer" parent="MainViewMargin/MainViewContent/ViewArea/InitiativeStrip/InitiativeOrder/ActiveCombatant/CombatantMargin" unique_id=104466760]
+layout_mode = 2
+
+[node name="CurrentIndicatorLabel" type="Label" parent="MainViewMargin/MainViewContent/ViewArea/InitiativeStrip/InitiativeOrder/ActiveCombatant/CombatantMargin/CombatantVBox" unique_id=1389226182]
+layout_mode = 2
+size_flags_vertical = 3
+text = "CURRENT"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CombatantNameLabel" type="Label" parent="MainViewMargin/MainViewContent/ViewArea/InitiativeStrip/InitiativeOrder/ActiveCombatant/CombatantMargin/CombatantVBox" unique_id=1065883410]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 14
+text = "Combatant"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="InitiatvieStripAnimationPlayer" type="AnimationPlayer" parent="MainViewMargin/MainViewContent/ViewArea" unique_id=398638847]
+libraries/ = SubResource("AnimationLibrary_r6p8e")

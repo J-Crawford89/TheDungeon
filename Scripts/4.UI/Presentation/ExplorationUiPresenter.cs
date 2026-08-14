@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public sealed class ExplorationUiPresenter
 {
@@ -152,14 +153,11 @@ public sealed class ExplorationUiPresenter
 		_isResolvingAction = true;
 		try
 		{
-		var previousCoord = _session.Dungeon.PlayerCoord;
-		var floorLevel = _session.Dungeon.CurrentFloor?.Level ?? 0;
-		var result = _explorationService.MoveForward(_session);
-		_session.AppendGameLog(_narrativeService.ForMoveForward(result));
-		if (result.Success)
-			await _explorationService.TryBeginCombatIfHostileAsync(_session, previousCoord, floorLevel);
-		if (!TryReportDiagnosticAndRefreshAll(result))
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
+			var previousCoord = _session.Dungeon.PlayerCoord;
+			var floorLevel = _session.Dungeon.CurrentFloor?.Level ?? 0;
+			var result = _explorationService.MoveForward(_session);
+			_session.AppendGameLog(_narrativeService.ForMoveForward(result));
+			await RefreshThenBeginCombatIfNeededAsync(result, previousCoord, floorLevel);
 		}
 		finally
 		{
@@ -232,18 +230,31 @@ public sealed class ExplorationUiPresenter
 		_isResolvingAction = true;
 		try
 		{
-		var previousCoord = _session.Dungeon.PlayerCoord;
-		var result = _explorationService.MoveDownAFloor(_session);
-		_session.AppendGameLog(_narrativeService.ForMoveDownFloor(result));
-		if (result.Success && result.FloorAfterMove is { } floorLevel)
-			await _explorationService.TryBeginCombatIfHostileAsync(_session, previousCoord, floorLevel);
-		if (!TryReportDiagnosticAndRefreshAll(result))
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
+			var previousCoord = _session.Dungeon.PlayerCoord;
+			var result = _explorationService.MoveDownAFloor(_session);
+			_session.AppendGameLog(_narrativeService.ForMoveDownFloor(result));
+			var floorLevel = result.FloorAfterMove ?? (_session.Dungeon.CurrentFloor?.Level ?? 0);
+			await RefreshThenBeginCombatIfNeededAsync(result, previousCoord, floorLevel);
 		}
 		finally
 		{
 			_isResolvingAction = false;
 		}
+	}
+
+	private async Task RefreshThenBeginCombatIfNeededAsync(
+		ExplorationServiceResult result,
+		RoomCoord previousCoord,
+		int floorLevel)
+	{
+		var diagnosticRefresh = TryReportDiagnosticAndRefreshAll(result);
+		if (!diagnosticRefresh)
+			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
+		if (!result.Success)
+			return;
+		await _explorationService.TryBeginCombatIfHostileAsync(_session, previousCoord, floorLevel);
+		if (!diagnosticRefresh)
+			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
 	}
 
 	private bool TryReportDiagnosticAndRefreshAll(ExplorationServiceResult result)

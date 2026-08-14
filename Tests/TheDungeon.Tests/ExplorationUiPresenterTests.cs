@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 public sealed class ExplorationUiPresenterTests
@@ -37,10 +38,37 @@ public sealed class ExplorationUiPresenterTests
 			LastOrdinal = containerOrdinal;
 	}
 
+	private sealed class RecordingCombatService : ICombatService
+	{
+		private readonly List<string> _timeline;
+
+		public RecordingCombatService(List<string> timeline) =>
+			_timeline = timeline;
+
+		public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel)
+		{
+			_timeline.Add("combat-begin");
+			return true;
+		}
+
+		public Task<bool> TryBeginCombatIfHostileAsync(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
+			Task.FromResult(TryBeginCombatIfHostile(session, previousCoord, floorLevel));
+
+		public bool CanAcceptPlayerAction(GameSessionState session) => false;
+		public bool CanExecuteCombatAbility(GameSessionState session, string abilityId) => false;
+		public void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice) { }
+		public void ExecutePlayerFlee(GameSessionState session) { }
+		public void ExecutePlayerTakeTreasure(GameSessionState session, TargetPayload payload) { }
+		public void ExecutePlayerUseHealthPotion(GameSessionState session) { }
+		public void ExecutePlayerDefend(GameSessionState session) { }
+		public void ExecutePlayerDisarmTrap(GameSessionState session, TargetPayload payload) { }
+	}
+
 	private static ExplorationUiPresenter CreatePresenter(
 		GameSessionState session,
 		System.Action<UiRefreshFlags> refreshHud,
-		IContainerLootOverlayOpener? lootOverlay = null)
+		IContainerLootOverlayOpener? lootOverlay = null,
+		ICombatService? combat = null)
 	{
 		var chestLoot = new ChestLootGenerator(new EmptyItems(), ChestLootGenerationParameters.Default);
 		var population = new RoomFeaturePopulationService(
@@ -50,7 +78,7 @@ public sealed class ExplorationUiPresenterTests
 		var inspect = new InspectService(dice, new ResolutionService(dice), narrative);
 		var trapService = new TrapService(new ResolutionService(dice), narrative, new PlayerVitalsService(), new EmptyItems());
 		var floorGenerator = new FloorGenerator(population);
-		var exploration = new ExplorationService(floorGenerator, new NoopCombatService(), inspect, trapService);
+		var exploration = new ExplorationService(floorGenerator, combat ?? new NoopCombatService(), inspect, trapService);
 		var treasure = new TreasurePickupService(narrative, new EmptyItems(), TestPlayerProficiencyAggregation.CreateEmpty());
 		var potionFx = new PotionEffectApplicationService(dice, narrative, new EmptyItems());
 		var bootstrap = new DungeonBootstrap(
@@ -195,5 +223,48 @@ public sealed class ExplorationUiPresenterTests
 		presenter.OnDisarmWithTarget(new TargetPayload { Kind = TargetPayloadKind.DisarmTrapInstance });
 
 		Assert.Empty(refreshes);
+	}
+
+	[Fact]
+	public void OnForwardPressed_SuccessfulMove_RefreshesMainViewBeforeCombatBegin()
+	{
+		var timeline = new List<string>();
+		var session = BuildLinkedNorthRooms();
+		var presenter = CreatePresenter(
+			session,
+			f =>
+			{
+				if (f.HasFlag(UiRefreshFlags.MainView))
+					timeline.Add("refresh-main-view");
+			},
+			combat: new RecordingCombatService(timeline));
+
+		presenter.OnForwardPressed();
+
+		Assert.Contains("refresh-main-view", timeline);
+		Assert.Contains("combat-begin", timeline);
+		Assert.True(timeline.IndexOf("refresh-main-view") < timeline.IndexOf("combat-begin"));
+	}
+
+	private static GameSessionState BuildLinkedNorthRooms()
+	{
+		var session = new GameSessionState();
+		var floor = new DungeonFloor { Level = 1, Entrance = DirectionHelper.Origin };
+		var origin = new DungeonRoom { Position = DirectionHelper.Origin };
+		var northCoord = DungeonNavigationHelper.GetNeighborCoord(DirectionHelper.Origin, HorizontalDirection.North);
+		var north = new DungeonRoom { Position = northCoord };
+		floor.Rooms[origin.Position] = origin;
+		floor.Rooms[north.Position] = north;
+		Assert.True(DungeonFloorLayoutService.TryLinkRooms(
+			floor,
+			origin.Position,
+			HorizontalDirection.North,
+			RoomConnectionType.Passage,
+			out _));
+		session.Dungeon.CurrentFloor = floor;
+		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
+		session.Player.Facing = HorizontalDirection.North;
+		session.Dungeon.DiscoveredRoomsByFloor[1] = [DirectionHelper.Origin];
+		return session;
 	}
 }

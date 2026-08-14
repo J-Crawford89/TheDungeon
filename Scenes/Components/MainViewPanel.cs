@@ -16,10 +16,13 @@ public partial class MainViewPanel : PanelContainer
 	[Export] private TextureRect _backWallRect = null!;
 	[Export] private TextureRect _rightWallRect = null!;
 	[Export] private HBoxContainer _featureContainer = null!;
+	[Export] private InitiativeStripView? _initiativeStrip;
 
 	[Export] private Texture2D _backgroundTexture = null!;
 	[Export] private Texture2D _doorTexture = null!;
 	[Export] private Texture2D _passageTexture = null!;
+
+	public InitiativeStripView? InitiativeStrip => _initiativeStrip;
 
 	private IconResolver? _iconResolver;
 
@@ -37,6 +40,8 @@ public partial class MainViewPanel : PanelContainer
 
 	public override void _Ready()
 	{
+		if (_initiativeStrip == null)
+			GD.PushError("MainViewPanel: assign the Initiative Strip export to InitiativeStrip.");
 		if (_backgroundRect != null)
 			_backgroundRect.Texture = _backgroundTexture;
 

@@ -1,6 +1,8 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 public sealed class GameUiCoordinator
 {
@@ -29,6 +31,8 @@ public sealed class GameUiCoordinator
 	private readonly LogPanel _logPanel;
 	private readonly CommandPanel _commandPanel;
 	private readonly MapPanel _mapPanel;
+	private readonly InitiativeOverlay? _initiativeOverlay;
+	private readonly InitiativeStripView? _initiativeStrip;
 
 	private ActiveTargeting? _targeting;
 	private int? _targetHoverDescriptorIndex;
@@ -44,7 +48,9 @@ public sealed class GameUiCoordinator
 		CharacterPanel characterPanel,
 		LogPanel logPanel,
 		CommandPanel commandPanel,
-		MapPanel mapPanel)
+		MapPanel mapPanel,
+		InitiativeOverlay? initiativeOverlay = null,
+		InitiativeStripView? initiativeStrip = null)
 	{
 		_session = session;
 		_combatService = combatService;
@@ -56,6 +62,8 @@ public sealed class GameUiCoordinator
 		_logPanel = logPanel;
 		_commandPanel = commandPanel;
 		_mapPanel = mapPanel;
+		_initiativeOverlay = initiativeOverlay;
+		_initiativeStrip = initiativeStrip;
 
 		_session.Dungeon.PlayerMoved += OnDungeonMapViewInvalidated;
 	}
@@ -179,8 +187,48 @@ public sealed class GameUiCoordinator
 		return d;
 	}
 
+	/// <summary>
+	/// Combat-turn presentation beat. Game awaits this after initiative, after each turn advance,
+	/// and when combat ends so the strip can fade out.
+	/// </summary>
+	public async Task PresentCombatTurnAsync(CombatTurnPresentationKind kind, CancellationToken ct = default)
+	{
+		ct.ThrowIfCancellationRequested();
+		var view = InitiativeTurnOrderView.FromSession(_session);
+		if (kind == CombatTurnPresentationKind.OrderRevealed)
+		{
+			if (_initiativeOverlay != null)
+				await _initiativeOverlay.ShowOrderAsync(view.Names);
+			ct.ThrowIfCancellationRequested();
+			if (_initiativeStrip != null)
+				await _initiativeStrip.ShowOrderAsync(view.Names, view.CurrentIndex);
+			return;
+		}
+
+		if (kind == CombatTurnPresentationKind.ActiveTurnChanged)
+		{
+			_initiativeStrip?.SetCurrentIndex(view.Names, view.CurrentIndex);
+			return;
+		}
+
+		if (kind == CombatTurnPresentationKind.CombatEnded)
+		{
+			_initiativeOverlay?.HideImmediate();
+			if (_initiativeStrip != null)
+				await _initiativeStrip.FadeOutAsync();
+		}
+	}
+
+	private void SyncInitiativeChromeToMode()
+	{
+		if (_session.Phase == GamePlayPhase.InProgress && _session.Dungeon.DungeonMode == DungeonMode.Combat)
+			return;
+		_initiativeOverlay?.HideImmediate();
+	}
+
 	public void RefreshHud(UiRefreshFlags flags)
 	{
+		SyncInitiativeChromeToMode();
 		if (_session.Phase != GamePlayPhase.InProgress)
 		{
 			_pendingAttackChoice = null;

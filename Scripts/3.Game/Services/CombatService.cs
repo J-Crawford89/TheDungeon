@@ -36,6 +36,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		IItemDefinitionRepository itemDefinitions,
 		PlayerExperienceService? experience = null,
 		IAttackRollAbilityOverlay? attackRollAbilityOverlay = null,
+		CombatTurnPresentationHost? turnPresentationHost = null,
 		int defaultFleeDc = 12)
 	{
 		_dice = dice;
@@ -52,23 +53,34 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		_lifecycle = new CombatEncounterLifecycle(_narrative);
 		_monsterTurn = new CombatMonsterTurn(_resolution, _dice, _narrative, _vitals, _playerDowned);
 		_initiative = new CombatInitiative(_dice, _narrative, _resolution);
-		_turnLoop = new CombatTurnLoop(this, _lifecycle, _monsterTurn);
+		_turnLoop = new CombatTurnLoop(this, _lifecycle, _monsterTurn, turnPresentationHost);
 		_potionEffects = potionEffects;
 		RegisterCombatAbilityHandlers();
 	}
 
 	private async Task RunAfterSuccessfulCombatHealthPotionAsync(GameSessionState session)
 	{
+		if (await TryEndCombatIfFinishedAsync(session))
+			return;
+
+		await _turnLoop.AdvanceTurnAndPresentAsync(session);
+		await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
+	}
+
+	private async Task<bool> TryEndCombatIfFinishedAsync(GameSessionState session)
+	{
 		var room = session.Dungeon.CurrentRoom;
 		if (room != null && RoomFeatureHelper.GetFeature<MonsterFeature>(room) is { } monsterFeature)
 		{
 			_turnLoop.PruneDeadMonstersFromTurnOrder(session, monsterFeature);
-			if (_turnLoop.CheckVictory(session, monsterFeature))
-				return;
+			if (await _turnLoop.EndIfVictoryAsync(session, monsterFeature))
+				return true;
 		}
 
-		_turnLoop.AdvanceTurn(session);
-		await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
+		if (_turnLoop.IsCombatActive(session))
+			return false;
+		await _turnLoop.PresentCombatEndedAsync(session);
+		return true;
 	}
 
 	private void RegisterCombatAbilityHandlers()
@@ -115,6 +127,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			session.Combat.TurnOrder = order;
 			session.AppendGameLog(_narrative.ForCombatTurnOrderSummary(_initiative.BuildTurnOrderNames(feature, order)));
 			await _resolution.NotifyResolvedRollAsync();
+			await _turnLoop.PresentOrderRevealedAsync(session);
 
 			await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
 			return true;
@@ -252,11 +265,10 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			await _resolution.NotifyResolvedRollAsync();
 		}
 
-		_turnLoop.PruneDeadMonstersFromTurnOrder(session, feature);
-		if (_turnLoop.CheckVictory(session, feature))
+		if (await TryEndCombatIfFinishedAsync(session))
 			return;
 
-		_turnLoop.AdvanceTurn(session);
+		await _turnLoop.AdvanceTurnAndPresentAsync(session);
 		await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
 		}
 		finally
@@ -304,12 +316,13 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			session.AppendGameLog(_narrative.ForFleeSuccess());
 			_lifecycle.RestoreExplorationAfterFlee(session);
 			await _resolution.NotifyResolvedRollAsync();
+			await _turnLoop.PresentCombatEndedAsync(session);
 			return;
 		}
 
 		session.AppendGameLog(_narrative.ForFleeFailure());
 		await _resolution.NotifyResolvedRollAsync();
-		_turnLoop.AdvanceTurn(session);
+		await _turnLoop.AdvanceTurnAndPresentAsync(session);
 		await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
 		}
 		finally
@@ -338,15 +351,10 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		};
 		if (outcome != TakeTreasureOutcome.TookItems)
 			return;
-		var room = session.Dungeon.CurrentRoom;
-		if (room != null && RoomFeatureHelper.GetFeature<MonsterFeature>(room) is { } monsterFeature)
-		{
-			_turnLoop.PruneDeadMonstersFromTurnOrder(session, monsterFeature);
-			if (_turnLoop.CheckVictory(session, monsterFeature))
-				return;
-		}
+		if (await TryEndCombatIfFinishedAsync(session))
+			return;
 
-		_turnLoop.AdvanceTurn(session);
+		await _turnLoop.AdvanceTurnAndPresentAsync(session);
 		await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
 		}
 		finally
@@ -395,15 +403,10 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		if (!result.ShouldAdvanceCombatTurn)
 			return;
 
-		var room = session.Dungeon.CurrentRoom;
-		if (room != null && RoomFeatureHelper.GetFeature<MonsterFeature>(room) is { } monsterFeature)
-		{
-			_turnLoop.PruneDeadMonstersFromTurnOrder(session, monsterFeature);
-			if (_turnLoop.CheckVictory(session, monsterFeature))
-				return;
-		}
+		if (await TryEndCombatIfFinishedAsync(session))
+			return;
 
-		_turnLoop.AdvanceTurn(session);
+		await _turnLoop.AdvanceTurnAndPresentAsync(session);
 		await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
 		}
 		finally
@@ -430,6 +433,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 
 		if (_combatAbilities.TryExecute(AbilityIds.Defend, session, Advance))
 		{
+			await _turnLoop.PresentActiveTurnAsync(session);
 			await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
 			return;
 		}

@@ -88,17 +88,19 @@ public sealed class ContainerLootOperationsTests
 	{
 		private readonly List<string> _events;
 		private readonly string _itemDefinitionId;
+		private readonly GameSessionState _session;
 
-		public RecordingReactionSink(List<string> events, string itemDefinitionId)
+		public RecordingReactionSink(List<string> events, string itemDefinitionId, GameSessionState session)
 		{
 			_events = events;
 			_itemDefinitionId = itemDefinitionId;
+			_session = session;
 		}
 
-		public Task NotifyAsync(GameSessionState session, CancellationToken ct = default)
+		public Task NotifyAsync(CancellationToken ct = default)
 		{
-			var rollLogCount = session.LogEntries.Count(entry => entry.Kind == LogEntryKind.Roll);
-			var inventoryQuantity = session.Player.InventoryState.SumQuantityForDefinitionId(_itemDefinitionId);
+			var rollLogCount = _session.LogEntries.Count(entry => entry.Kind == LogEntryKind.Roll);
+			var inventoryQuantity = _session.Player.InventoryState.SumQuantityForDefinitionId(_itemDefinitionId);
 			_events.Add($"react:{rollLogCount}:{inventoryQuantity}");
 			return Task.CompletedTask;
 		}
@@ -404,7 +406,7 @@ public sealed class ContainerLootOperationsTests
 		var presenterHost = new DiceRollPresenterHost { Presenter = presenter };
 		var reactionHost = new ResolvedRollReactionHost
 		{
-			Sink = new RecordingReactionSink(events, item.Id),
+			Sink = new RecordingReactionSink(events, item.Id, session),
 		};
 		var resolution = new ResolutionService(
 			new DiceRollService(new QueueRandom(10, 5, 10)),
@@ -457,7 +459,7 @@ public sealed class ContainerLootOperationsTests
 		var resolution = new ResolutionService(
 			new DiceRollService(new QueueRandom(10)),
 			new DiceRollPresenterHost { Presenter = presenter },
-			new ResolvedRollReactionHost { Sink = new RecordingReactionSink(events, item.Id) });
+			new ResolvedRollReactionHost { Sink = new RecordingReactionSink(events, item.Id, session) });
 
 		await ContainerLootOperations.TransferAllContentsAsync(
 			session,

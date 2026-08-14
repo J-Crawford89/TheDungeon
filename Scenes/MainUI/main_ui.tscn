@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://bu6sqdijxfqyr" path="res://Scenes/Components/ContainerLootOverlay.cs" id="9_hnx6b"]
 [ext_resource type="PackedScene" uid="uid://c6a5ctuwo5260" path="res://Scenes/Menus/NotebookOverlay.tscn" id="10_fo6o3"]
 [ext_resource type="PackedScene" uid="uid://chgqdbjnwt8i5" path="res://Scenes/Components/Dice/dice_roll_overlay.tscn" id="13_oha01"]
+[ext_resource type="Script" uid="uid://dqcemkeet0ai0" path="res://Scenes/MainUI/InitiativeOverlay.cs" id="14_4u3ra"]
 [ext_resource type="Script" uid="uid://dhxmgcg1n3vmh" path="res://Scenes/MainUI/GameOverOverlay.cs" id="14_pl31g"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hnx6b"]
@@ -39,7 +40,44 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="MainUI" type="Control" unique_id=1749426459 node_paths=PackedStringArray("_mainViewPanel", "_characterPanel", "_commandPanel", "_logPanel", "_mapPanel", "_gameOverOverlay", "_notebookOverlay", "_containerLootOverlay", "_diceRollOverlay")]
+[sub_resource type="Animation" id="Animation_oha01"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("InitiativeOverlay:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_pl31g"]
+resource_name = "initiative_reveal"
+length = 2.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("InitiativeOverlay:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.25, 1.75, 2),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_4u3ra"]
+_data = {
+&"RESET": SubResource("Animation_oha01"),
+&"initiative_reveal": SubResource("Animation_pl31g")
+}
+
+[node name="MainUI" type="Control" unique_id=1749426459 node_paths=PackedStringArray("_mainViewPanel", "_characterPanel", "_commandPanel", "_logPanel", "_mapPanel", "_gameOverOverlay", "_notebookOverlay", "_containerLootOverlay", "_diceRollOverlay", "_initiativeOverlay")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -56,6 +94,7 @@ _gameOverOverlay = NodePath("GameOverOverlay")
 _notebookOverlay = NodePath("NotebookOverlay")
 _containerLootOverlay = NodePath("ContainerLootOverlay")
 _diceRollOverlay = NodePath("DiceRollOverlay")
+_initiativeOverlay = NodePath("InitiativeOverlay")
 
 [node name="RootMargin" type="MarginContainer" parent="." unique_id=864533212]
 layout_mode = 1
@@ -540,4 +579,53 @@ visible = false
 layout_mode = 1
 
 [node name="DiceRollOverlay" parent="." unique_id=352711561 instance=ExtResource("13_oha01")]
+visible = false
 layout_mode = 1
+
+[node name="InitiativeOverlay" type="Control" parent="." unique_id=1261235365 node_paths=PackedStringArray("_orderLabel", "_animationPlayer")]
+visible = false
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("14_4u3ra")
+_orderLabel = NodePath("InitiativeOverlayColorRect/InitiativeContentCenter/InitiativeContent/InitiativeOrderLabel")
+_animationPlayer = NodePath("../InitiativeAnimationPlayer")
+
+[node name="InitiativeOverlayColorRect" type="ColorRect" parent="InitiativeOverlay" unique_id=575573546]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6666667)
+
+[node name="InitiativeContentCenter" type="CenterContainer" parent="InitiativeOverlay/InitiativeOverlayColorRect" unique_id=1404021649]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="InitiativeContent" type="VBoxContainer" parent="InitiativeOverlay/InitiativeOverlayColorRect/InitiativeContentCenter" unique_id=674641389]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="InitiativeOverlay/InitiativeOverlayColorRect/InitiativeContentCenter/InitiativeContent" unique_id=1431555089]
+layout_mode = 2
+text = "INITIATIVE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="InitiativeOrderLabel" type="Label" parent="InitiativeOverlay/InitiativeOverlayColorRect/InitiativeContentCenter/InitiativeContent" unique_id=2095971126]
+layout_mode = 2
+text = "Combatant -> Combatant"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="InitiativeAnimationPlayer" type="AnimationPlayer" parent="." unique_id=1001219594]
+libraries/ = SubResource("AnimationLibrary_4u3ra")

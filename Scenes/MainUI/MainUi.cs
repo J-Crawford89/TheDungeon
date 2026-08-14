@@ -14,6 +14,7 @@ public partial class MainUi : Control
 
 	[Export] private ContainerLootOverlay? _containerLootOverlay;
 	[Export] private DiceRollOverlay? _diceRollOverlay;
+	[Export] private InitiativeOverlay? _initiativeOverlay;
 
 	public event Action? QuitRequested;
 	public event Action? ReturnToStartMenuRequested;
@@ -99,9 +100,17 @@ public partial class MainUi : Control
 			_characterPanel,
 			_logPanel,
 			_commandPanel,
-			_mapPanel);
+			_mapPanel,
+			_initiativeOverlay,
+			_mainViewPanel.InitiativeStrip);
 		_coordinator = coordinator;
 		_runContext.ResolvedRollReactionHost.Sink = new UiResolvedRollReactionSink(RefreshHudAndGameOver);
+		_runContext.CombatTurnPresentationHost.Sink = new UiCombatTurnPresentationSink(
+			RefreshHudAndGameOver,
+			(kind, ct) => coordinator.PresentCombatTurnAsync(kind, ct));
+
+		if (_initiativeOverlay == null)
+			GD.PushError("MainUi: assign the Initiative Overlay export to your InitiativeOverlay node.");
 
 		_mainViewPanel.TargetSlotHoverChanged += OnMainViewTargetHover;
 		_mainViewPanel.TargetSlotClicked += OnMainViewTargetClick;
@@ -242,6 +251,7 @@ public partial class MainUi : Control
 		{
 			_runContext.DicePresenterHost.Presenter = NullDiceRollPresenter.Instance;
 			_runContext.ResolvedRollReactionHost.Sink = NullResolvedRollReactionSink.Instance;
+			_runContext.CombatTurnPresentationHost.Sink = NullCombatTurnPresentationSink.Instance;
 		}
 
 		if (GetViewport() != null)

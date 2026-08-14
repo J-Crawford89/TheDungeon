@@ -202,6 +202,7 @@ public partial class GameRoot : Control
 		var diceRollService = new DiceRollService(random);
 		var dicePresenterHost = new DiceRollPresenterHost();
 		var resolvedRollReactionHost = new ResolvedRollReactionHost();
+		var combatTurnPresentationHost = new CombatTurnPresentationHost();
 		var resolutionService = new ResolutionService(diceRollService, dicePresenterHost, resolvedRollReactionHost);
 		var experienceService = new PlayerExperienceService(narrativeService);
 		var treasurePickupService = new TreasurePickupService(narrativeService, itemRepo, proficiencyAggregation);
@@ -229,6 +230,7 @@ public partial class GameRoot : Control
 			trapService,
 			itemRepo,
 			experienceService,
+			turnPresentationHost: combatTurnPresentationHost,
 			defaultFleeDc: defaultFleeDc);
 		var inspectService = new InspectService(diceRollService, resolutionService, narrativeService);
 		var explorationService = new ExplorationService(
@@ -268,6 +270,7 @@ public partial class GameRoot : Control
 			resolutionService,
 			dicePresenterHost,
 			resolvedRollReactionHost,
+			combatTurnPresentationHost,
 			treasurePickupService,
 			vitalsService,
 			gameOverDownedHandler,

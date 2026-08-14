@@ -14,15 +14,18 @@ internal sealed class CombatTurnLoop
 	private readonly ICombatTurnReadiness _readiness;
 	private readonly CombatEncounterLifecycle _lifecycle;
 	private readonly CombatMonsterTurn _monsterTurn;
+	private readonly CombatTurnPresentationHost? _turnPresentation;
 
 	public CombatTurnLoop(
 		ICombatTurnReadiness readiness,
 		CombatEncounterLifecycle lifecycle,
-		CombatMonsterTurn monsterTurn)
+		CombatMonsterTurn monsterTurn,
+		CombatTurnPresentationHost? turnPresentation = null)
 	{
 		_readiness = readiness;
 		_lifecycle = lifecycle;
 		_monsterTurn = monsterTurn;
+		_turnPresentation = turnPresentation;
 	}
 
 	public void NotifyPlayerTurnStarted(GameSessionState session)
@@ -53,6 +56,7 @@ internal sealed class CombatTurnLoop
 			if (room == null)
 			{
 				_lifecycle.EndCombatVictory(session);
+				await PresentCombatEndedAsync(session, ct);
 				return;
 			}
 
@@ -60,20 +64,22 @@ internal sealed class CombatTurnLoop
 			if (feature == null)
 			{
 				_lifecycle.EndCombatVictory(session);
+				await PresentCombatEndedAsync(session, ct);
 				return;
 			}
 
 			await _monsterTurn.ExecuteMonsterTurnAsync(session, feature, slot.MonsterIndex, ct);
-			if (session.Phase != GamePlayPhase.InProgress)
+			if (!IsCombatActive(session))
+			{
+				await PresentCombatEndedAsync(session, ct);
 				return;
-			if (session.Dungeon.DungeonMode != DungeonMode.Combat)
-				return;
+			}
 
 			PruneDeadMonstersFromTurnOrder(session, feature);
-			if (CheckVictory(session, feature))
+			if (await EndIfVictoryAsync(session, feature, ct))
 				return;
 
-			AdvanceTurn(session);
+			await AdvanceTurnAndPresentAsync(session, ct);
 		}
 	}
 
@@ -98,6 +104,9 @@ internal sealed class CombatTurnLoop
 	private static bool TurnSlotsEqual(CombatTurnSlot a, CombatTurnSlot b) =>
 		a.IsPlayer == b.IsPlayer && a.MonsterIndex == b.MonsterIndex;
 
+	public bool IsCombatActive(GameSessionState session) =>
+		session.Phase == GamePlayPhase.InProgress && session.Dungeon.DungeonMode == DungeonMode.Combat;
+
 	public bool CheckVictory(GameSessionState session, MonsterFeature feature)
 	{
 		if (feature.Monsters.All(m => m.CurrentHp <= 0))
@@ -109,10 +118,55 @@ internal sealed class CombatTurnLoop
 		return false;
 	}
 
+	public async Task<bool> EndIfVictoryAsync(
+		GameSessionState session,
+		MonsterFeature feature,
+		CancellationToken ct = default)
+	{
+		if (!CheckVictory(session, feature))
+			return false;
+		await PresentCombatEndedAsync(session, ct);
+		return true;
+	}
+
 	public void AdvanceTurn(GameSessionState session)
 	{
 		if (session.Combat is not { } c || c.TurnOrder.Count == 0)
 			return;
 		c.CurrentTurnIndex = (c.CurrentTurnIndex + 1) % c.TurnOrder.Count;
+	}
+
+	public async Task AdvanceTurnAndPresentAsync(GameSessionState session, CancellationToken ct = default)
+	{
+		AdvanceTurn(session);
+		await PresentActiveTurnAsync(session, ct);
+	}
+
+	public Task PresentOrderRevealedAsync(GameSessionState session, CancellationToken ct = default) =>
+		PresentWhileCombatActiveAsync(session, CombatTurnPresentationKind.OrderRevealed, ct);
+
+	public Task PresentActiveTurnAsync(GameSessionState session, CancellationToken ct = default) =>
+		PresentWhileCombatActiveAsync(session, CombatTurnPresentationKind.ActiveTurnChanged, ct);
+
+	public Task PresentCombatEndedAsync(GameSessionState session, CancellationToken ct = default)
+	{
+		_ = session;
+		if (_turnPresentation == null)
+			return Task.CompletedTask;
+		return _turnPresentation.Sink.PresentAsync(CombatTurnPresentationKind.CombatEnded, ct);
+	}
+
+	private Task PresentWhileCombatActiveAsync(
+		GameSessionState session,
+		CombatTurnPresentationKind kind,
+		CancellationToken ct)
+	{
+		if (_turnPresentation == null)
+			return Task.CompletedTask;
+		if (!IsCombatActive(session))
+			return Task.CompletedTask;
+		if (session.Combat is not { } combat || combat.TurnOrder.Count == 0)
+			return Task.CompletedTask;
+		return _turnPresentation.Sink.PresentAsync(kind, ct);
 	}
 }

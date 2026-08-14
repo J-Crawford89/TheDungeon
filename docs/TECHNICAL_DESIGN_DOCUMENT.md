@@ -202,6 +202,8 @@ Authoritative rolls stay in [`DiceRollService`](../Scripts/3.Game/Services/DiceR
 
 12. Once presentation returns, the owning service appends that roll's narration and applies its consequences. It then awaits `ResolutionService.NotifyResolvedRollAsync`, which delegates through [`IResolvedRollReactionSink`](../Scripts/3.Game.Contracts/Dice/IResolvedRollReactionSink.cs). The runtime [`UiResolvedRollReactionSink`](../Scripts/4.UI/Presentation/UiResolvedRollReactionSink.cs) refreshes the HUD and game-over state; the default null sink keeps headless execution independent of UI.
 
+Combat turn chrome uses a second UI-agnostic boundary: [`ICombatTurnPresentationSink`](../Scripts/3.Game.Contracts/Combat/ICombatTurnPresentationSink.cs). After initiative order is committed, Game awaits `OrderRevealed` before any combatant acts. After each later `AdvanceTurn`, Game awaits `ActiveTurnChanged` before the next combatant acts. When combat ends (victory, successful flee, or player death), Game awaits `CombatEnded` so the initiative strip can fade out. The signal is kind-only; order and the active combatant stay on [`CombatState`](../Scripts/2.State/Combat/CombatState.cs) while combat is active. The runtime [`UiCombatTurnPresentationSink`](../Scripts/4.UI/Presentation/UiCombatTurnPresentationSink.cs) refreshes MainView/Command and forwards to [`GameUiCoordinator.PresentCombatTurnAsync`](../Scenes/MainUI/GameUiCoordinator.cs). The default null sink keeps headless execution independent of UI.
+
 ### Presentation profiles and reaction ownership
 
 | Concern | `Standard` | `RapidSequence` |
