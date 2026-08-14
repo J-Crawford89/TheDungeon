@@ -48,7 +48,7 @@ public sealed class D10PredeterminedTrajectoryTests
 			Vector3.Normalize(Vector3.Transform(localNormal, orientation)),
 			Vector3.UnitY);
 
-	private static PredeterminedDieThrowRequest CreateRequest(int desiredFace, int attempt)
+	internal static PredeterminedDieThrowRequest CreateRequest(int desiredFace, int attempt)
 	{
 		var points = new List<Vector3>
 		{

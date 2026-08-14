@@ -33,7 +33,6 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		PotionEffectApplicationService potionEffects,
 		TrapService trapService,
 		IItemDefinitionRepository itemDefinitions,
-		DiceRollPresenterHost? dicePresenterHost = null,
 		PlayerExperienceService? experience = null,
 		IAttackRollAbilityOverlay? attackRollAbilityOverlay = null)
 	{
@@ -49,7 +48,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		_attackRollAbilityOverlay = attackRollAbilityOverlay;
 		_lifecycle = new CombatEncounterLifecycle(_narrative);
 		_monsterTurn = new CombatMonsterTurn(_resolution, _dice, _narrative, _vitals, _playerDowned);
-		_initiative = new CombatInitiative(_dice, _narrative, dicePresenterHost);
+		_initiative = new CombatInitiative(_dice, _narrative, _resolution);
 		_turnLoop = new CombatTurnLoop(this, _lifecycle, _monsterTurn);
 		_potionEffects = potionEffects;
 		RegisterCombatAbilityHandlers();
@@ -112,6 +111,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			var order = await _initiative.RollInitiativeOrderAsync(session, feature);
 			session.Combat.TurnOrder = order;
 			session.AppendGameLog(_narrative.ForCombatTurnOrderSummary(_initiative.BuildTurnOrderNames(feature, order)));
+			await _resolution.NotifyResolvedRollAsync(session);
 
 			await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
 			return true;
@@ -210,8 +210,11 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			Text = _narrative.ForAttackRoll("You", monster.Definition.Name, result.Roll.Total, monster.Definition.Defense, result.Roll.DetailText)
 		});
 
-		if (result.Outcome == ResolutionOutcome.Success || result.Outcome == ResolutionOutcome.CriticalSuccess)
+		var hit = result.Outcome == ResolutionOutcome.Success || result.Outcome == ResolutionOutcome.CriticalSuccess;
+		if (hit)
 		{
+			await _resolution.NotifyResolvedRollAsync(session);
+
 			var (damageAbility, addAbilityToDamage) = PlayerAttackRollBuilder.ResolveDamageAbility(rollInput);
 			var damageRoll = PlayerAttackRollBuilder.RollDamage(
 				new PlayerAttackDamageRollInput
@@ -221,7 +224,7 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 					DamageAbility = damageAbility,
 					AddAbilityToDamage = addAbilityToDamage,
 				});
-			await _resolution.PresentSpecsAsync(damageRoll.VisualDice);
+			await _resolution.PresentSpecsAsync(damageRoll.VisualDice, DicePresentationProfile.Standard);
 			var dmg = damageRoll.Total;
 
 			if (result.Outcome == ResolutionOutcome.CriticalSuccess)
@@ -233,9 +236,13 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 				_experience?.GrantExperience(session, monster.Definition.ExperienceReward);
 				CombatCorpseHelper.SpawnCorpseOnMonsterDeath(session, room, monster.Definition, _items, _narrative);
 			}
+			await _resolution.NotifyResolvedRollAsync(session);
 		}
 		else
+		{
 			session.AppendGameLog(_narrative.ForAttackMiss("You", monster.Definition.Name));
+			await _resolution.NotifyResolvedRollAsync(session);
+		}
 
 		_turnLoop.PruneDeadMonstersFromTurnOrder(session, feature);
 		if (_turnLoop.CheckVictory(session, feature))
@@ -288,10 +295,12 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		{
 			session.AppendGameLog(_narrative.ForFleeSuccess());
 			_lifecycle.RestoreExplorationAfterFlee(session);
+			await _resolution.NotifyResolvedRollAsync(session);
 			return;
 		}
 
 		session.AppendGameLog(_narrative.ForFleeFailure());
+		await _resolution.NotifyResolvedRollAsync(session);
 		_turnLoop.AdvanceTurn(session);
 		await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
 		}

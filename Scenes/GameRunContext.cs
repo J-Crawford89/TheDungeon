@@ -13,6 +13,7 @@ public sealed class GameRunContext
 	public DiceRollService DiceRollService { get; }
 	public ResolutionService ResolutionService { get; }
 	public DiceRollPresenterHost DicePresenterHost { get; }
+	public ResolvedRollReactionHost ResolvedRollReactionHost { get; }
 	public TreasurePickupService TreasurePickupService { get; }
 	public PlayerVitalsService VitalsService { get; }
 	public GameOverDownedHandler GameOverDownedHandler { get; }
@@ -46,6 +47,7 @@ public sealed class GameRunContext
 		DiceRollService diceRollService,
 		ResolutionService resolutionService,
 		DiceRollPresenterHost dicePresenterHost,
+		ResolvedRollReactionHost resolvedRollReactionHost,
 		TreasurePickupService treasurePickupService,
 		PlayerVitalsService vitalsService,
 		GameOverDownedHandler gameOverDownedHandler,
@@ -77,6 +79,7 @@ public sealed class GameRunContext
 		DiceRollService = diceRollService;
 		ResolutionService = resolutionService;
 		DicePresenterHost = dicePresenterHost;
+		ResolvedRollReactionHost = resolvedRollReactionHost;
 		TreasurePickupService = treasurePickupService;
 		VitalsService = vitalsService;
 		GameOverDownedHandler = gameOverDownedHandler;

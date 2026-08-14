@@ -100,22 +100,64 @@ public sealed class PredeterminedDiceTrajectorySimulatorTests
 		Assert.True(Vector3.Dot(displayedNormal, Vector3.UnitY) > 0.98f);
 	}
 	[Fact]
-	public void Simulate_BatchPreservesCollisionsAndDisplaysEachRequestedFace()
+	public void Simulate_HeadOnBatchRecordsContactDeflectionAndDisplaysEachRequestedFace()
 	{
-		var first = CreateD6Request(1) with
+		var firstTemplate = CreateD6Request(1);
+		var secondTemplate = CreateD6Request(6);
+		var firstVelocity = new Vector3(7.5f, 0f, 0f);
+		var secondVelocity = new Vector3(-7.5f, 0f, 0f);
+		var first = firstTemplate with
 		{
-			StartPosition = new Vector3(-2.5f, 1.35f, -0.3f),
-			LinearVelocity = new Vector3(7.5f, 0f, 0.5f),
+			StartPosition = new Vector3(-0.75f, firstTemplate.StartPosition.Y, 0f),
+			LinearVelocity = firstVelocity,
+			AngularVelocity = DieTossKinematicsBuilder.Build(
+				firstTemplate.CollisionPoints,
+				firstTemplate.StartOrientation,
+				firstVelocity,
+				0.99f,
+				Vector3.UnitY,
+				0.6f).AngularVelocity,
 		};
-		var second = CreateD6Request(6) with
+		var second = secondTemplate with
 		{
-			StartPosition = new Vector3(2.5f, 1.35f, 0.3f),
-			LinearVelocity = new Vector3(-7.5f, 0f, -0.5f),
+			StartPosition = new Vector3(0.75f, secondTemplate.StartPosition.Y, 0f),
+			LinearVelocity = secondVelocity,
+			AngularVelocity = DieTossKinematicsBuilder.Build(
+				secondTemplate.CollisionPoints,
+				secondTemplate.StartOrientation,
+				secondVelocity,
+				0.99f,
+				Vector3.UnitY,
+				0.6f).AngularVelocity,
 		};
 
-		var results = PredeterminedDiceTrajectorySimulator.Simulate([first, second]);
+		var simulation = PredeterminedDiceTrajectorySimulator.SimulateWithDiagnostics([first, second]);
+		var results = simulation.Trajectories;
 
 		Assert.Equal(2, results.Count);
+		var contacts = simulation.PairContacts
+			.Where(contact => contact.FirstDieIndex == 0 && contact.SecondDieIndex == 1)
+			.ToArray();
+		var commonFrameCount = Math.Min(results[0].Frames.Count, results[1].Frames.Count);
+		var minimumDistance = Enumerable.Range(0, commonFrameCount)
+			.Min(index => Vector3.Distance(
+				results[0].Frames[index].Position,
+				results[1].Frames[index].Position));
+		Assert.True(
+			contacts.Length > 0,
+			$"No die contact was recorded; minimum origin distance was {minimumDistance:F3}; " +
+			$"manifolds={simulation.ManifoldCallbackCount}, dynamic={simulation.DynamicPairManifoldCount}, " +
+			$"identified={simulation.IdentifiedDiePairManifoldCount}.");
+		Assert.True(
+			contacts.Max(contact => contact.ApproachSpeedBefore) > 5f,
+			$"Maximum recorded approach speed was " +
+			$"{contacts.Max(contact => contact.ApproachSpeedBefore):F3}.");
+		Assert.True(
+			contacts.Max(contact => Vector3.Distance(
+				contact.FirstVelocityBefore - contact.SecondVelocityBefore,
+				contact.FirstVelocityAfter - contact.SecondVelocityAfter)) > 1f,
+			"The contact constraint did not measurably deflect the pair.");
+		Assert.Contains(contacts, contact => contact.MaximumDepth >= -0.1f);
 		Assert.All(results, result => Assert.True(result.SettledNaturally));
 		for (var i = 0; i < results.Count; i++)
 		{
@@ -262,7 +304,7 @@ public sealed class PredeterminedDiceTrajectorySimulatorTests
 		}
 		return transitions;
 	}
-	private static PredeterminedDieThrowRequest CreateD6Request(int desiredFace)
+	internal static PredeterminedDieThrowRequest CreateD6Request(int desiredFace)
 	{
 		const float extent = 0.57735026f * 1.01f;
 		var points = new List<Vector3>(8);

@@ -8,9 +8,15 @@ public sealed class NullDiceRollPresenter : IDiceRollPresenter
 
 	private NullDiceRollPresenter() { }
 
-	public Task PresentDieAsync(PhysicalDieRollSpec die, CancellationToken ct = default) =>
+	public Task PresentDieAsync(
+		PhysicalDieRollSpec die,
+		DicePresentationProfile profile = DicePresentationProfile.Standard,
+		CancellationToken ct = default) =>
 		Task.CompletedTask;
 
-	public Task PresentDiceBatchAsync(IReadOnlyList<PhysicalDieRollSpec> dice, CancellationToken ct = default) =>
+	public Task PresentDiceBatchAsync(
+		IReadOnlyList<PhysicalDieRollSpec> dice,
+		DicePresentationProfile profile = DicePresentationProfile.Standard,
+		CancellationToken ct = default) =>
 		Task.CompletedTask;
 }

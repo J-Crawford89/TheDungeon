@@ -7,13 +7,13 @@ public sealed class CombatInitiative
 {
 	private readonly DiceRollService _dice;
 	private readonly NarrativeService _narrative;
-	private readonly DiceRollPresenterHost? _dicePresenterHost;
+	private readonly ResolutionService? _resolution;
 
-	public CombatInitiative(DiceRollService dice, NarrativeService narrative, DiceRollPresenterHost? dicePresenterHost = null)
+	public CombatInitiative(DiceRollService dice, NarrativeService narrative, ResolutionService? resolution = null)
 	{
 		_dice = dice;
 		_narrative = narrative;
-		_dicePresenterHost = dicePresenterHost;
+		_resolution = resolution;
 	}
 
 	public List<string> BuildTurnOrderNames(MonsterFeature feature, List<CombatTurnSlot> order)
@@ -37,8 +37,9 @@ public sealed class CombatInitiative
 		var playerAgi = session.Player.AbilityScores.Agility;
 		var pRoll = _dice.RollD20Plus("Initiative (you)", playerAgi, "Agility");
 		await PresentInitiativeRollAsync(pRoll, DieRollVisualKind.Player, ct);
-		session.AppendLog(new LogEntry { Kind = LogEntryKind.Roll, Text = _narrative.ForCombatInitiativeRoll("You", pRoll) });
 		entries.Add(new InitiativeEntry { Total = pRoll.Total, Agility = playerAgi, IsPlayer = true, MonsterIndex = -1 });
+		session.AppendLog(new LogEntry { Kind = LogEntryKind.Roll, Text = _narrative.ForCombatInitiativeRoll("You", pRoll) });
+		await NotifyResolvedRollAsync(session, ct);
 
 		for (var i = 0; i < feature.Monsters.Count; i++)
 		{
@@ -47,8 +48,9 @@ public sealed class CombatInitiative
 			var monsterAgi = 0;
 			var mRoll = _dice.RollD20Plus($"Initiative ({feature.Monsters[i].Definition.Name})", monsterAgi, "Agility");
 			await PresentInitiativeRollAsync(mRoll, DieRollVisualKind.Monster, ct);
-			session.AppendLog(new LogEntry { Kind = LogEntryKind.Roll, Text = _narrative.ForCombatInitiativeRoll(feature.Monsters[i].Definition.Name, mRoll) });
 			entries.Add(new InitiativeEntry { Total = mRoll.Total, Agility = monsterAgi, IsPlayer = false, MonsterIndex = i });
+			session.AppendLog(new LogEntry { Kind = LogEntryKind.Roll, Text = _narrative.ForCombatInitiativeRoll(feature.Monsters[i].Definition.Name, mRoll) });
+			await NotifyResolvedRollAsync(session, ct);
 		}
 
 		entries.Sort(InitiativeHelper.Compare);
@@ -62,12 +64,17 @@ public sealed class CombatInitiative
 		DiceRollResult roll,
 		DieRollVisualKind kind,
 		CancellationToken ct) =>
-		_dicePresenterHost == null
+		_resolution == null
 			? Task.CompletedTask
-			: DiceRollPresentation.PresentRollAsync(
-				_dicePresenterHost.Presenter,
+			: _resolution.PresentRollVisualAsync(
 				roll,
 				new DiceRollRequest(),
 				kind,
+				DicePresentationProfile.Standard,
 				ct);
+
+	private Task NotifyResolvedRollAsync(GameSessionState session, CancellationToken ct) =>
+		_resolution == null
+			? Task.CompletedTask
+			: _resolution.NotifyResolvedRollAsync(session, ct);
 }

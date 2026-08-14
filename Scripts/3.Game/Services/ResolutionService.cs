@@ -6,11 +6,16 @@ public sealed class ResolutionService
 {
 	private readonly IDiceRollRequestExecutor _diceRollService;
 	private readonly DiceRollPresenterHost? _dicePresenterHost;
+	private readonly ResolvedRollReactionHost? _resolvedRollReactionHost;
 
-	public ResolutionService(IDiceRollRequestExecutor diceRollService, DiceRollPresenterHost? dicePresenterHost = null)
+	public ResolutionService(
+		IDiceRollRequestExecutor diceRollService,
+		DiceRollPresenterHost? dicePresenterHost = null,
+		ResolvedRollReactionHost? resolvedRollReactionHost = null)
 	{
 		_diceRollService = diceRollService;
 		_dicePresenterHost = dicePresenterHost;
+		_resolvedRollReactionHost = resolvedRollReactionHost;
 	}
 
 	public ResolutionResult RollAgainstTarget(DiceRollRequest request, DieRollVisualKind visualKind = DieRollVisualKind.Player)
@@ -23,10 +28,11 @@ public sealed class ResolutionService
 	public async Task<ResolutionResult> RollAgainstTargetAsync(
 		DiceRollRequest request,
 		DieRollVisualKind visualKind = DieRollVisualKind.Player,
+		DicePresentationProfile profile = DicePresentationProfile.Standard,
 		CancellationToken ct = default)
 	{
 		var roll = _diceRollService.Roll(request);
-		await PresentRollVisualAsync(roll, request, visualKind, ct);
+		await PresentRollVisualAsync(roll, request, visualKind, profile, ct);
 		return BuildResult(roll, request.TargetNumber);
 	}
 
@@ -34,17 +40,30 @@ public sealed class ResolutionService
 		DiceRollResult roll,
 		DiceRollRequest request,
 		DieRollVisualKind visualKind,
+		DicePresentationProfile profile = DicePresentationProfile.Standard,
 		CancellationToken ct = default) =>
 		_dicePresenterHost == null
 			? Task.CompletedTask
-			: DiceRollPresentation.PresentRollAsync(_dicePresenterHost.Presenter, roll, request, visualKind, ct);
+			: DiceRollPresentation.PresentRollAsync(
+				_dicePresenterHost.Presenter,
+				roll,
+				request,
+				visualKind,
+				profile,
+				ct);
 
 	public Task PresentSpecsAsync(
 		IReadOnlyList<PhysicalDieRollSpec> specs,
+		DicePresentationProfile profile = DicePresentationProfile.Standard,
 		CancellationToken ct = default) =>
 		_dicePresenterHost == null
 			? Task.CompletedTask
-			: DiceRollPresentation.PresentSpecsAsync(_dicePresenterHost.Presenter, specs, ct);
+			: DiceRollPresentation.PresentSpecsAsync(_dicePresenterHost.Presenter, specs, profile, ct);
+
+	public Task NotifyResolvedRollAsync(GameSessionState session, CancellationToken ct = default) =>
+		_resolvedRollReactionHost == null
+			? Task.CompletedTask
+			: _resolvedRollReactionHost.Sink.NotifyAsync(session, ct);
 
 	/// <summary>Uses the same rules as <see cref="RollAgainstTarget"/> for an existing roll vs a DC.</summary>
 	public ResolutionOutcome ResolveOutcomeAgainstTarget(DiceRollResult roll, int targetNumber) =>

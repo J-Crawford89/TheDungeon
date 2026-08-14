@@ -74,18 +74,25 @@ public sealed class CombatMonsterTurn
 			},
 			ModifiersWithSources = modifiers,
 		};
-		var result = await _resolution.RollAgainstTargetAsync(req, DieRollVisualKind.Monster, ct);
+		var result = await _resolution.RollAgainstTargetAsync(
+			req,
+			DieRollVisualKind.Monster,
+			DicePresentationProfile.Standard,
+			ct);
 		session.AppendLog(new LogEntry
 		{
 			Kind = LogEntryKind.Roll,
 			Text = _narrative.ForAttackRoll(name, "you", result.Roll.Total, playerEc, result.Roll.DetailText)
 		});
 
-		if (result.Outcome == ResolutionOutcome.Success || result.Outcome == ResolutionOutcome.CriticalSuccess)
+		var hit = result.Outcome == ResolutionOutcome.Success || result.Outcome == ResolutionOutcome.CriticalSuccess;
+		if (hit)
 		{
+			await _resolution.NotifyResolvedRollAsync(session, ct);
+
 			var hitArmorBand = result.Roll.Total >= playerEc && result.Roll.Total < armorThreshold;
 			var damageRoll = RollAttackDamageSum(attack);
-			await _resolution.PresentSpecsAsync(damageRoll.VisualDice, ct);
+			await _resolution.PresentSpecsAsync(damageRoll.VisualDice, DicePresentationProfile.Standard, ct);
 			var damage = damageRoll.Total;
 			if (attack.AddAbilityScoreToDamage)
 				damage += monster.Definition.AbilityScores.GetScore(attack.AbilityScore);
@@ -94,7 +101,10 @@ public sealed class CombatMonsterTurn
 				damage *= 2;
 			// Preserve existing defend ordering: it can fully negate damage before any armor/DR math.
 			if (CombatPlayerIncomingDamage.TryApplyDefendNegate(ref damage, session, _narrative))
+			{
+				await _resolution.NotifyResolvedRollAsync(session, ct);
 				return;
+			}
 			var rolledDamage = damage;
 			var reducedByArmor = 0;
 			if (hitArmorBand)
@@ -128,9 +138,13 @@ public sealed class CombatMonsterTurn
 					DamageSource = source,
 				});
 			}
+			await _resolution.NotifyResolvedRollAsync(session, ct);
 		}
 		else
+		{
 			session.AppendGameLog(_narrative.ForAttackMiss(name, "you"));
+			await _resolution.NotifyResolvedRollAsync(session, ct);
+		}
 	}
 
 	private AttackDefinition? SelectAttack(GameSessionState session, MonsterDefinition definition, string monsterName)

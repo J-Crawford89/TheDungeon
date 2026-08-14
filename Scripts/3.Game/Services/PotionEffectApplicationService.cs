@@ -92,7 +92,11 @@ public sealed class PotionEffectApplicationService
 			};
 			var roll = _dice.Roll(req);
 			if (_resolution != null)
-				await _resolution.PresentRollVisualAsync(roll, req, DieRollVisualKind.Player);
+				await _resolution.PresentRollVisualAsync(
+					roll,
+					req,
+					DieRollVisualKind.Player,
+					DicePresentationProfile.Standard);
 			sum += roll.RollTotal;
 
 			session.AppendLog(new LogEntry
@@ -100,6 +104,8 @@ public sealed class PotionEffectApplicationService
 				Kind = LogEntryKind.Roll,
 				Text = roll.DetailText
 			});
+			if (_resolution != null)
+				await _resolution.NotifyResolvedRollAsync(session);
 		}
 
 		return sum;

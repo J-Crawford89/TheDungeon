@@ -36,20 +36,24 @@ Each type has its own independent number sequence. Identifiers are stable once a
 
 - **Type:** Bug / orchestration
 - **Priority:** P1
-- **Status:** Proposed
+- **Status:** Implemented; awaiting visual acceptance
 - **Depends on:** None
 - **Problem:** A queue of rolls can defer narration, main-view refreshes, and state consequences until later rolls finish.
 - **Desired behavior:** Treat each resolved roll as a presentation boundary. After its brief result linger, publish its narration and applicable state/UI changes before starting the next queued roll.
 - **Acceptance notes:** When harvesting several different parts, the result for part A appears immediately after part A's die resolves, while part B has not started rolling yet. The same rule applies to combat and exploration checks. A true multi-die roll remains one resolution boundary.
+- **Implementation evidence (2026-08-13):** A UI-agnostic `IResolvedRollReactionSink` is awaited after each initiative, hit, damage, flee, potion, trap, inspect, and harvest result commits its narration and applicable state. Deferred regression tests prove a hit reaction completes before damage presentation and each initiative reaction completes before the next combatant's roll.
+- **Automated verification:** 384 xUnit tests pass; the Godot C# solution builds with 0 errors. Main-game visual ordering remains the completion gate.
 
 ### Bug-003 — Make simultaneous dice collisions believable
 
 - **Type:** Bug / investigation
 - **Priority:** P2
-- **Status:** Planned
+- **Status:** Completed
+- **Completed:** 2026-08-13
+- **Acceptance evidence:** The user visually confirmed that simultaneously rolling dice collide and continue to roll correctly. Finished/stale dice remain non-colliding by design during frozen replay; Issue-001 removes those dice before any later independent roll.
 - **Depends on:** None
 - **Problem:** Visible dice in a true multi-die roll can pass through one another, breaking immersion.
-- **Current technical context:** The offscreen Bepu simulation already places every die in one world, permits dynamic-body contact generation, and creates contact constraints. Whole-trajectory face substitution uses rotations verified as symmetries of each convex hull, so it should preserve the collider's occupied volume. Improvement-001 also replaced independent playback tasks with one shared batch clock. However, the existing test named `Simulate_BatchPreservesCollisionsAndDisplaysEachRequestedFace` proves only that the batch settles and displays the requested faces; it does not prove that a die-to-die contact occurred or produced visible deflection. The original pass-through report must therefore be re-established against the accepted playback baseline before choosing a fix.
+- **Implementation finding:** The offscreen Bepu simulation was already producing real dynamic-die contact constraints and measurable deflection. The previous collision test was invalid because its dice never contacted, while its first diagnostic instrumentation pass also initialized after the timestep and erased the contact it intended to report. Improvement-001's shared playback clock, exact collider symmetries, and uniform trajectory sampling preserve the corrected physical response; the evidence did not justify another physics change, contact-aware time warp, or collision-avoidance fallback.
 - **Desired behavior:** Dice in a true multi-die roll should visibly bounce or, if guaranteed-result collision playback cannot be made coherent, their generated trajectories should avoid visible intersections.
 - **Acceptance notes:** No obvious pass-through occurs; requested faces remain guaranteed; dice do not snap or diverge from the floor/walls; sequential rolls remain single-die per Issue-001.
 
@@ -64,6 +68,20 @@ Each type has its own independent number sequence. Identifiers are stable once a
 7. **Apply the smallest evidence-based fix.** If Bepu never creates the intended contact, correct its filtering, speculative margin, material, or solver setup and lock that response with tests. If Bepu is correct but compressed playback aliases the impact, add one shared batch-only contact-aware time mapping that allocates visible frames around recorded contacts while compressing uneventful motion; never alter each die independently. If a remapped visual cannot reproduce a valid collision, reject/regenerate that batch with tested trajectory clearance so the dice visibly avoid one another.
 8. **Do not enable live Godot collision during frozen replay.** The visible bodies intentionally replay an authoritative Bepu trajectory while frozen and non-colliding. Re-enabling a second physics engine would allow it to diverge from the recorded path and requested faces; consider that only as a separately approved architecture replacement.
 9. **Expose narrow diagnostics and run the visual gate.** Show batch contact count/pairs and whether contact-aware playback or avoidance was used in the test-scene status. Manually verify head-on and glancing pairs, d100, three-plus mixed dice, wall-adjacent contacts, and every configured render-rate test without wrong faces, snaps, stalls, or a pacing regression.
+
+#### Implementation evidence (2026-08-13)
+
+- `PredeterminedDiceTrajectorySimulator.SimulateWithDiagnostics` reports die indices, simulation step/time, contact count/depth, contact normal, and relative linear velocity immediately before and after each die-pair contact step. The existing `Simulate` trajectory API remains compatible.
+- The former collision test now launches a separated head-on d6 pair, proves a Bepu contact occurred, and proves the pair's relative velocity materially changed.
+- Deterministic glancing d6, head-on d10/d100-shape, and mixed d6+d10 scenarios prove contact, deflection, requested final faces, and equivalent raw/displayed hull occupancy at the contact frame.
+- Every natural-to-requested face pair for every serialized die hull maps the complete hull onto itself within the existing scale-relative tolerance.
+- Shared compressed playback at 30, 60, and 144 FPS with both `0.75s` and `1.0s` caps preserves ordering through the head-on contact and applies exact final poses. Uniform shared playback passed, so no additional contact-aware remapping or avoidance mode was added.
+- The code-built dice harness now includes **Forced collision: head-on d6 pair** and **Forced collision: glancing d6 pair**. Gameplay batches and d100 pairs report Bepu contact points/steps/pairs, maximum approach/response, `playback=shared-uniform`, and `avoidance=none`.
+- Automated verification: 379 xUnit tests pass and the Godot C# project builds with 0 errors. No `.tscn`, `.tres`, or other Godot-serialized file was edited.
+
+#### Manual acceptance gate
+
+Open the existing dice test scene without changing editor data. Run both forced-collision buttons repeatedly; each should visibly bounce and its status must report a nonzero Bepu contact. Then repeat normal gameplay batches at counts 2, 3, 6, and 12 plus several d100 pairs. A randomized batch may legitimately report zero contacts when its paths do not meet; that is not a failure. Keep Bug-003 open until no obvious pass-through, wrong face, snap, stall, or pacing regression is observed.
 
 #### Delivery targets
 
@@ -89,11 +107,13 @@ Each type has its own independent number sequence. Identifiers are stable once a
 
 - **Type:** UX / presentation sequencing
 - **Priority:** P1
-- **Status:** Proposed
+- **Status:** Implemented; awaiting visual acceptance
 - **Depends on:** Bug-002
 - **Problem:** Sequential checks can leave dice visible or overlap rolls, making independent checks look like one multi-die event.
 - **Desired behavior:** Roll → briefly display the result → remove the resolved die → let the game react → begin the next queued roll.
 - **Acceptance notes:** Only dice belonging to one true multi-die roll may share the screen. Sequential harvest, attack, damage, initiative, inspect, disarm, and similar checks must appear separately.
+- **Implementation evidence (2026-08-13):** `DiceRollOverlay` serializes independent presentation requests and owns each logical roll through the profile-scaled result pause, synchronous detach, and queued deletion. The unawaited `DieLingerSeconds` path was removed. True multi-die batches still share one presentation.
+- **Acceptance gate:** Visually confirm Standard combat/initiative and repeated harvest flows never begin an independent roll while a prior die remains visible.
 
 ### Issue-002 — Make initiative order explicit before combat actions
 
@@ -109,16 +129,27 @@ Each type has its own independent number sequence. Identifiers are stable once a
 
 - **Type:** Design decision / pacing
 - **Priority:** P1
-- **Status:** Proposed
+- **Status:** Implemented; awaiting visual acceptance
 - **Depends on:** Bug-002, Issue-001, Improvement-001
 - **Problem:** Rolling separately for many harvestable parts can make a small corpse take roughly ten seconds or more to resolve.
-- **Preferred path:** First evaluate rapid sequential rolls after per-roll reactions and faster presentation are implemented. The target experience is several clearly resolved checks within only a few seconds.
-- **Fallback design:** If rapid sequential presentation remains tedious, use one roll per item stack with tiered difficulty thresholds determining how many items in that stack are harvested.
-- **Decision criteria:** Preserve meaningful uncertainty and clear per-result feedback while avoiding repetitive spectacle. Document the chosen harvesting rule in the GDD before implementation.
+- **Chosen design:** Retain one authoritative roll per individual item. A loot action with multiple valid harvest attempts uses the timing-only `RapidSequence` profile (`0.75x` playback cap, `0.5x` result pause); exactly one attempt uses `Standard`. Complete trajectories and exact final faces remain guaranteed.
+- **Result cadence:** Each die is removed, its indexed result is logged, and any successful item is added to inventory before the UI reaction and next roll. The final attempt also commits a concise stack summary.
+- **Fallback design:** If rapid sequential presentation remains tedious after visual play-testing, reconsider one roll per item stack with tiered difficulty thresholds.
+- **Implementation evidence (2026-08-13):** Deterministic tests prove all repeated attempts select `RapidSequence`, a lone attempt selects `Standard`, and log/inventory snapshots advance after each attempt before the next presentation.
+- **Acceptance gate:** Use Harvest All with six or more checks and confirm several clearly readable results complete within only a few seconds without overlap, wrong faces, or delayed UI feedback.
 
 ## Improvements
 
-No active improvements.
+### Improvement-002 — Add dice-rolling sound effects
+
+- **Type:** Improvement / audio feedback
+- **Priority:** P2
+- **Status:** Proposed
+- **Depends on:** Improvement-001
+- **Problem:** The physical dice presentation is visually readable but silent, reducing its weight and tactile believability.
+- **Desired behavior:** Add synchronized audio for the throw, rolling/tumbling, wall or die impacts where appropriate, and the final settle. Sound should reflect the visible presentation without becoming noisy during rapid sequences or true multi-die rolls.
+- **Scope notes:** Define whether sounds are driven by physics events, presentation phases, or a hybrid; support per-die variation in pitch, volume, and sample selection; prevent repetitive sample playback and excessive overlapping impacts; respect sound-effect volume and mute settings.
+- **Acceptance notes:** Standard and rapid-sequence rolls sound responsive and materially grounded. Audio remains synchronized under time-compressed playback, multi-die rolls remain intelligible, and headless tests do not require audio resources.
 
 ## Features
 
@@ -195,6 +226,28 @@ No active improvements.
 - **Status:** Proposed
 - **Scope:** Define spell acquisition, preparation/selection, resources, targeting, resolution rolls, effects, scaling, interruption, combat/exploration use, enemy casting, UI, content authoring, and save-state requirements before implementation.
 
+### Feature-010 — Contextual music system
+
+- **Type:** Feature / audio presentation
+- **Priority:** P3
+- **Status:** Proposed
+- **Depends on:** None
+- **Desired behavior:** Provide music appropriate to major game modes, initially including the main menu, dungeon exploration, and combat, with room for victory, defeat, boss, safe-area, and special-event cues.
+- **Scope notes:** Define track ownership and licensing, transition and crossfade rules, looping, interruption/resume behavior, scene and game-state triggers, volume controls, saveable settings, and how rapidly changing states avoid restarting or stacking tracks.
+- **Acceptance notes:** Music follows authoritative game state, transitions cleanly without audible overlap or abrupt unintended restarts, and can be independently adjusted or muted.
+
+### Feature-011 — Event-driven audiovisual UI reactions
+
+- **Type:** Feature / game-feel and UI feedback
+- **Priority:** P2
+- **Status:** Proposed; requires detailed scoping
+- **Depends on:** Feature-001
+- **Design intent:** Make important actions and consequences immediately legible and satisfying through coordinated UI motion, graphical effects, sound cues, and brief emphasis beats. The system must work with placeholder assets so interaction design can be developed before final artwork exists.
+- **Initial examples:** Flash a monster portrait red and play a slash effect when it is hit; shake or flash the main UI when the player takes damage; distinguish trap triggering from trap disarming; acknowledge unlocking a chest; emphasize attacks, misses, critical outcomes, healing, death, and battle victory.
+- **Architecture direction:** Gameplay publishes semantic presentation events such as `MonsterHit`, `PlayerDamaged`, `TrapDisarmed`, or `BattleWon`. Presentation code decides which animation, sound, overlay, and timing to use. Rules and state mutation must not depend on a particular animation or asset.
+- **Scope required:** Establish an event catalog and priority tiers; feedback ownership by UI region; animation interruption and queuing rules; synchronization with dice and narration; placeholder and final asset requirements; audio routing; reduced-motion, flash-intensity, screen-shake, and volume settings; and behavior when effects are disabled.
+- **Acceptance notes:** Core outcomes are understandable without relying only on the narrative log, simultaneous feedback remains readable, skipped or disabled effects cannot block gameplay, and presentation consistently reflects already-authoritative state.
+
 ## Cross-cutting sequencing principle
 
 Unless a roll is explicitly one multi-die mechanic, presentation and state progression should follow this cycle:
@@ -220,4 +273,4 @@ This principle should guide the eventual orchestration design for room entry, in
 - **Outcome:** The complete 60 Hz Bepu trajectory remains authoritative, while visible predetermined playback uses a shared monotonic elapsed-time clock, linear position interpolation, normalized quaternion interpolation, and an explicit exact final pose. True multi-die rolls share one timeline. The default readability hold is `0.20s`, and non-positive playback caps still provide a recorded-speed rollback.
 - **Accepted tuning:** The C# fallback cap remains `0.75s`; the user-owned `RollingDie.tscn` currently overrides **Maximum Predetermined Playback Seconds** to `1.0s`, which is the value used for visual acceptance.
 - **Verification:** 370 xUnit tests passed, the Godot C# project built with 0 errors, and no Godot-serialized asset was edited by an agent.
-- **Commit:** Pending; the implementation and documentation remain in the current working tree.
+- **Commit:** `e9b038b` (`Faster roll resolving, creation of backlog.md and tracking of bugs/issues/features`).

@@ -40,6 +40,7 @@ public static class ContainerLootOperations
 		var distinctKinds = container.Contents.Count(static c =>
 			!string.IsNullOrWhiteSpace(c.ItemDefinitionId) && c.Quantity > 0);
 		session.AppendGameLog(narrative.ForContainerLootTransferStart(containerKindLabel, distinctKinds));
+		var harvestProfile = ResolveHarvestPresentationProfile(container.Contents, items);
 
 		var granted = 0;
 		var skipped = 0;
@@ -60,7 +61,7 @@ public static class ContainerLootOperations
 				continue;
 			}
 
-			if (await TryGrantStackAsync(session, stack, def, containerKindLabel, narrative, resolution))
+			if (await TryGrantStackAsync(session, stack, def, containerKindLabel, narrative, resolution, harvestProfile))
 				granted++;
 		}
 
@@ -123,6 +124,7 @@ public static class ContainerLootOperations
 		var distinctKinds = snapshots.Count(static c =>
 			!string.IsNullOrWhiteSpace(c.ItemDefinitionId) && c.Quantity > 0);
 		session.AppendGameLog(narrative.ForContainerLootTransferStart(containerKindLabel, distinctKinds));
+		var harvestProfile = ResolveHarvestPresentationProfile(snapshots, items);
 
 		var granted = 0;
 		var skipped = 0;
@@ -145,7 +147,7 @@ public static class ContainerLootOperations
 				continue;
 			}
 
-			if (await TryGrantStackAsync(session, stack, def, containerKindLabel, narrative, resolution))
+			if (await TryGrantStackAsync(session, stack, def, containerKindLabel, narrative, resolution, harvestProfile))
 				granted++;
 		}
 
@@ -166,6 +168,27 @@ public static class ContainerLootOperations
 		};
 	}
 
+	private static DicePresentationProfile ResolveHarvestPresentationProfile(
+		IEnumerable<LootableItemDefinition> stacks,
+		IItemDefinitionRepository items)
+	{
+		var attempts = 0;
+		foreach (var stack in stacks)
+		{
+			if (stack.Quantity <= 0 || !RequiresHarvestRoll(stack))
+				continue;
+			var id = stack.ItemDefinitionId.Trim();
+			if (id.Length == 0 || items.TryGetById(id) == null)
+				continue;
+
+			attempts += stack.Quantity;
+			if (attempts > 1)
+				return DicePresentationProfile.RapidSequence;
+		}
+
+		return DicePresentationProfile.Standard;
+	}
+
 	private static bool RequiresHarvestRoll(LootableItemDefinition stack) =>
 		stack.Harvest is { HarvestDc: > 0 };
 
@@ -178,7 +201,8 @@ public static class ContainerLootOperations
 		ItemDefinition def,
 		string containerKindLabel,
 		NarrativeService narrative,
-		ResolutionService resolution)
+		ResolutionService resolution,
+		DicePresentationProfile harvestProfile)
 	{
 		var qty = stack.Quantity;
 		if (!RequiresHarvestRoll(stack))
@@ -190,31 +214,31 @@ public static class ContainerLootOperations
 
 		var hr = stack.Harvest!;
 		var successes = 0;
-		var perUnitDetails = new List<string>();
 		for (var u = 0; u < qty; u++)
 		{
 			var req = BuildHarvestDiceRequest(def.Name, hr, session.Player.AbilityScores);
-			var resolved = await resolution.RollAgainstTargetAsync(req);
-			var line =
-				$"[{u + 1}/{qty}] total {resolved.Roll.Total} vs DC {hr.HarvestDc}" +
-				(string.IsNullOrWhiteSpace(resolved.Roll.DetailText) ? "" : $" ({resolved.Roll.DetailText.Trim()})");
-			perUnitDetails.Add(line);
-			if (IsHarvestSuccess(resolved.Outcome))
+			var resolved = await resolution.RollAgainstTargetAsync(
+				req,
+				DieRollVisualKind.Player,
+				harvestProfile);
+			var succeeded = IsHarvestSuccess(resolved.Outcome);
+			if (succeeded)
+			{
 				successes++;
-		}
+				session.Player.InventoryState.AddOrStack(def, 1);
+			}
 
-		session.AppendLog(new LogEntry
-		{
-			Kind = LogEntryKind.Roll,
-			Text = narrative.ForHarvestRollBundle(def.Name, qty, perUnitDetails),
-		});
-
-		var failures = qty - successes;
-		session.AppendGameLog(narrative.ForHarvestStackOutcome(containerKindLabel, def.Name, successes, failures));
-
-		if (successes > 0)
-		{
-			session.Player.InventoryState.AddOrStack(def, successes);
+			session.AppendLog(new LogEntry
+			{
+				Kind = LogEntryKind.Roll,
+				Text = narrative.ForHarvestRollAttempt(def.Name, u + 1, qty, resolved.Roll.Total, hr.HarvestDc, succeeded, resolved.Roll.DetailText),
+			});
+			if (u == qty - 1)
+			{
+				var failures = qty - successes;
+				session.AppendGameLog(narrative.ForHarvestStackOutcome(containerKindLabel, def.Name, successes, failures));
+			}
+			await resolution.NotifyResolvedRollAsync(session);
 		}
 
 		return successes > 0;

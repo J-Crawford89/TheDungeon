@@ -94,6 +94,7 @@ public partial class MainUi : Control
 			_commandPanel,
 			_mapPanel);
 		_coordinator = coordinator;
+		_runContext.ResolvedRollReactionHost.Sink = new UiResolvedRollReactionSink(RefreshHudAndGameOver);
 
 		_mainViewPanel.TargetSlotHoverChanged += OnMainViewTargetHover;
 		_mainViewPanel.TargetSlotClicked += OnMainViewTargetClick;
@@ -230,6 +231,12 @@ public partial class MainUi : Control
 
 	public override void _ExitTree()
 	{
+		if (_runContext != null)
+		{
+			_runContext.DicePresenterHost.Presenter = NullDiceRollPresenter.Instance;
+			_runContext.ResolvedRollReactionHost.Sink = NullResolvedRollReactionSink.Instance;
+		}
+
 		if (GetViewport() != null)
 			GetViewport().SizeChanged -= OnViewportSizeChanged;
 

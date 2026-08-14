@@ -38,7 +38,47 @@ public sealed record PredeterminedDieTrajectory(
 	bool SettledNaturally,
 	float AverageContactSlipSpeed,
 	float FinalContactSlipSpeed,
-	float TimeToGripSeconds);
+	float TimeToGripSeconds)
+{
+	public Quaternion DisplayOffset { get; init; } = Quaternion.Identity;
+}
+
+public sealed record PredeterminedDicePairContact(
+	int FirstDieIndex,
+	int SecondDieIndex,
+	int SimulationStep,
+	float TimeSeconds,
+	int ContactCount,
+	float MaximumDepth,
+	Vector3 NormalTowardFirstDie,
+	Vector3 FirstVelocityBefore,
+	Vector3 SecondVelocityBefore,
+	Vector3 FirstVelocityAfter,
+	Vector3 SecondVelocityAfter)
+{
+	public float ApproachSpeedBefore => MathF.Max(
+		0f,
+		-Vector3.Dot(FirstVelocityBefore - SecondVelocityBefore, NormalTowardFirstDie));
+
+	public float SeparationSpeedAfter => MathF.Max(
+		0f,
+		Vector3.Dot(FirstVelocityAfter - SecondVelocityAfter, NormalTowardFirstDie));
+}
+
+public sealed record PredeterminedDiceSimulationResult(
+	IReadOnlyList<PredeterminedDieTrajectory> Trajectories,
+	IReadOnlyList<PredeterminedDicePairContact> PairContacts,
+	int ManifoldCallbackCount,
+	int DynamicPairManifoldCount,
+	int IdentifiedDiePairManifoldCount)
+{
+	public static PredeterminedDiceSimulationResult Empty { get; } = new(
+		Array.Empty<PredeterminedDieTrajectory>(),
+		Array.Empty<PredeterminedDicePairContact>(),
+		0,
+		0,
+		0);
+}
 
 public sealed record PredeterminedDiceSimulationSettings
 {
@@ -72,12 +112,17 @@ public static class PredeterminedDiceTrajectorySimulator
 {
 	public static IReadOnlyList<PredeterminedDieTrajectory> Simulate(
 		IReadOnlyList<PredeterminedDieThrowRequest> requests,
+		PredeterminedDiceSimulationSettings? settings = null) =>
+		SimulateWithDiagnostics(requests, settings).Trajectories;
+
+	public static PredeterminedDiceSimulationResult SimulateWithDiagnostics(
+		IReadOnlyList<PredeterminedDieThrowRequest> requests,
 		PredeterminedDiceSimulationSettings? settings = null)
 	{
 		if (requests == null)
 			throw new ArgumentNullException(nameof(requests));
 		if (requests.Count == 0)
-			return Array.Empty<PredeterminedDieTrajectory>();
+			return PredeterminedDiceSimulationResult.Empty;
 
 		settings ??= new PredeterminedDiceSimulationSettings();
 		ValidateSettings(settings);
@@ -86,10 +131,12 @@ public static class PredeterminedDiceTrajectorySimulator
 
 		var pool = new BufferPool();
 		var materials = new CollidableProperty<DiceContactMaterial>();
+		var pairContactCollector = new DicePairContactCollector(requests.Count);
 		var simulation = Simulation.Create(
 			pool,
 			new DiceNarrowPhaseCallbacks(
 				materials,
+				pairContactCollector,
 				settings.MaximumRecoveryVelocity,
 				new SpringSettings(
 					settings.ContactSpringFrequency,
@@ -111,7 +158,7 @@ public static class PredeterminedDiceTrajectorySimulator
 
 			for (var i = 0; i < requests.Count; i++)
 			{
-				bodies[i] = AddDie(simulation, pool, requests[i], materials);
+				bodies[i] = AddDie(simulation, pool, requests[i], i, materials);
 				recordedFrames[i] = new List<PredeterminedDieTrajectoryFrame>(256);
 				RecordFrame(
 					simulation,
@@ -129,8 +176,13 @@ public static class PredeterminedDiceTrajectorySimulator
 			var settledNaturally = false;
 			for (var step = 1; step <= maximumSteps; step++)
 			{
+				pairContactCollector.BeginStep(step, simulation, bodies);
 				simulation.Timestep(settings.TimeStepSeconds);
 				var allSlow = true;
+				pairContactCollector.CompleteStep(
+					settings.TimeStepSeconds,
+					simulation,
+					bodies);
 				for (var i = 0; i < bodies.Length; i++)
 				{
 					RecordFrame(
@@ -196,9 +248,17 @@ public static class PredeterminedDiceTrajectorySimulator
 					surfaceGripTrackers[i].AverageSlipSpeed,
 					surfaceGripTrackers[i].FinalSlipSpeed,
 					surfaceGripTrackers[i].GetTimeToGrip(
-						MathF.Max(0f, displayFrames.Length - 1) * settings.TimeStepSeconds));
+						MathF.Max(0f, displayFrames.Length - 1) * settings.TimeStepSeconds))
+				{
+					DisplayOffset = displayOffset,
+				};
 			}
-			return results;
+			return new PredeterminedDiceSimulationResult(
+				results,
+				pairContactCollector.Contacts,
+				pairContactCollector.ManifoldCallbackCount,
+				pairContactCollector.DynamicPairManifoldCount,
+				pairContactCollector.IdentifiedDiePairManifoldCount);
 		}
 		finally
 		{
@@ -262,6 +322,7 @@ public static class PredeterminedDiceTrajectorySimulator
 		Simulation simulation,
 		BufferPool pool,
 		PredeterminedDieThrowRequest request,
+		int dieIndex,
 		CollidableProperty<DiceContactMaterial> materials)
 	{
 		var points = new QuickList<Vector3>(request.CollisionPoints.Count, pool);
@@ -284,7 +345,7 @@ public static class PredeterminedDiceTrajectorySimulator
 			new CollidableDescription(shapeIndex, 0.1f),
 			new BodyActivityDescription(-1f, byte.MaxValue));
 		var handle = simulation.Bodies.Add(description);
-		materials.Allocate(handle) = new DiceContactMaterial(1f);
+		materials.Allocate(handle) = new DiceContactMaterial(1f, dieIndex);
 		return new SimulatedBody(handle, center);
 	}
 
@@ -457,8 +518,138 @@ public static class PredeterminedDiceTrajectorySimulator
 	}
 
 	private readonly record struct SimulatedBody(BodyHandle Handle, Vector3 HullCenter);
+
+	private sealed class DicePairContactCollector
+	{
+		private readonly Dictionary<long, ContactAccumulator> _stepContacts = new();
+		private readonly List<PredeterminedDicePairContact> _contacts = new();
+		private readonly Vector3[] _velocitiesBefore;
+		private int _currentStep;
+
+		public DicePairContactCollector(int dieCount)
+		{
+			_velocitiesBefore = new Vector3[dieCount];
+		}
+
+		public IReadOnlyList<PredeterminedDicePairContact> Contacts => _contacts;
+		public int ManifoldCallbackCount { get; private set; }
+		public int DynamicPairManifoldCount { get; private set; }
+		public int IdentifiedDiePairManifoldCount { get; private set; }
+
+		public void BeginStep(
+			int simulationStep,
+			Simulation simulation,
+			IReadOnlyList<SimulatedBody> bodies)
+		{
+			_currentStep = simulationStep;
+			_stepContacts.Clear();
+			for (var i = 0; i < bodies.Count; i++)
+				_velocitiesBefore[i] = simulation.Bodies
+					.GetBodyReference(bodies[i].Handle)
+					.Velocity.Linear;
+		}
+
+		public void Record<TManifold>(
+			CollidablePair pair,
+			ref TManifold manifold,
+			int dieA,
+			int dieB)
+			where TManifold : unmanaged, IContactManifold<TManifold>
+		{
+			ManifoldCallbackCount++;
+			if (pair.A.Mobility != CollidableMobility.Dynamic ||
+				pair.B.Mobility != CollidableMobility.Dynamic)
+				return;
+
+			DynamicPairManifoldCount++;
+			if (dieA < 0 || dieB < 0)
+				return;
+
+			IdentifiedDiePairManifoldCount++;
+			if (manifold.Count == 0 || dieA == dieB)
+				return;
+
+			var firstDie = Math.Min(dieA, dieB);
+			var secondDie = Math.Max(dieA, dieB);
+			var key = ((long)firstDie << 32) | (uint)secondDie;
+			if (!_stepContacts.TryGetValue(key, out var accumulator))
+			{
+				accumulator = new ContactAccumulator(firstDie, secondDie);
+				_stepContacts.Add(key, accumulator);
+			}
+
+			for (var contactIndex = 0; contactIndex < manifold.Count; contactIndex++)
+			{
+				manifold.GetContact(
+					contactIndex,
+					out _,
+					out var normal,
+					out var depth,
+					out _);
+				if (dieA != firstDie)
+					normal = -normal;
+				accumulator.Add(normal, depth);
+			}
+		}
+
+		public void CompleteStep(
+			float timeStepSeconds,
+			Simulation simulation,
+			IReadOnlyList<SimulatedBody> bodies)
+		{
+			foreach (var accumulator in _stepContacts.Values)
+			{
+				var firstAfter = simulation.Bodies
+					.GetBodyReference(bodies[accumulator.FirstDieIndex].Handle)
+					.Velocity.Linear;
+				var secondAfter = simulation.Bodies
+					.GetBodyReference(bodies[accumulator.SecondDieIndex].Handle)
+					.Velocity.Linear;
+				_contacts.Add(new PredeterminedDicePairContact(
+					accumulator.FirstDieIndex,
+					accumulator.SecondDieIndex,
+					_currentStep,
+					_currentStep * timeStepSeconds,
+					accumulator.ContactCount,
+					accumulator.MaximumDepth,
+					accumulator.Normal,
+					_velocitiesBefore[accumulator.FirstDieIndex],
+					_velocitiesBefore[accumulator.SecondDieIndex],
+					firstAfter,
+					secondAfter));
+			}
+		}
+
+		private sealed class ContactAccumulator
+		{
+			private Vector3 _normalAtMaximumDepth;
+
+			public ContactAccumulator(int firstDieIndex, int secondDieIndex)
+			{
+				FirstDieIndex = firstDieIndex;
+				SecondDieIndex = secondDieIndex;
+				MaximumDepth = float.NegativeInfinity;
+			}
+
+			public int FirstDieIndex { get; }
+			public int SecondDieIndex { get; }
+			public int ContactCount { get; private set; }
+			public float MaximumDepth { get; private set; }
+			public Vector3 Normal => Vector3.Normalize(_normalAtMaximumDepth);
+
+			public void Add(Vector3 normal, float depth)
+			{
+				ContactCount++;
+				if (depth <= MaximumDepth)
+					return;
+				MaximumDepth = depth;
+				_normalAtMaximumDepth = normal;
+			}
+		}
+	}
+
 	private readonly record struct NaturalLanding(int Face, Quaternion FaceUpOrientation, float Dot);
-	private readonly record struct DiceContactMaterial(float Friction);
+	private readonly record struct DiceContactMaterial(float Friction, int DieIndex = -1);
 
 	private struct SurfaceGripTracker
 	{
@@ -550,15 +741,18 @@ public static class PredeterminedDiceTrajectorySimulator
 	private unsafe struct DiceNarrowPhaseCallbacks : INarrowPhaseCallbacks
 	{
 		private readonly CollidableProperty<DiceContactMaterial> _materials;
+		private readonly DicePairContactCollector _pairContactCollector;
 		private readonly float _maximumRecoveryVelocity;
 		private readonly SpringSettings _springSettings;
 
 		public DiceNarrowPhaseCallbacks(
 			CollidableProperty<DiceContactMaterial> materials,
+			DicePairContactCollector pairContactCollector,
 			float maximumRecoveryVelocity,
 			SpringSettings springSettings)
 		{
 			_materials = materials;
+			_pairContactCollector = pairContactCollector;
 			_maximumRecoveryVelocity = maximumRecoveryVelocity;
 			_springSettings = springSettings;
 		}
@@ -588,6 +782,14 @@ public static class PredeterminedDiceTrajectorySimulator
 			out PairMaterialProperties pairMaterial)
 			where TManifold : unmanaged, IContactManifold<TManifold>
 		{
+			if (manifold.Convex)
+			{
+				_pairContactCollector.Record(
+					pair,
+					ref manifold,
+					_materials[pair.A].DieIndex,
+					_materials[pair.B].DieIndex);
+			}
 			pairMaterial.FrictionCoefficient =
 				_materials[pair.A].Friction * _materials[pair.B].Friction;
 			pairMaterial.MaximumRecoveryVelocity = _maximumRecoveryVelocity;
@@ -601,7 +803,15 @@ public static class PredeterminedDiceTrajectorySimulator
 			CollidablePair pair,
 			int childIndexA,
 			int childIndexB,
-			ref ConvexContactManifold manifold) => true;
+			ref ConvexContactManifold manifold)
+		{
+			_pairContactCollector.Record(
+				pair,
+				ref manifold,
+				_materials[pair.A].DieIndex,
+				_materials[pair.B].DieIndex);
+			return true;
+		}
 
 		public void Dispose() { }
 	}

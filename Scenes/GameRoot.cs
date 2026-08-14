@@ -186,7 +186,8 @@ public partial class GameRoot : Control
 		var dungeonBootstrap = new DungeonBootstrap(roomFeaturePopulation, handBuiltPopulation, proceduralFloorFactory);
 		var diceRollService = new DiceRollService(random);
 		var dicePresenterHost = new DiceRollPresenterHost();
-		var resolutionService = new ResolutionService(diceRollService, dicePresenterHost);
+		var resolvedRollReactionHost = new ResolvedRollReactionHost();
+		var resolutionService = new ResolutionService(diceRollService, dicePresenterHost, resolvedRollReactionHost);
 		var experienceService = new PlayerExperienceService(narrativeService);
 		var treasurePickupService = new TreasurePickupService(narrativeService, itemRepo, proficiencyAggregation);
 		var potionEffectApplicationService = new PotionEffectApplicationService(diceRollService, narrativeService, itemRepo, resolutionService);
@@ -211,9 +212,8 @@ public partial class GameRoot : Control
 			potionEffectApplicationService,
 			trapService,
 			itemRepo,
-			dicePresenterHost,
 			experienceService);
-		var inspectService = new InspectService(diceRollService, resolutionService, narrativeService, dicePresenterHost);
+		var inspectService = new InspectService(diceRollService, resolutionService, narrativeService);
 		var explorationService = new ExplorationService(
 			roomFeaturePopulation,
 			combatService,
@@ -244,6 +244,7 @@ public partial class GameRoot : Control
 			diceRollService,
 			resolutionService,
 			dicePresenterHost,
+			resolvedRollReactionHost,
 			treasurePickupService,
 			vitalsService,
 			gameOverDownedHandler,

@@ -16,9 +16,9 @@ public partial class DiceRollOverlay : Control
 	[Export] public float MinimumSpawnSeparation { get; set; } = 1.25f;
 	[Export] public int RandomSpawnAttempts { get; set; } = 16;
 	[Export] public int MaxConcurrentDice { get; set; } = 12;
-	[Export] public float DieLingerSeconds { get; set; } = 1.5f;
 
 	private readonly object _spawnLock = new();
+	private readonly SemaphoreSlim _presentationGate = new(1, 1);
 	private Node3D? _spawnRoot;
 	private Camera3D? _camera;
 	private int _activeCount;
@@ -45,50 +45,59 @@ public partial class DiceRollOverlay : Control
 		}
 	}
 
-	public Task PresentDieAsync(PhysicalDieRollSpec spec, CancellationToken ct = default) =>
-		PresentDiceBatchAsync([spec], ct);
+	public Task PresentDieAsync(
+		PhysicalDieRollSpec spec,
+		DicePresentationProfile profile = DicePresentationProfile.Standard,
+		CancellationToken ct = default) =>
+		PresentDiceBatchAsync([spec], profile, ct);
 
-	public async Task PresentDiceBatchAsync(IReadOnlyList<PhysicalDieRollSpec> dice, CancellationToken ct = default)
+	public async Task PresentDiceBatchAsync(
+		IReadOnlyList<PhysicalDieRollSpec> dice,
+		DicePresentationProfile profile = DicePresentationProfile.Standard,
+		CancellationToken ct = default)
 	{
 		if (dice.Count == 0)
 			return;
-		if (_spawnRoot == null || RollingDieScene == null)
-			return;
 
-		var offsets = new Vector3[dice.Count];
-		var reserved = SnapshotReservedSpawnPositions(dice.Count);
-		for (var i = 0; i < dice.Count; i++)
-			offsets[i] = AllocateSpawnOffset(reserved);
-
-		var spawned = new List<RollingDie>(dice.Count);
-		var faceValues = new List<int>(dice.Count);
+		await _presentationGate.WaitAsync(ct);
 		try
 		{
+			if (_spawnRoot == null || RollingDieScene == null)
+				return;
+
+			var offsets = new Vector3[dice.Count];
+			var reserved = SnapshotReservedSpawnPositions(dice.Count);
 			for (var i = 0; i < dice.Count; i++)
+				offsets[i] = AllocateSpawnOffset(reserved);
+
+			var timing = DicePresentationTiming.For(profile);
+			var spawned = new List<RollingDie>(dice.Count);
+			var faceValues = new List<int>(dice.Count);
+			try
 			{
-				ct.ThrowIfCancellationRequested();
-				var die = SpawnDie(dice[i], offsets[i]);
-				if (die == null)
-					continue;
-				spawned.Add(die);
-				faceValues.Add(dice[i].FaceValue);
+				for (var i = 0; i < dice.Count; i++)
+				{
+					ct.ThrowIfCancellationRequested();
+					var die = SpawnDie(dice[i], offsets[i]);
+					if (die == null)
+						continue;
+					die.MaximumPredeterminedPlaybackSeconds *= timing.PlaybackDurationMultiplier;
+					die.PostRollDisplaySeconds *= timing.ResultPauseMultiplier;
+					spawned.Add(die);
+					faceValues.Add(dice[i].FaceValue);
+				}
+
+				await RollingDie.RollPredeterminedBatchAsync(spawned, faceValues, ct);
 			}
-
-			await RollingDie.RollPredeterminedBatchAsync(spawned, faceValues, ct);
+			finally
+			{
+				foreach (var die in spawned)
+					ReleaseDie(die);
+			}
 		}
-		catch
+		finally
 		{
-			foreach (var die in spawned)
-				ReleaseDie(die);
-			throw;
-		}
-
-		foreach (var die in spawned)
-		{
-			if (DieLingerSeconds > 0f && IsInstanceValid(die))
-				_ = LingerAndReleaseAsync(die);
-			else
-				ReleaseDie(die);
+			_presentationGate.Release();
 		}
 	}
 
@@ -112,25 +121,17 @@ public partial class DiceRollOverlay : Control
 		UpdateOverlayVisibility();
 		return die;
 	}
-	private async Task LingerAndReleaseAsync(RollingDie die)
-	{
-		try
-		{
-			if (IsInstanceValid(die))
-				await ToSignal(die.GetTree().CreateTimer(DieLingerSeconds), SceneTreeTimer.SignalName.Timeout);
-		}
-		finally
-		{
-			ReleaseDie(die);
-		}
-	}
 
 	private void ReleaseDie(RollingDie? die)
 	{
 		if (_activeCount > 0)
 			_activeCount--;
 		if (IsInstanceValid(die))
-			die!.QueueFree();
+		{
+			var parent = die!.GetParent();
+			parent?.RemoveChild(die);
+			die.QueueFree();
+		}
 		UpdateOverlayVisibility();
 	}
 

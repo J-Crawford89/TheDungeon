@@ -4,6 +4,23 @@ using System.Linq;
 
 public sealed partial class NarrativeService
 {
+	public string ForHarvestRollAttempt(
+		string itemName,
+		int attemptNumber,
+		int quantity,
+		int total,
+		int targetNumber,
+		bool succeeded,
+		string detail)
+	{
+		var outcome = succeeded ? "success" : "failure";
+		var detailSuffix = string.IsNullOrWhiteSpace(detail)
+			? string.Empty
+			: $" ({detail.Trim()})";
+		return $"Harvest ({itemName}) [{attemptNumber}/{quantity}]: " +
+			$"total {total} vs DC {targetNumber} - {outcome}{detailSuffix}";
+	}
+
 	/// <summary>Single roll-log line bundling every per-unit attempt for one stack.</summary>
 	public string ForHarvestRollBundle(string itemName, int quantity, IReadOnlyList<string> perUnitDetailLines)
 	{

@@ -10,18 +10,15 @@ public sealed class InspectService
 	private readonly IDiceRollRequestExecutor _dice;
 	private readonly ResolutionService _resolution;
 	private readonly NarrativeService _narrative;
-	private readonly DiceRollPresenterHost? _dicePresenterHost;
 
 	public InspectService(
 		IDiceRollRequestExecutor dice,
 		ResolutionService resolution,
-		NarrativeService narrative,
-		DiceRollPresenterHost? dicePresenterHost = null)
+		NarrativeService narrative)
 	{
 		_dice = dice;
 		_resolution = resolution;
 		_narrative = narrative;
-		_dicePresenterHost = dicePresenterHost;
 	}
 
 	/// <summary>
@@ -60,7 +57,11 @@ public sealed class InspectService
 		};
 
 		var diceRoll = _dice.Roll(req);
-		await _resolution.PresentRollVisualAsync(diceRoll, req, DieRollVisualKind.Player);
+		await _resolution.PresentRollVisualAsync(
+			diceRoll,
+			req,
+			DieRollVisualKind.Player,
+			DicePresentationProfile.Standard);
 		session.AppendLog(new LogEntry
 		{
 			Kind = LogEntryKind.Roll,
@@ -77,6 +78,8 @@ public sealed class InspectService
 			c.MarkRevealed();
 			session.AppendGameLog(_narrative.ForInspectDiscoverReveal(c.KindLabel, c.Name, c.DiscoverDc, diceRoll.Total, outcome));
 		}
+
+		await _resolution.NotifyResolvedRollAsync(session);
 	}
 
 	private sealed class HiddenCandidate

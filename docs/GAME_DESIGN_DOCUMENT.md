@@ -61,10 +61,23 @@ A roll should read as one coherent beat:
 5. The requested face is substituted for that natural face by applying a valid local symmetry rotation to every recorded orientation, beginning with the first frame. Position, timing, collisions, and angular motion remain those of the natural throw.
 6. The complete recorded trajectory is then replayed visibly. Long trajectories may be time-compressed for pacing, but no physical frame is used as an early cutoff: visible playback samples the whole path and always ends on the exact settled pose. Dice from the same true multi-die roll share one presentation clock. Because the result mapping exists for the whole animation, a die never displays one result and then corrects, snaps, or receives an invisible second flick.
 7. Free/test rolls may still use live Godot physics when no outcome has been predetermined.
-8. Only after the face is readable and the die is physically settled does the game reveal narration and apply consequences such as damage, death, discovery, healing, or loot.
-9. The resolved die may linger briefly while the player reads the outcome.
+8. After the face becomes readable, the result remains visible for a brief profile-controlled pause. All dice belonging to that logical roll are then removed before presentation completes.
+9. The game commits narration and consequences such as damage, death, discovery, healing, or loot, then refreshes the affected UI before another independent roll begins.
+10. Only dice belonging to one true multi-die roll may share the screen. Independent checks are always presented as separate beats.
 
 The camera is presentational, not part of the rule for deciding "up." A gameplay face is oriented to the play surface. A simulation timeout is a diagnostic guard: it may end recording a pathological trajectory, but it must never trigger a visible result snap. Normal rolls are not cut off by a randomized animation duration; presentation pacing may compress only a complete, already-resolved trajectory.
+
+#### Repeated harvest checks
+
+**Design decision:** Harvesting retains one authoritative check per individual item. A stack of six harvestable teeth therefore produces six distinct checks rather than one roll with tiered thresholds.
+
+- A lone harvest check uses normal dice pacing.
+- When one loot action contains multiple harvest checks, those checks use rapid sequential pacing: each complete trajectory is displayed at `0.75x` the normal playback cap and its readable result pause is `0.5x` the normal pause.
+- Timing compression never truncates physics. Each rapid roll still replays the complete recorded trajectory and exact final face.
+- Each attempt is presented alone, removed, logged with its indexed success or failure, applied to inventory when successful, and reflected in the UI before the next attempt starts.
+- A concise stack summary follows the final attempt. True multi-die rolls remain simultaneous and are not converted into rapid independent rolls.
+
+The one-roll-per-stack tiered-DC alternative is not the current rule. Revisit it only if visually accepted rapid sequential pacing still proves tedious in play.
 
 ---
 
@@ -132,8 +145,51 @@ Implementation references: [`CoinPurse`](../Scripts/0.Core/Economy/CoinPurse.cs)
 - **Readable narrative** — the game log carries clarity of outcomes (combat, loot, traps).
 - **Explicit inventory and loot** — taking loot is deliberate; container flows should avoid silent backpack fills where possible (see roadmap).
 - **Character clarity** — stats, purse, and combat-relevant state visible when relevant.
+- **Responsive consequences** — important actions and outcomes receive immediate, coordinated visual and audio feedback rather than relying exclusively on the narrative log.
+- **Accessible game feel** — animation, flashes, screen shake, and sound reinforce information but are never the only way essential information is communicated.
 
-**TODO:** Accessibility targets, input posture, and failure feedback.
+### Audiovisual feedback and game feel
+
+The game should communicate important events through several synchronized channels: persistent state in the main view, concise narrative text, transient UI animation or graphical effects, and audio. These channels reinforce one another; none may contradict the authoritative result or make gameplay wait indefinitely for presentation.
+
+The initial event families to design are:
+
+- **Combat actions:** attack wind-up or declaration, hit, miss, critical outcome, damage, healing, defend, creature death, player death, initiative confirmation, turn change, and battle victory.
+- **Exploration and hazards:** room entry, inspection discovery, trap discovery, trap trigger, trap disarm, lock failure, chest unlock, and meaningful loot acquisition.
+- **Dice:** throw, tumble/roll, collision, and settle cues synchronized with the visible recorded trajectory, including rapid sequences and true multi-die rolls.
+- **System transitions:** menu entry, exploration, combat, victory, defeat, and other major state changes that may drive music or larger presentation beats.
+
+#### Initial feedback language
+
+- A damaged monster may flash or tint red while a short slash, impact, or damage-type effect crosses or overlays its image.
+- Player damage may use a brief UI shake, red edge flash, portrait/stat emphasis, and impact sound. Trap damage should share enough language to read as harm while retaining a distinct hazard cue.
+- Successful trap disarming, chest unlocking, harvesting, healing, and battle victory should have recognizable positive confirmation cues rather than only log text.
+- Misses, blocked actions, and failures need lighter feedback that remains distinct from successful impact.
+- Feedback intensity should correspond to consequence. Routine events must not compete visually or sonically with critical hits, death, victory, or major discoveries.
+
+#### Presentation rules
+
+Gameplay state remains authoritative. It emits a semantic event after an outcome is known; presentation selects the available sound, animation, overlay, and timing. Missing or placeholder assets must degrade gracefully, and disabling an effect must never alter rules, sequencing, or state.
+
+Presentation events need explicit policies for priority, overlap, interruption, queuing, and cancellation. A rapid sequence should not accumulate an unreadable backlog of shakes, flashes, or sounds. Dice presentation, narration, main-view updates, and reactions should share deliberate ordering boundaries, while purely decorative tails may finish asynchronously when safe.
+
+The system should be designed and tuned using simple placeholder shapes, colors, shaders, and temporary sounds before final art is available. Final assets can replace those implementations without changing gameplay contracts or event semantics.
+
+#### Audio direction
+
+Sound effects and music are separate controllable layers. Dice audio should make throws, surface contact, tumbling, collisions, and settling feel physical without producing a wall of repeated samples. Variation, rate limiting, and playback-speed-aware synchronization will be necessary.
+
+Music should respond to authoritative modes such as menu, exploration, and battle. Transitions should normally crossfade or otherwise preserve continuity, and repeated notifications of the same mode must not restart the current track. Later scoping should cover victory/defeat stingers, bosses, safe areas, special rooms, track rotation, and resume behavior.
+
+#### Accessibility and settings requirements
+
+- Independent music and sound-effect volume controls, including mute.
+- Reduced-motion behavior for shakes and large movement.
+- Adjustable or disabled screen shake.
+- Reduced flash intensity and avoidance of unsafe rapid flashing.
+- Persistent textual/state feedback even when audio or animation is disabled.
+
+**TODO:** Define the complete semantic event catalog, feedback matrix, intensity tiers, accessibility defaults, asset specifications, input posture, and detailed failure feedback before implementing Feature-011.
 
 Delivery detail for containers and loot UX: [Loot, containers, and phased delivery](./LOOT_CONTAINERS_ROADMAP.md).
 

@@ -144,6 +144,8 @@ public partial class DiceTestScene : Node3D
 		AddButton(vbox, "Re-roll last (gameplay)", () => _ = RerollLastAsync(gameplayRoll: true));
 		AddButton(vbox, "Snap in place (gameplay face)", SnapLastInPlace);
 		AddButton(vbox, "Verify calibration (last die)", VerifyLastCalibration);
+		AddButton(vbox, "Forced collision: head-on d6 pair", () => _ = SpawnForcedCollisionAsync(glancing: false));
+		AddButton(vbox, "Forced collision: glancing d6 pair", () => _ = SpawnForcedCollisionAsync(glancing: true));
 		AddButton(vbox, "Clear all", ClearAll);
 
 		_statusLabel = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart, CustomMinimumSize = new Vector2(300, 48) };
@@ -181,6 +183,7 @@ public partial class DiceTestScene : Node3D
 
 		var count = (int)_spawnCountSpin!.Value;
 		var spawned = new List<RollingDie>(count);
+		var batchSimulation = PredeterminedDiceSimulationResult.Empty;
 		for (var i = 0; i < count; i++)
 		{
 			var die = CreateDie(_selectedPreset);
@@ -194,7 +197,7 @@ public partial class DiceTestScene : Node3D
 			await Task.WhenAll(spawned.Select(die => RollWithOptionalClear(die, -1)));
 		else if (rollGameplay)
 		{
-			await RollingDie.RollPredeterminedBatchAsync(
+			batchSimulation = await RollingDie.RollPredeterminedBatchWithDiagnosticsAsync(
 				spawned,
 				Enumerable.Repeat(forcedFace, spawned.Count).ToArray());
 			await Task.WhenAll(spawned.Select(ClearAfterRollIfNeededAsync));
@@ -205,7 +208,8 @@ public partial class DiceTestScene : Node3D
 		else
 		{
 			var detail = _lastSpawnedDie == null ? "" : $" {DescribeMotion(_lastSpawnedDie)}";
-			SetStatus($"Rolled {_selectedPreset.Label}.{detail}");
+			var contactDetail = rollGameplay ? $" {DescribeBatchContacts(batchSimulation)}" : "";
+			SetStatus($"Rolled {_selectedPreset.Label}.{detail}{contactDetail}");
 		}
 	}
 
@@ -242,14 +246,95 @@ public partial class DiceTestScene : Node3D
 			return;
 		}
 
-		await RollingDie.RollPredeterminedBatchAsync(
+		var simulation = await RollingDie.RollPredeterminedBatchWithDiagnosticsAsync(
 			[tens, ones],
 			[faces.PercentileTensFace, faces.OnesDieFace]);
 		await Task.WhenAll(
 			ClearAfterRollIfNeededAsync(tens),
 			ClearAfterRollIfNeededAsync(ones));
 		_lastSpawnedDie = ones;
-		SetStatus($"d100 total {total} → tens {faces.PercentileTensFace}, ones {faces.OnesDieFace}");
+		SetStatus($"d100 total {total} → tens {faces.PercentileTensFace}, ones {faces.OnesDieFace}. " +
+			DescribeBatchContacts(simulation));
+	}
+
+	private async Task SpawnForcedCollisionAsync(bool glancing)
+	{
+		if (_spawnRoot == null || RollingDieScene == null || VisualCatalogLibrary == null)
+			return;
+
+		ClearAll();
+		var preset = _presets.First(p => p is { DieType: DieType.d6, Role: DieVisualRole.Standard });
+		var firstDie = CreateDie(preset);
+		var secondDie = CreateDie(preset);
+		if (firstDie == null || secondDie == null ||
+			!firstDie.TryPreparePredeterminedRoll(1, out var firstTemplate) ||
+			!secondDie.TryPreparePredeterminedRoll(6, out var secondTemplate))
+		{
+			SetStatus("Failed to prepare the forced d6 collision pair.");
+			return;
+		}
+
+		var orientation = System.Numerics.Quaternion.CreateFromYawPitchRoll(0.63f, 1.17f, 0.41f);
+		var firstVelocity = new System.Numerics.Vector3(7.5f, 0f, 0f);
+		var secondVelocity = new System.Numerics.Vector3(-7.5f, 0f, 0f);
+		var halfOffsetZ = glancing ? 0.18f : 0f;
+		var firstRequest = ConfigureForcedCollisionRequest(
+			firstTemplate,
+			new System.Numerics.Vector3(-0.75f, 0f, -halfOffsetZ),
+			orientation,
+			firstVelocity);
+		var secondRequest = ConfigureForcedCollisionRequest(
+			secondTemplate,
+			new System.Numerics.Vector3(0.75f, 0f, halfOffsetZ),
+			orientation,
+			secondVelocity);
+		firstDie.SpawnPosition = new Vector3(
+			firstRequest.StartPosition.X,
+			firstRequest.StartPosition.Y,
+			firstRequest.StartPosition.Z);
+		secondDie.SpawnPosition = new Vector3(
+			secondRequest.StartPosition.X,
+			secondRequest.StartPosition.Y,
+			secondRequest.StartPosition.Z);
+		firstDie.PlaceAtSpawn();
+		secondDie.PlaceAtSpawn();
+
+		var simulation = await RollingDie.RollPreparedPredeterminedBatchAsync(
+			[firstDie, secondDie],
+			[firstRequest, secondRequest]);
+		await Task.WhenAll(
+			ClearAfterRollIfNeededAsync(firstDie),
+			ClearAfterRollIfNeededAsync(secondDie));
+		_lastSpawnedDie = secondDie;
+		var collisionKind = glancing ? "glancing" : "head-on";
+		SetStatus($"Forced {collisionKind} d6 pair. {DescribeBatchContacts(simulation)}");
+	}
+
+	private static PredeterminedDieThrowRequest ConfigureForcedCollisionRequest(
+		PredeterminedDieThrowRequest template,
+		System.Numerics.Vector3 position,
+		System.Numerics.Quaternion orientation,
+		System.Numerics.Vector3 velocity)
+	{
+		position.Y = DieTossKinematicsBuilder.ComputeOriginHeightForFloorClearance(
+			template.CollisionPoints,
+			orientation,
+			floorHeight: 0f,
+			clearance: 0.05f);
+		var kinematics = DieTossKinematicsBuilder.Build(
+			template.CollisionPoints,
+			orientation,
+			velocity,
+			rollCoupling: 0.99f,
+			System.Numerics.Vector3.UnitY,
+			tumbleSpeed: 0.6f);
+		return template with
+		{
+			StartPosition = position,
+			StartOrientation = orientation,
+			LinearVelocity = velocity,
+			AngularVelocity = kinematics.AngularVelocity,
+		};
 	}
 
 	private async Task RerollLastAsync(bool gameplayRoll)
@@ -310,6 +395,29 @@ public partial class DiceTestScene : Node3D
 			$"Target face {targetFace} dot(up)={requestedDot:F3} | " +
 			$"Best: face {best.Face} dot(up)={best.DotWithTarget:F3} | " +
 			$"Top3: {string.Join(", ", ranked.Take(3).Select(r => $"{r.Face}({r.DotWithTarget:F2})"))}");
+	}
+
+	private static string DescribeBatchContacts(PredeterminedDiceSimulationResult simulation)
+	{
+		if (simulation.Trajectories.Count <= 1)
+			return "Single-die playback; pair contacts are not applicable.";
+
+		var contacts = simulation.PairContacts;
+		if (contacts.Count == 0)
+			return "Bepu die contacts: 0; playback=shared-uniform; avoidance=none.";
+
+		var pairs = string.Join(
+			", ",
+			contacts
+				.Select(contact => $"{contact.FirstDieIndex}-{contact.SecondDieIndex}")
+				.Distinct());
+		var maximumResponse = contacts.Max(contact => System.Numerics.Vector3.Distance(
+			contact.FirstVelocityBefore - contact.SecondVelocityBefore,
+			contact.FirstVelocityAfter - contact.SecondVelocityAfter));
+		return $"Bepu die contacts: {contacts.Sum(contact => contact.ContactCount)} points over " +
+			$"{contacts.Count} steps (pairs {pairs}); max approach/response " +
+			$"{contacts.Max(contact => contact.ApproachSpeedBefore):F2}/{maximumResponse:F2}; " +
+			"playback=shared-uniform; avoidance=none.";
 	}
 
 	private static string DescribeMotion(RollingDie die)

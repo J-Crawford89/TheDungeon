@@ -138,7 +138,13 @@ public partial class RollingDie : Node3D
 		await RollNaturallyAsync(ct);
 	}
 
-	public static async Task RollPredeterminedBatchAsync(
+	public static Task RollPredeterminedBatchAsync(
+		IReadOnlyList<RollingDie> dice,
+		IReadOnlyList<int> faceValues,
+		CancellationToken ct = default) =>
+		RollPredeterminedBatchWithDiagnosticsAsync(dice, faceValues, ct);
+
+	public static async Task<PredeterminedDiceSimulationResult> RollPredeterminedBatchWithDiagnosticsAsync(
 		IReadOnlyList<RollingDie> dice,
 		IReadOnlyList<int> faceValues,
 		CancellationToken ct = default)
@@ -150,9 +156,9 @@ public partial class RollingDie : Node3D
 		if (dice.Count != faceValues.Count)
 			throw new ArgumentException("Dice and face-value counts must match.");
 		if (dice.Count == 0)
-			return;
+			return PredeterminedDiceSimulationResult.Empty;
 
-		IReadOnlyList<PredeterminedDieTrajectory>? trajectories = null;
+		var simulation = PredeterminedDiceSimulationResult.Empty;
 		for (var attempt = 1; attempt <= MaximumTrajectoryAttempts; attempt++)
 		{
 			var requests = new PredeterminedDieThrowRequest[dice.Count];
@@ -164,10 +170,10 @@ public partial class RollingDie : Node3D
 						$"{dice[i].Name}: cannot prepare predetermined face {faceValues[i]}.");
 			}
 
-			trajectories = PredeterminedDiceTrajectorySimulator.Simulate(
+			simulation = PredeterminedDiceTrajectorySimulator.SimulateWithDiagnostics(
 				requests,
 				dice[0].BuildSimulationSettings());
-			if (trajectories.All(MeetsPredeterminedMotionQuality))
+			if (simulation.Trajectories.All(MeetsPredeterminedMotionQuality))
 				break;
 			if (attempt == MaximumTrajectoryAttempts)
 				GD.PushWarning(
@@ -175,7 +181,8 @@ public partial class RollingDie : Node3D
 					"using the final physically valid trajectory.");
 		}
 
-		await PlayPredeterminedTrajectoriesAsync(dice, trajectories!, ct);
+		await PlayPredeterminedTrajectoriesAsync(dice, simulation.Trajectories, ct);
+		return simulation;
 	}
 
 	public bool TryPreparePredeterminedRoll(
@@ -218,6 +225,38 @@ public partial class RollingDie : Node3D
 			_body.Mass,
 			faceNormals.Count == 3 && hullPoints.Count == 8);
 		return true;
+	}
+
+	/// <summary>
+	/// Test-harness hook for replaying explicitly arranged dice through the production simulator
+	/// and the same shared playback clock used by gameplay batches.
+	/// </summary>
+	public static async Task<PredeterminedDiceSimulationResult> RollPreparedPredeterminedBatchAsync(
+		IReadOnlyList<RollingDie> dice,
+		IReadOnlyList<PredeterminedDieThrowRequest> requests,
+		CancellationToken ct = default)
+	{
+		if (dice == null)
+			throw new ArgumentNullException(nameof(dice));
+		if (requests == null)
+			throw new ArgumentNullException(nameof(requests));
+		if (dice.Count != requests.Count)
+			throw new ArgumentException("Dice and prepared-request counts must match.");
+		if (dice.Count == 0)
+			return PredeterminedDiceSimulationResult.Empty;
+
+		for (var i = 0; i < dice.Count; i++)
+		{
+			ct.ThrowIfCancellationRequested();
+			if (dice[i]._body == null)
+				throw new InvalidOperationException($"{dice[i].Name}: no visual body; cannot roll.");
+		}
+
+		var simulation = PredeterminedDiceTrajectorySimulator.SimulateWithDiagnostics(
+			requests,
+			dice[0].BuildSimulationSettings());
+		await PlayPredeterminedTrajectoriesAsync(dice, simulation.Trajectories, ct);
+		return simulation;
 	}
 
 	public Task PlayPredeterminedTrajectoryAsync(

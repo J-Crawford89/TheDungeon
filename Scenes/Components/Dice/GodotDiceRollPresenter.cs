@@ -11,9 +11,15 @@ public sealed class GodotDiceRollPresenter : IDiceRollPresenter
 		_overlay = overlay;
 	}
 
-	public Task PresentDieAsync(PhysicalDieRollSpec die, CancellationToken ct = default) =>
-		_overlay.PresentDieAsync(die, ct);
+	public Task PresentDieAsync(
+		PhysicalDieRollSpec die,
+		DicePresentationProfile profile = DicePresentationProfile.Standard,
+		CancellationToken ct = default) =>
+		_overlay.PresentDieAsync(die, profile, ct);
 
-	public Task PresentDiceBatchAsync(IReadOnlyList<PhysicalDieRollSpec> dice, CancellationToken ct = default) =>
-		_overlay.PresentDiceBatchAsync(dice, ct);
+	public Task PresentDiceBatchAsync(
+		IReadOnlyList<PhysicalDieRollSpec> dice,
+		DicePresentationProfile profile = DicePresentationProfile.Standard,
+		CancellationToken ct = default) =>
+		_overlay.PresentDiceBatchAsync(dice, profile, ct);
 }

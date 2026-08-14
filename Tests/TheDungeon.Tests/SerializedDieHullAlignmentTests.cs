@@ -44,17 +44,19 @@ public sealed class SerializedDieHullAlignmentTests
 
 		var center = points.Aggregate(Vector3.Zero, (sum, point) => sum + point) / points.Count;
 		var scale = points.Max(point => Vector3.Distance(center, point));
-		var reference = result.FaceUpOrientations.Values.First();
-		foreach (var desired in result.FaceUpOrientations.Values)
+		foreach (var natural in result.FaceUpOrientations)
 		{
-			var offset = Quaternion.Normalize(Quaternion.Inverse(reference) * desired);
-			foreach (var point in points)
+			foreach (var desired in result.FaceUpOrientations)
 			{
-				var transformed = center + Vector3.Transform(point - center, offset);
-				var nearestDistance = points.Min(candidate => Vector3.Distance(candidate, transformed));
-				Assert.True(
-					nearestDistance <= MathF.Max(0.002f, scale * 0.005f),
-					$"{sceneFile} selected a face offset that is not a collider symmetry.");
+				var offset = Quaternion.Normalize(Quaternion.Inverse(natural.Value) * desired.Value);
+				foreach (var point in points)
+				{
+					var transformed = center + Vector3.Transform(point - center, offset);
+					var nearestDistance = points.Min(candidate => Vector3.Distance(candidate, transformed));
+					Assert.True(
+						nearestDistance <= MathF.Max(0.002f, scale * 0.005f),
+						$"{sceneFile} face offset {natural.Key}->{desired.Key} is not a collider symmetry.");
+				}
 			}
 		}
 	}
