@@ -22,17 +22,6 @@ Each type has its own independent number sequence. Identifiers are stable once a
 
 ## Bugs
 
-### Bug-001 — Resolve room entry before initiative presentation
-
-- **Type:** Bug / sequencing
-- **Priority:** P1
-- **Status:** Implemented; awaiting visual acceptance
-- **Depends on:** Bug-002
-- **Problem:** Entering a room containing a monster can begin the initiative roll before the move is visibly resolved. The main view and narrative log therefore lag behind the player's action.
-- **Desired behavior:** Commit the move into the room, refresh the main view, and log room entry before initiative dice appear.
-- **Acceptance notes:** The player must see that they entered the destination room and encountered its contents before combat initiative begins. Backend state, main view, and narrative order must agree.
-- **Implementation evidence (2026-08-14):** `ExplorationUiPresenter` refreshes MainView/Log/Command/Map/Character after the move log and before `TryBeginCombatIfHostileAsync` on forward and floor-down. Sequencing tests prove a MainView refresh is recorded before combat begin.
-
 ### Bug-004 — Define physical result semantics for tetrahedral d4 dice
 
 - **Type:** Bug / physics-model investigation
@@ -44,16 +33,7 @@ Each type has its own independent number sequence. Identifiers are stable once a
 
 ## Issues
 
-### Issue-002 — Make initiative order explicit before combat actions
-
-- **Type:** UX / combat clarity
-- **Priority:** P1
-- **Status:** Proposed; awaitable event channel exists, overlay/bar chrome TBD
-- **Depends on:** Bug-002, Feature-001
-- **Problem:** If monsters win initiative, an enemy attack can begin immediately after the initiative dice. The player may take damage or die before understanding that initiative was resolved or who acts first.
-- **Desired behavior:** After initiative resolves, clearly announce that the order is set and show the resulting order before any combatant acts.
-- **Acceptance notes:** Both the narrative log and main view identify the order. There is a readable presentation beat before the first turn begins, including when a monster acts first.
-- **Infrastructure (2026-08-14):** Game awaits `ICombatTurnPresentationSink` `OrderRevealed` after turn order is committed and before automatic monster turns. The signal is kind-only; UI reads `session.Combat` for order. Overlay → shrink-to-bar is still TBD.
+None open.
 
 ## Improvements
 
@@ -78,18 +58,18 @@ Each type has its own independent number sequence. Identifiers are stable once a
 - **Desired behavior:** `GameUiCoordinator` (or a dedicated HUD subscriber) owns refresh. Presenters and services stop passing `UiRefreshFlags` through call chains; they raise or rely on **state events**, and the coordinator subscribes.
 - **Acceptance notes:** Combat, exploration, loot, and inventory still update the same panels; no presenter needs a `refreshHud` callback solely to push flags.
 
+### Improvement-004 — Polish initiative overlay and strip presentation assets
+
+- **Type:** Improvement / combat UI polish
+- **Priority:** P2
+- **Status:** Proposed
+- **Depends on:** Feature-001, Issue-002
+- **Distinct from:** Feature-011 (semantic AV juice for hits, damage, traps, victory). This item is about the **initiative overlay and strip** already in the main view: final art, motion, audio, and layout, not new combat-outcome events.
+- **Problem:** Functional initiative chrome is in place (order overlay, persistent strip, current-combatant styling, fade in/out). Placeholder panels, typography, timing, and silence still read as prototype.
+- **Desired behavior:** Replace or tighten graphics, animation, audio, and related UI assets so the order reveal and strip feel authored rather than temporary, without changing the Game presentation beats (`OrderRevealed`, `ActiveTurnChanged`, `CombatEnded`).
+- **Acceptance notes:** Order and active combatant remain readable at a glance. Polish does not stall combat if an asset or animation is missing. Headless tests stay independent of Godot assets.
+
 ## Features
-
-### Feature-001 — Main-view turn and action indicators
-
-- **Type:** Feature / combat UX
-- **Priority:** P1
-- **Status:** Proposed; awaitable event channel exists, overlay/bar chrome TBD
-- **Depends on:** Bug-002
-- **Problem:** The narrative log records turns and actions, but the main view does not make the active combatant or current action sufficiently clear.
-- **Desired behavior:** Add persistent or animated main-view indicators for whose turn it is and what action is being taken.
-- **Acceptance notes:** At a glance, the player can identify the active combatant and action without reading historical log entries. Indicators remain synchronized with initiative, dice presentation, resolution, death, and turn advancement.
-- **Infrastructure (2026-08-14):** Game awaits `ICombatTurnPresentationSink` `ActiveTurnChanged` after each `AdvanceTurn` while combat continues. `GameUiCoordinator.PresentCombatTurnAsync` is the subscriber hook; it should read `session.Combat` for the active combatant. Visual chrome is still TBD.
 
 ### Feature-002 — Default player and monster die colors
 
@@ -244,6 +224,42 @@ Unless a roll is explicitly one multi-die mechanic, presentation and state progr
 This principle should guide the eventual orchestration design for room entry, initiative, combat, harvesting, inspection, traps, containers, and other checks.
 
 ## Completed
+
+### Bug-001 — Resolve room entry before initiative presentation
+
+- **Type:** Bug / sequencing
+- **Priority:** P1
+- **Status:** Completed
+- **Completed:** 2026-08-14
+- **Depends on:** Bug-002
+- **Problem:** Entering a room containing a monster could begin the initiative roll before the move was visibly resolved. The main view and narrative log lagged behind the player's action.
+- **Outcome:** The move is committed, logged, and reflected in the main view before `TryBeginCombatIfHostileAsync`. The player sees the destination room and its contents before initiative dice.
+- **Implementation evidence (2026-08-14):** `ExplorationUiPresenter` refreshes MainView/Log/Command/Map/Character after the move log and before combat begin on forward and floor-down. A sequencing test records a MainView refresh before combat begin.
+- **Acceptance evidence:** The user requested the item be closed after the initiative overlay/strip work landed on this sequencing.
+
+### Issue-002 — Make initiative order explicit before combat actions
+
+- **Type:** UX / combat clarity
+- **Priority:** P1
+- **Status:** Completed
+- **Completed:** 2026-08-14
+- **Depends on:** Bug-002, Feature-001
+- **Problem:** If monsters won initiative, an enemy attack could begin immediately after the initiative dice, before the player understood that order was set or who acted first.
+- **Outcome:** After turn order is committed, Game awaits `OrderRevealed`. The UI shows the rolled order on an overlay (readable beat, then fade out) and then the persistent initiative strip before any combatant acts, including when a monster acts first. Combat end awaits `CombatEnded` so the strip can fade out.
+- **Implementation evidence (2026-08-14):** `ICombatTurnPresentationSink` is kind-only; UI maps `session.Combat` to names and current index. Deferred-sink tests prove Game waits on `OrderRevealed`, `ActiveTurnChanged`, and `CombatEnded`.
+- **Acceptance evidence:** The user requested the item be closed; remaining art/audio polish is Improvement-004.
+
+### Feature-001 — Main-view turn and action indicators
+
+- **Type:** Feature / combat UX
+- **Priority:** P1
+- **Status:** Completed
+- **Completed:** 2026-08-14
+- **Depends on:** Bug-002
+- **Problem:** The narrative log recorded turns and actions, but the main view did not make the active combatant or combat order sufficiently clear.
+- **Outcome:** Functional main-view chrome is in: initiative overlay for the rolled order, a strip of combatants with current-turn styling, restyle on `ActiveTurnChanged`, and fade-out on `CombatEnded`. Action-specific juice (hit flashes, attack FX) remains Feature-011; asset polish is Improvement-004.
+- **Implementation evidence (2026-08-14):** `GameUiCoordinator.PresentCombatTurnAsync` drives overlay and `InitiativeStripView`. The strip is exported on `MainViewPanel` (instanced scene). Mapper tests cover player/monster names and empty combat.
+- **Acceptance evidence:** The user confirmed the functional work is done and asked that the item be marked implemented.
 
 ### Bug-002 — React after each resolved roll, not after the entire queue
 
