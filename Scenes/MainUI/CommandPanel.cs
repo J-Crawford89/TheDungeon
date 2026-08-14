@@ -21,7 +21,9 @@ public partial class CommandPanel : PanelContainer
 	[Export] private Button? _defendButton;
 	[Export] private Button? _disarmButton;
 
-	private GridContainer? _gameplayButtonGrid;
+	[Export] private GridContainer? _gameplayButtonGrid;
+	[Export] private Control? _commandContent;
+
 	private Control? _targetingButtonHost;
 	private Button[]? _targetingPickButtons;
 
@@ -48,8 +50,6 @@ public partial class CommandPanel : PanelContainer
 
 	public override void _Ready()
 	{
-		_gameplayButtonGrid = _forwardButton.GetParent() as GridContainer;
-
 		_forwardButton.Pressed += () => ForwardPressed?.Invoke();
 		_backwardButton.Pressed += () => BackwardPressed?.Invoke();
 		_leftButton.Pressed += () => LeftPressed?.Invoke();
@@ -75,9 +75,6 @@ public partial class CommandPanel : PanelContainer
 	{
 		ExitTargetSelection();
 		if (_gameplayButtonGrid == null)
-			return;
-		var parent = _gameplayButtonGrid.GetParent() as Control;
-		if (parent == null)
 			return;
 
 		_gameplayButtonGrid.Visible = false;
@@ -111,7 +108,7 @@ public partial class CommandPanel : PanelContainer
 		cancel.Pressed += () => TargetSelectCancelPressed?.Invoke();
 		host.AddChild(cancel);
 
-		parent.AddChild(host);
+		_commandContent?.AddChild(host);
 		_targetingButtonHost = host;
 	}
 

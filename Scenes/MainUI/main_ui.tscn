@@ -191,7 +191,7 @@ text = "Inventory"
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="CommandPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row2" unique_id=786944443 node_paths=PackedStringArray("_forwardButton", "_backwardButton", "_leftButton", "_rightButton", "_inspectButton", "_floorUpButton", "_floorDownButton", "_attackButton", "_fleeButton", "_takeButton", "_openButton", "_potionButton", "_defendButton", "_disarmButton")]
+[node name="CommandPanel" type="PanelContainer" parent="RootMargin/MainVBox/Row2" unique_id=786944443 node_paths=PackedStringArray("_forwardButton", "_backwardButton", "_leftButton", "_rightButton", "_inspectButton", "_floorUpButton", "_floorDownButton", "_attackButton", "_fleeButton", "_takeButton", "_openButton", "_potionButton", "_defendButton", "_disarmButton", "_gameplayButtonGrid", "_commandContent")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.2
@@ -210,6 +210,8 @@ _openButton = NodePath("CommandMargin/CommandContent/ButtonGrid/OpenButton")
 _potionButton = NodePath("CommandMargin/CommandContent/ButtonGrid/PotionButton")
 _defendButton = NodePath("CommandMargin/CommandContent/ButtonGrid/DefendButton")
 _disarmButton = NodePath("CommandMargin/CommandContent/ButtonGrid/DisarmButton")
+_gameplayButtonGrid = NodePath("CommandMargin/CommandContent/ButtonGrid")
+_commandContent = NodePath("CommandMargin/CommandContent")
 
 [node name="CommandMargin" type="MarginContainer" parent="RootMargin/MainVBox/Row2/CommandPanel" unique_id=1719189521]
 layout_mode = 2
@@ -348,7 +350,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 4
 
-[node name="ContainerLootOverlay" type="Control" parent="." unique_id=1916478978 node_paths=PackedStringArray("_lootTitle", "_lootSubtitle", "_lootWarning", "_lootGrid", "_lootSelectedButton", "_lootAllButton", "_closeButton")]
+[node name="ContainerLootOverlay" type="Control" parent="." unique_id=1916478978 node_paths=PackedStringArray("_lootTitle", "_lootSubtitle", "_lootWarning", "_lootGrid", "_lootSelectedButton", "_lootAllButton", "_closeButton", "_lootDimmer")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -365,6 +367,7 @@ _lootSelectedButton = NodePath("LootCenter/LootPanel/LootMargin/LootRoot/LootBut
 _lootAllButton = NodePath("LootCenter/LootPanel/LootMargin/LootRoot/LootButtons/LootAllButton")
 _closeButton = NodePath("LootCenter/LootPanel/LootMargin/LootRoot/LootButtons/CloseButton")
 _lootableItemScene = ExtResource("9_8jwe3")
+_lootDimmer = NodePath("LootDimmer")
 
 [node name="LootDimmer" type="ColorRect" parent="ContainerLootOverlay" unique_id=412263264]
 layout_mode = 1

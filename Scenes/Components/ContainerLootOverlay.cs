@@ -70,8 +70,8 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 		}
 
 		if (session.Dungeon.CurrentRoom is { } room &&
-		    RoomContainerLocator.TryGetNthContainer(room, containerOrdinal, out var openedContainer) &&
-		    openedContainer != null)
+			RoomContainerLocator.TryGetNthContainer(room, containerOrdinal, out var openedContainer) &&
+			openedContainer != null)
 			openedContainer.WasOpened = true;
 
 		_containerOrdinal = containerOrdinal;
