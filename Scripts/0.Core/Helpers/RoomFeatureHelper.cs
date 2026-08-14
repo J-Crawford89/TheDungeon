@@ -15,19 +15,29 @@ public static class RoomFeatureHelper
 		return null;
 	}
 
-    public static TFeature? GetFeature<TFeature>(DungeonRoom room) where TFeature : RoomFeature
-    {
-        return room.Features.OfType<TFeature>().FirstOrDefault();
-    }
+	public static TFeature? GetFeature<TFeature>(DungeonRoom room) where TFeature : RoomFeature
+	{
+		return room.Features.OfType<TFeature>().FirstOrDefault();
+	}
 
-    public static IEnumerable<TFeature> GetFeatures<TFeature>(DungeonRoom room) where TFeature : RoomFeature
-    {
-        return room.Features.OfType<TFeature>();
-    }
+	public static IEnumerable<TFeature> GetFeatures<TFeature>(DungeonRoom room) where TFeature : RoomFeature
+	{
+		return room.Features.OfType<TFeature>();
+	}
 
-    public static bool HasFeature<TFeature>(DungeonRoom room) where TFeature : RoomFeature
-    {
-        return room.Features.OfType<TFeature>().Any();
-    }
+	public static bool HasFeature<TFeature>(DungeonRoom room) where TFeature : RoomFeature
+	{
+		return room.Features.OfType<TFeature>().Any();
+	}
+
+	public static int FirstLivingMonsterIndex(MonsterFeature feature)
+	{
+		for (var i = 0; i < feature.Monsters.Count; i++)
+		{
+			if (feature.Monsters[i].CurrentHp > 0)
+				return i;
+		}
+
+		return -1;
+	}
 }
-

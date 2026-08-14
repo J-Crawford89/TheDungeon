@@ -235,11 +235,8 @@ public partial class CommandPanel : PanelContainer
 		_defendButton.Visible = hasDefend;
 		if (!hasDefend)
 			return;
-		var c = session.Combat;
-		var awaiting = combat.IsAwaitingPlayerAction(session);
-		var onCd = c != null && c.AbilityCooldowns.IsOnCooldown(AbilityIds.Defend);
-		var stance = c?.HasDefendStanceActive() == true;
-		_defendButton.Disabled = !awaiting || stance || onCd;
+		_defendButton.Disabled = !combat.CanAcceptPlayerAction(session) ||
+			!combat.CanExecuteCombatAbility(session, AbilityIds.Defend);
 	}
 
 	public void RenderFloorExitButtons(DungeonRoom? currentRoom, PlayerState? player)

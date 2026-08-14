@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 /// </summary>
 public interface IResolvedRollReactionSink
 {
-	Task NotifyAsync(GameSessionState session, CancellationToken ct = default);
+	Task NotifyAsync(CancellationToken ct = default);
 }

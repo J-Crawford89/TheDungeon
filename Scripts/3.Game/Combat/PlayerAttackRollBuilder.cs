@@ -3,14 +3,17 @@ using System.Collections.Generic;
 
 public static class PlayerAttackRollBuilder
 {
-	public static DiceRollRequest BuildToHitRequest(PlayerAttackRollInput input, string diceRollLabel, int targetDefense)
+	public static DiceRollRequest BuildToHitRequest(
+		PlayerAttackRollInput input,
+		PlayerState player,
+		string diceRollLabel,
+		int targetDefense)
 	{
-		var ctx = new AttackRollResolutionContext(input.Session, input.Attack, input.Weapon);
+		var ctx = new AttackRollResolutionContext { Attack = input.Attack, Weapon = input.Weapon };
 		var hitAbility = input.Attack.AbilityScore;
 		var addAbilityToDamage = input.Attack.AddAbilityScoreToDamage;
 		input.AbilityOverlay?.Apply(ctx, ref hitAbility, ref addAbilityToDamage);
 
-		var player = input.Session.Player;
 		var abilityMod = player.AbilityScores.GetScore(hitAbility);
 		var modifiers = new List<ModifierWithSource>();
 		if (abilityMod != 0)
@@ -48,26 +51,25 @@ public static class PlayerAttackRollBuilder
 	/// <summary>Resolves ability used on damage after overlay (must match to-hit overlay call).</summary>
 	public static (AbilityScore damageAbility, bool addAbilityToDamage) ResolveDamageAbility(PlayerAttackRollInput input)
 	{
-		var ctx = new AttackRollResolutionContext(input.Session, input.Attack, input.Weapon);
+		var ctx = new AttackRollResolutionContext { Attack = input.Attack, Weapon = input.Weapon };
 		var hitAbility = input.Attack.AbilityScore;
 		var addAbilityToDamage = input.Attack.AddAbilityScoreToDamage;
 		input.AbilityOverlay?.Apply(ctx, ref hitAbility, ref addAbilityToDamage);
 		return (hitAbility, addAbilityToDamage);
 	}
 
-	public static int RollDamageTotal(PlayerAttackDamageRollInput input, out string damageDetail)
+	public static int RollDamageTotal(PlayerAttackDamageRollInput input, PlayerState player, out string damageDetail)
 	{
-		var result = RollDamage(input);
+		var result = RollDamage(input, player);
 		damageDetail = result.Detail;
 		return result.Total;
 	}
 
-	public static PlayerAttackDamageRollResult RollDamage(PlayerAttackDamageRollInput input)
+	public static PlayerAttackDamageRollResult RollDamage(PlayerAttackDamageRollInput input, PlayerState player)
 	{
 		var dice = input.Dice;
 		var roll = input.Roll;
 		var attack = roll.Attack;
-		var player = roll.Session.Player;
 		var abilityScore = input.AddAbilityToDamage ? player.AbilityScores.GetScore(input.DamageAbility) : 0;
 		var visualDice = new List<PhysicalDieRollSpec>();
 

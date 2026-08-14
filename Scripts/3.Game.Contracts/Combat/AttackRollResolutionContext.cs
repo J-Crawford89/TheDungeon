@@ -7,14 +7,6 @@
 /// </remarks>
 public sealed class AttackRollResolutionContext
 {
-	public AttackRollResolutionContext(GameSessionState session, AttackDefinition attack, WeaponDefinition? weapon)
-	{
-		Session = session;
-		Attack = attack;
-		Weapon = weapon;
-	}
-
-	public GameSessionState Session { get; }
-	public AttackDefinition Attack { get; }
-	public WeaponDefinition? Weapon { get; }
+	public AttackDefinition Attack { get; set; } = null!;
+	public WeaponDefinition? Weapon { get; set; }
 }

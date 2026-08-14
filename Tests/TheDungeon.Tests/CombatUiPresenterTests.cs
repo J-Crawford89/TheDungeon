@@ -19,7 +19,9 @@ public sealed class CombatUiPresenterTests
 		public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
 			false;
 
-		public bool IsAwaitingPlayerAction(GameSessionState session) => AwaitingPlayerAction;
+		public bool CanAcceptPlayerAction(GameSessionState session) => AwaitingPlayerAction;
+
+		public bool CanExecuteCombatAbility(GameSessionState session, string abilityId) => false;
 
 		public void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice)
 		{

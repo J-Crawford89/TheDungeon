@@ -39,7 +39,7 @@ public sealed class CombatInitiative
 		await PresentInitiativeRollAsync(pRoll, DieRollVisualKind.Player, ct);
 		entries.Add(new InitiativeEntry { Total = pRoll.Total, Agility = playerAgi, IsPlayer = true, MonsterIndex = -1 });
 		session.AppendLog(new LogEntry { Kind = LogEntryKind.Roll, Text = _narrative.ForCombatInitiativeRoll("You", pRoll) });
-		await NotifyResolvedRollAsync(session, ct);
+		await NotifyResolvedRollAsync(ct);
 
 		for (var i = 0; i < feature.Monsters.Count; i++)
 		{
@@ -50,7 +50,7 @@ public sealed class CombatInitiative
 			await PresentInitiativeRollAsync(mRoll, DieRollVisualKind.Monster, ct);
 			entries.Add(new InitiativeEntry { Total = mRoll.Total, Agility = monsterAgi, IsPlayer = false, MonsterIndex = i });
 			session.AppendLog(new LogEntry { Kind = LogEntryKind.Roll, Text = _narrative.ForCombatInitiativeRoll(feature.Monsters[i].Definition.Name, mRoll) });
-			await NotifyResolvedRollAsync(session, ct);
+			await NotifyResolvedRollAsync(ct);
 		}
 
 		entries.Sort(InitiativeHelper.Compare);
@@ -73,8 +73,8 @@ public sealed class CombatInitiative
 				DicePresentationProfile.Standard,
 				ct);
 
-	private Task NotifyResolvedRollAsync(GameSessionState session, CancellationToken ct) =>
+	private Task NotifyResolvedRollAsync(CancellationToken ct) =>
 		_resolution == null
 			? Task.CompletedTask
-			: _resolution.NotifyResolvedRollAsync(session, ct);
+			: _resolution.NotifyResolvedRollAsync(ct);
 }

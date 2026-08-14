@@ -248,6 +248,70 @@ Open the existing dice test scene without changing editor data. Run both forced-
 - **Scope required:** Establish an event catalog and priority tiers; feedback ownership by UI region; animation interruption and queuing rules; synchronization with dice and narration; placeholder and final asset requirements; audio routing; reduced-motion, flash-intensity, screen-shake, and volume settings; and behavior when effects are disabled.
 - **Acceptance notes:** Core outcomes are understandable without relying only on the narrative log, simultaneous feedback remains readable, skipped or disabled effects cannot block gameplay, and presentation consistently reflects already-authoritative state.
 
+### Improvement-003 — Coordinator owns HUD refresh (drop `UiRefreshFlags` plumbing)
+
+- **Type:** Improvement / UI architecture
+- **Priority:** P2
+- **Status:** Proposed
+- **Depends on:** None
+- **Distinct from:** Feature-011 (AV juice / semantic presentation events). This item is about **who refreshes HUD panels**, not about hit flashes or screen shake.
+- **Desired behavior:** `GameUiCoordinator` (or a dedicated HUD subscriber) owns refresh. Presenters and services stop passing `UiRefreshFlags` through call chains; they raise or rely on **state events**, and the coordinator subscribes.
+- **Acceptance notes:** Combat, exploration, loot, and inventory still update the same panels; no presenter needs a `refreshHud` callback solely to push flags.
+
+### Feature-012 — Drive coded combat abilities through `CombatAbilityEffectsRegistry`
+
+- **Type:** Feature / combat
+- **Priority:** P2
+- **Status:** Proposed
+- **Depends on:** None
+- **Notes:** The registry already exists; this cleanup pass only queries Defend `CanExecute` for the command panel. Remaining coded abilities should use the same lookup for visibility, enablement, and execution instead of duplicating cooldown/stance checks in UI.
+- **Acceptance notes:** Adding a registered ability does not require a new `CommandPanel` cooldown branch.
+
+### Feature-013 — Gate healing on `RestoreHealthEffectDefinition`
+
+- **Type:** Feature / items
+- **Priority:** P3
+- **Status:** Proposed
+- **Depends on:** None
+- **Desired behavior:** Using a potion (and related heal rules) keys off [`RestoreHealthEffectDefinition`](../Scripts/0.Core/Item/ItemEffectDefinition.cs) on the item, not the `health_potion` definition id. Notebook **Use** already enables for any `PotionDefinition`; heal application should follow the effect type.
+- **Acceptance notes:** A non-health potion id with a restore-health effect heals; a health-potion id without that effect does not.
+
+### Feature-014 — Async orchestration sweep
+
+- **Type:** Feature / architecture
+- **Priority:** P2
+- **Status:** Proposed
+- **Depends on:** None
+- **Desired behavior:** Delete production `Foo() => FooAsync().GetResult()` wrappers. Dice and UI waits are async-only. Share a safe `async void` logging pattern for Godot button handlers. Keep inventory/math APIs synchronous.
+- **Acceptance notes:** No gameplay path blocks a thread on `.GetResult()`; unit tests still cover the async methods.
+
+### Feature-015 — `NarrativeConstants` wording store
+
+- **Type:** Feature / narrative
+- **Priority:** P3
+- **Status:** Proposed
+- **Depends on:** None
+- **Desired behavior:** Player-facing strings live in `NarrativeConstants` behind [`NarrativeService`](../Scripts/3.Game/Narrative/NarrativeService.cs). Callers still only use `_narrative.For…` and never reference constants.
+- **Acceptance notes:** Combat/UI log lines are unchanged for players; constants are the single wording store.
+
+### Feature-016 — Real backpack capacity
+
+- **Type:** Feature / inventory
+- **Priority:** P2
+- **Status:** Proposed
+- **Depends on:** None
+- **Desired behavior:** Enforce a real backpack capacity (not only 16 visible notebook rows). `AddOrStack` reports leftover quantity; loot and harvest handle a full pack without silently dropping items.
+- **Acceptance notes:** Overflow is visible in UI and logs; taking loot when full does not destroy remaining stacks.
+
+### Feature-017 — Character-creation preview lists real grants
+
+- **Type:** Feature / character creation
+- **Priority:** P3
+- **Status:** Proposed
+- **Depends on:** None
+- **Desired behavior:** The creation preview lists actual ability grants, starting equipment, and abilities the player will receive on apply—not placeholder or incomplete summaries.
+- **Acceptance notes:** Preview matches `CharacterCreationService.ApplyToPlayer` for the selected race/class/background.
+
 ## Cross-cutting sequencing principle
 
 Unless a roll is explicitly one multi-die mechanic, presentation and state progression should follow this cycle:

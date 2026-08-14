@@ -72,11 +72,11 @@ We **keep a dual model** for now. Moving **gold piles** or **inspect-driven reve
 
 | Concern | **Treasure** | **Chest / containers** |
 |--------|--------------|-------------------------|
-| **Payload** | [`TreasureInstance`](../Scripts/0.Core/Treasure/TreasureInstance.cs) + [`TreasureDefinition`](../Scripts/0.Core/Treasure/TreasureDefinition.cs) ([`TreasureKind`](../Scripts/0.Core/Enums/TreasureKind.cs)) | [`LootableItemDefinition`](../Scripts/0.Core/Inventory/LootableItemDefinition.cs) rows in `Contents` |
-| **Gold** | [`TreasureKind.Gold`](../Scripts/0.Core/Enums/TreasureKind.cs) adds GP in [`TreasurePickupService`](../Scripts/3.Game/Services/TreasurePickupService.cs) | Not representable today (items are id + quantity only) |
+| **Payload** | [`TreasureInstance`](../Scripts/0.Core/Treasure/TreasureInstance.cs) + [`TreasureDefinition`](../Scripts/0.Core/Treasure/TreasureDefinition.cs) ([`TreasureKind`](../Scripts/0.Core/Enums/TreasureKind.cs): **`Currency`** or **`InventoryItem`**) | [`LootableItemDefinition`](../Scripts/0.Core/Inventory/LootableItemDefinition.cs) rows in `Contents` |
+| **Currency** | `TreasureKind.Currency` grants a [`CoinPurse`](../Scripts/0.Core/Economy/CoinPurse.cs) in [`TreasurePickupService`](../Scripts/3.Game/Services/TreasurePickupService.cs) | Not representable today (items are id + quantity only) |
 | **Discovery** | Per-instance `IsRevealed` + `DiscoverDc`; [`InspectService`](../Scripts/3.Game/Services/InspectService.cs) reveals hidden treasure | No hidden/reveal model on [`ContainerFeature`](../Scripts/0.Core/Dungeon/ContainerFeature.cs) |
-| **Pickup UX** | **Take**: [`MainViewRoomSlots`](../Scripts/3.Game/Presentation/MainViewRoomSlots.cs), [`PlayerActionTargetResolvers`](../Scripts/3.Game/Targeting/PlayerActionTargetResolvers.cs), [`GameUiCoordinator`](../Scenes/MainUI/GameUiCoordinator.cs) | **Open container** by ordinal: [`RoomContainerLocator`](../Scripts/3.Game/Services/RoomContainerLocator.cs), [`ContainerLootInteractionService`](../Scripts/3.Game/Services/ContainerLootInteractionService.cs) |
-| **Procedural rooms** | [`RoomFeaturePopulationService`](../Scripts/3.Game/Services/RoomFeaturePopulationService.cs) → [`RoomFeatureFactories.CreateTreasureFeature`](../Scripts/3.Game/Features/RoomFeatureFactories.cs) | Population does **not** create [`ChestFeature`](../Scripts/0.Core/Dungeon/ChestFeature.cs) today (type exists for authored/container flows) |
+| **Pickup UX** | **Take**: [`MainViewRoomSlots`](../Scripts/3.Game/Targeting/MainViewRoomSlots.cs), [`PlayerActionTargetResolvers`](../Scripts/3.Game/Targeting/PlayerActionTargetResolvers.cs), [`GameUiCoordinator`](../Scenes/MainUI/GameUiCoordinator.cs) | **Open container** by ordinal: [`RoomContainerLocator`](../Scripts/3.Game/Services/RoomContainerLocator.cs), [`ContainerLootInteractionService`](../Scripts/3.Game/Services/ContainerLootInteractionService.cs) |
+| **Procedural rooms** | [`RoomFeaturePopulationService`](../Scripts/3.Game/Services/RoomFeaturePopulationService.cs) → [`RoomFeatureFactories.CreateTreasureFeature`](../Scripts/3.Game/Features/RoomFeatureFactories.cs) | Population **does** create [`ChestFeature`](../Scripts/0.Core/Dungeon/ChestFeature.cs) when [`PopulateableFeatureKind.Chest`](../Scripts/3.Game.Contracts/Dungeon/PopulateableFeatureKind.cs) is selected; contents come from [`ChestLootGenerator`](../Scripts/3.Game/Services/ChestLootGenerator.cs) |
 
 **Treasure** remains responsible for: GP grants, hidden-then-revealed piles, and the current **Take** UI.
 
@@ -116,7 +116,7 @@ Any design that **drops per-pile reveal** without replacing it changes inspect d
 
 **Take / main view — containers**
 
-- Exploration **Take** lists treasure plus [**LootContainerAll**](../Scripts/3.Game/Targeting/TargetPayload.cs) targets for each **lootable** [`ContainerFeature`](../Scripts/0.Core/Dungeon/ContainerFeature.cs) (ordinal matches [`RoomContainerLocator`](../Scripts/3.Game/Services/RoomContainerLocator.cs)); [`MainViewRoomSlots`](../Scripts/3.Game/Presentation/MainViewRoomSlots.cs) draws one row per container with highlight `container:N`.
+- Exploration **Take** lists treasure plus [**LootContainerAll**](../Scripts/3.Game/Targeting/TargetPayload.cs) targets for each **lootable** [`ContainerFeature`](../Scripts/0.Core/Dungeon/ContainerFeature.cs) (ordinal matches [`RoomContainerLocator`](../Scripts/3.Game/Services/RoomContainerLocator.cs)); [`MainViewRoomSlots`](../Scripts/3.Game/Targeting/MainViewRoomSlots.cs) locators and [`MainViewPresentationBuilder`](../Scripts/4.UI/Presentation/MainViewPresentationBuilder.cs) draw one row per container with highlight `container:N`.
 - **Godot:** [`IconResolver`](../Scenes/IconResolver.cs) logs once for `mainview/container/*` keys until you wire textures (extend resolver or add resource-backed icons—no `*.tscn` edits required for wiring resolver code).
 
 ### Deferred epics (product-gated)

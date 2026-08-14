@@ -10,7 +10,7 @@ public sealed class CombatTurnLoopTests
 
 	private sealed class CombatReadinessMirror : ICombatTurnReadiness
 	{
-		public bool IsAwaitingPlayerAction(GameSessionState session)
+		public bool IsPlayerTurn(GameSessionState session)
 		{
 			if (session.Phase != GamePlayPhase.InProgress)
 				return false;

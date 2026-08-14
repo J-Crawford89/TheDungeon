@@ -19,7 +19,8 @@ public sealed class ExplorationUiPresenterTests
 	private sealed class NoopCombatService : ICombatService
 	{
 		public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel) => false;
-		public bool IsAwaitingPlayerAction(GameSessionState session) => false;
+		public bool CanAcceptPlayerAction(GameSessionState session) => false;
+		public bool CanExecuteCombatAbility(GameSessionState session, string abilityId) => false;
 		public void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice) { }
 		public void ExecutePlayerFlee(GameSessionState session) { }
 		public void ExecutePlayerTakeTreasure(GameSessionState session, TargetPayload payload) { }
@@ -48,10 +49,12 @@ public sealed class ExplorationUiPresenterTests
 		var narrative = new NarrativeService();
 		var inspect = new InspectService(dice, new ResolutionService(dice), narrative);
 		var trapService = new TrapService(new ResolutionService(dice), narrative, new PlayerVitalsService(), new EmptyItems());
-		var exploration = new ExplorationService(population, new NoopCombatService(), inspect, trapService);
+		var floorGenerator = new FloorGenerator(population);
+		var exploration = new ExplorationService(floorGenerator, new NoopCombatService(), inspect, trapService);
 		var treasure = new TreasurePickupService(narrative, new EmptyItems(), TestPlayerProficiencyAggregation.CreateEmpty());
 		var potionFx = new PotionEffectApplicationService(dice, narrative, new EmptyItems());
 		var bootstrap = new DungeonBootstrap(
+			floorGenerator,
 			population,
 			RoomFeaturePopulationParameters.CreateDefault(),
 			() => new FloorGenerationParameters

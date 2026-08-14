@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 internal interface ICombatTurnReadiness
 {
-	bool IsAwaitingPlayerAction(GameSessionState session);
+	bool IsPlayerTurn(GameSessionState session);
 }
 
 internal sealed class CombatTurnLoop
@@ -29,7 +29,7 @@ internal sealed class CombatTurnLoop
 	{
 		if (session.Combat is not { } c)
 			return;
-		if (!_readiness.IsAwaitingPlayerAction(session))
+		if (!_readiness.IsPlayerTurn(session))
 			return;
 		c.AbilityCooldowns.OnPlayerTurnStarted();
 	}

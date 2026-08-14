@@ -6,7 +6,7 @@ public sealed class CombatUiPresenter
 	private readonly GameSessionState _session;
 	private readonly ICombatService _combatService;
 	private readonly Action<UiRefreshFlags> _refreshHud;
-	private bool _isResolvingAction;
+	private bool _isBusyResolvingAction;
 
 	public CombatUiPresenter(GameSessionState session, ICombatService combatService, Action<UiRefreshFlags> refreshHud)
 	{
@@ -19,7 +19,7 @@ public sealed class CombatUiPresenter
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
-		if (!_combatService.IsAwaitingPlayerAction(_session))
+		if (!_combatService.CanAcceptPlayerAction(_session))
 			return;
 		ExecuteAsync(() => _combatService.ExecutePlayerAttackAsync(_session, livingMonsterOrdinal, attackChoice));
 	}
@@ -28,7 +28,7 @@ public sealed class CombatUiPresenter
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
-		if (!_combatService.IsAwaitingPlayerAction(_session))
+		if (!_combatService.CanAcceptPlayerAction(_session))
 			return;
 		ExecuteAsync(() => _combatService.ExecutePlayerFleeAsync(_session));
 	}
@@ -37,7 +37,7 @@ public sealed class CombatUiPresenter
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
-		if (!_combatService.IsAwaitingPlayerAction(_session))
+		if (!_combatService.CanAcceptPlayerAction(_session))
 			return;
 		ExecuteAsync(() => _combatService.ExecutePlayerTakeTreasureAsync(_session, payload));
 	}
@@ -46,7 +46,7 @@ public sealed class CombatUiPresenter
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
-		if (!_combatService.IsAwaitingPlayerAction(_session))
+		if (!_combatService.CanAcceptPlayerAction(_session))
 			return;
 		ExecuteAsync(() => _combatService.ExecutePlayerUseHealthPotionAsync(_session));
 	}
@@ -55,7 +55,7 @@ public sealed class CombatUiPresenter
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
-		if (!_combatService.IsAwaitingPlayerAction(_session))
+		if (!_combatService.CanAcceptPlayerAction(_session))
 			return;
 		ExecuteAsync(() => _combatService.ExecutePlayerDefendAsync(_session));
 	}
@@ -64,23 +64,23 @@ public sealed class CombatUiPresenter
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
-		if (!_combatService.IsAwaitingPlayerAction(_session))
+		if (!_combatService.CanAcceptPlayerAction(_session))
 			return;
 		ExecuteAsync(() => _combatService.ExecutePlayerDisarmTrapAsync(_session, payload));
 	}
 
 	private async void ExecuteAsync(Func<Task> action)
 	{
-		if (_isResolvingAction)
+		if (_isBusyResolvingAction)
 			return;
-		_isResolvingAction = true;
+		_isBusyResolvingAction = true;
 		try
 		{
 			await action();
 		}
 		finally
 		{
-			_isResolvingAction = false;
+			_isBusyResolvingAction = false;
 			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
 		}
 	}

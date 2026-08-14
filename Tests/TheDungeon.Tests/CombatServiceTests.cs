@@ -134,20 +134,32 @@ public sealed class CombatServiceTests
 		((MonsterFeature)session.Dungeon.CurrentRoom!.Features[0]).Monsters[0].CurrentHp;
 
 	[Fact]
-	public void IsAwaitingPlayerAction_WhenPhaseGameOver_ReturnsFalse()
+	public void CanAcceptPlayerAction_WhenPhaseGameOver_ReturnsFalse()
 	{
 		var combat = CreateCombatService();
 		var session = new GameSessionState();
 		session.Phase = GamePlayPhase.GameOver;
-		Assert.False(combat.IsAwaitingPlayerAction(session));
+		Assert.False(combat.CanAcceptPlayerAction(session));
 	}
 
 	[Fact]
-	public void IsAwaitingPlayerAction_WhenNotInCombat_ReturnsFalse()
+	public void CanAcceptPlayerAction_WhenNotInCombat_ReturnsFalse()
 	{
 		var combat = CreateCombatService();
 		var session = new GameSessionState();
-		Assert.False(combat.IsAwaitingPlayerAction(session));
+		Assert.False(combat.CanAcceptPlayerAction(session));
+	}
+
+	[Fact]
+	public void CanExecuteCombatAbility_Defend_UsesRegistryWhenGrantedOnPlayerTurn()
+	{
+		var combat = CreateCombatService();
+		var session = SessionWithWeaponCombat(null, null);
+		session.Player.GrantedAbilities.Add(new GrantedAbility { AbilityId = AbilityIds.Defend });
+
+		Assert.True(combat.CanAcceptPlayerAction(session));
+		Assert.True(combat.CanExecuteCombatAbility(session, AbilityIds.Defend));
+		Assert.False(combat.CanExecuteCombatAbility(session, "unknown"));
 	}
 
 	[Fact]

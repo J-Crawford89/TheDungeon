@@ -8,7 +8,9 @@ public interface ICombatService
 	Task<bool> TryBeginCombatIfHostileAsync(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
 		Task.FromResult(TryBeginCombatIfHostile(session, previousCoord, floorLevel));
 
-	bool IsAwaitingPlayerAction(GameSessionState session);
+	bool CanAcceptPlayerAction(GameSessionState session);
+
+	bool CanExecuteCombatAbility(GameSessionState session, string abilityId);
 
 	void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice);
 

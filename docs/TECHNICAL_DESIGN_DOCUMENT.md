@@ -39,13 +39,22 @@ This document is the **canonical reference for engineering and architecture** in
 
 ### Procedural generation
 
-The intended **player-facing** dungeon experience is **procedural** (see [Game Design Document — Dungeon structure](./GAME_DESIGN_DOCUMENT.md#dungeon-structure)). [`DungeonBootstrap.CreateInitialFloor(true)`](../Scripts/3.Game/Dungeon/DungeonBootstrap.cs) uses [`FloorGenerator`](../Scripts/3.Game/Dungeon/FloorGenerator.cs) with [`FloorGenerationParameters`](../Scripts/3.Game.Contracts/Dungeon/FloorGenerationParameters.cs) supplied from [`GameBalanceSettingsResource`](../Resources/GameBalanceSettingsResource.cs) via [`GameBalanceSettingsMapper`](../Mappers/GameBalanceSettingsMapper.cs).
+The intended **player-facing** dungeon experience is **procedural** (see [Game Design Document — Dungeon structure](./GAME_DESIGN_DOCUMENT.md#dungeon-structure)). [`DungeonBootstrap.CreateInitialFloor()`](../Scripts/3.Game/Dungeon/DungeonBootstrap.cs) (default) uses an injected [`FloorGenerator`](../Scripts/3.Game/Dungeon/FloorGenerator.cs) with [`FloorGenerationParameters`](../Scripts/3.Game.Contracts/Dungeon/FloorGenerationParameters.cs) supplied from [`GameBalanceSettingsResource`](../Resources/GameBalanceSettingsResource.cs) via [`GameBalanceSettingsMapper`](../Mappers/GameBalanceSettingsMapper.cs). Production bootstrap is always procedural.
 
 ### Hand-built floor (`DungeonBootstrap` / `HandBuiltDungeonFloor`)
 
-[`DungeonBootstrap.CreateInitialFloor(false)`](../Scripts/3.Game/Dungeon/DungeonBootstrap.cs) returns [`HandBuiltDungeonFloor.CreateSample(...)`](../Scripts/3.Game/Dungeon/HandBuiltDungeonFloor.cs). This path exists for **tests and development** (e.g. [`HandBuiltDungeonFloorTests`](../Tests/TheDungeon.Tests/HandBuiltDungeonFloorTests.cs)) and for toggling a fixed layout when debugging. [`ExplorationUiPresenter`](../Scripts/4.UI/Presentation/ExplorationUiPresenter.cs) chooses procedural vs hand-built via a **private bool** (`_useProceduralFloor`, currently `true` for procedural).
+[`DungeonBootstrap.CreateInitialFloor(useHandBuiltDebugFloor: true)`](../Scripts/3.Game/Dungeon/DungeonBootstrap.cs) returns [`HandBuiltDungeonFloor.CreateSample(...)`](../Scripts/3.Game/Dungeon/HandBuiltDungeonFloor.cs). This path exists for **tests and development** (e.g. [`HandBuiltDungeonFloorTests`](../Tests/TheDungeon.Tests/HandBuiltDungeonFloorTests.cs)) and for a **debug-only** Inspector toggle on [`GameRoot`](../Scenes/GameRoot.cs): **Use Hand Built Floor When Debug Tools Enabled**, which applies **only when Debug Tools Enabled is also on**. [`ExplorationUiPresenter`](../Scripts/4.UI/Presentation/ExplorationUiPresenter.cs) receives that flag from `MainUi` / `GameRoot`; it does not keep a private production switch.
 
 **This is not a product design pillar** — do not document it in the GDD as a player-facing mode. See [Game Design Document](./GAME_DESIGN_DOCUMENT.md).
+
+### Godot Editor — remaining Inspector wiring (this cleanup pass)
+
+Do **not** edit `.tscn` / `.tres` in git for these; apply once in the editor:
+
+1. **`GameRoot`** — set **Use Hand Built Floor When Debug Tools Enabled** only if you want the prototype floor while **Debug Tools Enabled** is on. Leave it off for normal play (procedural).
+2. **`GameBalanceSettings`** resource (the asset assigned on `GameRoot`) — after the new C# `[Export]`s exist: **Max Unequipped Backpack Rows** `16`, **Default Flee Dc** `12`, **Starting Spell Points** `10` (optional; C# defaults match if unset).
+
+Already assigned (no re-wire): `CommandPanel` button grid / command content; `ContainerLootOverlay` **Loot Dimmer** → `LootDimmer`.
 
 ---
 
@@ -58,9 +67,11 @@ Projects under `Scripts/` are **layered**. **A project must not reference a proj
 | Foundation | `0.Core` (`TheDungeon.Core`) | *(none of the other script projects)* |
 | Parallel on Core | `2.State`, `3.Game.Contracts` | `0.Core` only |
 | Game rules | `3.Game` (`TheDungeon.Game`) | `0.Core`, `2.State`, `3.Game.Contracts` |
-| Presentation | `4.UI` | `0.Core`, `2.State`, `3.Game`, `3.Game.Contracts` |
+| Presentation (Godot-free) | `4.UI` | `0.Core`, `2.State`, `3.Game`, `3.Game.Contracts` |
 
-**`3.Game.Contracts`** holds **DTOs, result types, and shared request/response shapes** used across Game and UI. It must stay **thin**: no references upward, and no game-rule implementation—only types that describe data crossing boundaries.
+**`3.Game.Contracts`** holds **DTOs, result types, and shared request/response shapes** used across Game and UI. It must stay **thin**: **Core only** (no `2.State` reference), no game-rule implementation—only types that describe data crossing boundaries.
+
+**Godot vs `4.UI` (ADR-0011):** Files under [`Scenes/`](../Scenes/) (and other Godot game-project helpers such as `Repositories/`, `Mappers/`, `Resources/`) are the code that references Godot types. Godot-free orchestration (presenters, view-models, icon keys) lives in `4.UI`. **Do not** add a Godot package reference to `4.UI` so xUnit can stay headless.
 
 **Composition root:** Code that talks to Godot resources and the scene tree (e.g. [`GameRoot`](../Scenes/GameRoot.cs), [`Repositories/Godot*Repository.cs`](../Repositories/)) lives **outside** this strict stack but **wires** implementations into interfaces declared in lower tiers. Services depend on **abstractions** (e.g. `I*Repository` in Core), not on Godot-specific types.
 
@@ -90,6 +101,8 @@ As features multiply, **many services** can affect what the UI should show. Pref
 2. **UI/presenter layers** that **subscribe** and map those signals to controls.
 
 Reserve **direct** calls like `RefreshX()` from deep services into specific panels for **simple** flows or transitional code; new work should **bias toward** listener-style updates.
+
+Main-view **locators** (living-monster / treasure / trap ordinals, highlight-key prefixes) stay in Game ([`MainViewRoomSlots`](../Scripts/3.Game/Targeting/MainViewRoomSlots.cs)). **View-models and icon keys** live in `4.UI` ([`MainViewPresentationBuilder`](../Scripts/4.UI/Presentation/MainViewPresentationBuilder.cs), [`PresentationIconKeys`](../Scripts/4.UI/Presentation/PresentationIconKeys.cs)); [`IconResolver`](../Scenes/IconResolver.cs) stays in `Scenes/` because it uses Godot `Texture2D`.
 
 ---
 
@@ -415,3 +428,10 @@ Player-facing summary: [Game Design Document — Combat and damage](./GAME_DESIG
 - **Harvest policy:** A loot action with more than one valid harvest attempt uses `RapidSequence`; one attempt uses `Standard`. Each item remains a separate authoritative backend check.
 - **Batch boundary:** Multiple dice belonging to one logical roll remain one simultaneous presenter call and one resolved-roll boundary.
 - **UI boundary:** Game services depend only on the reaction contract/host. `MainUi` installs the Godot UI adapter and restores the null adapter during teardown.
+
+### ADR-0011: Scenes own Godot types; `4.UI` stays Godot-free
+
+- **Status:** Accepted
+- **Decision:** Code that references Godot (`Node`, `Texture2D`, `[Export]`, etc.) lives under `Scenes/` (and the Godot game project’s repositories/mappers/resources). Godot-free UI orchestration, presenters, view-models, and presentation icon keys live in `4.UI`. `4.UI` must not reference the Godot SDK.
+- **Rationale:** Headless xUnit can exercise presenters and view-models; scene scripts stay thin adapters. Mixing Godot into `4.UI` would collapse that seam.
+- **Companion:** ADR-0001 (serialized `.tscn` / `.tres` remain editor-owned).

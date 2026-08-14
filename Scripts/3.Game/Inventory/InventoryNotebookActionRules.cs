@@ -10,7 +10,7 @@ public static class InventoryNotebookActionRules
 		selection.Kind == InventorySlotKind.Equipment && item != null;
 
 	public static bool ShouldEnableUse(InventoryNotebookSelection selection, ItemInstance? item) =>
-		item != null && item.Definition.Id == InventoryIds.HealthPotion;
+		item?.Definition is PotionDefinition;
 
 	public static bool ShouldEnableDrop(ItemInstance? item) => item != null && item.Definition.CanDrop;
 

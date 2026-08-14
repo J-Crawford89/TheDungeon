@@ -1,6 +1,6 @@
 #nullable enable
 
-/// <summary>Dependencies for <see cref="CharacterCreationScreen"/> (narrower than full <see cref="GameRunContext"/>).</summary>
+/// <summary>Dependencies for character creation UI (narrower than full run context).</summary>
 public sealed class CharacterCreationDependencies
 {
 	public CharacterCreationService CharacterCreation { get; }
@@ -19,7 +19,4 @@ public sealed class CharacterCreationDependencies
 		CharacterRaces = characterRaces;
 		CharacterBackgrounds = characterBackgrounds;
 	}
-
-	public static CharacterCreationDependencies From(GameRunContext ctx) =>
-		new(ctx.CharacterCreation, ctx.CharacterClasses, ctx.CharacterRaces, ctx.CharacterBackgrounds);
 }

@@ -105,7 +105,7 @@ public sealed class PotionEffectApplicationService
 				Text = roll.DetailText
 			});
 			if (_resolution != null)
-				await _resolution.NotifyResolvedRollAsync(session);
+				await _resolution.NotifyResolvedRollAsync();
 		}
 
 		return sum;

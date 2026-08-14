@@ -9,10 +9,9 @@ public sealed class PlayerAttackRollBuilderTests
 			hitAbility = AbilityScore.Agility;
 	}
 
-	private static PlayerAttackRollInput RollInput(GameSessionState session, AttackDefinition attack, WeaponDefinition? weapon, IAttackRollAbilityOverlay? overlay) =>
+	private static PlayerAttackRollInput RollInput(AttackDefinition attack, WeaponDefinition? weapon, IAttackRollAbilityOverlay? overlay) =>
 		new()
 		{
-			Session = session,
 			Attack = attack,
 			Weapon = weapon,
 			AbilityOverlay = overlay,
@@ -43,7 +42,7 @@ public sealed class PlayerAttackRollBuilderTests
 			],
 		};
 
-		var req = PlayerAttackRollBuilder.BuildToHitRequest(RollInput(session, attack, weapon, null), "roll", 12);
+		var req = PlayerAttackRollBuilder.BuildToHitRequest(RollInput(attack, weapon, null), session.Player, "roll", 12);
 
 		Assert.Equal(12, req.TargetNumber);
 		Assert.Equal(3, req.ModifiersWithSources.Count);
@@ -75,7 +74,7 @@ public sealed class PlayerAttackRollBuilderTests
 			],
 		};
 
-		var req = PlayerAttackRollBuilder.BuildToHitRequest(RollInput(session, attack, weapon, new AgilityOverlay()), "roll", 10);
+		var req = PlayerAttackRollBuilder.BuildToHitRequest(RollInput(attack, weapon, new AgilityOverlay()), session.Player, "roll", 10);
 
 		Assert.Single(req.ModifiersWithSources);
 		Assert.Equal(5, req.ModifiersWithSources[0].Modifier);
@@ -105,7 +104,7 @@ public sealed class PlayerAttackRollBuilderTests
 			],
 		};
 
-		var req = PlayerAttackRollBuilder.BuildToHitRequest(RollInput(session, attack, null, null), "roll", 10);
+		var req = PlayerAttackRollBuilder.BuildToHitRequest(RollInput(attack, null, null), session.Player, "roll", 10);
 
 		Assert.Contains(
 			req.ModifiersWithSources,
@@ -132,7 +131,7 @@ public sealed class PlayerAttackRollBuilderTests
 			],
 		};
 
-		var rollInput = RollInput(session, attack, null, null);
+		var rollInput = RollInput(attack, null, null);
 		var total = PlayerAttackRollBuilder.RollDamageTotal(
 			new PlayerAttackDamageRollInput
 			{
@@ -141,6 +140,7 @@ public sealed class PlayerAttackRollBuilderTests
 				DamageAbility = AbilityScore.Might,
 				AddAbilityToDamage = false,
 			},
+			session.Player,
 			out _);
 
 		Assert.InRange(total, 1, 4);

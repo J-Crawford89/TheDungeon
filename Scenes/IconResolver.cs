@@ -70,14 +70,14 @@ public sealed class IconResolver
 
 		return category switch
 		{
-			"monster" => ResolveMonster(key, id),
-			"trap" => ResolveTrap(key, id),
-			"item" => ResolveItem(key, id),
-			"treasure" => ResolveTreasure(key, id),
-			"container" => ResolveContainer(key, id),
-			"npc" => ResolveNpc(key, id),
-			"lore" => ResolveLore(key, id),
-			"vertical" => ResolveVertical(key, id),
+			PresentationIconKeys.Categories.Monster => ResolveMonster(key, id),
+			PresentationIconKeys.Categories.Trap => ResolveTrap(key, id),
+			PresentationIconKeys.Categories.Item => ResolveItem(key, id),
+			PresentationIconKeys.Categories.Treasure => ResolveTreasure(key, id),
+			PresentationIconKeys.Categories.Container => ResolveContainer(key, id),
+			PresentationIconKeys.Categories.Npc => ResolveNpc(key, id),
+			PresentationIconKeys.Categories.Lore => ResolveLore(key, id),
+			PresentationIconKeys.Categories.Vertical => ResolveVertical(key, id),
 			_ => UnknownCategory(key, category)
 		};
 	}
@@ -108,7 +108,7 @@ public sealed class IconResolver
 
 		return category switch
 		{
-			"item" => ResolveInventoryItem(key, id),
+			PresentationIconKeys.Categories.Item => ResolveInventoryItem(key, id),
 			_ => UnknownInventoryCategory(key, category)
 		};
 	}

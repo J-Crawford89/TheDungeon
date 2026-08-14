@@ -17,7 +17,8 @@ public sealed class ExplorationServiceTests
 	private sealed class NoopCombatService : ICombatService
 	{
 		public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel) => false;
-		public bool IsAwaitingPlayerAction(GameSessionState session) => false;
+		public bool CanAcceptPlayerAction(GameSessionState session) => false;
+		public bool CanExecuteCombatAbility(GameSessionState session, string abilityId) => false;
 		public void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice) { }
 		public void ExecutePlayerFlee(GameSessionState session) { }
 		public void ExecutePlayerTakeTreasure(GameSessionState session, TargetPayload payload) { }
@@ -34,11 +35,11 @@ public sealed class ExplorationServiceTests
 		var dice = new DiceRollService(new System.Random(1));
 		var inspect = new InspectService(dice, new ResolutionService(dice), new NarrativeService());
 		var trapService = new TrapService(new ResolutionService(dice), new NarrativeService(), new PlayerVitalsService(), new EmptyItems());
-		return new ExplorationService(population, new NoopCombatService(), inspect, trapService);
+		return new ExplorationService(new FloorGenerator(population), new NoopCombatService(), inspect, trapService);
 	}
 
 	[Fact]
-	public void Inspect_IncludesCorpseFeatureLine()
+	public void Inspect_CorpseFeature_DoesNotEmitRemains_KeepsSlainFromDeadMonster()
 	{
 		var service = Service();
 		var session = new GameSessionState();
@@ -48,6 +49,36 @@ public sealed class ExplorationServiceTests
 		{
 			Contents = [new LootableItemDefinition { ItemDefinitionId = "coin", Quantity = 1 }],
 		});
+		room.Features.Add(new MonsterFeature
+		{
+			Monsters =
+			[
+				new MonsterInstance
+				{
+					CurrentHp = 0,
+					Definition = new MonsterDefinition
+					{
+						Id = "rat",
+						Name = "Rat",
+						Defense = 1,
+						Attacks =
+						[
+							new AttackDefinition
+							{
+								Name = "Bite",
+								DamageComponents =
+								[
+									new DamageComponent(
+										new DiceExpression { NumberOfDice = 0, DieType = DieType.d4, InD20CheckPool = false },
+										0,
+										new DamageTypeDefinition("p", "Physical", DamageFamily.Physical)),
+								],
+							},
+						],
+					},
+				},
+			],
+		});
 		floor.Rooms[DirectionHelper.Origin] = room;
 		session.Dungeon.CurrentFloor = floor;
 		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
@@ -55,9 +86,8 @@ public sealed class ExplorationServiceTests
 		var result = service.Inspect(session);
 
 		Assert.True(result.Success);
-		var line = Assert.Single(result.InspectData!.FeatureLines, l => l.Text.StartsWith("Remains:"));
-		Assert.Contains("1 stack", line.Text);
-		Assert.DoesNotContain("harvest DC", line.Text, System.StringComparison.OrdinalIgnoreCase);
+		Assert.DoesNotContain(result.InspectData!.FeatureLines, l => l.Text.StartsWith("Remains:"));
+		Assert.Contains(result.InspectData.FeatureLines, l => l.Text == "Slain: Rat (carcass)");
 	}
 
 	[Fact]
@@ -213,5 +243,156 @@ public sealed class ExplorationServiceTests
 
 		Assert.False(result.Success);
 		Assert.Equal(ExplorationErrorCode.NoVerticalConnection, result.ErrorCode);
+	}
+
+	[Fact]
+	public void MoveForward_LinkedNeighbor_MovesPlayerToDestination()
+	{
+		var service = Service();
+		var session = new GameSessionState();
+		var floor = new DungeonFloor { Level = 1, Entrance = DirectionHelper.Origin };
+		var origin = new DungeonRoom { Position = DirectionHelper.Origin };
+		var northCoord = DungeonNavigationHelper.GetNeighborCoord(DirectionHelper.Origin, HorizontalDirection.North);
+		var north = new DungeonRoom { Position = northCoord };
+		floor.Rooms[origin.Position] = origin;
+		floor.Rooms[north.Position] = north;
+		Assert.True(DungeonFloorLayoutService.TryLinkRooms(
+			floor,
+			origin.Position,
+			HorizontalDirection.North,
+			RoomConnectionType.Passage,
+			out _));
+		session.Dungeon.CurrentFloor = floor;
+		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
+		session.Player.Facing = HorizontalDirection.North;
+		session.Dungeon.DiscoveredRoomsByFloor[1] = [DirectionHelper.Origin];
+
+		var result = service.MoveForward(session);
+
+		Assert.True(result.Success);
+		Assert.Equal(northCoord, session.Dungeon.PlayerCoord);
+		Assert.Equal(northCoord, result.DestinationAfterMove);
+	}
+
+	[Fact]
+	public void MoveDownAFloor_UnanchoredHoleWithoutRope_DoesNotTripTrapsOrGenerateFloor()
+	{
+		var service = Service();
+		var session = new GameSessionState();
+		session.Player.CurrentHp = 10;
+		session.Player.MaxHp = 10;
+		var floor = new DungeonFloor { Level = 1, Entrance = DirectionHelper.Origin };
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		room.Features.Add(new FloorExitFeature { ExitType = FloorConnectionType.Hole });
+		room.Features.Add(new TrapFeature
+		{
+			Traps =
+			[
+				new TrapInstance
+				{
+					CurrentHp = 1,
+					IsRevealed = true,
+					Definition = new TrapDefinition
+					{
+						Id = "snare",
+						Name = "Snare",
+						Damage = 3,
+						IsRemovedAfterTripped = true,
+					},
+				},
+			],
+		});
+		floor.Rooms[DirectionHelper.Origin] = room;
+		session.Dungeon.Floors.Add(floor);
+		session.Dungeon.CurrentFloor = floor;
+		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
+
+		var result = service.MoveDownAFloor(session, new FloorGenerationParameters
+		{
+			Seed = 1,
+			MinRooms = 3,
+			MaxRooms = 3,
+			CurrentFloorCount = 1,
+			PreviousFloorConnectionType = FloorConnectionType.Hole,
+			RoomFeatures = new RoomFeaturePopulationParameters
+			{
+				MinFeaturesPerRoom = 0,
+				MaxFeaturesPerRoom = 0,
+				ContinueAfterFirstOptionalFeatureProbability = 0,
+				FeatureTypeRules = [],
+			},
+		});
+
+		Assert.False(result.Success);
+		Assert.Equal(ExplorationErrorCode.MoveBlocked, result.ErrorCode);
+		Assert.Single(session.Dungeon.Floors);
+		Assert.Equal(10, session.Player.CurrentHp);
+		Assert.True(RoomFeatureHelper.HasFeature<TrapFeature>(room));
+	}
+
+	[Fact]
+	public void MoveDownAFloor_UnanchoredHoleWithRope_ConsumesRopeBeforeTrapsAndGenerate()
+	{
+		var service = Service();
+		var session = new GameSessionState();
+		session.Player.CurrentHp = 10;
+		session.Player.MaxHp = 10;
+		session.Player.InventoryState.Items.Add(new ItemInstance
+		{
+			Definition = new ItemDefinition { Id = InventoryIds.Rope, Name = "Rope", MaxStackSize = 99 },
+			Quantity = 1,
+		});
+		var floor = new DungeonFloor { Level = 1, Entrance = DirectionHelper.Origin };
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		var hole = new FloorExitFeature { ExitType = FloorConnectionType.Hole };
+		room.Features.Add(hole);
+		room.Features.Add(new TrapFeature
+		{
+			Traps =
+			[
+				new TrapInstance
+				{
+					CurrentHp = 1,
+					IsRevealed = true,
+					Definition = new TrapDefinition
+					{
+						Id = "snare",
+						Name = "Snare",
+						Damage = 3,
+						IsRemovedAfterTripped = true,
+					},
+				},
+			],
+		});
+		floor.Rooms[DirectionHelper.Origin] = room;
+		session.Dungeon.Floors.Add(floor);
+		session.Dungeon.CurrentFloor = floor;
+		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
+		session.Dungeon.DiscoveredRoomsByFloor[1] = [DirectionHelper.Origin];
+
+		var result = service.MoveDownAFloor(session, new FloorGenerationParameters
+		{
+			Seed = 11,
+			MinRooms = 3,
+			MaxRooms = 3,
+			DoorChance = 0,
+			CurrentFloorCount = 1,
+			PreviousFloorConnectionType = FloorConnectionType.Hole,
+			RoomFeatures = new RoomFeaturePopulationParameters
+			{
+				MinFeaturesPerRoom = 0,
+				MaxFeaturesPerRoom = 0,
+				ContinueAfterFirstOptionalFeatureProbability = 0,
+				FeatureTypeRules = [],
+			},
+		});
+
+		Assert.True(result.Success);
+		Assert.True(result.ConsumedRopeForHole);
+		Assert.Equal(0, session.Player.InventoryState.SumQuantityForDefinitionId(InventoryIds.Rope));
+		Assert.True(hole.RopeAnchored);
+		Assert.Equal(2, session.Dungeon.Floors.Count);
+		Assert.Equal(7, session.Player.CurrentHp);
+		Assert.False(RoomFeatureHelper.HasFeature<TrapFeature>(room));
 	}
 }

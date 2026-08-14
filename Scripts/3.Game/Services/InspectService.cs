@@ -79,7 +79,7 @@ public sealed class InspectService
 			session.AppendGameLog(_narrative.ForInspectDiscoverReveal(c.KindLabel, c.Name, c.DiscoverDc, diceRoll.Total, outcome));
 		}
 
-		await _resolution.NotifyResolvedRollAsync(session);
+		await _resolution.NotifyResolvedRollAsync();
 	}
 
 	private sealed class HiddenCandidate

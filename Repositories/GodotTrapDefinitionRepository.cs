@@ -1,4 +1,5 @@
 #nullable enable
+using Godot;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,40 +9,23 @@ public sealed class GodotTrapDefinitionRepository : ITrapDefinitionRepository
 
 	public GodotTrapDefinitionRepository(TrapResourceDatabase? database)
 	{
-		if (database?.Traps != null && database.Traps.Count > 0)
-			_all = database.Traps.Select(TrapMapper.ToDomain).ToList();
-		else
-			_all = DefaultAll();
+		if (database?.Traps == null || database.Traps.Count == 0)
+		{
+			GD.PushWarning("GodotTrapDefinitionRepository: TrapDatabase missing or empty.");
+			_all = [];
+			return;
+		}
+
+		var mapped = database.Traps
+			.Where(static r => r != null && !string.IsNullOrWhiteSpace(r.Id))
+			.Select(TrapMapper.ToDomain)
+			.ToList();
+
+		foreach (var group in mapped.GroupBy(static t => t.Id).Where(static g => g.Count() > 1))
+			GD.PushWarning($"GodotTrapDefinitionRepository: duplicate trap id '{group.Key}'. Using last occurrence.");
+
+		_all = mapped.GroupBy(static t => t.Id).Select(static g => g.Last()).ToList();
 	}
 
 	public IReadOnlyList<TrapDefinition> All => _all;
-
-	private static IReadOnlyList<TrapDefinition> DefaultAll() =>
-		new[]
-		{
-			new TrapDefinition
-			{
-				Id = TrapIds.Snare,
-				Name = "Snare trap",
-				DiscoverDc = 10,
-				DisarmDc = 12,
-				Damage = 2,
-				Effect = "Cord tightens around the ankle.",
-				IsRemovedAfterTripped = true,
-				DisarmLoot =
-				[
-					new LootableItemDefinition { ItemDefinitionId = InventoryIds.Rope, Quantity = 1 }
-				],
-			},
-			new TrapDefinition
-			{
-				Id = "rusty_needle",
-				Name = "Rusty needle trap",
-				DiscoverDc = 12,
-				DisarmDc = 14,
-				Damage = 3,
-				Effect = "A spring-loaded needle jabs out.",
-				IsRemovedAfterTripped = true,
-			}
-		};
 }

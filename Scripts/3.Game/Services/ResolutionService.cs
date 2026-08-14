@@ -60,10 +60,10 @@ public sealed class ResolutionService
 			? Task.CompletedTask
 			: DiceRollPresentation.PresentSpecsAsync(_dicePresenterHost.Presenter, specs, profile, ct);
 
-	public Task NotifyResolvedRollAsync(GameSessionState session, CancellationToken ct = default) =>
+	public Task NotifyResolvedRollAsync(CancellationToken ct = default) =>
 		_resolvedRollReactionHost == null
 			? Task.CompletedTask
-			: _resolvedRollReactionHost.Sink.NotifyAsync(session, ct);
+			: _resolvedRollReactionHost.Sink.NotifyAsync(ct);
 
 	/// <summary>Uses the same rules as <see cref="RollAgainstTarget"/> for an existing roll vs a DC.</summary>
 	public ResolutionOutcome ResolveOutcomeAgainstTarget(DiceRollResult roll, int targetNumber) =>

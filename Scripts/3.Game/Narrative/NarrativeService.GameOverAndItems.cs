@@ -15,6 +15,18 @@ public sealed partial class NarrativeService
 
 	public string ForTakeNothingHere() => "There is nothing here to take.";
 
+	public string ForNothingYouCanAttack() => "There is nothing you can attack.";
+
+	public string ForStrikeUnarmedInstead() =>
+		"You have nothing to attack with in that hand; you strike unarmed instead.";
+
+	public string ForWeaponHasNoAttacksConfigured() =>
+		"That weapon has no attacks configured; you cannot strike with it.";
+
+	public string ForNothingHereToOpen() => "There is nothing here to open.";
+
+	public string ForNothingHereToDisarm() => "There is nothing here to disarm.";
+
 	public string ForTookCurrency(CoinPurse grant, string treasureName, CoinPurse purseAfter) =>
 		$"You take {treasureName} ({CurrencyFormatter.DescribeSentenceGrant(grant)}). You now carry {CurrencyFormatter.DescribeSentenceTotal(purseAfter)}.";
 

@@ -13,15 +13,4 @@ public sealed class CombatState
 
 	public bool HasDefendStanceActive() =>
 		ActiveCombatEffects.Contains(ActiveCombatEffectKind.DefendNegateNextNonZeroDamage);
-
-	public static int FirstLivingMonsterIndex(MonsterFeature feature)
-	{
-		for (var i = 0; i < feature.Monsters.Count; i++)
-		{
-			if (feature.Monsters[i].CurrentHp > 0)
-				return i;
-		}
-
-		return -1;
-	}
 }

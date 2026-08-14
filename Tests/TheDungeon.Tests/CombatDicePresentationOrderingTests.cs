@@ -97,7 +97,7 @@ public sealed class CombatDicePresentationOrderingTests
 			release.TrySetResult();
 		}
 
-		public Task NotifyAsync(GameSessionState session, CancellationToken ct = default)
+		public Task NotifyAsync(CancellationToken ct = default)
 		{
 			var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 			if (ct.CanBeCanceled)
@@ -138,7 +138,7 @@ public sealed class CombatDicePresentationOrderingTests
 
 		Assert.Equal(hpBefore, monster.CurrentHp);
 		Assert.DoesNotContain(session.LogEntries, entry => entry.Kind == LogEntryKind.Roll);
-		Assert.False(combat.IsAwaitingPlayerAction(session));
+		Assert.False(combat.CanAcceptPlayerAction(session));
 
 		presenter.Complete(0);
 		await reaction.WaitForCallCountAsync(1);
@@ -159,7 +159,7 @@ public sealed class CombatDicePresentationOrderingTests
 		reaction.Complete(1);
 		await action;
 
-		Assert.True(combat.IsAwaitingPlayerAction(session));
+		Assert.True(combat.CanAcceptPlayerAction(session));
 	}
 
 	[Fact]

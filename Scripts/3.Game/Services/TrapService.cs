@@ -168,7 +168,7 @@ public sealed class TrapService
 		var result = success
 			? ApplySuccess(session, room, trapFeature, resolution, trapDef)
 			: ApplyFail(session, room, trapFeature, trapInstance, trapDef, resolution);
-		await _resolution.NotifyResolvedRollAsync(session);
+		await _resolution.NotifyResolvedRollAsync();
 		return result;
 	}
 

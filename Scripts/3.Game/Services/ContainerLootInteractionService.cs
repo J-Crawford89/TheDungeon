@@ -43,6 +43,8 @@ public sealed class ContainerLootInteractionService
 		    container == null)
 			return ContainerLootPanelResult.Fail(ContainerLootErrorCode.ContainerOrdinalOutOfRange);
 
+		container.WasOpened = true;
+
 		var (kind, label) = Describe(container);
 		var (panelTitle, panelSubtitle) = BuildPanelHeadings(container, kind);
 		var rows = new List<ContainerLootStackRowDto>();

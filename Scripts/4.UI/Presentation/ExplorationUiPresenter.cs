@@ -13,9 +13,8 @@ public sealed class ExplorationUiPresenter
 	private readonly PotionEffectApplicationService _potionEffects;
 	private readonly Action<UiRefreshFlags> _refreshHud;
 	private readonly IContainerLootOverlayOpener? _lootOverlay;
+	private readonly bool _useHandBuiltDebugFloor;
 	private bool _isResolvingAction;
-
-	private readonly bool _useProceduralFloor = true; //Set this bool to true in order to use procedural generation, or false to use prototype hand built floor.
 
 	public ExplorationUiPresenter(
 		GameSessionState session,
@@ -27,7 +26,8 @@ public sealed class ExplorationUiPresenter
 		PotionEffectApplicationService potionEffects,
 		DungeonBootstrap dungeonBootstrap,
 		Action<UiRefreshFlags> refreshHud,
-		IContainerLootOverlayOpener? lootOverlay = null)
+		IContainerLootOverlayOpener? lootOverlay = null,
+		bool useHandBuiltDebugFloor = false)
 	{
 		_session = session;
 		_explorationService = explorationService;
@@ -39,6 +39,7 @@ public sealed class ExplorationUiPresenter
 		_dungeonBootstrap = dungeonBootstrap;
 		_refreshHud = refreshHud;
 		_lootOverlay = lootOverlay;
+		_useHandBuiltDebugFloor = useHandBuiltDebugFloor;
 	}
 
 	public async void OnPotionPressed()
@@ -131,7 +132,7 @@ public sealed class ExplorationUiPresenter
 	{
 		if (_isResolvingAction)
 			return;
-		var initialFloor = _dungeonBootstrap.CreateInitialFloor(_useProceduralFloor);
+		var initialFloor = _dungeonBootstrap.CreateInitialFloor(_useHandBuiltDebugFloor);
 		_session.Dungeon.Floors.Clear();
 		_session.Dungeon.Floors.Add(initialFloor);
 		_session.Dungeon.DiscoveredRoomsByFloor.Clear();

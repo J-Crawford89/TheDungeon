@@ -11,7 +11,7 @@ public sealed class UiResolvedRollReactionSink : IResolvedRollReactionSink
 		_refreshHud = refreshHud ?? throw new ArgumentNullException(nameof(refreshHud));
 	}
 
-	public Task NotifyAsync(GameSessionState session, CancellationToken ct = default)
+	public Task NotifyAsync(CancellationToken ct = default)
 	{
 		ct.ThrowIfCancellationRequested();
 		_refreshHud(UiRefreshFlags.All);

@@ -88,7 +88,7 @@ public sealed class CombatMonsterTurn
 		var hit = result.Outcome == ResolutionOutcome.Success || result.Outcome == ResolutionOutcome.CriticalSuccess;
 		if (hit)
 		{
-			await _resolution.NotifyResolvedRollAsync(session, ct);
+			await _resolution.NotifyResolvedRollAsync(ct);
 
 			var hitArmorBand = result.Roll.Total >= playerEc && result.Roll.Total < armorThreshold;
 			var damageRoll = RollAttackDamageSum(attack);
@@ -102,7 +102,7 @@ public sealed class CombatMonsterTurn
 			// Preserve existing defend ordering: it can fully negate damage before any armor/DR math.
 			if (CombatPlayerIncomingDamage.TryApplyDefendNegate(ref damage, session, _narrative))
 			{
-				await _resolution.NotifyResolvedRollAsync(session, ct);
+				await _resolution.NotifyResolvedRollAsync(ct);
 				return;
 			}
 			var rolledDamage = damage;
@@ -138,12 +138,12 @@ public sealed class CombatMonsterTurn
 					DamageSource = source,
 				});
 			}
-			await _resolution.NotifyResolvedRollAsync(session, ct);
+			await _resolution.NotifyResolvedRollAsync(ct);
 		}
 		else
 		{
 			session.AppendGameLog(_narrative.ForAttackMiss(name, "you"));
-			await _resolution.NotifyResolvedRollAsync(session, ct);
+			await _resolution.NotifyResolvedRollAsync(ct);
 		}
 	}
 

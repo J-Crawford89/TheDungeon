@@ -5,6 +5,10 @@ using Godot.Collections;
 [GlobalClass]
 public partial class GameBalanceSettingsResource : Resource
 {
+	[Export] public int MaxUnequippedBackpackRows { get; set; } = 16;
+	[Export] public int DefaultFleeDc { get; set; } = 12;
+	[Export] public int StartingSpellPoints { get; set; } = 10;
+
 	[Export] public int ExperiencePerFirstRoomVisit { get; set; }
 	[Export] public int ExperiencePerFloorEntry { get; set; }
 

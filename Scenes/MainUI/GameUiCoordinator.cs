@@ -308,13 +308,13 @@ public sealed class GameUiCoordinator
 			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
-		if (!_combatService.IsAwaitingPlayerAction(_session))
+		if (!_combatService.CanAcceptPlayerAction(_session))
 			return;
 
 		var monsters = PlayerActionTargetResolvers.ResolveAttackTargets(_session);
 		if (monsters.Count == 0)
 		{
-			_session.AppendGameLog("There is nothing you can attack.");
+			_session.AppendGameLog(_takeNarrative.ForNothingYouCanAttack());
 			return;
 		}
 
@@ -362,7 +362,7 @@ public sealed class GameUiCoordinator
 		var monsters = PlayerActionTargetResolvers.ResolveAttackTargets(_session);
 		if (monsters.Count == 0)
 		{
-			_session.AppendGameLog("There is nothing you can attack.");
+			_session.AppendGameLog(_takeNarrative.ForNothingYouCanAttack());
 			_pendingAttackChoice = null;
 			return;
 		}
@@ -402,7 +402,7 @@ public sealed class GameUiCoordinator
 		if (mode != DungeonMode.Exploration && mode != DungeonMode.Combat)
 			return;
 
-		if (mode == DungeonMode.Combat && !_combatService.IsAwaitingPlayerAction(_session))
+		if (mode == DungeonMode.Combat && !_combatService.CanAcceptPlayerAction(_session))
 			return;
 
 		var list = PlayerActionTargetResolvers.ResolveTakeTargets(_session, mode);
@@ -439,7 +439,7 @@ public sealed class GameUiCoordinator
 		var list = PlayerActionTargetResolvers.ResolveOpenContainerTargets(_session, _session.Dungeon.DungeonMode);
 		if (list.Count == 0)
 		{
-			_session.AppendGameLog("There is nothing here to open.");
+			_session.AppendGameLog(_takeNarrative.ForNothingHereToOpen());
 			return;
 		}
 
@@ -488,13 +488,13 @@ public sealed class GameUiCoordinator
 		if (mode != DungeonMode.Exploration && mode != DungeonMode.Combat)
 			return;
 
-		if (mode == DungeonMode.Combat && !_combatService.IsAwaitingPlayerAction(_session))
+		if (mode == DungeonMode.Combat && !_combatService.CanAcceptPlayerAction(_session))
 			return;
 
 		var list = PlayerActionTargetResolvers.ResolveDisarmTargets(_session);
 		if (list.Count == 0)
 		{
-			_session.AppendGameLog("There is nothing here to disarm.");
+			_session.AppendGameLog(_takeNarrative.ForNothingHereToDisarm());
 			return;
 		}
 

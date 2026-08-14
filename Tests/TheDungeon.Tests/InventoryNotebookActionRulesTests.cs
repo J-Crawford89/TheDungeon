@@ -31,11 +31,19 @@ public sealed class InventoryNotebookActionRulesTests
 	}
 
 	[Fact]
-	public void ShouldEnableUse_HealthPotion_True()
+	public void ShouldEnableUse_PotionDefinition_True()
+	{
+		var sel = InventoryNotebookSelection.Backpack(2);
+		var item = new ItemInstance { Definition = new PotionDefinition { Id = "mana_potion" }, Quantity = 1 };
+		Assert.True(InventoryNotebookActionRules.ShouldEnableUse(sel, item));
+	}
+
+	[Fact]
+	public void ShouldEnableUse_NonPotion_False()
 	{
 		var sel = InventoryNotebookSelection.Backpack(2);
 		var item = new ItemInstance { Definition = new ItemDefinition { Id = InventoryIds.HealthPotion }, Quantity = 1 };
-		Assert.True(InventoryNotebookActionRules.ShouldEnableUse(sel, item));
+		Assert.False(InventoryNotebookActionRules.ShouldEnableUse(sel, item));
 	}
 
 	[Fact]

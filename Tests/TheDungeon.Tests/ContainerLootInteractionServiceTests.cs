@@ -65,6 +65,7 @@ public sealed class ContainerLootInteractionServiceTests
 		Assert.Equal(2, result.Panel.Rows.Count);
 		Assert.Equal("Coin", result.Panel.Rows[0].DisplayName);
 		Assert.Equal("Gem", result.Panel.Rows[1].DisplayName);
+		Assert.True(salvage.WasOpened);
 	}
 
 	[Fact]

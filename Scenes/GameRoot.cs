@@ -32,6 +32,7 @@ public partial class GameRoot : Control
 
 	[Export] public bool CaptureDebugDiagnostics { get; set; }
 	[Export] public bool DebugToolsEnabled { get; set; }
+	[Export] public bool UseHandBuiltFloorWhenDebugToolsEnabled { get; set; }
 
 	private GameRunContext? _activeRunContext;
 
@@ -101,7 +102,13 @@ public partial class GameRoot : Control
 		ClearScreenHost();
 
 		var cc = _characterCreationScene.Instantiate<CharacterCreationScreen>();
-		cc.Initialize(CharacterCreationDependencies.From(_activeRunContext), CaptureDebugDiagnostics);
+		cc.Initialize(
+			new CharacterCreationDependencies(
+				_activeRunContext.CharacterCreation,
+				_activeRunContext.CharacterClasses,
+				_activeRunContext.CharacterRaces,
+				_activeRunContext.CharacterBackgrounds),
+			CaptureDebugDiagnostics);
 		cc.BackButtonPressed += HandleReturnToStartMenu;
 		cc.StartGameRequested += HandleStartGame;
 		_screenHost.AddChild(cc);
@@ -133,7 +140,8 @@ public partial class GameRoot : Control
 		ClearScreenHost();
 
 		var mainUi = _mainUiScene.Instantiate<MainUi>();
-		mainUi.Initialize(_activeRunContext, CaptureDebugDiagnostics, DebugToolsEnabled);
+		var useHandBuiltDebugFloor = DebugToolsEnabled && UseHandBuiltFloorWhenDebugToolsEnabled;
+		mainUi.Initialize(_activeRunContext, CaptureDebugDiagnostics, DebugToolsEnabled, useHandBuiltDebugFloor);
 		mainUi.QuitRequested += HandleQuitGame;
 		mainUi.ReturnToStartMenuRequested += HandleReturnToStartMenu;
 		_screenHost.AddChild(mainUi);
@@ -183,7 +191,14 @@ public partial class GameRoot : Control
 				System.Random.Shared.Next(),
 				0,
 				FloorConnectionType.None);
-		var dungeonBootstrap = new DungeonBootstrap(roomFeaturePopulation, handBuiltPopulation, proceduralFloorFactory);
+		var maxUnequippedBackpackRows = GameBalanceSettings?.MaxUnequippedBackpackRows ?? 16;
+		if (maxUnequippedBackpackRows < 1)
+			maxUnequippedBackpackRows = 16;
+		var defaultFleeDc = GameBalanceSettings?.DefaultFleeDc ?? 12;
+		var startingSpellPoints = GameBalanceSettings?.StartingSpellPoints ?? 10;
+
+		var floorGenerator = new FloorGenerator(roomFeaturePopulation);
+		var dungeonBootstrap = new DungeonBootstrap(floorGenerator, roomFeaturePopulation, handBuiltPopulation, proceduralFloorFactory);
 		var diceRollService = new DiceRollService(random);
 		var dicePresenterHost = new DiceRollPresenterHost();
 		var resolvedRollReactionHost = new ResolvedRollReactionHost();
@@ -200,6 +215,7 @@ public partial class GameRoot : Control
 			narrativeService,
 			proficiencyAggregation,
 			resolutionService,
+			maxUnequippedBackpackRows,
 			monsters: monsterRepo,
 			traps: trapRepo);
 		var combatService = new CombatService(
@@ -212,17 +228,24 @@ public partial class GameRoot : Control
 			potionEffectApplicationService,
 			trapService,
 			itemRepo,
-			experienceService);
+			experienceService,
+			defaultFleeDc: defaultFleeDc);
 		var inspectService = new InspectService(diceRollService, resolutionService, narrativeService);
 		var explorationService = new ExplorationService(
-			roomFeaturePopulation,
+			floorGenerator,
 			combatService,
 			inspectService,
 			trapService,
 			experienceService,
 			GameBalanceSettings?.ExperiencePerFirstRoomVisit ?? 0,
 			GameBalanceSettings?.ExperiencePerFloorEntry ?? 0);
-		var characterCreation = new CharacterCreationService(diceRollService, random, abilityRepo, itemRepo, proficiencyAggregation);
+		var characterCreation = new CharacterCreationService(
+			diceRollService,
+			random,
+			abilityRepo,
+			itemRepo,
+			proficiencyAggregation,
+			startingSpellPoints);
 
 		var icons = new IconResolver(
 			MonsterDatabase,

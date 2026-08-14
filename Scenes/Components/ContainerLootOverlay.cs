@@ -16,6 +16,7 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 
 	/// <summary>Typically <c>LootableItemControl.tscn</c>; assign in Inspector.</summary>
 	[Export] private PackedScene _lootableItemScene = null!;
+	[Export] private Control? _lootDimmer;
 
 	private GameRunContext? _ctx;
 	private Action<UiRefreshFlags>? _refreshHud;
@@ -40,9 +41,8 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 		}
 
 		MouseFilter = MouseFilterEnum.Stop;
-		var dimmer = GetNodeOrNull<Control>("LootDimmer");
-		if (dimmer != null)
-			dimmer.MouseFilter = MouseFilterEnum.Stop;
+		if (_lootDimmer != null)
+			_lootDimmer.MouseFilter = MouseFilterEnum.Stop;
 	}
 
 	public void OpenLootPanel(int containerOrdinal) => OpenInternal(containerOrdinal);
@@ -68,11 +68,6 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 			GD.PushWarning($"Container loot panel unavailable: {result.ErrorCode}");
 			return;
 		}
-
-		if (session.Dungeon.CurrentRoom is { } room &&
-			RoomContainerLocator.TryGetNthContainer(room, containerOrdinal, out var openedContainer) &&
-			openedContainer != null)
-			openedContainer.WasOpened = true;
 
 		_containerOrdinal = containerOrdinal;
 		_selectedStackIndices.Clear();

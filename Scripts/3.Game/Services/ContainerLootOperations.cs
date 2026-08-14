@@ -238,7 +238,7 @@ public static class ContainerLootOperations
 				var failures = qty - successes;
 				session.AppendGameLog(narrative.ForHarvestStackOutcome(containerKindLabel, def.Name, successes, failures));
 			}
-			await resolution.NotifyResolvedRollAsync(session);
+			await resolution.NotifyResolvedRollAsync();
 		}
 
 		return successes > 0;

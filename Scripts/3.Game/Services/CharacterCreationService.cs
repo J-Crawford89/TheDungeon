@@ -11,19 +11,22 @@ public sealed class CharacterCreationService
 	private readonly IAbilityDefinitionRepository _abilityDefinitions;
 	private readonly IItemDefinitionRepository _itemDefinitions;
 	private readonly PlayerProficiencyAggregationService _proficiencyAggregation;
+	private readonly int _startingSpellPoints;
 
 	public CharacterCreationService(
 		DiceRollService diceRollService,
 		Random random,
 		IAbilityDefinitionRepository abilityDefinitions,
 		IItemDefinitionRepository itemDefinitions,
-		PlayerProficiencyAggregationService proficiencyAggregation)
+		PlayerProficiencyAggregationService proficiencyAggregation,
+		int startingSpellPoints = 10)
 	{
 		_diceRollService = diceRollService;
 		_random = random;
 		_abilityDefinitions = abilityDefinitions;
 		_itemDefinitions = itemDefinitions;
 		_proficiencyAggregation = proficiencyAggregation;
+		_startingSpellPoints = startingSpellPoints;
 	}
 
 	public void RollAndApplyRolledScores(CharacterCreationState state)
@@ -113,8 +116,8 @@ public sealed class CharacterCreationService
 
 		if (player.HasAbility(AbilityIds.Spellcasting))
 		{
-			player.CurrentSpellPoints = 10;
-			player.MaxSpellPoints = 10;
+			player.CurrentSpellPoints = _startingSpellPoints;
+			player.MaxSpellPoints = _startingSpellPoints;
 		}
 		else
 		{

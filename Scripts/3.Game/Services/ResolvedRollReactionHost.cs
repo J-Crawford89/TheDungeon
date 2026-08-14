@@ -14,6 +14,6 @@ public sealed class NullResolvedRollReactionSink : IResolvedRollReactionSink
 	{
 	}
 
-	public Task NotifyAsync(GameSessionState session, CancellationToken ct = default) =>
+	public Task NotifyAsync(CancellationToken ct = default) =>
 		Task.CompletedTask;
 }

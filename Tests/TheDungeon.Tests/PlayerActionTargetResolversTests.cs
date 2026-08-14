@@ -120,6 +120,24 @@ public sealed class PlayerActionTargetResolversTests
 	}
 
 	[Fact]
+	public void ResolveOpenContainerTargets_IncludesCorpseOrdinal()
+	{
+		var room = new DungeonRoom { Position = DirectionHelper.Origin };
+		room.Features.Add(new CorpseFeature
+		{
+			SourceMonsterDefinitionId = "rat",
+			Contents = [new LootableItemDefinition { ItemDefinitionId = "coin", Quantity = 1 }],
+		});
+		var session = SessionWithRoom(room);
+
+		var open = PlayerActionTargetResolvers.ResolveOpenContainerTargets(session, DungeonMode.Exploration);
+
+		Assert.Single(open);
+		Assert.Equal(0, open[0].Payload.ContainerOrdinal);
+		Assert.Equal($"{MainViewRoomSlots.ContainerKeyPrefix}0", open[0].HighlightKey);
+	}
+
+	[Fact]
 	public void ResolveOpenContainerTargets_Combat_ReturnsEmpty()
 	{
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };

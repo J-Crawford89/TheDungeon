@@ -38,7 +38,6 @@ public partial class CharacterPage : MarginContainer
 		ClearChildren(_damageReductionsGrid);
 
 		var player = context.Session.Player;
-		PlayerDefenseAggregationHelper.RecomputeFromEquippedArmor(player);
 		var classes = context.CharacterClasses;
 		var races = context.CharacterRaces;
 		var backgrounds = context.CharacterBackgrounds;

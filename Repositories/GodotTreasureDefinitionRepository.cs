@@ -1,4 +1,5 @@
 #nullable enable
+using Godot;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,30 +9,23 @@ public sealed class GodotTreasureDefinitionRepository : ITreasureDefinitionRepos
 
 	public GodotTreasureDefinitionRepository(TreasureResourceDatabase? database)
 	{
-		if (database?.Treasures != null && database.Treasures.Count > 0)
-			_all = database.Treasures.Select(TreasureMapper.ToDomain).ToList();
-		else
-			_all = DefaultAll();
+		if (database?.Treasures == null || database.Treasures.Count == 0)
+		{
+			GD.PushWarning("GodotTreasureDefinitionRepository: TreasureDatabase missing or empty.");
+			_all = [];
+			return;
+		}
+
+		var mapped = database.Treasures
+			.Where(static r => r != null && !string.IsNullOrWhiteSpace(r.Id))
+			.Select(TreasureMapper.ToDomain)
+			.ToList();
+
+		foreach (var group in mapped.GroupBy(static t => t.Id).Where(static g => g.Count() > 1))
+			GD.PushWarning($"GodotTreasureDefinitionRepository: duplicate treasure id '{group.Key}'. Using last occurrence.");
+
+		_all = mapped.GroupBy(static t => t.Id).Select(static g => g.Last()).ToList();
 	}
 
 	public IReadOnlyList<TreasureDefinition> All => _all;
-
-	private static IReadOnlyList<TreasureDefinition> DefaultAll() =>
-		new[]
-		{
-			new TreasureDefinition
-			{
-				Id = TreasureIds.CopperCoins,
-				Name = "A pouch of copper coins",
-				GrantKind = TreasureKind.Currency,
-				CurrencyGrant = new CoinPurse { Copper = 5 },
-			},
-			new TreasureDefinition
-			{
-				Id = TreasureIds.HealthPotion,
-				Name = "A health potion",
-				GrantKind = TreasureKind.InventoryItem,
-				InventoryItemId = InventoryIds.HealthPotion
-			}
-		};
 }

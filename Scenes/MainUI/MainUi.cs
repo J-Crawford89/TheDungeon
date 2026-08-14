@@ -21,17 +21,23 @@ public partial class MainUi : Control
 	private GameRunContext? _runContext;
 	private bool _captureDebugDiagnostics;
 	private bool _debugToolsEnabled;
+	private bool _useHandBuiltDebugFloor;
 	private Button? _debugRoomLootButton;
 
 	private ExplorationUiPresenter _explorationPresenter = null!;
 	private CombatUiPresenter _combatPresenter = null!;
 	private GameUiCoordinator _coordinator = null!;
 
-	public void Initialize(GameRunContext runContext, bool captureDebugDiagnostics, bool debugToolsEnabled = false)
+	public void Initialize(
+		GameRunContext runContext,
+		bool captureDebugDiagnostics,
+		bool debugToolsEnabled = false,
+		bool useHandBuiltDebugFloor = false)
 	{
 		_runContext = runContext;
 		_captureDebugDiagnostics = captureDebugDiagnostics;
 		_debugToolsEnabled = debugToolsEnabled;
+		_useHandBuiltDebugFloor = useHandBuiltDebugFloor;
 	}
 
 	public override void _Ready()
@@ -80,7 +86,8 @@ public partial class MainUi : Control
 			potionEffects,
 			dungeonBootstrap,
 			RefreshHudAndGameOver,
-			_containerLootOverlay);
+			_containerLootOverlay,
+			_useHandBuiltDebugFloor);
 		_combatPresenter = new CombatUiPresenter(session, combatService, RefreshHudAndGameOver);
 		coordinator = new GameUiCoordinator(
 			session,

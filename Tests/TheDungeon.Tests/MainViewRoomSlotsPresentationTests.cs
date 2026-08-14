@@ -24,7 +24,7 @@ public sealed class MainViewRoomSlotsPresentationTests
 			],
 		});
 
-		var slots = MainViewRoomSlots.Enumerate(room);
+		var slots = MainViewPresentationBuilder.EnumerateFeatureSlots(room);
 		Assert.Single(slots);
 		Assert.Equal(PresentationIconKeys.MainView.Monster("rat"), slots[0].PresentationIconKey);
 	}
@@ -52,7 +52,7 @@ public sealed class MainViewRoomSlotsPresentationTests
 			],
 		});
 
-		var slots = MainViewRoomSlots.Enumerate(room);
+		var slots = MainViewPresentationBuilder.EnumerateFeatureSlots(room);
 		Assert.Single(slots);
 		Assert.Equal(PresentationIconKeys.MainView.Treasure("gold_pile"), slots[0].PresentationIconKey);
 	}
@@ -80,7 +80,7 @@ public sealed class MainViewRoomSlotsPresentationTests
 			],
 		});
 
-		var slots = MainViewRoomSlots.Enumerate(room);
+		var slots = MainViewPresentationBuilder.EnumerateFeatureSlots(room);
 		Assert.Single(slots);
 		Assert.Equal(PresentationIconKeys.MainView.Treasure("copper_coins"), slots[0].PresentationIconKey);
 	}
@@ -107,7 +107,7 @@ public sealed class MainViewRoomSlotsPresentationTests
 			],
 		});
 
-		var slots = MainViewRoomSlots.Enumerate(room);
+		var slots = MainViewPresentationBuilder.EnumerateFeatureSlots(room);
 		Assert.Single(slots);
 		Assert.Equal(PresentationIconKeys.MainView.Item("health_potion"), slots[0].PresentationIconKey);
 	}
@@ -121,7 +121,7 @@ public sealed class MainViewRoomSlotsPresentationTests
 			Contents = [new LootableItemDefinition { ItemDefinitionId = "rope", Quantity = 1 }],
 		});
 
-		var slots = MainViewRoomSlots.Enumerate(room);
+		var slots = MainViewPresentationBuilder.EnumerateFeatureSlots(room);
 		Assert.Single(slots);
 		Assert.Equal($"{MainViewRoomSlots.ContainerKeyPrefix}0", slots[0].HighlightKey);
 		Assert.Equal(PresentationIconKeys.MainView.ContainerSalvage(), slots[0].PresentationIconKey);

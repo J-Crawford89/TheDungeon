@@ -20,6 +20,21 @@ public sealed class CombatAbilityEffectsRegistryTests
 	}
 
 	[Fact]
+	public void CanExecute_UnknownAbilityId_ReturnsFalse()
+	{
+		var reg = new CombatAbilityEffectsRegistry();
+		Assert.False(reg.CanExecute("nope", new GameSessionState()));
+	}
+
+	[Fact]
+	public void CanExecute_DelegatesToHandler()
+	{
+		var reg = new CombatAbilityEffectsRegistry();
+		reg.Register(new StubHandler { AbilityId = "test.ability", CanExecuteResult = true });
+		Assert.True(reg.CanExecute("test.ability", new GameSessionState()));
+	}
+
+	[Fact]
 	public void TryExecute_UnknownAbilityId_ReturnsFalse()
 	{
 		var reg = new CombatAbilityEffectsRegistry();

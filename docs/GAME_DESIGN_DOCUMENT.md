@@ -30,6 +30,8 @@ The project is an **old-school dungeon-crawl exploration RPG** built in **Godot 
 
 **Design intent:** Dungeons are **procedurally generated** — layout, room connectivity, and placement of challenges should feel varied across runs and support the core loop above.
 
+- **Progress is downward.** The player advances the dungeon by going **down**. Going **up** returns to a **previously cleared** floor/room; it is not a second frontier of unexplored content.
+- **Monsters do not wander.** Hostiles stay in their rooms. Because of that, **moving up a floor does not need to start combat** until the design adds multiple up-exits on a floor or wandering monsters.
 - **Not a design target:** Fixed **hand-built** floors used in development or automated tests (see [TDD — Dungeon generation](./TECHNICAL_DESIGN_DOCUMENT.md#dungeon-generation-implementation)) are **implementation details**, not a player-facing mode or pillar.
 
 **TODO:** Design targets for floor count, room density, biome/tile themes, escalation per floor, and how procedural parameters express difficulty.
