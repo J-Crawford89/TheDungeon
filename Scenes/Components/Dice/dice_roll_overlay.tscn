@@ -4,6 +4,21 @@
 [ext_resource type="PackedScene" uid="uid://c33ob4cqx7t6p" path="res://Scenes/Components/Dice/RollingDie.tscn" id="2_oaku6"]
 [ext_resource type="Resource" uid="uid://bdenbq3xdg05r" path="res://Content/Dice/BaseDiceSets.tres" id="3_kr1rg"]
 [ext_resource type="Script" uid="uid://xvccaq1yj0yp" path="res://Scenes/Components/Dice/DicePlayAreaWalls.cs" id="4_kr1rg"]
+[ext_resource type="AudioStream" uid="uid://50my778ja0hw" path="res://Assets/Audio/SFX/Dice/Throw/dice-throw-1.ogg" id="5_throw1"]
+[ext_resource type="AudioStream" uid="uid://docilj8hgwvsr" path="res://Assets/Audio/SFX/Dice/Throw/dice-throw-2.ogg" id="6_throw2"]
+[ext_resource type="AudioStream" uid="uid://d0f3cgwgoq6ga" path="res://Assets/Audio/SFX/Dice/Throw/dice-throw-3.ogg" id="7_throw3"]
+[ext_resource type="AudioStream" uid="uid://du5i5jctmj4mu" path="res://Assets/Audio/SFX/Dice/Impact/chips-collide-1.ogg" id="8_impact1"]
+[ext_resource type="AudioStream" uid="uid://bg4prvw5nnph" path="res://Assets/Audio/SFX/Dice/Impact/chips-collide-2.ogg" id="9_impact2"]
+[ext_resource type="AudioStream" uid="uid://sc5r4xi0n3t3" path="res://Assets/Audio/SFX/Dice/Impact/chips-collide-3.ogg" id="10_impact3"]
+[ext_resource type="AudioStream" uid="uid://cgqtsjhwyqoy0" path="res://Assets/Audio/SFX/Dice/Impact/chips-collide-4.ogg" id="11_impact4"]
+[ext_resource type="AudioStream" uid="uid://c4ud0pewtvtwv" path="res://Assets/Audio/SFX/Dice/Impact/impactGeneric_light_000.ogg" id="12_impact5"]
+[ext_resource type="AudioStream" uid="uid://itmmwuabhrsl" path="res://Assets/Audio/SFX/Dice/Impact/impactGeneric_light_001.ogg" id="13_impact6"]
+[ext_resource type="AudioStream" uid="uid://d0bv87lnjh5b5" path="res://Assets/Audio/SFX/Dice/Impact/impactGeneric_light_002.ogg" id="14_impact7"]
+[ext_resource type="AudioStream" uid="uid://dv3ivos0wv05e" path="res://Assets/Audio/SFX/Dice/Impact/impactGeneric_light_003.ogg" id="15_impact8"]
+[ext_resource type="AudioStream" uid="uid://ciuodrvecwm48" path="res://Assets/Audio/SFX/Dice/Impact/impactGeneric_light_004.ogg" id="16_impact9"]
+[ext_resource type="AudioStream" uid="uid://bu83f845vg2ta" path="res://Assets/Audio/SFX/Dice/Settle/chip-lay-1.ogg" id="17_settle1"]
+[ext_resource type="AudioStream" uid="uid://cmcvveqid6ux3" path="res://Assets/Audio/SFX/Dice/Settle/chip-lay-2.ogg" id="18_settle2"]
+[ext_resource type="AudioStream" uid="uid://0se7pj7fwn75" path="res://Assets/Audio/SFX/Dice/Settle/chip-lay-3.ogg" id="19_settle3"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_kr1rg"]
 friction = 0.65
@@ -33,6 +48,9 @@ RollingDieScene = ExtResource("2_oaku6")
 DiceSpawnPath = NodePath("SubViewportContainer/SubViewport/DiceWorld/DiceSpawn")
 CameraPath = NodePath("SubViewportContainer/SubViewport/DiceWorld/Camera3D")
 VisualCatalogLibrary = ExtResource("3_kr1rg")
+ThrowStreams = Array[AudioStream]([ExtResource("5_throw1"), ExtResource("6_throw2"), ExtResource("7_throw3")])
+ImpactStreams = Array[AudioStream]([ExtResource("8_impact1"), ExtResource("9_impact2"), ExtResource("10_impact3"), ExtResource("11_impact4"), ExtResource("12_impact5"), ExtResource("13_impact6"), ExtResource("14_impact7"), ExtResource("15_impact8"), ExtResource("16_impact9")])
+SettleStreams = Array[AudioStream]([ExtResource("17_settle1"), ExtResource("18_settle2"), ExtResource("19_settle3")])
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=776835778]
 layout_mode = 1
@@ -74,3 +92,14 @@ mesh = SubResource("BoxMesh_oaku6")
 [node name="PlayAreaWalls" type="Node3D" parent="SubViewportContainer/SubViewport/DiceWorld" unique_id=2008837266]
 script = ExtResource("4_kr1rg")
 WallHeight = 20.0
+
+[node name="DiceThrowPlayer" type="AudioStreamPlayer" parent="." unique_id=792552444]
+bus = &"SFX"
+
+[node name="DiceImpactPlayer" type="AudioStreamPlayer" parent="." unique_id=1593607793]
+max_polyphony = 4
+bus = &"SFX"
+
+[node name="DiceSettlePlayer" type="AudioStreamPlayer" parent="." unique_id=426454589]
+max_polyphony = 2
+bus = &"SFX"

@@ -5,6 +5,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+public sealed record PredeterminedDicePlaybackTiming(
+	float RecordedDurationSeconds,
+	float VisibleDurationSeconds,
+	IReadOnlyList<PredeterminedDieTrajectory> Trajectories,
+	IReadOnlyList<PredeterminedDicePairContact> PairContacts);
+
 /// <summary>
 /// Thin wrapper around a typed die visual. Free rolls use live Godot physics. Gameplay rolls
 /// pre-simulate a natural trajectory, remap it by a valid die symmetry, and replay it without
@@ -147,7 +153,10 @@ public partial class RollingDie : Node3D
 	public static async Task<PredeterminedDiceSimulationResult> RollPredeterminedBatchWithDiagnosticsAsync(
 		IReadOnlyList<RollingDie> dice,
 		IReadOnlyList<int> faceValues,
-		CancellationToken ct = default)
+		CancellationToken ct = default,
+		Action<PredeterminedDicePlaybackTiming>? playbackStarted = null,
+		Action<float>? playbackProgressed = null,
+		Action? playbackCompleted = null)
 	{
 		if (dice == null)
 			throw new ArgumentNullException(nameof(dice));
@@ -181,7 +190,14 @@ public partial class RollingDie : Node3D
 					"using the final physically valid trajectory.");
 		}
 
-		await PlayPredeterminedTrajectoriesAsync(dice, simulation.Trajectories, ct);
+		await PlayPredeterminedTrajectoriesAsync(
+			dice,
+			simulation.Trajectories,
+			ct,
+			simulation.PairContacts,
+			playbackStarted,
+			playbackProgressed,
+			playbackCompleted);
 		return simulation;
 	}
 
@@ -267,7 +283,11 @@ public partial class RollingDie : Node3D
 	private static async Task PlayPredeterminedTrajectoriesAsync(
 		IReadOnlyList<RollingDie> dice,
 		IReadOnlyList<PredeterminedDieTrajectory> trajectories,
-		CancellationToken ct)
+		CancellationToken ct,
+		IReadOnlyList<PredeterminedDicePairContact>? pairContacts = null,
+		Action<PredeterminedDicePlaybackTiming>? playbackStarted = null,
+		Action<float>? playbackProgressed = null,
+		Action? playbackCompleted = null)
 	{
 		if (dice.Count != trajectories.Count)
 			throw new ArgumentException("Dice and trajectory counts must match.");
@@ -294,6 +314,11 @@ public partial class RollingDie : Node3D
 		var visibleDuration = PredeterminedTrajectoryPlaybackSampler.ResolveVisibleDuration(
 			recordedBatchDuration,
 			compressionDisabled ? 0f : maximumVisibleDuration);
+		playbackStarted?.Invoke(new PredeterminedDicePlaybackTiming(
+			recordedBatchDuration,
+			visibleDuration,
+			trajectories,
+			pairContacts ?? Array.Empty<PredeterminedDicePairContact>()));
 		for (var i = 0; i < dice.Count; i++)
 			dice[i].BeginPredeterminedPlayback(trajectories[i]);
 
@@ -308,6 +333,7 @@ public partial class RollingDie : Node3D
 			var progress = visibleDuration <= 0f
 				? 1f
 				: Math.Clamp(elapsedVisibleSeconds / visibleDuration, 0f, 1f);
+			playbackProgressed?.Invoke(progress);
 			for (var i = 0; i < dice.Count; i++)
 				dice[i].ApplyTrajectoryFrame(
 					PredeterminedTrajectoryPlaybackSampler.SampleAtProgress(
@@ -324,6 +350,8 @@ public partial class RollingDie : Node3D
 				elapsedVisibleSeconds,
 				visibleFrameCount);
 		}
+		playbackProgressed?.Invoke(1f);
+		playbackCompleted?.Invoke();
 
 		var postRollDisplaySeconds = dice.Max(die => MathF.Max(0f, die.PostRollDisplaySeconds));
 		if (postRollDisplaySeconds > 0f)
