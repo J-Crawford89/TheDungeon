@@ -41,18 +41,18 @@ public sealed class PotionEffectApplicationServiceTests
 	}
 
 	[Fact]
-	public void TryUseHealthPotion_WhenNoneLeft_ReturnsNoneLeft()
+	public async Task TryUseHealthPotion_WhenNoneLeft_ReturnsNoneLeft()
 	{
 		var session = new GameSessionState();
 		var svc = Service(new ItemRepo());
 
-		var result = svc.TryUseHealthPotion(session);
+		var result = await svc.TryUseHealthPotionAsync(session);
 
 		Assert.Equal(HealthPotionUseOutcome.NoneLeft, result);
 	}
 
 	[Fact]
-	public void TryUseHealthPotion_WhenAtFullHealth_ReturnsAtFullHealth()
+	public async Task TryUseHealthPotion_WhenAtFullHealth_ReturnsAtFullHealth()
 	{
 		var session = new GameSessionState();
 		session.Player.InventoryState.Items.Add(new ItemInstance
@@ -62,13 +62,13 @@ public sealed class PotionEffectApplicationServiceTests
 		});
 		var svc = Service(new ItemRepo());
 
-		var result = svc.TryUseHealthPotion(session);
+		var result = await svc.TryUseHealthPotionAsync(session);
 
 		Assert.Equal(HealthPotionUseOutcome.AtFullHealth, result);
 	}
 
 	[Fact]
-	public void TryUseHealthPotion_WhenDefinitionMissing_ReturnsCannotResolveDefinition()
+	public async Task TryUseHealthPotion_WhenDefinitionMissing_ReturnsCannotResolveDefinition()
 	{
 		var session = new GameSessionState();
 		session.Player.CurrentHp = 5;
@@ -80,13 +80,13 @@ public sealed class PotionEffectApplicationServiceTests
 		});
 		var svc = Service(new ItemRepo());
 
-		var result = svc.TryUseHealthPotion(session);
+		var result = await svc.TryUseHealthPotionAsync(session);
 
 		Assert.Equal(HealthPotionUseOutcome.CannotResolveDefinition, result);
 	}
 
 	[Fact]
-	public void TryUseHealthPotion_AppliesHealAndConsumesOne()
+	public async Task TryUseHealthPotion_AppliesHealAndConsumesOne()
 	{
 		var session = new GameSessionState();
 		session.Player.CurrentHp = 4;
@@ -103,7 +103,7 @@ public sealed class PotionEffectApplicationServiceTests
 		});
 		var svc = Service(new ItemRepo(potionDef));
 
-		var result = svc.TryUseHealthPotion(session);
+		var result = await svc.TryUseHealthPotionAsync(session);
 
 		Assert.Equal(HealthPotionUseOutcome.Applied, result);
 		Assert.Equal(7, session.Player.CurrentHp);
@@ -111,7 +111,7 @@ public sealed class PotionEffectApplicationServiceTests
 	}
 
 	[Fact]
-	public void TryUseHealthPotion_ClampsToMissingHp()
+	public async Task TryUseHealthPotion_ClampsToMissingHp()
 	{
 		var session = new GameSessionState();
 		session.Player.CurrentHp = 9;
@@ -128,14 +128,14 @@ public sealed class PotionEffectApplicationServiceTests
 		});
 		var svc = Service(new ItemRepo(potionDef));
 
-		var result = svc.TryUseHealthPotion(session);
+		var result = await svc.TryUseHealthPotionAsync(session);
 
 		Assert.Equal(HealthPotionUseOutcome.Applied, result);
 		Assert.Equal(10, session.Player.CurrentHp);
 	}
 
 	[Fact]
-	public void TryUseHealthPotion_WithNegativeHeal_TotalTreatsAsZero()
+	public async Task TryUseHealthPotion_WithNegativeHeal_TotalTreatsAsZero()
 	{
 		var session = new GameSessionState();
 		session.Player.CurrentHp = 5;
@@ -152,7 +152,7 @@ public sealed class PotionEffectApplicationServiceTests
 		});
 		var svc = Service(new ItemRepo(potionDef));
 
-		var result = svc.TryUseHealthPotion(session);
+		var result = await svc.TryUseHealthPotionAsync(session);
 
 		Assert.Equal(HealthPotionUseOutcome.Applied, result);
 		Assert.Equal(5, session.Player.CurrentHp);

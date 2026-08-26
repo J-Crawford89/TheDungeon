@@ -20,6 +20,7 @@ internal sealed class InventoryNotebookCoordinator
 	private static bool _overflowWarned;
 	private Guid? _pendingEquipItemInstanceId;
 	private HashSet<EquipmentSlot>? _pendingEquipEligibleSlots;
+	private bool _isUsingItem;
 
 	public InventoryNotebookCoordinator(
 		NotebookOverlay o,
@@ -378,13 +379,27 @@ internal sealed class InventoryNotebookCoordinator
 		RefreshAll();
 	}
 
-	private async void OnUsePressed()
+	private void OnUsePressed() => GodotAsyncEventHandler.Run(UseSelectedItemAsync, "Use inventory item");
+
+	private async Task UseSelectedItemAsync()
 	{
+		if (_isUsingItem)
+			return;
 		if (!InventoryNotebookActionRules.ShouldEnableUse(_selection, GetSelectedItem()))
 			return;
-		await _potions.TryUseHealthPotionAsync(_session);
-		_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
-		RefreshAll();
+
+		_isUsingItem = true;
+		SetAllActionsDisabled();
+		try
+		{
+			await _potions.TryUseHealthPotionAsync(_session);
+			_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
+		}
+		finally
+		{
+			_isUsingItem = false;
+			RefreshAll();
+		}
 	}
 
 	private void OnDropPressed()

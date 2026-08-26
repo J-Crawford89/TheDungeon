@@ -134,7 +134,7 @@ public sealed class ContainerLootOperationsTests
 	}
 
 	[Fact]
-	public void TransferAllContents_Salvage_EmptiesAndRemovesFeature()
+	public async Task TransferAllContents_Salvage_EmptiesAndRemovesFeature()
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var repo = new MapItemRepo(coin);
@@ -150,7 +150,7 @@ public sealed class ContainerLootOperationsTests
 		session.Dungeon.CurrentFloor = floor;
 		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
 
-		var result = ContainerLootOperations.TransferAllContents(
+		var result = await ContainerLootOperations.TransferAllContentsAsync(
 			session,
 			room,
 			salvage,
@@ -168,7 +168,7 @@ public sealed class ContainerLootOperationsTests
 	}
 
 	[Fact]
-	public void TransferAllContents_Corpse_LeavesEmptyFeatureInRoom()
+	public async Task TransferAllContents_Corpse_LeavesEmptyFeatureInRoom()
 	{
 		var gem = new ItemDefinition { Id = "gem", Name = "Gem", MaxStackSize = 1 };
 		var repo = new MapItemRepo(gem);
@@ -184,7 +184,7 @@ public sealed class ContainerLootOperationsTests
 		session.Dungeon.CurrentFloor = floor;
 		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
 
-		var result = ContainerLootOperations.TransferAllContents(
+		var result = await ContainerLootOperations.TransferAllContentsAsync(
 			session,
 			room,
 			corpse,
@@ -201,7 +201,7 @@ public sealed class ContainerLootOperationsTests
 	}
 
 	[Fact]
-	public void TransferSelectedContents_TakesOneStack_LeavesOther()
+	public async Task TransferSelectedContents_TakesOneStack_LeavesOther()
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var gem = new ItemDefinition { Id = "gem", Name = "Gem", MaxStackSize = 1 };
@@ -222,7 +222,7 @@ public sealed class ContainerLootOperationsTests
 		session.Dungeon.CurrentFloor = floor;
 		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
 
-		var result = ContainerLootOperations.TransferSelectedContents(
+		var result = await ContainerLootOperations.TransferSelectedContentsAsync(
 			session,
 			room,
 			salvage,
@@ -240,7 +240,7 @@ public sealed class ContainerLootOperationsTests
 	}
 
 	[Fact]
-	public void TransferSelectedContents_InvalidIndex_Throws()
+	public async Task TransferSelectedContents_InvalidIndex_Throws()
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var repo = new MapItemRepo(coin);
@@ -256,8 +256,8 @@ public sealed class ContainerLootOperationsTests
 		session.Dungeon.CurrentFloor = floor;
 		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
 
-		Assert.Throws<System.ArgumentOutOfRangeException>(() =>
-			ContainerLootOperations.TransferSelectedContents(
+		await Assert.ThrowsAsync<System.ArgumentOutOfRangeException>(() =>
+			ContainerLootOperations.TransferSelectedContentsAsync(
 				session,
 				room,
 				salvage,
@@ -270,7 +270,7 @@ public sealed class ContainerLootOperationsTests
 	}
 
 	[Fact]
-	public void TransferAllContents_UnknownId_KeepsRowAndSkips()
+	public async Task TransferAllContents_UnknownId_KeepsRowAndSkips()
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var repo = new MapItemRepo(coin);
@@ -290,7 +290,7 @@ public sealed class ContainerLootOperationsTests
 		session.Dungeon.CurrentFloor = floor;
 		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
 
-		var result = ContainerLootOperations.TransferAllContents(
+		var result = await ContainerLootOperations.TransferAllContentsAsync(
 			session,
 			room,
 			salvage,
@@ -308,7 +308,7 @@ public sealed class ContainerLootOperationsTests
 	}
 
 	[Fact]
-	public void TransferAllContents_Harvest_PartialSuccess_GrantsSuccessCountOnly()
+	public async Task TransferAllContents_Harvest_PartialSuccess_GrantsSuccessCountOnly()
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var repo = new MapItemRepo(coin);
@@ -335,7 +335,7 @@ public sealed class ContainerLootOperationsTests
 		var dice = new DiceRollService(new QueueRandom(10, 10, 10, 10, 5, 5, 5));
 		var resolution = new ResolutionService(dice);
 
-		var result = ContainerLootOperations.TransferAllContents(
+		var result = await ContainerLootOperations.TransferAllContentsAsync(
 			session,
 			room,
 			salvage,
@@ -352,7 +352,7 @@ public sealed class ContainerLootOperationsTests
 	}
 
 	[Fact]
-	public void TransferAllContents_Harvest_AllFail_GrantsNothing()
+	public async Task TransferAllContents_Harvest_AllFail_GrantsNothing()
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var repo = new MapItemRepo(coin);
@@ -379,7 +379,7 @@ public sealed class ContainerLootOperationsTests
 		var dice = new DiceRollService(new QueueRandom(5, 5, 5));
 		var resolution = new ResolutionService(dice);
 
-		var result = ContainerLootOperations.TransferAllContents(
+		var result = await ContainerLootOperations.TransferAllContentsAsync(
 			session,
 			room,
 			salvage,

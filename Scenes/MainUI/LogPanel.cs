@@ -1,6 +1,7 @@
 #nullable enable
 using Godot;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public partial class LogPanel : PanelContainer
 {
@@ -54,7 +55,9 @@ public partial class LogPanel : PanelContainer
 
 	private void ScrollToBottomDeferred() => CallDeferred(nameof(ScrollLogToBottomImpl));
 
-	private async void ScrollLogToBottomImpl()
+	private void ScrollLogToBottomImpl() => GodotAsyncEventHandler.Run(ScrollLogToBottomAsync, "Scroll game log");
+
+	private async Task ScrollLogToBottomAsync()
 	{
 		await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 

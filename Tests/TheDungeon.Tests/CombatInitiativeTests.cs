@@ -31,7 +31,7 @@ public sealed class CombatInitiativeTests
 	}
 
 	[Fact]
-	public void RollInitiativeOrder_SkipsDeadMonsters_AndReturnsPlayerPlusAlive()
+	public async Task RollInitiativeOrder_SkipsDeadMonsters_AndReturnsPlayerPlusAlive()
 	{
 		var session = new GameSessionState();
 		session.Player.AbilityScores.Agility = 0;
@@ -47,7 +47,7 @@ public sealed class CombatInitiativeTests
 		// Player roll 10, monster0 roll 5, monster2 roll 15
 		var init = new CombatInitiative(new DiceRollService(new QueueRandom(10, 5, 15)), new NarrativeService());
 
-		var order = init.RollInitiativeOrder(session, feature);
+		var order = await init.RollInitiativeOrderAsync(session, feature);
 
 		Assert.Equal(3, order.Count);
 		Assert.Contains(order, s => s.IsPlayer);

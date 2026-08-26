@@ -118,7 +118,7 @@ public sealed class CombatCorpseHelperTests
 	}
 
 	[Fact]
-	public void ExecutePlayerAttack_OnKill_SpawnsCorpseWithLoot()
+	public async Task ExecutePlayerAttack_OnKill_SpawnsCorpseWithLoot()
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var items = new MapItemRepo(coin);
@@ -207,7 +207,7 @@ public sealed class CombatCorpseHelperTests
 			CurrentTurnIndex = 0,
 		};
 
-		combat.ExecutePlayerAttack(session, 0, PlayerAttackChoice.Weapon(EquipmentSlot.WeaponMainHand1));
+		await combat.ExecutePlayerAttackAsync(session, 0, PlayerAttackChoice.Weapon(EquipmentSlot.WeaponMainHand1));
 
 		var corpse = Assert.Single(room.Features.OfType<CorpseFeature>());
 		Assert.Single(corpse.Contents);
@@ -215,7 +215,7 @@ public sealed class CombatCorpseHelperTests
 	}
 
 	[Fact]
-	public void ContainerLoot_TryLootAll_AfterCombatCorpse_TransfersCoin()
+	public async Task ContainerLoot_TryLootAll_AfterCombatCorpse_TransfersCoin()
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var repo = new MapItemRepo(coin);
@@ -235,7 +235,7 @@ public sealed class CombatCorpseHelperTests
 
 		var svc = new ContainerLootInteractionService(repo, new NarrativeService(), TestPlayerProficiencyAggregation.CreateEmpty(),
 			new ResolutionService(new DiceRollService(new System.Random(1))));
-		var result = svc.TryLootAll(session, 0);
+		var result = await svc.TryLootAllAsync(session, 0);
 
 		Assert.Equal(ContainerLootErrorCode.None, result.ErrorCode);
 		Assert.Equal(1, result.StacksGranted);

@@ -15,18 +15,6 @@ public static class ContainerLootOperations
 	}
 
 	/// <summary>Takes every valid stack from <paramref name="container"/>; stacks with unknown item ids remain in the container.</summary>
-	public static TransferResult TransferAllContents(
-		GameSessionState session,
-		DungeonRoom room,
-		ContainerFeature container,
-		IItemDefinitionRepository items,
-		NarrativeService narrative,
-		PlayerProficiencyAggregationService proficiency,
-		ResolutionService resolution,
-		string containerKindLabel) =>
-		TransferAllContentsAsync(session, room, container, items, narrative, proficiency, resolution, containerKindLabel)
-			.GetAwaiter().GetResult();
-
 	public static async Task<TransferResult> TransferAllContentsAsync(
 		GameSessionState session,
 		DungeonRoom room,
@@ -86,19 +74,6 @@ public static class ContainerLootOperations
 	}
 
 	/// <summary>Takes selected stacks by content index into <paramref name="container.Contents"/>; unknown definition ids are returned to the container.</summary>
-	public static TransferResult TransferSelectedContents(
-		GameSessionState session,
-		DungeonRoom room,
-		ContainerFeature container,
-		IReadOnlyList<int> contentIndices,
-		IItemDefinitionRepository items,
-		NarrativeService narrative,
-		PlayerProficiencyAggregationService proficiency,
-		ResolutionService resolution,
-		string containerKindLabel) =>
-		TransferSelectedContentsAsync(session, room, container, contentIndices, items, narrative, proficiency, resolution, containerKindLabel)
-			.GetAwaiter().GetResult();
-
 	public static async Task<TransferResult> TransferSelectedContentsAsync(
 		GameSessionState session,
 		DungeonRoom room,

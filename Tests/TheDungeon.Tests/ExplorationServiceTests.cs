@@ -16,15 +16,15 @@ public sealed class ExplorationServiceTests
 	}
 	private sealed class NoopCombatService : ICombatService
 	{
-		public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel) => false;
+		public Task<bool> TryBeginCombatIfHostileAsync(GameSessionState session, RoomCoord previousCoord, int floorLevel) => Task.FromResult(false);
 		public bool CanAcceptPlayerAction(GameSessionState session) => false;
 		public bool CanExecuteCombatAbility(GameSessionState session, string abilityId) => false;
-		public void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice) { }
-		public void ExecutePlayerFlee(GameSessionState session) { }
-		public void ExecutePlayerTakeTreasure(GameSessionState session, TargetPayload payload) { }
-		public void ExecutePlayerUseHealthPotion(GameSessionState session) { }
-		public void ExecutePlayerDefend(GameSessionState session) { }
-		public void ExecutePlayerDisarmTrap(GameSessionState session, TargetPayload payload) { }
+		public Task ExecutePlayerAttackAsync(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice) => Task.CompletedTask;
+		public Task ExecutePlayerFleeAsync(GameSessionState session) => Task.CompletedTask;
+		public Task ExecutePlayerTakeTreasureAsync(GameSessionState session, TargetPayload payload) => Task.CompletedTask;
+		public Task ExecutePlayerUseHealthPotionAsync(GameSessionState session) => Task.CompletedTask;
+		public Task ExecutePlayerDefendAsync(GameSessionState session) => Task.CompletedTask;
+		public Task ExecutePlayerDisarmTrapAsync(GameSessionState session, TargetPayload payload) => Task.CompletedTask;
 	}
 
 	private static ExplorationService Service()
@@ -39,7 +39,7 @@ public sealed class ExplorationServiceTests
 	}
 
 	[Fact]
-	public void Inspect_CorpseFeature_DoesNotEmitRemains_KeepsSlainFromDeadMonster()
+	public async Task Inspect_CorpseFeature_DoesNotEmitRemains_KeepsSlainFromDeadMonster()
 	{
 		var service = Service();
 		var session = new GameSessionState();
@@ -83,7 +83,7 @@ public sealed class ExplorationServiceTests
 		session.Dungeon.CurrentFloor = floor;
 		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
 
-		var result = service.Inspect(session);
+		var result = await service.InspectAsync(session);
 
 		Assert.True(result.Success);
 		Assert.DoesNotContain(result.InspectData!.FeatureLines, l => l.Text.StartsWith("Remains:"));
@@ -91,7 +91,7 @@ public sealed class ExplorationServiceTests
 	}
 
 	[Fact]
-	public void Inspect_IncludesSalvageFeatureLine()
+	public async Task Inspect_IncludesSalvageFeatureLine()
 	{
 		var service = Service();
 		var session = new GameSessionState();
@@ -105,7 +105,7 @@ public sealed class ExplorationServiceTests
 		session.Dungeon.CurrentFloor = floor;
 		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
 
-		var result = service.Inspect(session);
+		var result = await service.InspectAsync(session);
 
 		Assert.True(result.Success);
 		var line = Assert.Single(result.InspectData!.FeatureLines, l => l.Text.StartsWith("Salvage:"));
@@ -113,7 +113,7 @@ public sealed class ExplorationServiceTests
 	}
 
 	[Fact]
-	public void Inspect_IncludesChestFeatureLine()
+	public async Task Inspect_IncludesChestFeatureLine()
 	{
 		var service = Service();
 		var session = new GameSessionState();
@@ -128,7 +128,7 @@ public sealed class ExplorationServiceTests
 		session.Dungeon.CurrentFloor = floor;
 		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
 
-		var result = service.Inspect(session);
+		var result = await service.InspectAsync(session);
 
 		Assert.True(result.Success);
 		var line = Assert.Single(result.InspectData!.FeatureLines, l => l.Text.StartsWith("Chest:"));
@@ -197,14 +197,14 @@ public sealed class ExplorationServiceTests
 	}
 
 	[Fact]
-	public void Inspect_NoRoomAtPlayer_ReturnsInspectNoRoom()
+	public async Task Inspect_NoRoomAtPlayer_ReturnsInspectNoRoom()
 	{
 		var service = Service();
 		var session = new GameSessionState();
 		session.Dungeon.CurrentFloor = new DungeonFloor { Level = 1, Entrance = DirectionHelper.Origin };
 		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
 
-		var result = service.Inspect(session);
+		var result = await service.InspectAsync(session);
 
 		Assert.False(result.Success);
 		Assert.Equal(ExplorationErrorCode.InspectNoRoom, result.ErrorCode);

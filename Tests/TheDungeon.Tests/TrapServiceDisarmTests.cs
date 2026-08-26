@@ -52,30 +52,30 @@ public sealed class TrapServiceDisarmTests
 	}
 
 	[Fact]
-	public void TryDisarm_NoFloor_ReturnsNoCurrentFloor()
+	public async Task TryDisarm_NoFloor_ReturnsNoCurrentFloor()
 	{
 		var session = new GameSessionState();
 		var svc = Service(new ItemRepo());
 
-		var result = svc.TryDisarm(session);
+		var result = await svc.TryDisarmAsync(session);
 
 		Assert.Equal(TrapDisarmResultCode.NoCurrentFloor, result.ResultCode);
 	}
 
 	[Fact]
-	public void TryDisarmAtSlot_BadSlot_ReturnsNoTrapPresent()
+	public async Task TryDisarmAtSlot_BadSlot_ReturnsNoTrapPresent()
 	{
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
 		var session = SessionWithRoom(room);
 		var svc = Service(new ItemRepo());
 
-		var result = svc.TryDisarmAtSlot(session, 0, 0);
+		var result = await svc.TryDisarmAtSlotAsync(session, 0, 0);
 
 		Assert.Equal(TrapDisarmResultCode.NoTrapPresent, result.ResultCode);
 	}
 
 	[Fact]
-	public void TryDisarm_Success_RemovesTrap_StagesSalvageWithRope()
+	public async Task TryDisarm_Success_RemovesTrap_StagesSalvageWithRope()
 	{
 		var ropeDef = new ItemDefinition { Id = InventoryIds.Rope, Name = "Rope", MaxStackSize = 99 };
 		var svc = Service(new ItemRepo(ropeDef), seed: 2);
@@ -98,7 +98,7 @@ public sealed class TrapServiceDisarmTests
 		var session = SessionWithRoom(room);
 		session.Player.AbilityScores.Dexterity = 0;
 
-		var result = svc.TryDisarm(session);
+		var result = await svc.TryDisarmAsync(session);
 
 		Assert.Equal(TrapDisarmResultCode.DisarmCheckResolved, result.ResultCode);
 		Assert.True(result.TrapFeatureRemoved);
@@ -113,7 +113,7 @@ public sealed class TrapServiceDisarmTests
 	}
 
 	[Fact]
-	public void TryDisarm_Success_EmptyDisarmLoot_NoSalvage()
+	public async Task TryDisarm_Success_EmptyDisarmLoot_NoSalvage()
 	{
 		var svc = Service(new ItemRepo(), seed: 4);
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
@@ -133,14 +133,14 @@ public sealed class TrapServiceDisarmTests
 		var session = SessionWithRoom(room);
 		session.Player.AbilityScores.Dexterity = 0;
 
-		var result = svc.TryDisarm(session);
+		var result = await svc.TryDisarmAsync(session);
 
 		Assert.Equal(TrapDisarmResultCode.DisarmCheckResolved, result.ResultCode);
 		Assert.Empty(room.Features.OfType<SalvageFeature>());
 	}
 
 	[Fact]
-	public void TryDisarm_Success_UnknownLootId_Omitted_ValidStillStaged()
+	public async Task TryDisarm_Success_UnknownLootId_Omitted_ValidStillStaged()
 	{
 		var ropeDef = new ItemDefinition { Id = InventoryIds.Rope, Name = "Rope", MaxStackSize = 99 };
 		var svc = Service(new ItemRepo(ropeDef), seed: 5);
@@ -167,7 +167,7 @@ public sealed class TrapServiceDisarmTests
 		var session = SessionWithRoom(room);
 		session.Player.AbilityScores.Dexterity = 0;
 
-		svc.TryDisarm(session);
+		await svc.TryDisarmAsync(session);
 
 		Assert.Contains(session.LogEntries,
 			e => e.Text.Contains($"[Loot] Item definition '{unknownId}' not found.", System.StringComparison.Ordinal));
@@ -179,7 +179,7 @@ public sealed class TrapServiceDisarmTests
 	}
 
 	[Fact]
-	public void TryDisarm_Fail_TripsAndDamagesPlayer()
+	public async Task TryDisarm_Fail_TripsAndDamagesPlayer()
 	{
 		var svc = Service(new ItemRepo(), seed: 3);
 		var room = new DungeonRoom { Position = DirectionHelper.Origin };
@@ -201,7 +201,7 @@ public sealed class TrapServiceDisarmTests
 		session.Player.MaxHp = 20;
 		session.Player.AbilityScores.Dexterity = 0;
 
-		var result = svc.TryDisarm(session);
+		var result = await svc.TryDisarmAsync(session);
 
 		Assert.Equal(TrapDisarmResultCode.DisarmCheckResolved, result.ResultCode);
 		Assert.Equal(4, result.DamageDealtToPlayer);

@@ -15,61 +15,61 @@ public sealed class CombatUiPresenter
 		_refreshHud = refreshHud;
 	}
 
-	public void OnAttackWithTarget(int livingMonsterOrdinal, PlayerAttackChoice attackChoice = default)
+	public async Task OnAttackWithTargetAsync(int livingMonsterOrdinal, PlayerAttackChoice attackChoice = default)
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		if (!_combatService.CanAcceptPlayerAction(_session))
 			return;
-		ExecuteAsync(() => _combatService.ExecutePlayerAttackAsync(_session, livingMonsterOrdinal, attackChoice));
+		await ExecuteAsync(() => _combatService.ExecutePlayerAttackAsync(_session, livingMonsterOrdinal, attackChoice));
 	}
 
-	public void OnFleePressed()
+	public async Task OnFleePressedAsync()
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		if (!_combatService.CanAcceptPlayerAction(_session))
 			return;
-		ExecuteAsync(() => _combatService.ExecutePlayerFleeAsync(_session));
+		await ExecuteAsync(() => _combatService.ExecutePlayerFleeAsync(_session));
 	}
 
-	public void OnTakeWithTarget(TargetPayload payload)
+	public async Task OnTakeWithTargetAsync(TargetPayload payload)
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		if (!_combatService.CanAcceptPlayerAction(_session))
 			return;
-		ExecuteAsync(() => _combatService.ExecutePlayerTakeTreasureAsync(_session, payload));
+		await ExecuteAsync(() => _combatService.ExecutePlayerTakeTreasureAsync(_session, payload));
 	}
 
-	public void OnPotionPressed()
+	public async Task OnPotionPressedAsync()
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		if (!_combatService.CanAcceptPlayerAction(_session))
 			return;
-		ExecuteAsync(() => _combatService.ExecutePlayerUseHealthPotionAsync(_session));
+		await ExecuteAsync(() => _combatService.ExecutePlayerUseHealthPotionAsync(_session));
 	}
 
-	public void OnDefendPressed()
+	public async Task OnDefendPressedAsync()
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		if (!_combatService.CanAcceptPlayerAction(_session))
 			return;
-		ExecuteAsync(() => _combatService.ExecutePlayerDefendAsync(_session));
+		await ExecuteAsync(() => _combatService.ExecutePlayerDefendAsync(_session));
 	}
 
-	public void OnDisarmWithTarget(TargetPayload payload)
+	public async Task OnDisarmWithTargetAsync(TargetPayload payload)
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		if (!_combatService.CanAcceptPlayerAction(_session))
 			return;
-		ExecuteAsync(() => _combatService.ExecutePlayerDisarmTrapAsync(_session, payload));
+		await ExecuteAsync(() => _combatService.ExecutePlayerDisarmTrapAsync(_session, payload));
 	}
 
-	private async void ExecuteAsync(Func<Task> action)
+	private async Task ExecuteAsync(Func<Task> action)
 	{
 		if (_isBusyResolvingAction)
 			return;

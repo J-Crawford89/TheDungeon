@@ -37,9 +37,6 @@ internal sealed class CombatTurnLoop
 		c.AbilityCooldowns.OnPlayerTurnStarted();
 	}
 
-	public void ProcessAutomaticMonsterTurns(GameSessionState session)
-		=> ProcessAutomaticMonsterTurnsAsync(session).GetAwaiter().GetResult();
-
 	public async Task ProcessAutomaticMonsterTurnsAsync(
 		GameSessionState session,
 		CancellationToken ct = default)

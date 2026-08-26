@@ -109,7 +109,7 @@ public sealed class CombatTurnLoopTests
 	}
 
 	[Fact]
-	public void ProcessAutomaticMonsterTurns_CurrentRoomNull_EndsCombatVictory()
+	public async Task ProcessAutomaticMonsterTurns_CurrentRoomNull_EndsCombatVictory()
 	{
 		var loop = CreateLoop(out _);
 		var session = SessionInCombat(
@@ -117,14 +117,14 @@ public sealed class CombatTurnLoopTests
 			currentTurnIndex: 0);
 		session.Dungeon.CurrentFloor = null;
 
-		loop.ProcessAutomaticMonsterTurns(session);
+		await loop.ProcessAutomaticMonsterTurnsAsync(session);
 
 		Assert.Null(session.Combat);
 		Assert.Equal(DungeonMode.Exploration, session.Dungeon.DungeonMode);
 	}
 
 	[Fact]
-	public void ProcessAutomaticMonsterTurns_NoMonsterFeature_EndsCombatVictory()
+	public async Task ProcessAutomaticMonsterTurns_NoMonsterFeature_EndsCombatVictory()
 	{
 		var loop = CreateLoop(out _);
 		var session = SessionInCombat(
@@ -136,14 +136,14 @@ public sealed class CombatTurnLoopTests
 		session.Dungeon.CurrentFloor = floor;
 		session.Dungeon.PlayerCoord = coord;
 
-		loop.ProcessAutomaticMonsterTurns(session);
+		await loop.ProcessAutomaticMonsterTurnsAsync(session);
 
 		Assert.Null(session.Combat);
 		Assert.Equal(DungeonMode.Exploration, session.Dungeon.DungeonMode);
 	}
 
 	[Fact]
-	public void ProcessAutomaticMonsterTurns_AfterOneMonsterTurn_ResumesOnPlayerAndStillInCombat()
+	public async Task ProcessAutomaticMonsterTurns_AfterOneMonsterTurn_ResumesOnPlayerAndStillInCombat()
 	{
 		var attack = new AttackDefinition
 		{
@@ -197,7 +197,7 @@ public sealed class CombatTurnLoopTests
 		session.Dungeon.CurrentFloor = floor;
 		session.Dungeon.PlayerCoord = coord;
 
-		loop.ProcessAutomaticMonsterTurns(session);
+		await loop.ProcessAutomaticMonsterTurnsAsync(session);
 
 		Assert.NotNull(session.Combat);
 		Assert.Equal(DungeonMode.Combat, session.Dungeon.DungeonMode);
@@ -208,7 +208,7 @@ public sealed class CombatTurnLoopTests
 	}
 
 	[Fact]
-	public void ProcessAutomaticMonsterTurns_PlayerSlot_DecrementsAbilityCooldownsOnce()
+	public async Task ProcessAutomaticMonsterTurns_PlayerSlot_DecrementsAbilityCooldownsOnce()
 	{
 		var loop = CreateLoop(out _);
 		var session = SessionInCombat(
@@ -216,7 +216,7 @@ public sealed class CombatTurnLoopTests
 			currentTurnIndex: 0);
 		session.Combat!.AbilityCooldowns.Start("defend", 2);
 
-		loop.ProcessAutomaticMonsterTurns(session);
+		await loop.ProcessAutomaticMonsterTurnsAsync(session);
 
 		Assert.Equal(1, session.Combat!.AbilityCooldowns.GetRemaining("defend"));
 	}

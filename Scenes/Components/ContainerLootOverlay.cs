@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Godot;
 
 /// <summary>Modal loot picker for <see cref="ContainerLootInteractionService"/>; bind once via <see cref="Bind"/>.</summary>
@@ -113,7 +114,9 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 		ctrl.SetSelected(_selectedStackIndices.Contains(stackIndex));
 	}
 
-	private async void OnTakeAllPressed()
+	private void OnTakeAllPressed() => GodotAsyncEventHandler.Run(TakeAllAsync, "Take all container loot");
+
+	private async Task TakeAllAsync()
 	{
 		if (_isResolvingLoot || _ctx == null || _refreshHud == null || _containerOrdinal < 0)
 			return;
@@ -131,7 +134,9 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 		}
 	}
 
-	private async void OnTakeSelectedPressed()
+	private void OnTakeSelectedPressed() => GodotAsyncEventHandler.Run(TakeSelectedAsync, "Take selected container loot");
+
+	private async Task TakeSelectedAsync()
 	{
 		if (_isResolvingLoot || _ctx == null || _refreshHud == null || _containerOrdinal < 0)
 			return;

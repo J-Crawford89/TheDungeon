@@ -170,7 +170,7 @@ public sealed class CombatServiceTests
 	}
 
 	[Fact]
-	public void ExecutePlayerAttack_WithEquippedWeapon_EventuallyDealsDamageForSomeSeed()
+	public async Task ExecutePlayerAttack_WithEquippedWeapon_EventuallyDealsDamageForSomeSeed()
 	{
 		var pierce = new DamageTypeDefinition("p", "Piercing", DamageFamily.Physical);
 		var club = new WeaponDefinition
@@ -205,7 +205,7 @@ public sealed class CombatServiceTests
 			var session = SessionWithWeaponCombat(club, weaponRow);
 			var hpBefore = FirstMonsterHp(session);
 			var combat = CreateCombatService(new Random(seed));
-			combat.ExecutePlayerAttack(session, 0, PlayerAttackChoice.Weapon(EquipmentSlot.WeaponMainHand1));
+			await combat.ExecutePlayerAttackAsync(session, 0, PlayerAttackChoice.Weapon(EquipmentSlot.WeaponMainHand1));
 			if (FirstMonsterHp(session) < hpBefore)
 			{
 				foundHit = true;
@@ -217,7 +217,7 @@ public sealed class CombatServiceTests
 	}
 
 	[Fact]
-	public void TryBeginCombatIfHostile_WhenNoLivingMonsters_ReturnsFalse()
+	public async Task TryBeginCombatIfHostile_WhenNoLivingMonsters_ReturnsFalse()
 	{
 		var combat = CreateCombatService(new Random(1));
 		var session = new GameSessionState();
@@ -239,12 +239,12 @@ public sealed class CombatServiceTests
 		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
 		session.Dungeon.DungeonMode = DungeonMode.Exploration;
 
-		Assert.False(combat.TryBeginCombatIfHostile(session, DirectionHelper.Origin, 1));
+		Assert.False(await combat.TryBeginCombatIfHostileAsync(session, DirectionHelper.Origin, 1));
 		Assert.Null(session.Combat);
 	}
 
 	[Fact]
-	public void TryBeginCombatIfHostile_WhenHostile_StartsCombatState()
+	public async Task TryBeginCombatIfHostile_WhenHostile_StartsCombatState()
 	{
 		var combat = CreateCombatService(new Random(2));
 		var session = new GameSessionState();
@@ -283,14 +283,14 @@ public sealed class CombatServiceTests
 		session.Dungeon.PlayerCoord = DirectionHelper.Origin;
 		session.Dungeon.DungeonMode = DungeonMode.Exploration;
 
-		Assert.True(combat.TryBeginCombatIfHostile(session, DirectionHelper.Origin, 1));
+		Assert.True(await combat.TryBeginCombatIfHostileAsync(session, DirectionHelper.Origin, 1));
 		Assert.NotNull(session.Combat);
 		Assert.Equal(DungeonMode.Combat, session.Dungeon.DungeonMode);
 		Assert.NotEmpty(session.Combat!.TurnOrder);
 	}
 
 	[Fact]
-	public void ExecutePlayerFlee_WhenSuccess_RestoresExploration()
+	public async Task ExecutePlayerFlee_WhenSuccess_RestoresExploration()
 	{
 		var combat = CreateCombatService(new Random(3));
 		var session = new GameSessionState();
@@ -312,7 +312,7 @@ public sealed class CombatServiceTests
 			CurrentTurnIndex = 0,
 		};
 
-		combat.ExecutePlayerFlee(session);
+		await combat.ExecutePlayerFleeAsync(session);
 
 		Assert.Null(session.Combat);
 		Assert.Equal(DungeonMode.Exploration, session.Dungeon.DungeonMode);
@@ -321,7 +321,7 @@ public sealed class CombatServiceTests
 	}
 
 	[Fact]
-	public void ExecutePlayerFlee_WhenFail_StaysInCombat()
+	public async Task ExecutePlayerFlee_WhenFail_StaysInCombat()
 	{
 		var combat = CreateCombatService(new Random(4));
 		var session = new GameSessionState();
@@ -334,7 +334,7 @@ public sealed class CombatServiceTests
 			CurrentTurnIndex = 0,
 		};
 
-		combat.ExecutePlayerFlee(session);
+		await combat.ExecutePlayerFleeAsync(session);
 
 		Assert.NotNull(session.Combat);
 		Assert.Equal(DungeonMode.Combat, session.Dungeon.DungeonMode);
@@ -342,33 +342,33 @@ public sealed class CombatServiceTests
 	}
 
 	[Fact]
-	public void ExecutePlayerAttack_InvalidTarget_LogsAndReturns()
+	public async Task ExecutePlayerAttack_InvalidTarget_LogsAndReturns()
 	{
 		var weapon = new WeaponDefinition { Id = "w", Name = "W", Attacks = [] };
 		var row = new ItemInstance { Definition = weapon, Quantity = 1 };
 		var session = SessionWithWeaponCombat(weapon, row);
 		var combat = CreateCombatService(new Random(5));
 
-		combat.ExecutePlayerAttack(session, 99, PlayerAttackChoice.Weapon(EquipmentSlot.WeaponMainHand1));
+		await combat.ExecutePlayerAttackAsync(session, 99, PlayerAttackChoice.Weapon(EquipmentSlot.WeaponMainHand1));
 
 		Assert.Contains(session.LogEntries, l => l.Text.Contains("nothing you can attack", StringComparison.OrdinalIgnoreCase));
 	}
 
 	[Fact]
-	public void ExecutePlayerAttack_MissingWeapon_FallsBackToUnarmed()
+	public async Task ExecutePlayerAttack_MissingWeapon_FallsBackToUnarmed()
 	{
 		var session = SessionWithWeaponCombat(null, null);
 		var hpBefore = FirstMonsterHp(session);
 		var combat = CreateCombatService(new Random(6));
 
-		combat.ExecutePlayerAttack(session, 0, PlayerAttackChoice.Weapon(EquipmentSlot.WeaponMainHand1));
+		await combat.ExecutePlayerAttackAsync(session, 0, PlayerAttackChoice.Weapon(EquipmentSlot.WeaponMainHand1));
 
 		Assert.True(FirstMonsterHp(session) < hpBefore);
 		Assert.Contains(session.LogEntries, l => l.Text.Contains("strike unarmed", StringComparison.OrdinalIgnoreCase));
 	}
 
 	[Fact]
-	public void ExecutePlayerAttack_WeaponWithNoAttacks_LogsAndDoesNotDamage()
+	public async Task ExecutePlayerAttack_WeaponWithNoAttacks_LogsAndDoesNotDamage()
 	{
 		var weapon = new WeaponDefinition
 		{
@@ -382,53 +382,53 @@ public sealed class CombatServiceTests
 		var hpBefore = FirstMonsterHp(session);
 		var combat = CreateCombatService(new Random(7));
 
-		combat.ExecutePlayerAttack(session, 0, PlayerAttackChoice.Weapon(EquipmentSlot.WeaponMainHand1));
+		await combat.ExecutePlayerAttackAsync(session, 0, PlayerAttackChoice.Weapon(EquipmentSlot.WeaponMainHand1));
 
 		Assert.Equal(hpBefore, FirstMonsterHp(session));
 		Assert.Contains(session.LogEntries, l => l.Text.Contains("no attacks configured", StringComparison.OrdinalIgnoreCase));
 	}
 
 	[Fact]
-	public void ExecutePlayerTakeTreasure_WrongPayloadKind_DoesNotAdvanceTurn()
+	public async Task ExecutePlayerTakeTreasure_WrongPayloadKind_DoesNotAdvanceTurn()
 	{
 		var session = SessionWithWeaponCombat(null, null);
 		session.Combat!.TurnOrder = [new CombatTurnSlot { IsPlayer = true }, new CombatTurnSlot { IsPlayer = true }];
 		session.Combat.CurrentTurnIndex = 0;
 		var combat = CreateCombatService(new Random(8));
 
-		combat.ExecutePlayerTakeTreasure(session, new TargetPayload { Kind = TargetPayloadKind.AttackLivingMonsterOrdinal });
+		await combat.ExecutePlayerTakeTreasureAsync(session, new TargetPayload { Kind = TargetPayloadKind.AttackLivingMonsterOrdinal });
 
 		Assert.Equal(0, session.Combat.CurrentTurnIndex);
 	}
 
 	[Fact]
-	public void ExecutePlayerDisarmTrap_WrongPayloadKind_DoesNotAdvanceTurn()
+	public async Task ExecutePlayerDisarmTrap_WrongPayloadKind_DoesNotAdvanceTurn()
 	{
 		var session = SessionWithWeaponCombat(null, null);
 		session.Combat!.TurnOrder = [new CombatTurnSlot { IsPlayer = true }, new CombatTurnSlot { IsPlayer = true }];
 		session.Combat.CurrentTurnIndex = 0;
 		var combat = CreateCombatService(new Random(9));
 
-		combat.ExecutePlayerDisarmTrap(session, new TargetPayload { Kind = TargetPayloadKind.AttackLivingMonsterOrdinal });
+		await combat.ExecutePlayerDisarmTrapAsync(session, new TargetPayload { Kind = TargetPayloadKind.AttackLivingMonsterOrdinal });
 
 		Assert.Equal(0, session.Combat.CurrentTurnIndex);
 	}
 
 	[Fact]
-	public void ExecutePlayerUseHealthPotion_NoneLeft_DoesNotAdvanceTurn()
+	public async Task ExecutePlayerUseHealthPotion_NoneLeft_DoesNotAdvanceTurn()
 	{
 		var session = SessionWithWeaponCombat(null, null);
 		session.Combat!.TurnOrder = [new CombatTurnSlot { IsPlayer = true }, new CombatTurnSlot { IsPlayer = true }];
 		session.Combat.CurrentTurnIndex = 0;
 		var combat = CreateCombatService(new Random(10));
 
-		combat.ExecutePlayerUseHealthPotion(session);
+		await combat.ExecutePlayerUseHealthPotionAsync(session);
 
 		Assert.Equal(0, session.Combat.CurrentTurnIndex);
 	}
 
 	[Fact]
-	public void ExecutePlayerUseHealthPotion_Applied_AdvancesTurn()
+	public async Task ExecutePlayerUseHealthPotion_Applied_AdvancesTurn()
 	{
 		var session = SessionWithWeaponCombat(null, null);
 		session.Combat!.TurnOrder = [new CombatTurnSlot { IsPlayer = true }, new CombatTurnSlot { IsPlayer = true }];
@@ -442,27 +442,27 @@ public sealed class CombatServiceTests
 		});
 		var combat = CreateCombatServiceWithPotionRepo(new Random(11));
 
-		combat.ExecutePlayerUseHealthPotion(session);
+		await combat.ExecutePlayerUseHealthPotionAsync(session);
 
 		Assert.Equal(1, session.Combat.CurrentTurnIndex);
 		Assert.True(session.Player.CurrentHp > 5);
 	}
 
 	[Fact]
-	public void ExecutePlayerDefend_WithoutAbility_DoesNotAdvanceTurn()
+	public async Task ExecutePlayerDefend_WithoutAbility_DoesNotAdvanceTurn()
 	{
 		var session = SessionWithWeaponCombat(null, null);
 		session.Combat!.TurnOrder = [new CombatTurnSlot { IsPlayer = true }, new CombatTurnSlot { IsPlayer = true }];
 		session.Combat.CurrentTurnIndex = 0;
 		var combat = CreateCombatService(new Random(12));
 
-		combat.ExecutePlayerDefend(session);
+		await combat.ExecutePlayerDefendAsync(session);
 
 		Assert.Equal(0, session.Combat.CurrentTurnIndex);
 	}
 
 	[Fact]
-	public void ExecutePlayerFlee_Success_WhenReturnFloorMissing_StillRestoresExplorationAndCoord()
+	public async Task ExecutePlayerFlee_Success_WhenReturnFloorMissing_StillRestoresExplorationAndCoord()
 	{
 		var combat = CreateCombatService(new Random(13));
 		var session = new GameSessionState();
@@ -480,7 +480,7 @@ public sealed class CombatServiceTests
 			CurrentTurnIndex = 0,
 		};
 
-		combat.ExecutePlayerFlee(session);
+		await combat.ExecutePlayerFleeAsync(session);
 
 		Assert.Null(session.Combat);
 		Assert.Equal(DungeonMode.Exploration, session.Dungeon.DungeonMode);
@@ -489,7 +489,7 @@ public sealed class CombatServiceTests
 	}
 
 	[Fact]
-	public void ExecutePlayerDefend_WhenAlreadyDefending_LogsMessageAndDoesNotAdvance()
+	public async Task ExecutePlayerDefend_WhenAlreadyDefending_LogsMessageAndDoesNotAdvance()
 	{
 		var session = SessionWithWeaponCombat(null, null);
 		session.Player.GrantedAbilities.Add(new GrantedAbility { AbilityId = AbilityIds.Defend });
@@ -498,14 +498,14 @@ public sealed class CombatServiceTests
 		session.Combat.CurrentTurnIndex = 0;
 		var combat = CreateCombatService(new Random(14));
 
-		combat.ExecutePlayerDefend(session);
+		await combat.ExecutePlayerDefendAsync(session);
 
 		Assert.Equal(0, session.Combat.CurrentTurnIndex);
 		Assert.Contains(session.LogEntries, l => l.Text.Contains("already defending", StringComparison.OrdinalIgnoreCase));
 	}
 
 	[Fact]
-	public void ExecutePlayerDefend_WhenOnCooldown_LogsMessageAndDoesNotAdvance()
+	public async Task ExecutePlayerDefend_WhenOnCooldown_LogsMessageAndDoesNotAdvance()
 	{
 		var session = SessionWithWeaponCombat(null, null);
 		session.Player.GrantedAbilities.Add(new GrantedAbility { AbilityId = AbilityIds.Defend });
@@ -514,7 +514,7 @@ public sealed class CombatServiceTests
 		session.Combat.CurrentTurnIndex = 0;
 		var combat = CreateCombatService(new Random(15));
 
-		combat.ExecutePlayerDefend(session);
+		await combat.ExecutePlayerDefendAsync(session);
 
 		Assert.Equal(0, session.Combat.CurrentTurnIndex);
 		Assert.Contains(session.LogEntries, l => l.Text.Contains("cannot defend yet", StringComparison.OrdinalIgnoreCase));

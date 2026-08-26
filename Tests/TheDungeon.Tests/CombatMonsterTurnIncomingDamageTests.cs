@@ -5,7 +5,7 @@ using Xunit;
 public sealed class CombatMonsterTurnIncomingDamageTests
 {
 	[Fact]
-	public void ExecuteMonsterTurn_WhenArmorBandHit_AppliesDamageReductionAndCanClampToZero()
+	public async Task ExecuteMonsterTurn_WhenArmorBandHit_AppliesDamageReductionAndCanClampToZero()
 	{
 		var foundArmorHit = false;
 		for (var seed = 0; seed < 400; seed++)
@@ -22,7 +22,7 @@ public sealed class CombatMonsterTurnIncomingDamageTests
 			var turn = CreateMonsterTurn(seed);
 			var hpBefore = session.Player.CurrentHp;
 
-			turn.ExecuteMonsterTurn(session, feature, 0);
+			await turn.ExecuteMonsterTurnAsync(session, feature, 0);
 			if (!session.LogEntries.Any(e => e.Text.Contains("strikes your armor", StringComparison.Ordinal)))
 				continue;
 
@@ -35,7 +35,7 @@ public sealed class CombatMonsterTurnIncomingDamageTests
 	}
 
 	[Fact]
-	public void ExecuteMonsterTurn_WhenDirectHit_DoesNotApplyArmorDamageReduction()
+	public async Task ExecuteMonsterTurn_WhenDirectHit_DoesNotApplyArmorDamageReduction()
 	{
 		var foundDirectHit = false;
 		for (var seed = 0; seed < 400; seed++)
@@ -52,7 +52,7 @@ public sealed class CombatMonsterTurnIncomingDamageTests
 			var turn = CreateMonsterTurn(seed);
 			var hpBefore = session.Player.CurrentHp;
 
-			turn.ExecuteMonsterTurn(session, feature, 0);
+			await turn.ExecuteMonsterTurnAsync(session, feature, 0);
 			if (!session.LogEntries.Any(e => e.Text.Contains("hits you for", StringComparison.Ordinal)))
 				continue;
 
@@ -136,4 +136,3 @@ public sealed class CombatMonsterTurnIncomingDamageTests
 			]
 		};
 }
-

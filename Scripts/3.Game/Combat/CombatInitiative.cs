@@ -24,9 +24,6 @@ public sealed class CombatInitiative
 		return names;
 	}
 
-	public List<CombatTurnSlot> RollInitiativeOrder(GameSessionState session, MonsterFeature feature)
-		=> RollInitiativeOrderAsync(session, feature).GetAwaiter().GetResult();
-
 	public async Task<List<CombatTurnSlot>> RollInitiativeOrderAsync(
 		GameSessionState session,
 		MonsterFeature feature,

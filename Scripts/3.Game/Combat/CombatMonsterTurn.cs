@@ -25,9 +25,6 @@ public sealed class CombatMonsterTurn
 		_playerDowned = playerDowned;
 	}
 
-	public void ExecuteMonsterTurn(GameSessionState session, MonsterFeature feature, int monsterIndex)
-		=> ExecuteMonsterTurnAsync(session, feature, monsterIndex).GetAwaiter().GetResult();
-
 	public async Task ExecuteMonsterTurnAsync(
 		GameSessionState session,
 		MonsterFeature feature,

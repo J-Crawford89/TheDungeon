@@ -82,9 +82,6 @@ public sealed class TrapService
 		return damageDealt;
 	}
 
-	public TrapDisarmResult TryDisarm(GameSessionState session)
-		=> TryDisarmAsync(session).GetAwaiter().GetResult();
-
 	public async Task<TrapDisarmResult> TryDisarmAsync(GameSessionState session)
 	{
 		if (session.Dungeon.CurrentFloor == null)
@@ -107,9 +104,6 @@ public sealed class TrapService
 		return await TryDisarmAsync(session, room, trapFeature, trapInstance);
 	}
 
-	public TrapDisarmResult TryDisarmAtSlot(GameSessionState session, int trapFeatureOrdinal, int trapIndexInFeature)
-		=> TryDisarmAtSlotAsync(session, trapFeatureOrdinal, trapIndexInFeature).GetAwaiter().GetResult();
-
 	public async Task<TrapDisarmResult> TryDisarmAtSlotAsync(
 		GameSessionState session,
 		int trapFeatureOrdinal,
@@ -127,9 +121,6 @@ public sealed class TrapService
 
 		return await TryDisarmAsync(session, room, trapFeature, trapInstance);
 	}
-
-	public TrapDisarmResult TryDisarm(GameSessionState session, DungeonRoom room, TrapFeature trapFeature, TrapInstance trapInstance)
-		=> TryDisarmAsync(session, room, trapFeature, trapInstance).GetAwaiter().GetResult();
 
 	public async Task<TrapDisarmResult> TryDisarmAsync(
 		GameSessionState session,

@@ -25,9 +25,6 @@ public sealed class PotionEffectApplicationService
 	/// <summary>Use one health potion stack from inventory (constant id).
 	/// Does not enforce combat-only; callers decide context.
 	/// </summary>
-	public HealthPotionUseOutcome TryUseHealthPotion(GameSessionState session)
-		=> TryUseHealthPotionAsync(session).GetAwaiter().GetResult();
-
 	public async Task<HealthPotionUseOutcome> TryUseHealthPotionAsync(GameSessionState session)
 	{
 		var player = session.Player;

@@ -88,9 +88,6 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		_combatAbilities.Register(new DefendCombatAbilityHandler(_narrative, IsPlayerTurn));
 	}
 
-	public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
-		TryBeginCombatIfHostileAsync(session, previousCoord, floorLevel).GetAwaiter().GetResult();
-
 	public async Task<bool> TryBeginCombatIfHostileAsync(GameSessionState session, RoomCoord previousCoord, int floorLevel)
 	{
 		if (session.Phase != GamePlayPhase.InProgress)
@@ -159,9 +156,6 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		var slot = c.TurnOrder[c.CurrentTurnIndex];
 		return slot.IsPlayer;
 	}
-
-	public void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice) =>
-		ExecutePlayerAttackAsync(session, livingMonsterOrdinal, attackChoice).GetAwaiter().GetResult();
 
 	public async Task ExecutePlayerAttackAsync(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice)
 	{
@@ -277,9 +271,6 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		}
 	}
 
-	public void ExecutePlayerFlee(GameSessionState session) =>
-		ExecutePlayerFleeAsync(session).GetAwaiter().GetResult();
-
 	public async Task ExecutePlayerFleeAsync(GameSessionState session)
 	{
 		if (!CanAcceptPlayerAction(session))
@@ -331,9 +322,6 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		}
 	}
 
-	public void ExecutePlayerTakeTreasure(GameSessionState session, TargetPayload payload) =>
-		ExecutePlayerTakeTreasureAsync(session, payload).GetAwaiter().GetResult();
-
 	public async Task ExecutePlayerTakeTreasureAsync(GameSessionState session, TargetPayload payload)
 	{
 		if (!CanAcceptPlayerAction(session))
@@ -363,9 +351,6 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		}
 	}
 
-	public void ExecutePlayerUseHealthPotion(GameSessionState session) =>
-		ExecutePlayerUseHealthPotionAsync(session).GetAwaiter().GetResult();
-
 	public async Task ExecutePlayerUseHealthPotionAsync(GameSessionState session)
 	{
 		if (!CanAcceptPlayerAction(session))
@@ -384,9 +369,6 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			_isBusyResolvingAction = false;
 		}
 	}
-
-	public void ExecutePlayerDisarmTrap(GameSessionState session, TargetPayload payload) =>
-		ExecutePlayerDisarmTrapAsync(session, payload).GetAwaiter().GetResult();
 
 	public async Task ExecutePlayerDisarmTrapAsync(GameSessionState session, TargetPayload payload)
 	{
@@ -414,9 +396,6 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 			_isBusyResolvingAction = false;
 		}
 	}
-
-	public void ExecutePlayerDefend(GameSessionState session) =>
-		ExecutePlayerDefendAsync(session).GetAwaiter().GetResult();
 
 	public async Task ExecutePlayerDefendAsync(GameSessionState session)
 	{

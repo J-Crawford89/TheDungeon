@@ -179,10 +179,11 @@ None open.
 
 - **Type:** Feature / architecture
 - **Priority:** P2
-- **Status:** Proposed
+- **Status:** Needs manual confirmation
 - **Depends on:** None
 - **Desired behavior:** Delete production `Foo() => FooAsync().GetResult()` wrappers. Dice and UI waits are async-only. Share a safe `async void` logging pattern for Godot button handlers. Keep inventory/math APIs synchronous.
 - **Acceptance notes:** No gameplay path blocks a thread on `.GetResult()`; unit tests still cover the async methods.
+- **Implementation note (2026-08-25):** Game services, Godot-free presenters, and `GameUiCoordinator` now expose Task-returning orchestration end to end. Godot signals dispatch through one guarded/logged `async void` boundary; loot, notebook use, deferred log scrolling, and the dice harness use the same boundary. Production blocking waits and discarded Task launches were removed, while pure inventory and calculation paths remain synchronous. Automated tests cover awaited production APIs, busy-state lifetime, fault cleanup, and guard behavior for completion, synchronous/asynchronous faults, and cancellation. A main-game smoke test remains before completion.
 
 ### Feature-015 — `NarrativeConstants` wording store
 

@@ -180,6 +180,20 @@ These rules align with [ADR-0001](#adr-0001-godot-serialized-files-are-editor-ow
 
 Keep scene scripts thin; move orchestration and heavy interaction logic into coordinator/presenter classes. Preferred shape: `MainUi` → `GameUiCoordinator` → presenters. See ADR-0002 in the appendix.
 
+### Async orchestration boundary
+
+Any gameplay or presentation operation that awaits dice, reactions, animation, or another asynchronous service stays asynchronous through its entire call chain:
+
+`Godot signal -> GodotAsyncEventHandler -> GameUiCoordinator Task -> presenter Task -> game service Task -> awaited presentation/reaction`
+
+- Async-capable public APIs use the `Async` suffix and return `Task` or `Task<T>`. Production code must not add synchronous wrappers that block with `.GetAwaiter().GetResult()`, `.Wait()`, or `.Result`.
+- [`MainUi`](../Scenes/MainUI/MainUi.cs) and other Godot scene adapters remain `void` signal handlers. They dispatch Task-returning work through [`GodotAsyncEventHandler`](../Scenes/GodotAsyncEventHandler.cs), the single intentional production `async void` boundary. That boundary uses the Godot-free [`AsyncOperationGuard`](../Scripts/4.UI/Presentation/AsyncOperationGuard.cs) to report synchronous and asynchronous faults through `GD.PushError`; cancellation ends quietly.
+- Coordinators and presenters do not catch operational faults merely to hide them. Their busy flags and control state span the complete awaited operation and are restored in `finally`; faults then reach the guarded Godot boundary for logging.
+- Pure in-memory inventory operations, calculations, mapping, queries, and other work with no asynchronous dependency remain synchronous. Async is used for orchestration boundaries, not as a blanket replacement for deterministic local work.
+- Tests call and await the same async APIs used by production. A test-only sync adapter is not an acceptable substitute for the production execution path.
+
+See ADR-0012 in the appendix.
+
 ---
 
 ## 3D dice presentation
@@ -216,7 +230,7 @@ Combat turn chrome uses a second UI-agnostic boundary: [`ICombatTurnPresentation
 
 Profile selection belongs to the application use case, not the dice request or rules engine. Repeated harvest attempts select `RapidSequence`; a lone harvest attempt and all existing combat/exploration rolls use `Standard`. A true multi-die roll is still one presenter call, one cleanup operation, and one resolved-roll reaction.
 
-The reaction boundary is propagated through initiative, player and monster hit/damage, flee, potion healing, trap disarm, inspect discovery, and each individual harvest attempt. Combat and UI presenters reject duplicate actions while an awaited action is resolving. Synchronous service methods remain compatibility paths for headless tests and non-Godot callers; production Godot callers must use the async methods.
+The reaction boundary is propagated through initiative, player and monster hit/damage, flee, potion healing, trap disarm, inspect discovery, and each individual harvest attempt. Combat and UI presenters reject duplicate actions while an awaited action is resolving. These service and presenter paths are async-only; headless tests await the same APIs used by Godot callers.
 
 ### Scene model
 
@@ -437,3 +451,12 @@ Player-facing summary: [Game Design Document — Combat and damage](./GAME_DESIG
 - **Decision:** Code that references Godot (`Node`, `Texture2D`, `[Export]`, etc.) lives under `Scenes/` (and the Godot game project’s repositories/mappers/resources). Godot-free UI orchestration, presenters, view-models, and presentation icon keys live in `4.UI`. `4.UI` must not reference the Godot SDK.
 - **Rationale:** Headless xUnit can exercise presenters and view-models; scene scripts stay thin adapters. Mixing Godot into `4.UI` would collapse that seam.
 - **Companion:** ADR-0001 (serialized `.tscn` / `.tres` remain editor-owned).
+
+### ADR-0012: Awaitable work stays async to one guarded Godot boundary
+
+- **Status:** Accepted
+- **Decision:** Any operation that awaits presentation, reaction, or another asynchronous dependency returns `Task` through Game services, UI presenters, and `GameUiCoordinator`. Synchronous blocking wrappers are prohibited. Godot `void` signals dispatch through one shared `GodotAsyncEventHandler`; pure inventory and calculation APIs remain synchronous.
+- **Rationale:** Blocking an engine thread can deadlock or freeze presentation, while scattered `async void` handlers lose composability and make failures difficult to observe. A single logged boundary preserves Godot's signal shape without hiding asynchronous work from the testable layers.
+- **Failure policy:** Presenter/coordinator faults propagate after local `finally` cleanup. `AsyncOperationGuard` catches synchronous and asynchronous faults at the scene boundary and reports them through Godot; `OperationCanceledException` is treated as expected scene-lifetime termination.
+- **Testing policy:** Unit tests await production APIs directly and verify operation ordering, busy-state lifetime, cleanup after faults, and boundary handling for completion, synchronous failure, asynchronous failure, and cancellation.
+- **Companions:** ADR-0002 (coordinator/presenter UI), ADR-0010 (awaited dice/reaction sequencing), and ADR-0011 (Godot-free `4.UI`).

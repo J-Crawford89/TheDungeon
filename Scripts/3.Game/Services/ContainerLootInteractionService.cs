@@ -95,9 +95,6 @@ public sealed class ContainerLootInteractionService
 		});
 	}
 
-	public ContainerLootTransferResult TryLootAll(GameSessionState session, int containerOrdinal)
-		=> TryLootAllAsync(session, containerOrdinal).GetAwaiter().GetResult();
-
 	public async Task<ContainerLootTransferResult> TryLootAllAsync(GameSessionState session, int containerOrdinal)
 	{
 		if (!TryResolveRoom(session, out var room, out var err))
@@ -124,12 +121,6 @@ public sealed class ContainerLootInteractionService
 			tr.StacksSkippedMissingDefinition,
 			tr.RemovedContainerFromRoom);
 	}
-
-	public ContainerLootTransferResult TryLootSelected(
-		GameSessionState session,
-		int containerOrdinal,
-		IReadOnlyList<int> contentIndices) =>
-		TryLootSelectedAsync(session, containerOrdinal, contentIndices).GetAwaiter().GetResult();
 
 	public async Task<ContainerLootTransferResult> TryLootSelectedAsync(
 		GameSessionState session,

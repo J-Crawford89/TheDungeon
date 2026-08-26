@@ -31,9 +31,6 @@ public sealed class ExplorationService
 		_experiencePerFloorEntry = experiencePerFloorEntry;
 	}
 
-	public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
-		_combat.TryBeginCombatIfHostile(session, previousCoord, floorLevel);
-
 	public Task<bool> TryBeginCombatIfHostileAsync(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
 		_combat.TryBeginCombatIfHostileAsync(session, previousCoord, floorLevel);
 
@@ -111,9 +108,6 @@ public sealed class ExplorationService
 		player.Facing = nextFacing;
 		return ExplorationServiceResult.OkRotation(nextFacing);
 	}
-
-	public ExplorationServiceResult Inspect(GameSessionState session)
-		=> InspectAsync(session).GetAwaiter().GetResult();
 
 	public async Task<ExplorationServiceResult> InspectAsync(GameSessionState session)
 	{

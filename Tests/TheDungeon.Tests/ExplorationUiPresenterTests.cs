@@ -19,15 +19,15 @@ public sealed class ExplorationUiPresenterTests
 
 	private sealed class NoopCombatService : ICombatService
 	{
-		public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel) => false;
+		public Task<bool> TryBeginCombatIfHostileAsync(GameSessionState session, RoomCoord previousCoord, int floorLevel) => Task.FromResult(false);
 		public bool CanAcceptPlayerAction(GameSessionState session) => false;
 		public bool CanExecuteCombatAbility(GameSessionState session, string abilityId) => false;
-		public void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice) { }
-		public void ExecutePlayerFlee(GameSessionState session) { }
-		public void ExecutePlayerTakeTreasure(GameSessionState session, TargetPayload payload) { }
-		public void ExecutePlayerUseHealthPotion(GameSessionState session) { }
-		public void ExecutePlayerDefend(GameSessionState session) { }
-		public void ExecutePlayerDisarmTrap(GameSessionState session, TargetPayload payload) { }
+		public Task ExecutePlayerAttackAsync(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice) => Task.CompletedTask;
+		public Task ExecutePlayerFleeAsync(GameSessionState session) => Task.CompletedTask;
+		public Task ExecutePlayerTakeTreasureAsync(GameSessionState session, TargetPayload payload) => Task.CompletedTask;
+		public Task ExecutePlayerUseHealthPotionAsync(GameSessionState session) => Task.CompletedTask;
+		public Task ExecutePlayerDefendAsync(GameSessionState session) => Task.CompletedTask;
+		public Task ExecutePlayerDisarmTrapAsync(GameSessionState session, TargetPayload payload) => Task.CompletedTask;
 	}
 
 	private sealed class RecordingLootOpener : IContainerLootOverlayOpener
@@ -41,27 +41,25 @@ public sealed class ExplorationUiPresenterTests
 	private sealed class RecordingCombatService : ICombatService
 	{
 		private readonly List<string> _timeline;
+		public Func<Task<bool>>? BeginOperation { get; init; }
 
 		public RecordingCombatService(List<string> timeline) =>
 			_timeline = timeline;
 
-		public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel)
+		public Task<bool> TryBeginCombatIfHostileAsync(GameSessionState session, RoomCoord previousCoord, int floorLevel)
 		{
 			_timeline.Add("combat-begin");
-			return true;
+			return BeginOperation?.Invoke() ?? Task.FromResult(true);
 		}
-
-		public Task<bool> TryBeginCombatIfHostileAsync(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
-			Task.FromResult(TryBeginCombatIfHostile(session, previousCoord, floorLevel));
 
 		public bool CanAcceptPlayerAction(GameSessionState session) => false;
 		public bool CanExecuteCombatAbility(GameSessionState session, string abilityId) => false;
-		public void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice) { }
-		public void ExecutePlayerFlee(GameSessionState session) { }
-		public void ExecutePlayerTakeTreasure(GameSessionState session, TargetPayload payload) { }
-		public void ExecutePlayerUseHealthPotion(GameSessionState session) { }
-		public void ExecutePlayerDefend(GameSessionState session) { }
-		public void ExecutePlayerDisarmTrap(GameSessionState session, TargetPayload payload) { }
+		public Task ExecutePlayerAttackAsync(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice) => Task.CompletedTask;
+		public Task ExecutePlayerFleeAsync(GameSessionState session) => Task.CompletedTask;
+		public Task ExecutePlayerTakeTreasureAsync(GameSessionState session, TargetPayload payload) => Task.CompletedTask;
+		public Task ExecutePlayerUseHealthPotionAsync(GameSessionState session) => Task.CompletedTask;
+		public Task ExecutePlayerDefendAsync(GameSessionState session) => Task.CompletedTask;
+		public Task ExecutePlayerDisarmTrapAsync(GameSessionState session, TargetPayload payload) => Task.CompletedTask;
 	}
 
 	private static ExplorationUiPresenter CreatePresenter(
@@ -109,7 +107,7 @@ public sealed class ExplorationUiPresenterTests
 	}
 
 	[Fact]
-	public void OnOpenContainerWithTarget_LootContainerWithOpener_DoesNotRefresh_OpensOverlay()
+	public async Task OnOpenContainerWithTarget_LootContainerWithOpener_DoesNotRefresh_OpensOverlay()
 	{
 		var refreshes = new List<UiRefreshFlags>();
 		var session = new GameSessionState();
@@ -117,7 +115,7 @@ public sealed class ExplorationUiPresenterTests
 		var opener = new RecordingLootOpener();
 		var presenter = CreatePresenter(session, f => refreshes.Add(f), opener);
 
-		presenter.OnOpenContainerWithTarget(new TargetPayload
+		await presenter.OnOpenContainerWithTargetAsync(new TargetPayload
 		{
 			Kind = TargetPayloadKind.LootContainerAll,
 			ContainerOrdinal = 2,
@@ -128,7 +126,7 @@ public sealed class ExplorationUiPresenterTests
 	}
 
 	[Fact]
-	public void OnOpenContainerWithTarget_WithoutOverlay_InvokesRefresh_IncludingMainView()
+	public async Task OnOpenContainerWithTarget_WithoutOverlay_InvokesRefresh_IncludingMainView()
 	{
 		var refreshes = new List<UiRefreshFlags>();
 		var session = new GameSessionState();
@@ -142,7 +140,7 @@ public sealed class ExplorationUiPresenterTests
 
 		var presenter = CreatePresenter(session, f => refreshes.Add(f), lootOverlay: null);
 
-		presenter.OnOpenContainerWithTarget(new TargetPayload
+		await presenter.OnOpenContainerWithTargetAsync(new TargetPayload
 		{
 			Kind = TargetPayloadKind.LootContainerAll,
 			ContainerOrdinal = 0,
@@ -170,27 +168,27 @@ public sealed class ExplorationUiPresenterTests
 	}
 
 	[Fact]
-	public void OnPotionPressed_InCombat_DoesNotInvokeRefresh()
+	public async Task OnPotionPressed_InCombat_DoesNotInvokeRefresh()
 	{
 		var refreshes = new List<UiRefreshFlags>();
 		var session = new GameSessionState();
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
 		var presenter = CreatePresenter(session, f => refreshes.Add(f));
 
-		presenter.OnPotionPressed();
+		await presenter.OnPotionPressedAsync();
 
 		Assert.Empty(refreshes);
 	}
 
 	[Fact]
-	public void OnPotionPressed_InExploration_InvokesRefreshWithExpectedFlags()
+	public async Task OnPotionPressed_InExploration_InvokesRefreshWithExpectedFlags()
 	{
 		var refreshes = new List<UiRefreshFlags>();
 		var session = new GameSessionState();
 		session.Dungeon.DungeonMode = DungeonMode.Exploration;
 		var presenter = CreatePresenter(session, f => refreshes.Add(f));
 
-		presenter.OnPotionPressed();
+		await presenter.OnPotionPressedAsync();
 
 		Assert.Single(refreshes);
 		var flags = refreshes[0];
@@ -213,20 +211,20 @@ public sealed class ExplorationUiPresenterTests
 	}
 
 	[Fact]
-	public void OnDisarmWithTarget_InCombat_DoesNotInvokeRefresh()
+	public async Task OnDisarmWithTarget_InCombat_DoesNotInvokeRefresh()
 	{
 		var refreshes = new List<UiRefreshFlags>();
 		var session = new GameSessionState();
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
 		var presenter = CreatePresenter(session, f => refreshes.Add(f));
 
-		presenter.OnDisarmWithTarget(new TargetPayload { Kind = TargetPayloadKind.DisarmTrapInstance });
+		await presenter.OnDisarmWithTargetAsync(new TargetPayload { Kind = TargetPayloadKind.DisarmTrapInstance });
 
 		Assert.Empty(refreshes);
 	}
 
 	[Fact]
-	public void OnForwardPressed_SuccessfulMove_RefreshesMainViewBeforeCombatBegin()
+	public async Task OnForwardPressed_SuccessfulMove_RefreshesMainViewBeforeCombatBegin()
 	{
 		var timeline = new List<string>();
 		var session = BuildLinkedNorthRooms();
@@ -239,11 +237,55 @@ public sealed class ExplorationUiPresenterTests
 			},
 			combat: new RecordingCombatService(timeline));
 
-		presenter.OnForwardPressed();
+		await presenter.OnForwardPressedAsync();
 
 		Assert.Contains("refresh-main-view", timeline);
 		Assert.Contains("combat-begin", timeline);
 		Assert.True(timeline.IndexOf("refresh-main-view") < timeline.IndexOf("combat-begin"));
+	}
+
+	[Fact]
+	public async Task OnForwardPressed_RemainsBusyUntilCombatBeginCompletes()
+	{
+		var timeline = new List<string>();
+		var beginCompletion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+		var session = BuildLinkedNorthRooms();
+		var presenter = CreatePresenter(
+			session,
+			flags => timeline.Add($"refresh:{flags}"),
+			combat: new RecordingCombatService(timeline) { BeginOperation = () => beginCompletion.Task });
+
+		var move = presenter.OnForwardPressedAsync();
+		var refreshCountWhileMoving = timeline.Count;
+		await presenter.OnPotionPressedAsync();
+
+		Assert.Equal(refreshCountWhileMoving, timeline.Count);
+
+		beginCompletion.SetResult(true);
+		await move;
+		await presenter.OnPotionPressedAsync();
+
+		Assert.True(timeline.Count > refreshCountWhileMoving);
+	}
+
+	[Fact]
+	public async Task OnForwardPressed_WhenCombatBeginFaults_ReleasesBusyState()
+	{
+		var timeline = new List<string>();
+		var session = BuildLinkedNorthRooms();
+		var presenter = CreatePresenter(
+			session,
+			flags => timeline.Add($"refresh:{flags}"),
+			combat: new RecordingCombatService(timeline)
+			{
+				BeginOperation = () => Task.FromException<bool>(new InvalidOperationException("test fault")),
+			});
+
+		await Assert.ThrowsAsync<InvalidOperationException>(presenter.OnForwardPressedAsync);
+		var refreshCountAfterFault = timeline.Count;
+		await presenter.OnPotionPressedAsync();
+
+		Assert.True(timeline.Count > refreshCountAfterFault);
 	}
 
 	private static GameSessionState BuildLinkedNorthRooms()

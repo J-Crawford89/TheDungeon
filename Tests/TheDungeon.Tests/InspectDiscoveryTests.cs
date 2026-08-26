@@ -48,7 +48,7 @@ public sealed class InspectDiscoveryTests
 	}
 
 	[Fact]
-	public void RunInspectDiscovery_OneRoll_ComparedToEachDiscoverDc()
+	public async Task RunInspectDiscovery_OneRoll_ComparedToEachDiscoverDc()
 	{
 		var dice = new FixedDiceRoll(BuildRoll(total: 15, resolvedD20: 10));
 		var resolution = new ResolutionService(dice);
@@ -111,7 +111,7 @@ public sealed class InspectDiscoveryTests
 		session.Dungeon.CurrentFloor = floor;
 		session.Dungeon.PlayerCoord = coord;
 
-		inspect.RunInspectDiscovery(session, room);
+		await inspect.RunInspectDiscoveryAsync(session, room);
 
 		Assert.Equal(1, room.InspectAttemptCount);
 		Assert.True(treasureFeature.TreasureItems[0].IsRevealed);
@@ -131,7 +131,7 @@ public sealed class InspectDiscoveryTests
 	}
 
 	[Fact]
-	public void RunInspectDiscovery_WhenWisdomHigher_UsesWisdomModifierSource()
+	public async Task RunInspectDiscovery_WhenWisdomHigher_UsesWisdomModifierSource()
 	{
 		var dice = new CapturingDiceRoll(BuildRoll(total: 10, resolvedD20: 10));
 		var resolution = new ResolutionService(dice);
@@ -158,7 +158,7 @@ public sealed class InspectDiscoveryTests
 			]
 		});
 
-		inspect.RunInspectDiscovery(session, room);
+		await inspect.RunInspectDiscoveryAsync(session, room);
 
 		Assert.NotNull(dice.LastRequest);
 		Assert.Single(dice.LastRequest!.ModifiersWithSources);

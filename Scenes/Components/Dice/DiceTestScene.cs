@@ -56,19 +56,19 @@ public partial class DiceTestScene : Node3D
 		SetStatus("Ready. Persist=" + PersistDiceUntilClear);
 	}
 
-	public override async void _Input(InputEvent @event)
+	public override void _Input(InputEvent @event)
 	{
 		if (@event is not InputEventKey { Pressed: true, Echo: false } key)
 			return;
 
 		if (key.Keycode == Key.Space && key.ShiftPressed)
 		{
-			await SpawnAndRollAsync(gameplayRoll: true);
+			GodotAsyncEventHandler.Run(() => SpawnAndRollAsync(gameplayRoll: true), "Dice test gameplay roll");
 			GetViewport().SetInputAsHandled();
 		}
 		else if (key.Keycode == Key.Space)
 		{
-			await SpawnAndRollAsync(gameplayRoll: false);
+			GodotAsyncEventHandler.Run(() => SpawnAndRollAsync(gameplayRoll: false), "Dice test free roll");
 			GetViewport().SetInputAsHandled();
 		}
 	}
@@ -134,18 +134,20 @@ public partial class DiceTestScene : Node3D
 		_d100TotalSpin = new SpinBox { MinValue = 1, MaxValue = 100, Value = 26 };
 		d100Row.AddChild(_d100TotalSpin);
 		var d100Btn = new Button { Text = "Spawn+gameplay d100 pair" };
-		d100Btn.Pressed += () => _ = SpawnD100GameplayAsync((int)_d100TotalSpin!.Value);
+		d100Btn.Pressed += () => GodotAsyncEventHandler.Run(
+			() => SpawnD100GameplayAsync((int)_d100TotalSpin!.Value),
+			"Dice test d100 roll");
 		d100Row.AddChild(d100Btn);
 
-		AddButton(vbox, "Spawn only", () => _ = SpawnDiceAsync(rollFree: false, rollGameplay: false, forcedFace: -1));
-		AddButton(vbox, "Spawn + free roll", () => _ = SpawnAndRollAsync(gameplayRoll: false));
-		AddButton(vbox, "Spawn + gameplay roll", () => _ = SpawnAndRollAsync(gameplayRoll: true));
-		AddButton(vbox, "Re-roll last (free)", () => _ = RerollLastAsync(gameplayRoll: false));
-		AddButton(vbox, "Re-roll last (gameplay)", () => _ = RerollLastAsync(gameplayRoll: true));
+		AddAsyncButton(vbox, "Spawn only", () => SpawnDiceAsync(rollFree: false, rollGameplay: false, forcedFace: -1));
+		AddAsyncButton(vbox, "Spawn + free roll", () => SpawnAndRollAsync(gameplayRoll: false));
+		AddAsyncButton(vbox, "Spawn + gameplay roll", () => SpawnAndRollAsync(gameplayRoll: true));
+		AddAsyncButton(vbox, "Re-roll last (free)", () => RerollLastAsync(gameplayRoll: false));
+		AddAsyncButton(vbox, "Re-roll last (gameplay)", () => RerollLastAsync(gameplayRoll: true));
 		AddButton(vbox, "Snap in place (gameplay face)", SnapLastInPlace);
 		AddButton(vbox, "Verify calibration (last die)", VerifyLastCalibration);
-		AddButton(vbox, "Forced collision: head-on d6 pair", () => _ = SpawnForcedCollisionAsync(glancing: false));
-		AddButton(vbox, "Forced collision: glancing d6 pair", () => _ = SpawnForcedCollisionAsync(glancing: true));
+		AddAsyncButton(vbox, "Forced collision: head-on d6 pair", () => SpawnForcedCollisionAsync(glancing: false));
+		AddAsyncButton(vbox, "Forced collision: glancing d6 pair", () => SpawnForcedCollisionAsync(glancing: true));
 		AddButton(vbox, "Clear all", ClearAll);
 
 		_statusLabel = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart, CustomMinimumSize = new Vector2(300, 48) };
@@ -158,6 +160,13 @@ public partial class DiceTestScene : Node3D
 	{
 		var btn = new Button { Text = text };
 		btn.Pressed += onPress;
+		parent.AddChild(btn);
+	}
+
+	private static void AddAsyncButton(Container parent, string text, Func<Task> onPress)
+	{
+		var btn = new Button { Text = text };
+		btn.Pressed += () => GodotAsyncEventHandler.Run(onPress, $"Dice test: {text}");
 		parent.AddChild(btn);
 	}
 

@@ -87,7 +87,7 @@ public sealed class CombatMonsterTurnTests
 	}
 
 	[Fact]
-	public void ExecuteMonsterTurn_InvalidIndex_ReturnsEarly()
+	public async Task ExecuteMonsterTurn_InvalidIndex_ReturnsEarly()
 	{
 		var dice = new SequentialDiceRoll();
 		var turn = CreateMonsterTurn(dice);
@@ -95,14 +95,14 @@ public sealed class CombatMonsterTurnTests
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
 		var feature = LivingMonsterFixture();
 
-		turn.ExecuteMonsterTurn(session, feature, monsterIndex: 99);
+		await turn.ExecuteMonsterTurnAsync(session, feature, monsterIndex: 99);
 
 		Assert.Empty(session.LogEntries);
 		Assert.Equal(10, session.Player.CurrentHp);
 	}
 
 	[Fact]
-	public void ExecuteMonsterTurn_DeadMonster_ReturnsEarly()
+	public async Task ExecuteMonsterTurn_DeadMonster_ReturnsEarly()
 	{
 		var dice = new SequentialDiceRoll();
 		var turn = CreateMonsterTurn(dice);
@@ -111,13 +111,13 @@ public sealed class CombatMonsterTurnTests
 		var feature = LivingMonsterFixture();
 		feature.Monsters[0].CurrentHp = 0;
 
-		turn.ExecuteMonsterTurn(session, feature, monsterIndex: 0);
+		await turn.ExecuteMonsterTurnAsync(session, feature, monsterIndex: 0);
 
 		Assert.Empty(session.LogEntries);
 	}
 
 	[Fact]
-	public void ExecuteMonsterTurn_NoValidAttacks_LogsDebugAndHesitates()
+	public async Task ExecuteMonsterTurn_NoValidAttacks_LogsDebugAndHesitates()
 	{
 		var emptyAttack = new AttackDefinition
 		{
@@ -146,14 +146,14 @@ public sealed class CombatMonsterTurnTests
 		var session = new GameSessionState();
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
 
-		turn.ExecuteMonsterTurn(session, feature, 0);
+		await turn.ExecuteMonsterTurnAsync(session, feature, 0);
 
 		Assert.Contains(session.LogEntries, e => e.Kind == LogEntryKind.Debug && e.Text.Contains("no valid attacks", StringComparison.Ordinal));
 		Assert.Contains(session.LogEntries, e => e.Text.Contains("hesitates", StringComparison.OrdinalIgnoreCase));
 	}
 
 	[Fact]
-	public void ExecuteMonsterTurn_SkipsFirstInvalidAttack_UsesSecond()
+	public async Task ExecuteMonsterTurn_SkipsFirstInvalidAttack_UsesSecond()
 	{
 		var pierce = Physical;
 		var invalid = new AttackDefinition { Name = "Empty", DamageComponents = [] };
@@ -196,7 +196,7 @@ public sealed class CombatMonsterTurnTests
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
 		session.Player.CurrentHp = 50;
 
-		turn.ExecuteMonsterTurn(session, feature, 0);
+		await turn.ExecuteMonsterTurnAsync(session, feature, 0);
 
 		Assert.Equal(47, session.Player.CurrentHp);
 		Assert.Contains(session.LogEntries,
@@ -205,7 +205,7 @@ public sealed class CombatMonsterTurnTests
 	}
 
 	[Fact]
-	public void ExecuteMonsterTurn_OnMiss_AppendsMissLineOnly()
+	public async Task ExecuteMonsterTurn_OnMiss_AppendsMissLineOnly()
 	{
 		var feature = LivingMonsterFixture();
 		var dice = new SequentialDiceRoll(Roll(total: 5, resolvedD20: 5));
@@ -214,7 +214,7 @@ public sealed class CombatMonsterTurnTests
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
 		session.Player.CurrentHp = 20;
 
-		turn.ExecuteMonsterTurn(session, feature, 0);
+		await turn.ExecuteMonsterTurnAsync(session, feature, 0);
 
 		Assert.Contains(session.LogEntries, e => e.Kind == LogEntryKind.Roll);
 		Assert.Contains(session.LogEntries, e => e.Text.Contains("miss", StringComparison.OrdinalIgnoreCase));
@@ -222,7 +222,7 @@ public sealed class CombatMonsterTurnTests
 	}
 
 	[Fact]
-	public void ExecuteMonsterTurn_OnHit_ReducesPlayerHp()
+	public async Task ExecuteMonsterTurn_OnHit_ReducesPlayerHp()
 	{
 		var feature = LivingMonsterFixture();
 		var dice = new SequentialDiceRoll(
@@ -233,7 +233,7 @@ public sealed class CombatMonsterTurnTests
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
 		session.Player.CurrentHp = 50;
 
-		turn.ExecuteMonsterTurn(session, feature, 0);
+		await turn.ExecuteMonsterTurnAsync(session, feature, 0);
 
 		Assert.Equal(46, session.Player.CurrentHp);
 		Assert.Contains(session.LogEntries, e => e.Kind == LogEntryKind.Normal && e.Text.Contains("damage", StringComparison.OrdinalIgnoreCase));

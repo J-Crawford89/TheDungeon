@@ -25,9 +25,6 @@ public sealed class InspectService
 	/// Increments <see cref="DungeonRoom.InspectAttemptCount"/>.
 	/// If hidden discoverable instances exist, rolls once and compares that roll to each instance's DiscoverDc.
 	/// </summary>
-	public void RunInspectDiscovery(GameSessionState session, DungeonRoom room)
-		=> RunInspectDiscoveryAsync(session, room).GetAwaiter().GetResult();
-
 	public async Task RunInspectDiscoveryAsync(GameSessionState session, DungeonRoom room)
 	{
 		room.InspectAttemptCount++;

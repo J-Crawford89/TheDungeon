@@ -139,7 +139,7 @@ public sealed class ContainerLootInteractionServiceTests
 	}
 
 	[Fact]
-	public void TryLootAll_TransfersAndClearsSalvage()
+	public async Task TryLootAll_TransfersAndClearsSalvage()
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var repo = new MapItemRepo(coin);
@@ -152,7 +152,7 @@ public sealed class ContainerLootInteractionServiceTests
 		room.Features.Add(salvage);
 		var session = SessionInRoom(room);
 
-		var result = svc.TryLootAll(session, 0);
+		var result = await svc.TryLootAllAsync(session, 0);
 
 		Assert.Equal(ContainerLootErrorCode.None, result.ErrorCode);
 		Assert.Equal(1, result.StacksGranted);
@@ -162,7 +162,7 @@ public sealed class ContainerLootInteractionServiceTests
 	}
 
 	[Fact]
-	public void TryLootSelected_PartialRow()
+	public async Task TryLootSelected_PartialRow()
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var gem = new ItemDefinition { Id = "gem", Name = "Gem", MaxStackSize = 1 };
@@ -180,7 +180,7 @@ public sealed class ContainerLootInteractionServiceTests
 		room.Features.Add(salvage);
 		var session = SessionInRoom(room);
 
-		var result = svc.TryLootSelected(session, 0, new[] { 1 });
+		var result = await svc.TryLootSelectedAsync(session, 0, new[] { 1 });
 
 		Assert.Equal(ContainerLootErrorCode.None, result.ErrorCode);
 		Assert.Equal(1, result.StacksGranted);
@@ -190,7 +190,7 @@ public sealed class ContainerLootInteractionServiceTests
 	}
 
 	[Fact]
-	public void TryLootSelected_InvalidRow_Fails()
+	public async Task TryLootSelected_InvalidRow_Fails()
 	{
 		var coin = new ItemDefinition { Id = "coin", Name = "Coin", MaxStackSize = 99 };
 		var repo = new MapItemRepo(coin);
@@ -203,14 +203,14 @@ public sealed class ContainerLootInteractionServiceTests
 		room.Features.Add(salvage);
 		var session = SessionInRoom(room);
 
-		var result = svc.TryLootSelected(session, 0, new[] { 5 });
+		var result = await svc.TryLootSelectedAsync(session, 0, new[] { 5 });
 
 		Assert.Equal(ContainerLootErrorCode.InvalidRowSelection, result.ErrorCode);
 		Assert.Equal(0, session.Player.InventoryState.SumQuantityForDefinitionId("coin"));
 	}
 
 	[Fact]
-	public void TryLootSelected_EmptySelection_Fails()
+	public async Task TryLootSelected_EmptySelection_Fails()
 	{
 		var svc = new ContainerLootInteractionService(new MapItemRepo(), new NarrativeService(),
 			TestPlayerProficiencyAggregation.CreateEmpty(), TestResolution());
@@ -218,7 +218,7 @@ public sealed class ContainerLootInteractionServiceTests
 		room.Features.Add(new SalvageFeature { Contents = [new LootableItemDefinition { ItemDefinitionId = "x", Quantity = 1 }] });
 		var session = SessionInRoom(room);
 
-		var result = svc.TryLootSelected(session, 0, []);
+		var result = await svc.TryLootSelectedAsync(session, 0, []);
 
 		Assert.Equal(ContainerLootErrorCode.EmptyRowSelection, result.ErrorCode);
 	}

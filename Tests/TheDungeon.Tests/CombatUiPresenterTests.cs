@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 public sealed class CombatUiPresenterTests
@@ -15,40 +16,53 @@ public sealed class CombatUiPresenterTests
 		public PlayerAttackChoice LastAttackChoice { get; private set; }
 		public TargetPayload? LastTakePayload { get; private set; }
 		public TargetPayload? LastDisarmPayload { get; private set; }
+		public Func<Task>? AttackOperation { get; set; }
 
-		public bool TryBeginCombatIfHostile(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
-			false;
+		public Task<bool> TryBeginCombatIfHostileAsync(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
+			Task.FromResult(false);
 
 		public bool CanAcceptPlayerAction(GameSessionState session) => AwaitingPlayerAction;
 
 		public bool CanExecuteCombatAbility(GameSessionState session, string abilityId) => false;
 
-		public void ExecutePlayerAttack(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice)
+		public Task ExecutePlayerAttackAsync(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice)
 		{
-			LastMethod = nameof(ICombatService.ExecutePlayerAttack);
+			LastMethod = nameof(ICombatService.ExecutePlayerAttackAsync);
 			LastAttackOrdinal = livingMonsterOrdinal;
 			LastAttackChoice = attackChoice;
+			return AttackOperation?.Invoke() ?? Task.CompletedTask;
 		}
 
-		public void ExecutePlayerFlee(GameSessionState session) =>
-			LastMethod = nameof(ICombatService.ExecutePlayerFlee);
-
-		public void ExecutePlayerTakeTreasure(GameSessionState session, TargetPayload payload)
+		public Task ExecutePlayerFleeAsync(GameSessionState session)
 		{
-			LastMethod = nameof(ICombatService.ExecutePlayerTakeTreasure);
+			LastMethod = nameof(ICombatService.ExecutePlayerFleeAsync);
+			return Task.CompletedTask;
+		}
+
+		public Task ExecutePlayerTakeTreasureAsync(GameSessionState session, TargetPayload payload)
+		{
+			LastMethod = nameof(ICombatService.ExecutePlayerTakeTreasureAsync);
 			LastTakePayload = payload;
+			return Task.CompletedTask;
 		}
 
-		public void ExecutePlayerUseHealthPotion(GameSessionState session) =>
-			LastMethod = nameof(ICombatService.ExecutePlayerUseHealthPotion);
-
-		public void ExecutePlayerDefend(GameSessionState session) =>
-			LastMethod = nameof(ICombatService.ExecutePlayerDefend);
-
-		public void ExecutePlayerDisarmTrap(GameSessionState session, TargetPayload payload)
+		public Task ExecutePlayerUseHealthPotionAsync(GameSessionState session)
 		{
-			LastMethod = nameof(ICombatService.ExecutePlayerDisarmTrap);
+			LastMethod = nameof(ICombatService.ExecutePlayerUseHealthPotionAsync);
+			return Task.CompletedTask;
+		}
+
+		public Task ExecutePlayerDefendAsync(GameSessionState session)
+		{
+			LastMethod = nameof(ICombatService.ExecutePlayerDefendAsync);
+			return Task.CompletedTask;
+		}
+
+		public Task ExecutePlayerDisarmTrapAsync(GameSessionState session, TargetPayload payload)
+		{
+			LastMethod = nameof(ICombatService.ExecutePlayerDisarmTrapAsync);
 			LastDisarmPayload = payload;
+			return Task.CompletedTask;
 		}
 	}
 
@@ -61,7 +75,7 @@ public sealed class CombatUiPresenterTests
 	}
 
 	[Fact]
-	public void Guards_WhenNotInCombat_NoServiceCallsAndNoRefresh()
+	public async Task Guards_WhenNotInCombat_NoServiceCallsAndNoRefresh()
 	{
 		var session = new GameSessionState();
 		session.Dungeon.DungeonMode = DungeonMode.Exploration;
@@ -69,16 +83,16 @@ public sealed class CombatUiPresenterTests
 		var refreshes = new List<UiRefreshFlags>();
 		var presenter = CreatePresenter(session, combat, f => refreshes.Add(f));
 
-		presenter.OnAttackWithTarget(0);
-		presenter.OnFleePressed();
-		presenter.OnPotionPressed();
+		await presenter.OnAttackWithTargetAsync(0);
+		await presenter.OnFleePressedAsync();
+		await presenter.OnPotionPressedAsync();
 
 		Assert.Null(combat.LastMethod);
 		Assert.Empty(refreshes);
 	}
 
 	[Fact]
-	public void Guards_WhenCombatButNotAwaiting_NoExecuteAndNoRefresh()
+	public async Task Guards_WhenCombatButNotAwaiting_NoExecuteAndNoRefresh()
 	{
 		var session = new GameSessionState();
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
@@ -86,14 +100,14 @@ public sealed class CombatUiPresenterTests
 		var refreshes = new List<UiRefreshFlags>();
 		var presenter = CreatePresenter(session, combat, f => refreshes.Add(f));
 
-		presenter.OnPotionPressed();
+		await presenter.OnPotionPressedAsync();
 
 		Assert.Null(combat.LastMethod);
 		Assert.Empty(refreshes);
 	}
 
 	[Fact]
-	public void OnAttackWithTarget_WhenAwaiting_CallsCombatAndRefreshes()
+	public async Task OnAttackWithTarget_WhenAwaiting_CallsCombatAndRefreshes()
 	{
 		var session = new GameSessionState();
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
@@ -101,9 +115,9 @@ public sealed class CombatUiPresenterTests
 		var refreshes = new List<UiRefreshFlags>();
 		var presenter = CreatePresenter(session, combat, f => refreshes.Add(f));
 
-		presenter.OnAttackWithTarget(2, PlayerAttackChoice.Unarmed);
+		await presenter.OnAttackWithTargetAsync(2, PlayerAttackChoice.Unarmed);
 
-		Assert.Equal(nameof(ICombatService.ExecutePlayerAttack), combat.LastMethod);
+		Assert.Equal(nameof(ICombatService.ExecutePlayerAttackAsync), combat.LastMethod);
 		Assert.Equal(2, combat.LastAttackOrdinal);
 		Assert.True(combat.LastAttackChoice.IsUnarmed);
 		Assert.Single(refreshes);
@@ -111,7 +125,7 @@ public sealed class CombatUiPresenterTests
 	}
 
 	[Fact]
-	public void OnFleePressed_WhenAwaiting_CallsCombatAndRefreshes()
+	public async Task OnFleePressed_WhenAwaiting_CallsCombatAndRefreshes()
 	{
 		var session = new GameSessionState();
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
@@ -119,15 +133,15 @@ public sealed class CombatUiPresenterTests
 		var refreshes = new List<UiRefreshFlags>();
 		var presenter = CreatePresenter(session, combat, f => refreshes.Add(f));
 
-		presenter.OnFleePressed();
+		await presenter.OnFleePressedAsync();
 
-		Assert.Equal(nameof(ICombatService.ExecutePlayerFlee), combat.LastMethod);
+		Assert.Equal(nameof(ICombatService.ExecutePlayerFleeAsync), combat.LastMethod);
 		Assert.Single(refreshes);
 		Assert.Equal(ExpectedCombatSuccessFlags, refreshes[0]);
 	}
 
 	[Fact]
-	public void OnPotionPressed_WhenAwaiting_CallsCombatAndRefreshes()
+	public async Task OnPotionPressed_WhenAwaiting_CallsCombatAndRefreshes()
 	{
 		var session = new GameSessionState();
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
@@ -135,15 +149,15 @@ public sealed class CombatUiPresenterTests
 		var refreshes = new List<UiRefreshFlags>();
 		var presenter = CreatePresenter(session, combat, f => refreshes.Add(f));
 
-		presenter.OnPotionPressed();
+		await presenter.OnPotionPressedAsync();
 
-		Assert.Equal(nameof(ICombatService.ExecutePlayerUseHealthPotion), combat.LastMethod);
+		Assert.Equal(nameof(ICombatService.ExecutePlayerUseHealthPotionAsync), combat.LastMethod);
 		Assert.Single(refreshes);
 		Assert.Equal(ExpectedCombatSuccessFlags, refreshes[0]);
 	}
 
 	[Fact]
-	public void OnTakeWithTarget_WhenAwaiting_CallsCombatAndRefreshes()
+	public async Task OnTakeWithTarget_WhenAwaiting_CallsCombatAndRefreshes()
 	{
 		var session = new GameSessionState();
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
@@ -152,16 +166,16 @@ public sealed class CombatUiPresenterTests
 		var presenter = CreatePresenter(session, combat, f => refreshes.Add(f));
 		var payload = new TargetPayload { Kind = TargetPayloadKind.TakeTreasureItem };
 
-		presenter.OnTakeWithTarget(payload);
+		await presenter.OnTakeWithTargetAsync(payload);
 
-		Assert.Equal(nameof(ICombatService.ExecutePlayerTakeTreasure), combat.LastMethod);
+		Assert.Equal(nameof(ICombatService.ExecutePlayerTakeTreasureAsync), combat.LastMethod);
 		Assert.Equal(TargetPayloadKind.TakeTreasureItem, combat.LastTakePayload!.Kind);
 		Assert.Single(refreshes);
 		Assert.Equal(ExpectedCombatSuccessFlags, refreshes[0]);
 	}
 
 	[Fact]
-	public void OnDefendPressed_WhenAwaiting_CallsCombatAndRefreshes()
+	public async Task OnDefendPressed_WhenAwaiting_CallsCombatAndRefreshes()
 	{
 		var session = new GameSessionState();
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
@@ -169,15 +183,15 @@ public sealed class CombatUiPresenterTests
 		var refreshes = new List<UiRefreshFlags>();
 		var presenter = CreatePresenter(session, combat, f => refreshes.Add(f));
 
-		presenter.OnDefendPressed();
+		await presenter.OnDefendPressedAsync();
 
-		Assert.Equal(nameof(ICombatService.ExecutePlayerDefend), combat.LastMethod);
+		Assert.Equal(nameof(ICombatService.ExecutePlayerDefendAsync), combat.LastMethod);
 		Assert.Single(refreshes);
 		Assert.Equal(ExpectedCombatSuccessFlags, refreshes[0]);
 	}
 
 	[Fact]
-	public void OnDisarmWithTarget_WhenAwaiting_CallsCombatAndRefreshes()
+	public async Task OnDisarmWithTarget_WhenAwaiting_CallsCombatAndRefreshes()
 	{
 		var session = new GameSessionState();
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
@@ -186,11 +200,52 @@ public sealed class CombatUiPresenterTests
 		var presenter = CreatePresenter(session, combat, f => refreshes.Add(f));
 		var payload = new TargetPayload { Kind = TargetPayloadKind.DisarmTrapInstance };
 
-		presenter.OnDisarmWithTarget(payload);
+		await presenter.OnDisarmWithTargetAsync(payload);
 
-		Assert.Equal(nameof(ICombatService.ExecutePlayerDisarmTrap), combat.LastMethod);
+		Assert.Equal(nameof(ICombatService.ExecutePlayerDisarmTrapAsync), combat.LastMethod);
 		Assert.Equal(TargetPayloadKind.DisarmTrapInstance, combat.LastDisarmPayload!.Kind);
 		Assert.Single(refreshes);
 		Assert.Equal(ExpectedCombatSuccessFlags, refreshes[0]);
+	}
+
+	[Fact]
+	public async Task Action_RemainsBusyUntilAwaitedOperationCompletes()
+	{
+		var session = new GameSessionState();
+		session.Dungeon.DungeonMode = DungeonMode.Combat;
+		var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var combat = new RecordingCombatService { AttackOperation = () => completion.Task };
+		var refreshes = new List<UiRefreshFlags>();
+		var presenter = CreatePresenter(session, combat, refreshes.Add);
+
+		var attack = presenter.OnAttackWithTargetAsync(0);
+		await presenter.OnFleePressedAsync();
+
+		Assert.Equal(nameof(ICombatService.ExecutePlayerAttackAsync), combat.LastMethod);
+		Assert.Empty(refreshes);
+
+		completion.SetResult();
+		await attack;
+
+		Assert.Single(refreshes);
+	}
+
+	[Fact]
+	public async Task Action_WhenServiceFaults_RefreshesAndReleasesBusyState()
+	{
+		var session = new GameSessionState();
+		session.Dungeon.DungeonMode = DungeonMode.Combat;
+		var combat = new RecordingCombatService
+		{
+			AttackOperation = () => Task.FromException(new InvalidOperationException("test fault")),
+		};
+		var refreshes = new List<UiRefreshFlags>();
+		var presenter = CreatePresenter(session, combat, refreshes.Add);
+
+		await Assert.ThrowsAsync<InvalidOperationException>(() => presenter.OnAttackWithTargetAsync(0));
+		await presenter.OnFleePressedAsync();
+
+		Assert.Equal(nameof(ICombatService.ExecutePlayerFleeAsync), combat.LastMethod);
+		Assert.Equal(2, refreshes.Count);
 	}
 }

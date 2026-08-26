@@ -80,7 +80,7 @@ public sealed class GameUiCoordinator
 		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
 
-	public void OnTargetSelectionPicked(int descriptorIndex)
+	public async Task OnTargetSelectionPickedAsync(int descriptorIndex)
 	{
 		if (_targeting == null || descriptorIndex < 0 || descriptorIndex >= _targeting.Descriptors.Count)
 			return;
@@ -90,30 +90,30 @@ public sealed class GameUiCoordinator
 		switch (kind)
 		{
 			case TargetingKind.AttackWeapon:
-				OnAttackWeaponPicked(d.Payload);
+				await OnAttackWeaponPickedAsync(d.Payload);
 				break;
 			case TargetingKind.Attack:
 			{
 				var choice = _pendingAttackChoice ?? PlayerAttackChoice.Unarmed;
 				_pendingAttackChoice = null;
-				_combat.OnAttackWithTarget(d.Payload.LivingMonsterOrdinal, choice);
+				await _combat.OnAttackWithTargetAsync(d.Payload.LivingMonsterOrdinal, choice);
 				break;
 			}
 			case TargetingKind.Take:
 				if (_session.Dungeon.DungeonMode == DungeonMode.Exploration)
 					_exploration.OnTakeWithTarget(d.Payload);
 				else
-					_combat.OnTakeWithTarget(d.Payload);
+					await _combat.OnTakeWithTargetAsync(d.Payload);
 				break;
 			case TargetingKind.OpenContainer:
 				if (_session.Dungeon.DungeonMode == DungeonMode.Exploration)
-					_exploration.OnOpenContainerWithTarget(d.Payload);
+					await _exploration.OnOpenContainerWithTargetAsync(d.Payload);
 				break;
 			case TargetingKind.Disarm:
 				if (_session.Dungeon.DungeonMode == DungeonMode.Exploration)
-					_exploration.OnDisarmWithTarget(d.Payload);
+					await _exploration.OnDisarmWithTargetAsync(d.Payload);
 				else
-					_combat.OnDisarmWithTarget(d.Payload);
+					await _combat.OnDisarmWithTargetAsync(d.Payload);
 				break;
 		}
 	}
@@ -164,13 +164,13 @@ public sealed class GameUiCoordinator
 		OnTargetSelectionHoverChanged(idx);
 	}
 
-	public void OnMainViewTargetClick(string highlightKey)
+	public async Task OnMainViewTargetClickAsync(string highlightKey)
 	{
 		if (!IsTargetingActive || _targeting == null)
 			return;
 		var idx = TargetHighlightMapping.TryGetDescriptorIndex(_targeting.Descriptors, highlightKey);
 		if (idx is int i)
-			OnTargetSelectionPicked(i);
+			await OnTargetSelectionPickedAsync(i);
 	}
 
 	private static Dictionary<string, string> BuildTargetingLabels(ActiveTargeting targeting)
@@ -295,11 +295,11 @@ public sealed class GameUiCoordinator
 			_mapPanel.RefreshMap(_session);
 	}
 
-	public void OnForwardPressed()
+	public async Task OnForwardPressedAsync()
 	{
 		if (!CanUseExplorationCommands())
 			return;
-		_exploration.OnForwardPressed();
+		await _exploration.OnForwardPressedAsync();
 	}
 
 	public void OnBackwardPressed()
@@ -316,11 +316,11 @@ public sealed class GameUiCoordinator
 		_exploration.OnTurn(direction);
 	}
 
-	public void OnInspectPressed()
+	public async Task OnInspectPressedAsync()
 	{
 		if (!CanUseExplorationCommands())
 			return;
-		_exploration.OnInspectPressed();
+		await _exploration.OnInspectPressedAsync();
 	}
 
 	public void OnFloorUpPressed()
@@ -330,11 +330,11 @@ public sealed class GameUiCoordinator
 		_exploration.OnFloorUpPressed();
 	}
 
-	public void OnFloorDownPressed()
+	public async Task OnFloorDownPressedAsync()
 	{
 		if (!CanUseExplorationCommands())
 			return;
-		_exploration.OnFloorDownPressed();
+		await _exploration.OnFloorDownPressedAsync();
 	}
 
 	private bool CanUseExplorationCommands()
@@ -348,7 +348,7 @@ public sealed class GameUiCoordinator
 		return true;
 	}
 
-	public void OnAttackPressed()
+	public async Task OnAttackPressedAsync()
 	{
 		if (_session.Phase != GamePlayPhase.InProgress)
 			return;
@@ -373,7 +373,7 @@ public sealed class GameUiCoordinator
 		{
 			if (monsters.Count == 1)
 			{
-				_combat.OnAttackWithTarget(monsters[0].Payload.LivingMonsterOrdinal, PlayerAttackChoice.Unarmed);
+				await _combat.OnAttackWithTargetAsync(monsters[0].Payload.LivingMonsterOrdinal, PlayerAttackChoice.Unarmed);
 				return;
 			}
 
@@ -401,7 +401,7 @@ public sealed class GameUiCoordinator
 		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
 
-	private void OnAttackWeaponPicked(TargetPayload payload)
+	private async Task OnAttackWeaponPickedAsync(TargetPayload payload)
 	{
 		if (payload.Kind != TargetPayloadKind.PlayerAttackWeaponPick)
 			return;
@@ -419,7 +419,7 @@ public sealed class GameUiCoordinator
 		{
 			var choice = _pendingAttackChoice ?? PlayerAttackChoice.Unarmed;
 			_pendingAttackChoice = null;
-			_combat.OnAttackWithTarget(monsters[0].Payload.LivingMonsterOrdinal, choice);
+			await _combat.OnAttackWithTargetAsync(monsters[0].Payload.LivingMonsterOrdinal, choice);
 			return;
 		}
 
@@ -429,7 +429,7 @@ public sealed class GameUiCoordinator
 		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
 
-	public void OnFleePressed()
+	public async Task OnFleePressedAsync()
 	{
 		if (_session.Phase != GamePlayPhase.InProgress)
 			return;
@@ -437,10 +437,10 @@ public sealed class GameUiCoordinator
 			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
-		_combat.OnFleePressed();
+		await _combat.OnFleePressedAsync();
 	}
 
-	public void OnTakePressed()
+	public async Task OnTakePressedAsync()
 	{
 		if (_session.Phase != GamePlayPhase.InProgress)
 			return;
@@ -465,7 +465,7 @@ public sealed class GameUiCoordinator
 			if (mode == DungeonMode.Exploration)
 				_exploration.OnTakeWithTarget(list[0].Payload);
 			else
-				_combat.OnTakeWithTarget(list[0].Payload);
+				await _combat.OnTakeWithTargetAsync(list[0].Payload);
 			return;
 		}
 
@@ -475,7 +475,7 @@ public sealed class GameUiCoordinator
 		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
 
-	public void OnOpenPressed()
+	public async Task OnOpenPressedAsync()
 	{
 		if (_session.Phase != GamePlayPhase.InProgress)
 			return;
@@ -493,7 +493,7 @@ public sealed class GameUiCoordinator
 
 		if (list.Count == 1)
 		{
-			_exploration.OnOpenContainerWithTarget(list[0].Payload);
+			await _exploration.OnOpenContainerWithTargetAsync(list[0].Payload);
 			return;
 		}
 
@@ -503,19 +503,19 @@ public sealed class GameUiCoordinator
 		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
 
-	public void OnPotionPressed()
+	public async Task OnPotionPressedAsync()
 	{
 		if (_session.Phase != GamePlayPhase.InProgress)
 			return;
 		if (IsTargetingActive)
 			return;
 		if (_session.Dungeon.DungeonMode == DungeonMode.Exploration)
-			_exploration.OnPotionPressed();
+			await _exploration.OnPotionPressedAsync();
 		else if (_session.Dungeon.DungeonMode == DungeonMode.Combat)
-			_combat.OnPotionPressed();
+			await _combat.OnPotionPressedAsync();
 	}
 
-	public void OnDefendPressed()
+	public async Task OnDefendPressedAsync()
 	{
 		if (_session.Phase != GamePlayPhase.InProgress)
 			return;
@@ -523,10 +523,10 @@ public sealed class GameUiCoordinator
 			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
-		_combat.OnDefendPressed();
+		await _combat.OnDefendPressedAsync();
 	}
 
-	public void OnDisarmPressed()
+	public async Task OnDisarmPressedAsync()
 	{
 		if (_session.Phase != GamePlayPhase.InProgress)
 			return;
@@ -549,9 +549,9 @@ public sealed class GameUiCoordinator
 		if (list.Count == 1)
 		{
 			if (mode == DungeonMode.Exploration)
-				_exploration.OnDisarmWithTarget(list[0].Payload);
+				await _exploration.OnDisarmWithTargetAsync(list[0].Payload);
 			else
-				_combat.OnDisarmWithTarget(list[0].Payload);
+				await _combat.OnDisarmWithTargetAsync(list[0].Payload);
 			return;
 		}
 

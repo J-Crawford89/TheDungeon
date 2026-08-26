@@ -197,30 +197,34 @@ public partial class MainUi : Control
 		Size = GetViewportRect().Size;
 	}
 
-	private void OnCommandForward() => _coordinator.OnForwardPressed();
+	private void OnCommandForward() => GodotAsyncEventHandler.Run(_coordinator.OnForwardPressedAsync, "Move forward");
 	private void OnCommandBackward() => _coordinator.OnBackwardPressed();
 	private void OnCommandLeft() => _coordinator.OnTurn(DirectionTurned.Left);
 	private void OnCommandRight() => _coordinator.OnTurn(DirectionTurned.Right);
-	private void OnCommandInspect() => _coordinator.OnInspectPressed();
+	private void OnCommandInspect() => GodotAsyncEventHandler.Run(_coordinator.OnInspectPressedAsync, "Inspect");
 	private void OnCommandFloorUp() => _coordinator.OnFloorUpPressed();
-	private void OnCommandFloorDown() => _coordinator.OnFloorDownPressed();
-	private void OnCommandAttack() => _coordinator.OnAttackPressed();
-	private void OnCommandFlee() => _coordinator.OnFleePressed();
-	private void OnCommandTake() => _coordinator.OnTakePressed();
-	private void OnCommandOpen() => _coordinator.OnOpenPressed();
-	private void OnCommandPotion() => _coordinator.OnPotionPressed();
-	private void OnCommandDefend() => _coordinator.OnDefendPressed();
-	private void OnCommandDisarm() => _coordinator.OnDisarmPressed();
+	private void OnCommandFloorDown() => GodotAsyncEventHandler.Run(_coordinator.OnFloorDownPressedAsync, "Move down a floor");
+	private void OnCommandAttack() => GodotAsyncEventHandler.Run(_coordinator.OnAttackPressedAsync, "Attack");
+	private void OnCommandFlee() => GodotAsyncEventHandler.Run(_coordinator.OnFleePressedAsync, "Flee");
+	private void OnCommandTake() => GodotAsyncEventHandler.Run(_coordinator.OnTakePressedAsync, "Take treasure");
+	private void OnCommandOpen() => GodotAsyncEventHandler.Run(_coordinator.OnOpenPressedAsync, "Open container");
+	private void OnCommandPotion() => GodotAsyncEventHandler.Run(_coordinator.OnPotionPressedAsync, "Use potion");
+	private void OnCommandDefend() => GodotAsyncEventHandler.Run(_coordinator.OnDefendPressedAsync, "Defend");
+	private void OnCommandDisarm() => GodotAsyncEventHandler.Run(_coordinator.OnDisarmPressedAsync, "Disarm trap");
 
 	private void OnTargetSelectCancel() => _coordinator.OnTargetSelectionCanceled();
 
-	private void OnTargetSelectPicked(int index) => _coordinator.OnTargetSelectionPicked(index);
+	private void OnTargetSelectPicked(int index) => GodotAsyncEventHandler.Run(
+		() => _coordinator.OnTargetSelectionPickedAsync(index),
+		"Resolve target selection");
 
 	private void OnTargetSelectHoverChanged(int? index) => _coordinator.OnTargetSelectionHoverChanged(index);
 
 	private void OnMainViewTargetHover(string? highlightKey) => _coordinator.OnMainViewTargetHover(highlightKey);
 
-	private void OnMainViewTargetClick(string highlightKey) => _coordinator.OnMainViewTargetClick(highlightKey);
+	private void OnMainViewTargetClick(string highlightKey) => GodotAsyncEventHandler.Run(
+		() => _coordinator.OnMainViewTargetClickAsync(highlightKey),
+		"Resolve main-view target");
 
 	private void OnGameOverReturnToMenu() => ReturnToStartMenu();
 

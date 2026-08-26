@@ -43,7 +43,7 @@ public sealed class ExplorationUiPresenter
 		_useHandBuiltDebugFloor = useHandBuiltDebugFloor;
 	}
 
-	public async void OnPotionPressed()
+	public async Task OnPotionPressedAsync()
 	{
 		if (_isResolvingAction)
 			return;
@@ -61,7 +61,7 @@ public sealed class ExplorationUiPresenter
 		}
 	}
 
-	public async void OnDisarmWithTarget(TargetPayload payload)
+	public async Task OnDisarmWithTargetAsync(TargetPayload payload)
 	{
 		if (_isResolvingAction)
 			return;
@@ -103,7 +103,7 @@ public sealed class ExplorationUiPresenter
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
 	}
 
-	public async void OnOpenContainerWithTarget(TargetPayload payload)
+	public async Task OnOpenContainerWithTargetAsync(TargetPayload payload)
 	{
 		if (_isResolvingAction)
 			return;
@@ -146,7 +146,7 @@ public sealed class ExplorationUiPresenter
 		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
 	}
 
-	public async void OnForwardPressed()
+	public async Task OnForwardPressedAsync()
 	{
 		if (_isResolvingAction)
 			return;
@@ -189,23 +189,23 @@ public sealed class ExplorationUiPresenter
 			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView);
 	}
 
-	public async void OnInspectPressed()
+	public async Task OnInspectPressedAsync()
 	{
 		if (_isResolvingAction)
 			return;
 		_isResolvingAction = true;
 		try
 		{
-		var result = await _explorationService.InspectAsync(_session);
-		_session.AppendGameLog(_narrativeService.ForInspect(result));
-		if (result.Success && result.InspectData is { } inspectData)
-		{
-			foreach (var line in _narrativeService.GetInspectImportantLogLines(inspectData))
-				_session.AppendLog(new LogEntry { Kind = LogEntryKind.Important, Text = line });
-		}
+			var result = await _explorationService.InspectAsync(_session);
+			_session.AppendGameLog(_narrativeService.ForInspect(result));
+			if (result.Success && result.InspectData is { } inspectData)
+			{
+				foreach (var line in _narrativeService.GetInspectImportantLogLines(inspectData))
+					_session.AppendLog(new LogEntry { Kind = LogEntryKind.Important, Text = line });
+			}
 
-		if (!TryReportDiagnosticAndRefreshAll(result))
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Map | UiRefreshFlags.MainView | UiRefreshFlags.Command);
+			if (!TryReportDiagnosticAndRefreshAll(result))
+				_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Map | UiRefreshFlags.MainView | UiRefreshFlags.Command);
 		}
 		finally
 		{
@@ -223,7 +223,7 @@ public sealed class ExplorationUiPresenter
 			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
 	}
 
-	public async void OnFloorDownPressed()
+	public async Task OnFloorDownPressedAsync()
 	{
 		if (_isResolvingAction)
 			return;
