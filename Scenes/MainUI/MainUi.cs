@@ -68,15 +68,6 @@ public partial class MainUi : Control
 
 		session.Debug.IsCaptureEnabled = _captureDebugDiagnostics;
 
-		GameUiCoordinator? coordinator = null;
-		void RefreshHudAndGameOver(UiRefreshFlags flags)
-		{
-			coordinator!.RefreshHud(flags);
-			UpdateGameOverPanel();
-		}
-
-		_containerLootOverlay?.Bind(_runContext, RefreshHudAndGameOver);
-
 		_explorationPresenter = new ExplorationUiPresenter(
 			session,
 			explorationService,
@@ -86,11 +77,10 @@ public partial class MainUi : Control
 			trapService,
 			potionEffects,
 			dungeonBootstrap,
-			RefreshHudAndGameOver,
 			_containerLootOverlay,
 			_useHandBuiltDebugFloor);
-		_combatPresenter = new CombatUiPresenter(session, combatService, RefreshHudAndGameOver);
-		coordinator = new GameUiCoordinator(
+		_combatPresenter = new CombatUiPresenter(session, combatService);
+		var coordinator = new GameUiCoordinator(
 			session,
 			combatService,
 			narrativeService,
@@ -101,12 +91,19 @@ public partial class MainUi : Control
 			_logPanel,
 			_commandPanel,
 			_mapPanel,
+			_gameOverOverlay,
 			_initiativeOverlay,
 			_mainViewPanel.InitiativeStrip);
 		_coordinator = coordinator;
-		_runContext.ResolvedRollReactionHost.Sink = new UiResolvedRollReactionSink(RefreshHudAndGameOver);
+
+		if (_containerLootOverlay != null)
+		{
+			_containerLootOverlay.StateChanged += OnExternalStateChanged;
+			_containerLootOverlay.Bind(_runContext);
+		}
+
+		_runContext.ResolvedRollReactionHost.Sink = new UiResolvedRollReactionSink(coordinator.RefreshHud);
 		_runContext.CombatTurnPresentationHost.Sink = new UiCombatTurnPresentationSink(
-			RefreshHudAndGameOver,
 			(kind, ct) => coordinator.PresentCombatTurnAsync(kind, ct));
 
 		if (_initiativeOverlay == null)
@@ -119,7 +116,8 @@ public partial class MainUi : Control
 			GD.PushError("MainUi: assign the Notebook Overlay export to your NotebookOverlay node.");
 		else
 		{
-			_notebookOverlay.Bind(_runContext, f => _coordinator.RefreshHud(f));
+			_notebookOverlay.StateChanged += OnExternalStateChanged;
+			_notebookOverlay.Bind(_runContext);
 			_notebookOverlay.HideNotebook();
 			_notebookOverlay.ZIndex = 100;
 		}
@@ -188,8 +186,7 @@ public partial class MainUi : Control
 		if (!DebugRoomLootSpawn.TrySpawnSnaresAndPotions(session, _runContext.TrapDefinitions, _runContext.TreasureDefinitions))
 			return;
 		session.AppendGameLog("[Debug] Added two snares and two health potion piles to the current room.");
-		_coordinator.RefreshHud(UiRefreshFlags.All);
-		UpdateGameOverPanel();
+		_coordinator.RefreshHud();
 	}
 
 	private void OnViewportSizeChanged()
@@ -226,6 +223,8 @@ public partial class MainUi : Control
 		() => _coordinator.OnMainViewTargetClickAsync(highlightKey),
 		"Resolve main-view target");
 
+	private void OnExternalStateChanged() => _coordinator.RefreshHud();
+
 	private void OnGameOverReturnToMenu() => ReturnToStartMenu();
 
 	private void OnGameOverQuitPressed() => QuitRequested?.Invoke();
@@ -234,19 +233,6 @@ public partial class MainUi : Control
 	{
 		_gameOverOverlay?.HidePanel();
 		ReturnToStartMenuRequested?.Invoke();
-	}
-
-	private void UpdateGameOverPanel()
-	{
-		if (_gameOverOverlay == null || _runContext == null)
-			return;
-		var session = _runContext.Session;
-		if (session.Phase == GamePlayPhase.GameOver &&
-			session.GameOverTitle is { } title &&
-			session.GameOverBody is { } body)
-			_gameOverOverlay.ShowPanel(title, body);
-		else
-			_gameOverOverlay.HidePanel();
 	}
 
 	public override void _ExitTree()
@@ -269,6 +255,12 @@ public partial class MainUi : Control
 			_mainViewPanel.TargetSlotHoverChanged -= OnMainViewTargetHover;
 			_mainViewPanel.TargetSlotClicked -= OnMainViewTargetClick;
 		}
+
+		if (_containerLootOverlay != null)
+			_containerLootOverlay.StateChanged -= OnExternalStateChanged;
+		if (_notebookOverlay != null)
+			_notebookOverlay.StateChanged -= OnExternalStateChanged;
+		_coordinator?.Dispose();
 
 		if (_commandPanel != null)
 		{

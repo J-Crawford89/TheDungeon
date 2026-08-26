@@ -5,15 +5,15 @@ public sealed class CombatUiPresenter
 {
 	private readonly GameSessionState _session;
 	private readonly ICombatService _combatService;
-	private readonly Action<UiRefreshFlags> _refreshHud;
 	private bool _isBusyResolvingAction;
 
-	public CombatUiPresenter(GameSessionState session, ICombatService combatService, Action<UiRefreshFlags> refreshHud)
+	public CombatUiPresenter(GameSessionState session, ICombatService combatService)
 	{
 		_session = session;
 		_combatService = combatService;
-		_refreshHud = refreshHud;
 	}
+
+	public event Action? StateChanged;
 
 	public async Task OnAttackWithTargetAsync(int livingMonsterOrdinal, PlayerAttackChoice attackChoice = default)
 	{
@@ -81,7 +81,7 @@ public sealed class CombatUiPresenter
 		finally
 		{
 			_isBusyResolvingAction = false;
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Command | UiRefreshFlags.Character | UiRefreshFlags.MainView);
+			StateChanged?.Invoke();
 		}
 	}
 }

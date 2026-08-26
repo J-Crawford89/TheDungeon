@@ -180,6 +180,19 @@ These rules align with [ADR-0001](#adr-0001-godot-serialized-files-are-editor-ow
 
 Keep scene scripts thin; move orchestration and heavy interaction logic into coordinator/presenter classes. Preferred shape: `MainUi` → `GameUiCoordinator` → presenters. See ADR-0002 in the appendix.
 
+### HUD refresh ownership
+
+[`GameUiCoordinator`](../Scenes/MainUI/GameUiCoordinator.cs) is the only component that decides which HUD surfaces render. Presenters and scene adapters never select panels or pass region flags through constructors and callbacks.
+
+- [`CombatUiPresenter`](../Scripts/4.UI/Presentation/CombatUiPresenter.cs) and [`ExplorationUiPresenter`](../Scripts/4.UI/Presentation/ExplorationUiPresenter.cs) expose a parameterless `StateChanged` event. It means authoritative session state should be reread; it carries no panel-selection policy.
+- The coordinator subscribes to presenter events and the existing dungeon movement event. Full state changes render the authoritative HUD and game-over overlay; coordinator-local targeting, map, and combat-chrome changes use private focused render methods.
+- Exploration raises `StateChanged` synchronously after committing/logging a move and before beginning hostile combat. This preserves the accepted destination-room-before-initiative ordering.
+- [`ContainerLootOverlay`](../Scenes/Components/ContainerLootOverlay.cs) and [`NotebookOverlay`](../Scenes/Menus/NotebookOverlay.cs) expose the same parameterless notification. [`MainUi`](../Scenes/MainUI/MainUi.cs), as composition root, wires those sources to the coordinator without owning refresh policy.
+- Resolved-roll and combat-turn UI sinks invoke or forward to coordinator-owned methods. They do not choose HUD regions.
+- The coordinator explicitly unsubscribes from its event sources during scene teardown. Rendering reads state and must not publish another state-change notification.
+
+This invalidation event is deliberately not Feature-011's semantic audiovisual event catalog: it only says “reread authoritative state.” See ADR-0013.
+
 ### Async orchestration boundary
 
 Any gameplay or presentation operation that awaits dice, reactions, animation, or another asynchronous service stays asynchronous through its entire call chain:
@@ -460,3 +473,14 @@ Player-facing summary: [Game Design Document — Combat and damage](./GAME_DESIG
 - **Failure policy:** Presenter/coordinator faults propagate after local `finally` cleanup. `AsyncOperationGuard` catches synchronous and asynchronous faults at the scene boundary and reports them through Godot; `OperationCanceledException` is treated as expected scene-lifetime termination.
 - **Testing policy:** Unit tests await production APIs directly and verify operation ordering, busy-state lifetime, cleanup after faults, and boundary handling for completion, synchronous failure, asynchronous failure, and cancellation.
 - **Companions:** ADR-0002 (coordinator/presenter UI), ADR-0010 (awaited dice/reaction sequencing), and ADR-0011 (Godot-free `4.UI`).
+
+### ADR-0013: GameUiCoordinator owns HUD refresh policy
+
+- **Status:** Accepted
+- **Decision:** `GameUiCoordinator` is the sole owner of HUD panel selection and rendering. Presenters and modal scene adapters emit parameterless `StateChanged` notifications; resolved-roll and combat-turn adapters call or forward to coordinator-owned methods. `UiRefreshFlags` and region-bearing refresh callbacks are removed.
+- **Rationale:** A presenter should report that its authoritative state changed, not know that the log, character, command, map, or main-view panel exists. Central ownership prevents panel-refresh policy from spreading through constructors and async call chains.
+- **Timing rule:** Notifications are synchronous at committed presentation checkpoints. In particular, exploration notifies after the move is logged and before hostile combat/initiative begins.
+- **Scope rule:** Full external state changes may conservatively rerender the HUD. Any later performance optimization stays private to the coordinator and must not reintroduce region flags into presenters or services.
+- **Lifecycle rule:** The coordinator and composition root explicitly unsubscribe from presenter, dungeon, loot, and notebook events during teardown.
+- **Distinct from:** Feature-011 semantic audiovisual reactions, which communicate gameplay meaning and may drive animation/audio. `StateChanged` carries no gameplay semantics.
+- **Companions:** ADR-0002 (coordinator/presenter UI), ADR-0010 (resolved-roll sequencing), ADR-0012 (async orchestration), and ADR-0011 (Godot-free `4.UI`).

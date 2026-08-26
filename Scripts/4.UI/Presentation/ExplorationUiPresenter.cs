@@ -12,7 +12,6 @@ public sealed class ExplorationUiPresenter
 	private readonly ContainerLootInteractionService _containerLoot;
 	private readonly TrapService _trapService;
 	private readonly PotionEffectApplicationService _potionEffects;
-	private readonly Action<UiRefreshFlags> _refreshHud;
 	private readonly IContainerLootOverlayOpener? _lootOverlay;
 	private readonly bool _useHandBuiltDebugFloor;
 	private bool _isResolvingAction;
@@ -26,7 +25,6 @@ public sealed class ExplorationUiPresenter
 		TrapService trapService,
 		PotionEffectApplicationService potionEffects,
 		DungeonBootstrap dungeonBootstrap,
-		Action<UiRefreshFlags> refreshHud,
 		IContainerLootOverlayOpener? lootOverlay = null,
 		bool useHandBuiltDebugFloor = false)
 	{
@@ -38,10 +36,11 @@ public sealed class ExplorationUiPresenter
 		_trapService = trapService;
 		_potionEffects = potionEffects;
 		_dungeonBootstrap = dungeonBootstrap;
-		_refreshHud = refreshHud;
 		_lootOverlay = lootOverlay;
 		_useHandBuiltDebugFloor = useHandBuiltDebugFloor;
 	}
+
+	public event Action? StateChanged;
 
 	public async Task OnPotionPressedAsync()
 	{
@@ -53,7 +52,7 @@ public sealed class ExplorationUiPresenter
 		try
 		{
 			await _potionEffects.TryUseHealthPotionAsync(_session);
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command);
+			NotifyStateChanged();
 		}
 		finally
 		{
@@ -73,7 +72,7 @@ public sealed class ExplorationUiPresenter
 		try
 		{
 			await _trapService.TryDisarmAtSlotAsync(_session, payload.TrapFeatureOrdinal, payload.TrapIndexInFeature);
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
+			NotifyStateChanged();
 		}
 		finally
 		{
@@ -100,7 +99,7 @@ public sealed class ExplorationUiPresenter
 				return;
 		}
 
-		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
+		NotifyStateChanged();
 	}
 
 	public async Task OnOpenContainerWithTargetAsync(TargetPayload payload)
@@ -121,7 +120,7 @@ public sealed class ExplorationUiPresenter
 		try
 		{
 			await _containerLoot.TryLootAllAsync(_session, payload.ContainerOrdinal);
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
+			NotifyStateChanged();
 		}
 		finally
 		{
@@ -143,7 +142,7 @@ public sealed class ExplorationUiPresenter
 		_session.Dungeon.ClearRoomIngress();
 
 		_session.AppendGameLog(_narrativeService.ForEnterDungeon());
-		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
+		NotifyStateChanged();
 	}
 
 	public async Task OnForwardPressedAsync()
@@ -173,8 +172,8 @@ public sealed class ExplorationUiPresenter
 		var line = _narrativeService.ForAboutFace(result);
 		if (!string.IsNullOrEmpty(line))
 			_session.AppendGameLog(line);
-		if (!TryReportDiagnosticAndRefreshAll(result) && !string.IsNullOrEmpty(line))
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView);
+		if (!TryReportDiagnosticAndNotifyStateChanged(result) && !string.IsNullOrEmpty(line))
+			NotifyStateChanged();
 	}
 
 	public void OnTurn(DirectionTurned direction)
@@ -185,8 +184,8 @@ public sealed class ExplorationUiPresenter
 		var line = _narrativeService.ForTurn(result, direction);
 		if (!string.IsNullOrEmpty(line))
 			_session.AppendGameLog(line);
-		if (!TryReportDiagnosticAndRefreshAll(result) && !string.IsNullOrEmpty(line))
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView);
+		if (!TryReportDiagnosticAndNotifyStateChanged(result) && !string.IsNullOrEmpty(line))
+			NotifyStateChanged();
 	}
 
 	public async Task OnInspectPressedAsync()
@@ -204,8 +203,8 @@ public sealed class ExplorationUiPresenter
 					_session.AppendLog(new LogEntry { Kind = LogEntryKind.Important, Text = line });
 			}
 
-			if (!TryReportDiagnosticAndRefreshAll(result))
-				_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Map | UiRefreshFlags.MainView | UiRefreshFlags.Command);
+			if (!TryReportDiagnosticAndNotifyStateChanged(result))
+				NotifyStateChanged();
 		}
 		finally
 		{
@@ -219,8 +218,8 @@ public sealed class ExplorationUiPresenter
 			return;
 		var result = _explorationService.MoveUpAFloor(_session);
 		_session.AppendGameLog(_narrativeService.ForMoveUpFloor(result));
-		if (!TryReportDiagnosticAndRefreshAll(result))
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
+		if (!TryReportDiagnosticAndNotifyStateChanged(result))
+			NotifyStateChanged();
 	}
 
 	public async Task OnFloorDownPressedAsync()
@@ -247,24 +246,26 @@ public sealed class ExplorationUiPresenter
 		RoomCoord previousCoord,
 		int floorLevel)
 	{
-		var diagnosticRefresh = TryReportDiagnosticAndRefreshAll(result);
+		var diagnosticRefresh = TryReportDiagnosticAndNotifyStateChanged(result);
 		if (!diagnosticRefresh)
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
+			NotifyStateChanged();
 		if (!result.Success)
 			return;
 		await _explorationService.TryBeginCombatIfHostileAsync(_session, previousCoord, floorLevel);
 		if (!diagnosticRefresh)
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.MainView | UiRefreshFlags.Command | UiRefreshFlags.Map | UiRefreshFlags.Character);
+			NotifyStateChanged();
 	}
 
-	private bool TryReportDiagnosticAndRefreshAll(ExplorationServiceResult result)
+	private bool TryReportDiagnosticAndNotifyStateChanged(ExplorationServiceResult result)
 	{
 		if (string.IsNullOrWhiteSpace(result.DiagnosticDetail))
 			return false;
 		_session.Debug.Report(_session, result.DiagnosticDetail);
 		if (!_session.Debug.IsCaptureEnabled)
 			return false;
-		_refreshHud(UiRefreshFlags.All);
+		NotifyStateChanged();
 		return true;
 	}
+
+	private void NotifyStateChanged() => StateChanged?.Invoke();
 }

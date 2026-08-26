@@ -69,6 +69,8 @@ public partial class NotebookOverlay : Control
 	private bool _wired;
 	private GameRunContext? _runContext;
 
+	public event Action? StateChanged;
+
 	public override void _Ready()
 	{
 		Visible = false;
@@ -104,7 +106,7 @@ public partial class NotebookOverlay : Control
 		_coordinator = null;
 	}
 
-	public void Bind(GameRunContext context, Action<UiRefreshFlags>? refreshHud)
+	public void Bind(GameRunContext context)
 	{
 		_runContext = context;
 
@@ -113,7 +115,7 @@ public partial class NotebookOverlay : Control
 		var maxRows = context.GameBalanceSettings?.MaxUnequippedBackpackRows ?? 16;
 		if (maxRows < 1)
 			maxRows = 16;
-		_coordinator = new InventoryNotebookCoordinator(this, context, refreshHud, maxRows);
+		_coordinator = new InventoryNotebookCoordinator(this, context, NotifyStateChanged, maxRows);
 		_coordinator.WireSlotsAndButtons();
 		_wired = true;
 	}
@@ -150,6 +152,8 @@ public partial class NotebookOverlay : Control
 	private void OnInventoryTabPressed() => ShowInventory();
 
 	private void OnCharacterTabPressed() => ShowCharacter();
+
+	private void NotifyStateChanged() => StateChanged?.Invoke();
 
 	private void SwitchToInventoryPage()
 	{

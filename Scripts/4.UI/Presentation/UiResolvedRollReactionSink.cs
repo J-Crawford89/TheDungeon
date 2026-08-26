@@ -4,17 +4,17 @@ using System.Threading.Tasks;
 
 public sealed class UiResolvedRollReactionSink : IResolvedRollReactionSink
 {
-	private readonly Action<UiRefreshFlags> _refreshHud;
+	private readonly Action _refreshCoordinator;
 
-	public UiResolvedRollReactionSink(Action<UiRefreshFlags> refreshHud)
+	public UiResolvedRollReactionSink(Action refreshCoordinator)
 	{
-		_refreshHud = refreshHud ?? throw new ArgumentNullException(nameof(refreshHud));
+		_refreshCoordinator = refreshCoordinator ?? throw new ArgumentNullException(nameof(refreshCoordinator));
 	}
 
 	public Task NotifyAsync(CancellationToken ct = default)
 	{
 		ct.ThrowIfCancellationRequested();
-		_refreshHud(UiRefreshFlags.All);
+		_refreshCoordinator();
 		return Task.CompletedTask;
 	}
 }

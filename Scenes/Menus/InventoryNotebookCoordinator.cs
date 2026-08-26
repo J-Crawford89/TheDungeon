@@ -11,7 +11,7 @@ internal sealed class InventoryNotebookCoordinator
 	private readonly IconResolver _icons;
 	private readonly PotionEffectApplicationService _potions;
 	private readonly PlayerProficiencyAggregationService _proficiencyAggregation;
-	private readonly Action<UiRefreshFlags>? _refreshHud;
+	private readonly Action _stateChanged;
 	private readonly int _maxUnequippedBackpackRows;
 
 	private readonly List<InventorySlotControl> _slotRefs = new();
@@ -25,7 +25,7 @@ internal sealed class InventoryNotebookCoordinator
 	public InventoryNotebookCoordinator(
 		NotebookOverlay o,
 		GameRunContext context,
-		Action<UiRefreshFlags>? refreshHud,
+		Action stateChanged,
 		int maxUnequippedBackpackRows = 16)
 	{
 		_o = o;
@@ -33,7 +33,7 @@ internal sealed class InventoryNotebookCoordinator
 		_icons = context.Icons;
 		_potions = context.PotionEffects;
 		_proficiencyAggregation = context.ProficiencyAggregation;
-		_refreshHud = refreshHud;
+		_stateChanged = stateChanged;
 		_maxUnequippedBackpackRows = maxUnequippedBackpackRows;
 	}
 
@@ -210,7 +210,7 @@ internal sealed class InventoryNotebookCoordinator
 		PlayerDefenseAggregationHelper.RecomputeFromEquippedArmor(_session.Player);
 		_proficiencyAggregation.Recompute(_session.Player);
 		_selection = InventoryNotebookSelection.Equipment(chosenSlot);
-		_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
+		_stateChanged();
 		RefreshAll();
 	}
 
@@ -361,7 +361,7 @@ internal sealed class InventoryNotebookCoordinator
 			return;
 		PlayerDefenseAggregationHelper.RecomputeFromEquippedArmor(_session.Player);
 		_proficiencyAggregation.Recompute(_session.Player);
-		_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
+		_stateChanged();
 		RefreshAll();
 	}
 
@@ -375,7 +375,7 @@ internal sealed class InventoryNotebookCoordinator
 			return;
 		PlayerDefenseAggregationHelper.RecomputeFromEquippedArmor(_session.Player);
 		_proficiencyAggregation.Recompute(_session.Player);
-		_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
+		_stateChanged();
 		RefreshAll();
 	}
 
@@ -393,7 +393,7 @@ internal sealed class InventoryNotebookCoordinator
 		try
 		{
 			await _potions.TryUseHealthPotionAsync(_session);
-			_refreshHud?.Invoke(UiRefreshFlags.Character | UiRefreshFlags.Command);
+			_stateChanged();
 		}
 		finally
 		{

@@ -1,6 +1,8 @@
 # Feature-003 — UI scaling plan and chat-mode handoff
 
-Status: planning complete; no Godot scene or project settings have been changed.
+Status: completed and accepted on 2026-08-25. The global scalable-window baseline landed in commit `5f0a323` (`window resizing`); optional Stage 2 responsive expansion is not part of the completed scope.
+
+This document is retained as the planning and verification record. Sections describing the repository's “current” behavior refer to the pre-implementation snapshot unless explicitly labeled as the accepted outcome.
 
 ## Outcome to target
 
@@ -13,7 +15,7 @@ Stage 1 is sufficient to call Feature-003 complete if the desired product scope 
 
 ## Backlog item
 
-`Feature-003 — UI scaling` is currently Proposed, P2, accessibility-related, and asks the project to define:
+At planning time, `Feature-003 — UI scaling` was Proposed, P2, accessibility-related, and asked the project to define:
 
 - supported resolutions;
 - scaling behavior;
@@ -49,7 +51,7 @@ At the 1280×720 logical baseline:
 
 The current 9 px notebook action-button theme and 9 px harvest hint fail this target and should be raised during Stage 1 polish.
 
-## What the project currently does
+## What the project did at planning time
 
 ### Project-level behavior
 
@@ -261,7 +263,7 @@ For every row, verify startup, character creation, exploration, combat/initiativ
 
 ## Relevant files
 
-- `project.godot` — currently inherits Godot's disabled-stretch defaults.
+- `project.godot` — the planning baseline inherited Godot's disabled-stretch defaults; the accepted implementation enables `canvas_items` stretch.
 - `Scenes/game_root.tscn` — full-rect screen host.
 - `Scenes/MainUI/main_ui.tscn` — primary container layout and modal overlays.
 - `Scenes/MainUI/MainUi.cs` — manual root-size update on viewport resize.

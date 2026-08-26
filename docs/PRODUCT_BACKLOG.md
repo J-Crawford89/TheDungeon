@@ -37,26 +37,16 @@ None open.
 
 ## Improvements
 
-### Improvement-002 — Add dice-rolling sound effects
-
-- **Type:** Improvement / audio feedback
-- **Priority:** P2
-- **Status:** Proposed
-- **Depends on:** Improvement-001
-- **Problem:** The physical dice presentation is visually readable but silent, reducing its weight and tactile believability.
-- **Desired behavior:** Add synchronized audio for the throw, rolling/tumbling, wall or die impacts where appropriate, and the final settle. Sound should reflect the visible presentation without becoming noisy during rapid sequences or true multi-die rolls.
-- **Scope notes:** Define whether sounds are driven by physics events, presentation phases, or a hybrid; support per-die variation in pitch, volume, and sample selection; prevent repetitive sample playback and excessive overlapping impacts; respect sound-effect volume and mute settings.
-- **Acceptance notes:** Standard and rapid-sequence rolls sound responsive and materially grounded. Audio remains synchronized under time-compressed playback, multi-die rolls remain intelligible, and headless tests do not require audio resources.
-
 ### Improvement-003 — Coordinator owns HUD refresh (drop `UiRefreshFlags` plumbing)
 
 - **Type:** Improvement / UI architecture
 - **Priority:** P2
-- **Status:** Proposed
+- **Status:** Needs manual confirmation
 - **Depends on:** None
 - **Distinct from:** Feature-011 (AV juice / semantic presentation events). This item is about **who refreshes HUD panels**, not about hit flashes or screen shake.
 - **Desired behavior:** `GameUiCoordinator` (or a dedicated HUD subscriber) owns refresh. Presenters and services stop passing `UiRefreshFlags` through call chains; they raise or rely on **state events**, and the coordinator subscribes.
 - **Acceptance notes:** Combat, exploration, loot, and inventory still update the same panels; no presenter needs a `refreshHud` callback solely to push flags.
+- **Implementation note (2026-08-25):** `GameUiCoordinator` now owns full-HUD, targeting, map, combat-chrome, and game-over rendering. Combat/exploration presenters and loot/notebook adapters emit parameterless state-change notifications; resolved-roll and combat-turn sinks invoke or forward to coordinator-owned methods. `UiRefreshFlags`, region-bearing callbacks, and presenter refresh callbacks were removed. Automated coverage verifies notification guards/timing, move-before-combat ordering, async busy/fault/cancellation behavior, and sink forwarding; a full in-game HUD sweep remains before completion.
 
 ### Improvement-004 — Polish initiative overlay and strip presentation assets
 
@@ -70,23 +60,6 @@ None open.
 - **Acceptance notes:** Order and active combatant remain readable at a glance. Polish does not stall combat if an asset or animation is missing. Headless tests stay independent of Godot assets.
 
 ## Features
-
-### Feature-002 — Default player and monster die colors
-
-- **Type:** Feature / visual identity
-- **Priority:** P2
-- **Status:** Needs manual confirmation
-- **Depends on:** None
-- **Desired behavior:** Player and monster dice use clearly distinct default colors. Preserve an extension point for future selectable or unlockable dice appearances.
-- **Acceptance notes:** Ownership is immediately legible during initiative and combat rolls, including multi-die events; color choices remain distinguishable under supported accessibility settings.
-- **Implementation note (2026-08-25):** C# presentation now resolves a catalog-owned body material alongside each player/monster die visual and applies it through an explicitly wired body-mesh reference without changing numeral materials, roll rules, physics, timing, or sequencing. Automated ownership propagation is covered; Godot Editor wiring and the visual/accessibility acceptance gate remain.
-
-### Feature-003 — UI scaling
-
-- **Type:** Feature / accessibility
-- **Priority:** P2
-- **Status:** Proposed
-- **Scope:** Define supported resolutions, scaling behavior, minimum readable sizes, and whether scaling is global or independently configurable by UI region.
 
 ### Feature-004 — Split SP and HP
 
@@ -175,16 +148,6 @@ None open.
 - **Desired behavior:** Using a potion (and related heal rules) keys off [`RestoreHealthEffectDefinition`](../Scripts/0.Core/Item/ItemEffectDefinition.cs) on the item, not the `health_potion` definition id. Notebook **Use** already enables for any `PotionDefinition`; heal application should follow the effect type.
 - **Acceptance notes:** A non-health potion id with a restore-health effect heals; a health-potion id without that effect does not.
 
-### Feature-014 — Async orchestration sweep
-
-- **Type:** Feature / architecture
-- **Priority:** P2
-- **Status:** Needs manual confirmation
-- **Depends on:** None
-- **Desired behavior:** Delete production `Foo() => FooAsync().GetResult()` wrappers. Dice and UI waits are async-only. Share a safe `async void` logging pattern for Godot button handlers. Keep inventory/math APIs synchronous.
-- **Acceptance notes:** No gameplay path blocks a thread on `.GetResult()`; unit tests still cover the async methods.
-- **Implementation note (2026-08-25):** Game services, Godot-free presenters, and `GameUiCoordinator` now expose Task-returning orchestration end to end. Godot signals dispatch through one guarded/logged `async void` boundary; loot, notebook use, deferred log scrolling, and the dice harness use the same boundary. Production blocking waits and discarded Task launches were removed, while pure inventory and calculation paths remain synchronous. Automated tests cover awaited production APIs, busy-state lifetime, fault cleanup, and guard behavior for completion, synchronous/asynchronous faults, and cancellation. A main-game smoke test remains before completion.
-
 ### Feature-015 — `NarrativeConstants` wording store
 
 - **Type:** Feature / narrative
@@ -226,6 +189,50 @@ Unless a roll is explicitly one multi-die mechanic, presentation and state progr
 This principle should guide the eventual orchestration design for room entry, initiative, combat, harvesting, inspection, traps, containers, and other checks.
 
 ## Completed
+
+### Improvement-002 — Add dice-rolling sound effects
+
+- **Type:** Improvement / audio feedback
+- **Priority:** P2
+- **Status:** Completed
+- **Completed:** 2026-08-25
+- **Depends on:** Improvement-001
+- **Outcome:** Predetermined dice presentation now synchronizes varied throw, trajectory-derived impact, die-contact, and settle sounds to the visible playback timeline. Impact cadence and count are bounded for rapid and multi-die rolls, while independent players, volume tuning, pitch variation, and the SFX bus keep the mix controllable.
+- **Acceptance evidence:** The user confirmed the implemented dice audio should be marked complete.
+- **Commit:** `923e28e` (`dice audio`).
+
+### Feature-002 — Default player and monster die colors
+
+- **Type:** Feature / visual identity
+- **Priority:** P2
+- **Status:** Completed
+- **Completed:** 2026-08-25
+- **Depends on:** None
+- **Outcome:** Dice presentation resolves catalog-owned default body materials by player or monster ownership and applies them through explicitly wired body meshes without changing numeral materials, roll rules, physics, timing, or sequencing. The catalog remains the extension point for future appearances.
+- **Acceptance evidence:** The user confirmed the player/monster color distinction should be marked complete.
+- **Commit:** `dee0b5e` (`default die colors`).
+
+### Feature-003 — UI scaling
+
+- **Type:** Feature / accessibility
+- **Priority:** P2
+- **Status:** Completed
+- **Completed:** 2026-08-25
+- **Outcome:** The accepted baseline uses Godot's global `canvas_items` stretch behavior so the existing UI scales as one composition with the window. Independent per-region scaling and true responsive use of additional non-16:9 space remain outside the completed scope.
+- **Acceptance evidence:** The user confirmed the implemented window-scaling baseline should be marked complete.
+- **Commit:** `5f0a323` (`window resizing`).
+
+### Feature-014 — Async orchestration sweep
+
+- **Type:** Feature / architecture
+- **Priority:** P2
+- **Status:** Completed
+- **Completed:** 2026-08-25
+- **Depends on:** None
+- **Outcome:** Game services, Godot-free presenters, and `GameUiCoordinator` expose Task-returning orchestration end to end. Godot signals dispatch through one guarded/logged `async void` boundary; blocking compatibility wrappers and discarded Task launches are gone, while pure inventory and calculation APIs remain synchronous.
+- **Verification:** 421 xUnit tests pass; the Godot C# project builds with 0 warnings and 0 errors; repository audits find no production blocking waits or discarded async calls and exactly one intentional production `async void`.
+- **Acceptance evidence:** The user confirmed the async orchestration sweep should be marked complete.
+- **Commit:** `ec855eb` (`Async pass`).
 
 ### Bug-001 — Resolve room entry before initiative presentation
 

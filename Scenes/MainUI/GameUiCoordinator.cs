@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-public sealed class GameUiCoordinator
+public sealed class GameUiCoordinator : IDisposable
 {
 	private enum TargetingKind
 	{
@@ -31,6 +31,7 @@ public sealed class GameUiCoordinator
 	private readonly LogPanel _logPanel;
 	private readonly CommandPanel _commandPanel;
 	private readonly MapPanel _mapPanel;
+	private readonly GameOverOverlay _gameOverOverlay;
 	private readonly InitiativeOverlay? _initiativeOverlay;
 	private readonly InitiativeStripView? _initiativeStrip;
 
@@ -49,6 +50,7 @@ public sealed class GameUiCoordinator
 		LogPanel logPanel,
 		CommandPanel commandPanel,
 		MapPanel mapPanel,
+		GameOverOverlay gameOverOverlay,
 		InitiativeOverlay? initiativeOverlay = null,
 		InitiativeStripView? initiativeStrip = null)
 	{
@@ -62,14 +64,26 @@ public sealed class GameUiCoordinator
 		_logPanel = logPanel;
 		_commandPanel = commandPanel;
 		_mapPanel = mapPanel;
+		_gameOverOverlay = gameOverOverlay;
 		_initiativeOverlay = initiativeOverlay;
 		_initiativeStrip = initiativeStrip;
 
 		_session.Dungeon.PlayerMoved += OnDungeonMapViewInvalidated;
+		_exploration.StateChanged += OnAuthoritativeStateChanged;
+		_combat.StateChanged += OnAuthoritativeStateChanged;
 	}
 
 	private void OnDungeonMapViewInvalidated() =>
-		RefreshHud(UiRefreshFlags.Map);
+		RefreshMap();
+
+	private void OnAuthoritativeStateChanged() => RefreshHud();
+
+	public void Dispose()
+	{
+		_session.Dungeon.PlayerMoved -= OnDungeonMapViewInvalidated;
+		_exploration.StateChanged -= OnAuthoritativeStateChanged;
+		_combat.StateChanged -= OnAuthoritativeStateChanged;
+	}
 
 	private bool IsTargetingActive => _targeting != null;
 
@@ -77,7 +91,7 @@ public sealed class GameUiCoordinator
 	{
 		_pendingAttackChoice = null;
 		ClearTargetingSession();
-		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
+		RefreshTargetingSurface();
 	}
 
 	public async Task OnTargetSelectionPickedAsync(int descriptorIndex)
@@ -194,6 +208,7 @@ public sealed class GameUiCoordinator
 	public async Task PresentCombatTurnAsync(CombatTurnPresentationKind kind, CancellationToken ct = default)
 	{
 		ct.ThrowIfCancellationRequested();
+		RefreshCombatChrome();
 		var view = InitiativeTurnOrderView.FromSession(_session);
 		if (kind == CombatTurnPresentationKind.OrderRevealed)
 		{
@@ -226,7 +241,7 @@ public sealed class GameUiCoordinator
 		_initiativeOverlay?.HideImmediate();
 	}
 
-	public void RefreshHud(UiRefreshFlags flags)
+	public void RefreshHud()
 	{
 		SyncInitiativeChromeToMode();
 		if (_session.Phase != GamePlayPhase.InProgress)
@@ -235,64 +250,93 @@ public sealed class GameUiCoordinator
 			ClearTargetingSession();
 		}
 
-		if (flags.HasFlag(UiRefreshFlags.Command) && _session.Phase == GamePlayPhase.GameOver)
+		RenderCommandPanel();
+		RenderMainView();
+		_characterPanel.Render(_session.Player, _session);
+		_logPanel.SyncFromSession(_session);
+		RefreshMap();
+		RenderGameOver();
+	}
+
+	private void RefreshTargetingSurface()
+	{
+		SyncInitiativeChromeToMode();
+		RenderCommandPanel();
+		RenderMainView();
+		RenderGameOver();
+	}
+
+	private void RefreshCombatChrome()
+	{
+		SyncInitiativeChromeToMode();
+		RenderCommandPanel();
+		RenderMainView();
+		RenderGameOver();
+	}
+
+	private void RenderCommandPanel()
+	{
+		if (_session.Phase == GamePlayPhase.GameOver)
 		{
 			if (IsTargetingActive)
 				ClearTargetingSession();
 			_commandPanel.SetAllCommandButtonsDisabled(true);
 			_commandPanel.HideAllGameplayCommands();
+			return;
 		}
-		else if (flags.HasFlag(UiRefreshFlags.Command))
-			_commandPanel.SetAllCommandButtonsDisabled(false);
 
-		if (flags.HasFlag(UiRefreshFlags.MainView))
+		_commandPanel.SetAllCommandButtonsDisabled(false);
+		if (_session.Phase != GamePlayPhase.InProgress || IsTargetingActive)
+			return;
+
+		_commandPanel.ApplyDungeonMode(_session.Dungeon.DungeonMode);
+		var mode = _session.Dungeon.DungeonMode;
+		if (mode == DungeonMode.Exploration)
 		{
-			var verticalConnection = FloorConnectionType.None;
-			if (_session.Dungeon.CurrentRoom is { } currentRoom)
-				verticalConnection = GetExitType(currentRoom);
-			IReadOnlyDictionary<string, string>? labels = IsTargetingActive
-				? BuildTargetingLabels(_targeting!)
-				: null;
-			var mainViewModel = MainViewPresentationBuilder.Build(_session, verticalConnection, labels);
-			_mainViewPanel.Render(mainViewModel);
-			if (IsTargetingActive)
-				ApplyTargetHoverToMainView();
-			else
-				_mainViewPanel.ClearTargetingHighlight();
+			_commandPanel.RenderFloorExitButtons(_session.Dungeon.CurrentRoom, _session.Player);
+			_commandPanel.ApplyPotionButtonState(_session.Player);
 		}
 
-		if (flags.HasFlag(UiRefreshFlags.Character))
-			_characterPanel.Render(_session.Player, _session);
-
-		if (flags.HasFlag(UiRefreshFlags.Log))
-			_logPanel.SyncFromSession(_session);
-
-		if (flags.HasFlag(UiRefreshFlags.Command) && _session.Phase == GamePlayPhase.InProgress && !IsTargetingActive)
+		if (mode == DungeonMode.Combat)
 		{
-			_commandPanel.ApplyDungeonMode(_session.Dungeon.DungeonMode);
-			var mode = _session.Dungeon.DungeonMode;
-			if (mode == DungeonMode.Exploration)
-			{
-				_commandPanel.RenderFloorExitButtons(_session.Dungeon.CurrentRoom, _session.Player);
-				_commandPanel.ApplyPotionButtonState(_session.Player);
-			}
-
-			if (mode == DungeonMode.Combat)
-			{
-				_commandPanel.ApplyPotionButtonState(_session.Player);
-				_commandPanel.ApplyCombatAbilityButtons(_session.Player, _session, _combatService);
-			}
-
-			var inPlay = mode == DungeonMode.Exploration || mode == DungeonMode.Combat;
-			_commandPanel.ApplyTakeButtonVisible(inPlay &&
-			                                     TreasurePickupService.HasTakeableLootInCurrentRoom(_session));
-			_commandPanel.ApplyOpenButtonVisible(mode == DungeonMode.Exploration &&
-			                                     RoomContainerLocator.CurrentRoomHasAnyContainer(_session));
-			_commandPanel.ApplyDisarmButtonVisible(inPlay && TrapService.CurrentRoomHasTrap(_session));
+			_commandPanel.ApplyPotionButtonState(_session.Player);
+			_commandPanel.ApplyCombatAbilityButtons(_session.Player, _session, _combatService);
 		}
 
-		if (flags.HasFlag(UiRefreshFlags.Map))
-			_mapPanel.RefreshMap(_session);
+		var inPlay = mode == DungeonMode.Exploration || mode == DungeonMode.Combat;
+		_commandPanel.ApplyTakeButtonVisible(inPlay &&
+		                                     TreasurePickupService.HasTakeableLootInCurrentRoom(_session));
+		_commandPanel.ApplyOpenButtonVisible(mode == DungeonMode.Exploration &&
+		                                     RoomContainerLocator.CurrentRoomHasAnyContainer(_session));
+		_commandPanel.ApplyDisarmButtonVisible(inPlay && TrapService.CurrentRoomHasTrap(_session));
+	}
+
+	private void RenderMainView()
+	{
+		var verticalConnection = FloorConnectionType.None;
+		if (_session.Dungeon.CurrentRoom is { } currentRoom)
+			verticalConnection = GetExitType(currentRoom);
+		IReadOnlyDictionary<string, string>? labels = IsTargetingActive
+			? BuildTargetingLabels(_targeting!)
+			: null;
+		var mainViewModel = MainViewPresentationBuilder.Build(_session, verticalConnection, labels);
+		_mainViewPanel.Render(mainViewModel);
+		if (IsTargetingActive)
+			ApplyTargetHoverToMainView();
+		else
+			_mainViewPanel.ClearTargetingHighlight();
+	}
+
+	private void RefreshMap() => _mapPanel.RefreshMap(_session);
+
+	private void RenderGameOver()
+	{
+		if (_session.Phase == GamePlayPhase.GameOver &&
+			_session.GameOverTitle is { } title &&
+			_session.GameOverBody is { } body)
+			_gameOverOverlay.ShowPanel(title, body);
+		else
+			_gameOverOverlay.HidePanel();
 	}
 
 	public async Task OnForwardPressedAsync()
@@ -381,7 +425,7 @@ public sealed class GameUiCoordinator
 			_targeting = new ActiveTargeting { Kind = TargetingKind.Attack, Descriptors = monsters };
 			_targetHoverDescriptorIndex = null;
 			_commandPanel.EnterTargetSelection(monsters);
-			RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
+			RefreshTargetingSurface();
 			return;
 		}
 
@@ -390,7 +434,7 @@ public sealed class GameUiCoordinator
 			_targeting = new ActiveTargeting { Kind = TargetingKind.AttackWeapon, Descriptors = weaponChoices };
 			_targetHoverDescriptorIndex = null;
 			_commandPanel.EnterTargetSelection(weaponChoices);
-			RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
+			RefreshTargetingSurface();
 			return;
 		}
 
@@ -398,7 +442,7 @@ public sealed class GameUiCoordinator
 		_targeting = new ActiveTargeting { Kind = TargetingKind.AttackWeapon, Descriptors = weaponChoices };
 		_targetHoverDescriptorIndex = null;
 		_commandPanel.EnterTargetSelection(weaponChoices);
-		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
+		RefreshTargetingSurface();
 	}
 
 	private async Task OnAttackWeaponPickedAsync(TargetPayload payload)
@@ -426,7 +470,7 @@ public sealed class GameUiCoordinator
 		_targeting = new ActiveTargeting { Kind = TargetingKind.Attack, Descriptors = monsters };
 		_targetHoverDescriptorIndex = null;
 		_commandPanel.EnterTargetSelection(monsters);
-		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
+		RefreshTargetingSurface();
 	}
 
 	public async Task OnFleePressedAsync()
@@ -472,7 +516,7 @@ public sealed class GameUiCoordinator
 		_targeting = new ActiveTargeting { Kind = TargetingKind.Take, Descriptors = list };
 		_targetHoverDescriptorIndex = null;
 		_commandPanel.EnterTargetSelection(list);
-		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
+		RefreshTargetingSurface();
 	}
 
 	public async Task OnOpenPressedAsync()
@@ -500,7 +544,7 @@ public sealed class GameUiCoordinator
 		_targeting = new ActiveTargeting { Kind = TargetingKind.OpenContainer, Descriptors = list };
 		_targetHoverDescriptorIndex = null;
 		_commandPanel.EnterTargetSelection(list);
-		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
+		RefreshTargetingSurface();
 	}
 
 	public async Task OnPotionPressedAsync()
@@ -558,7 +602,7 @@ public sealed class GameUiCoordinator
 		_targeting = new ActiveTargeting { Kind = TargetingKind.Disarm, Descriptors = list };
 		_targetHoverDescriptorIndex = null;
 		_commandPanel.EnterTargetSelection(list);
-		RefreshHud(UiRefreshFlags.Command | UiRefreshFlags.MainView);
+		RefreshTargetingSurface();
 	}
 
 	private static FloorConnectionType GetExitType(DungeonRoom room)

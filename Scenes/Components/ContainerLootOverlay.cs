@@ -20,7 +20,6 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 	[Export] private Control? _lootDimmer;
 
 	private GameRunContext? _ctx;
-	private Action<UiRefreshFlags>? _refreshHud;
 	private int _containerOrdinal = -1;
 
 	private readonly HashSet<int> _selectedStackIndices = new();
@@ -29,10 +28,11 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 	private bool _signalsConnected;
 	private bool _isResolvingLoot;
 
-	public void Bind(GameRunContext context, Action<UiRefreshFlags> refreshHud)
+	public event Action? StateChanged;
+
+	public void Bind(GameRunContext context)
 	{
 		_ctx = context;
-		_refreshHud = refreshHud;
 		if (!_signalsConnected)
 		{
 			_lootSelectedButton.Pressed += OnTakeSelectedPressed;
@@ -50,9 +50,9 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 
 	private void OpenInternal(int containerOrdinal)
 	{
-		if (_ctx == null || _refreshHud == null)
+		if (_ctx == null)
 		{
-			GD.PushError("ContainerLootOverlay.Bind(GameRunContext, refresh) must run before Open.");
+			GD.PushError("ContainerLootOverlay.Bind(GameRunContext) must run before Open.");
 			return;
 		}
 
@@ -118,7 +118,7 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 
 	private async Task TakeAllAsync()
 	{
-		if (_isResolvingLoot || _ctx == null || _refreshHud == null || _containerOrdinal < 0)
+		if (_isResolvingLoot || _ctx == null || _containerOrdinal < 0)
 			return;
 		SetResolvingLoot(true);
 		try
@@ -126,7 +126,7 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 			await _ctx.ContainerLootInteraction.TryLootAllAsync(_ctx.Session, _containerOrdinal);
 
 			ClosePanel();
-			_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
+			StateChanged?.Invoke();
 		}
 		finally
 		{
@@ -138,7 +138,7 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 
 	private async Task TakeSelectedAsync()
 	{
-		if (_isResolvingLoot || _ctx == null || _refreshHud == null || _containerOrdinal < 0)
+		if (_isResolvingLoot || _ctx == null || _containerOrdinal < 0)
 			return;
 		if (_selectedStackIndices.Count == 0)
 		{
@@ -172,7 +172,7 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 		}
 
 		ClosePanel();
-		_refreshHud(UiRefreshFlags.Log | UiRefreshFlags.Character | UiRefreshFlags.Command | UiRefreshFlags.MainView);
+		StateChanged?.Invoke();
 	}
 
 	private void SetResolvingLoot(bool resolving)
@@ -186,7 +186,7 @@ public partial class ContainerLootOverlay : Control, IContainerLootOverlayOpener
 	private void OnClosePressed()
 	{
 		ClosePanel();
-		_refreshHud?.Invoke(UiRefreshFlags.MainView);
+		StateChanged?.Invoke();
 	}
 
 	private void ClosePanel()

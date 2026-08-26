@@ -4,21 +4,17 @@ using System.Threading.Tasks;
 
 public sealed class UiCombatTurnPresentationSink : ICombatTurnPresentationSink
 {
-	private readonly Action<UiRefreshFlags> _refreshHud;
-	private readonly Func<CombatTurnPresentationKind, CancellationToken, Task>? _presentCombatTurn;
+	private readonly Func<CombatTurnPresentationKind, CancellationToken, Task> _presentCombatTurn;
 
 	public UiCombatTurnPresentationSink(
-		Action<UiRefreshFlags> refreshHud,
-		Func<CombatTurnPresentationKind, CancellationToken, Task>? presentCombatTurn = null)
+		Func<CombatTurnPresentationKind, CancellationToken, Task> presentCombatTurn)
 	{
-		_refreshHud = refreshHud ?? throw new ArgumentNullException(nameof(refreshHud));
-		_presentCombatTurn = presentCombatTurn;
+		_presentCombatTurn = presentCombatTurn ?? throw new ArgumentNullException(nameof(presentCombatTurn));
 	}
 
 	public Task PresentAsync(CombatTurnPresentationKind kind, CancellationToken ct = default)
 	{
 		ct.ThrowIfCancellationRequested();
-		_refreshHud(UiRefreshFlags.MainView | UiRefreshFlags.Command);
-		return _presentCombatTurn?.Invoke(kind, ct) ?? Task.CompletedTask;
+		return _presentCombatTurn(kind, ct);
 	}
 }
