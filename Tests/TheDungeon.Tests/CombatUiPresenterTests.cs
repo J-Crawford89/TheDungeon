@@ -13,12 +13,16 @@ public sealed class CombatUiPresenterTests
 		public PlayerAttackChoice LastAttackChoice { get; private set; }
 		public TargetPayload? LastTakePayload { get; private set; }
 		public TargetPayload? LastDisarmPayload { get; private set; }
+		public string? LastCombatAbilityId { get; private set; }
 		public Func<Task>? AttackOperation { get; set; }
+		public Func<Task>? CombatAbilityOperation { get; set; }
 
 		public Task<bool> TryBeginCombatIfHostileAsync(GameSessionState session, RoomCoord previousCoord, int floorLevel) =>
 			Task.FromResult(false);
 
 		public bool CanAcceptPlayerAction(GameSessionState session) => AwaitingPlayerAction;
+
+		public bool IsCombatAbilityVisible(GameSessionState session, string abilityId) => false;
 
 		public bool CanExecuteCombatAbility(GameSessionState session, string abilityId) => false;
 
@@ -49,10 +53,11 @@ public sealed class CombatUiPresenterTests
 			return Task.CompletedTask;
 		}
 
-		public Task ExecutePlayerDefendAsync(GameSessionState session)
+		public Task ExecutePlayerCombatAbilityAsync(GameSessionState session, string abilityId)
 		{
-			LastMethod = nameof(ICombatService.ExecutePlayerDefendAsync);
-			return Task.CompletedTask;
+			LastMethod = nameof(ICombatService.ExecutePlayerCombatAbilityAsync);
+			LastCombatAbilityId = abilityId;
+			return CombatAbilityOperation?.Invoke() ?? Task.CompletedTask;
 		}
 
 		public Task ExecutePlayerDisarmTrapAsync(GameSessionState session, TargetPayload payload)
@@ -170,7 +175,7 @@ public sealed class CombatUiPresenterTests
 	}
 
 	[Fact]
-	public async Task OnDefendPressed_WhenAwaiting_CallsCombatAndRaisesStateChanged()
+	public async Task OnCombatAbilityPressed_WhenAwaiting_ForwardsAbilityIdAndRaisesStateChanged()
 	{
 		var session = new GameSessionState();
 		session.Dungeon.DungeonMode = DungeonMode.Combat;
@@ -178,10 +183,32 @@ public sealed class CombatUiPresenterTests
 		var stateChanges = 0;
 		var presenter = CreatePresenter(session, combat, () => stateChanges++);
 
-		await presenter.OnDefendPressedAsync();
+		await presenter.OnCombatAbilityPressedAsync(AbilityIds.Defend);
 
-		Assert.Equal(nameof(ICombatService.ExecutePlayerDefendAsync), combat.LastMethod);
+		Assert.Equal(nameof(ICombatService.ExecutePlayerCombatAbilityAsync), combat.LastMethod);
+		Assert.Equal(AbilityIds.Defend, combat.LastCombatAbilityId);
 		Assert.Equal(1, stateChanges);
+	}
+
+	[Fact]
+	public async Task OnCombatAbilityPressed_WhenServiceIsCanceled_NotifiesAndReleasesBusyState()
+	{
+		var session = new GameSessionState();
+		session.Dungeon.DungeonMode = DungeonMode.Combat;
+		var combat = new RecordingCombatService
+		{
+			CombatAbilityOperation = () => Task.FromCanceled(new CancellationToken(canceled: true)),
+		};
+		var stateChanges = 0;
+		var presenter = CreatePresenter(session, combat, () => stateChanges++);
+
+		await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+			presenter.OnCombatAbilityPressedAsync(AbilityIds.Defend));
+		combat.CombatAbilityOperation = null;
+		await presenter.OnCombatAbilityPressedAsync("test.second-ability");
+
+		Assert.Equal("test.second-ability", combat.LastCombatAbilityId);
+		Assert.Equal(2, stateChanges);
 	}
 
 	[Fact]

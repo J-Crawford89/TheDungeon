@@ -7,6 +7,8 @@ public interface ICombatService
 
 	bool CanAcceptPlayerAction(GameSessionState session);
 
+	bool IsCombatAbilityVisible(GameSessionState session, string abilityId);
+
 	bool CanExecuteCombatAbility(GameSessionState session, string abilityId);
 
 	Task ExecutePlayerAttackAsync(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice);
@@ -17,7 +19,7 @@ public interface ICombatService
 
 	Task ExecutePlayerUseHealthPotionAsync(GameSessionState session);
 
-	Task ExecutePlayerDefendAsync(GameSessionState session);
+	Task ExecutePlayerCombatAbilityAsync(GameSessionState session, string abilityId);
 
 	Task ExecutePlayerDisarmTrapAsync(GameSessionState session, TargetPayload payload);
 }

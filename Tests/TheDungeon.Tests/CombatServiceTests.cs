@@ -151,14 +151,20 @@ public sealed class CombatServiceTests
 	}
 
 	[Fact]
-	public void CanExecuteCombatAbility_Defend_UsesRegistryWhenGrantedOnPlayerTurn()
+	public void CombatAbilityQueries_DefendUseRegistryForVisibilityAndExecutability()
 	{
 		var combat = CreateCombatService();
 		var session = SessionWithWeaponCombat(null, null);
+
+		Assert.False(combat.IsCombatAbilityVisible(session, AbilityIds.Defend));
+		Assert.False(combat.CanExecuteCombatAbility(session, AbilityIds.Defend));
+
 		session.Player.GrantedAbilities.Add(new GrantedAbility { AbilityId = AbilityIds.Defend });
 
 		Assert.True(combat.CanAcceptPlayerAction(session));
+		Assert.True(combat.IsCombatAbilityVisible(session, AbilityIds.Defend));
 		Assert.True(combat.CanExecuteCombatAbility(session, AbilityIds.Defend));
+		Assert.False(combat.IsCombatAbilityVisible(session, "unknown"));
 		Assert.False(combat.CanExecuteCombatAbility(session, "unknown"));
 	}
 
@@ -449,16 +455,47 @@ public sealed class CombatServiceTests
 	}
 
 	[Fact]
-	public async Task ExecutePlayerDefend_WithoutAbility_DoesNotAdvanceTurn()
+	public async Task ExecutePlayerCombatAbility_DefendWithoutGrant_DoesNotAdvanceTurn()
 	{
 		var session = SessionWithWeaponCombat(null, null);
 		session.Combat!.TurnOrder = [new CombatTurnSlot { IsPlayer = true }, new CombatTurnSlot { IsPlayer = true }];
 		session.Combat.CurrentTurnIndex = 0;
 		var combat = CreateCombatService(new Random(12));
 
-		await combat.ExecutePlayerDefendAsync(session);
+		await combat.ExecutePlayerCombatAbilityAsync(session, AbilityIds.Defend);
 
 		Assert.Equal(0, session.Combat.CurrentTurnIndex);
+	}
+
+	[Fact]
+	public async Task ExecutePlayerCombatAbility_UnknownAbility_DoesNotAdvanceOrLog()
+	{
+		var session = SessionWithWeaponCombat(null, null);
+		session.Combat!.TurnOrder = [new CombatTurnSlot { IsPlayer = true }, new CombatTurnSlot { IsPlayer = true }];
+		var combat = CreateCombatService(new Random(13));
+		var logCount = session.LogEntries.Count;
+
+		await combat.ExecutePlayerCombatAbilityAsync(session, "unknown");
+
+		Assert.Equal(0, session.Combat.CurrentTurnIndex);
+		Assert.Equal(logCount, session.LogEntries.Count);
+	}
+
+	[Fact]
+	public async Task ExecutePlayerCombatAbility_DefendExecutesEffectAndAdvancesExactlyOnce()
+	{
+		var session = SessionWithWeaponCombat(null, null);
+		session.Player.GrantedAbilities.Add(new GrantedAbility { AbilityId = AbilityIds.Defend });
+		session.Combat!.TurnOrder = [new CombatTurnSlot { IsPlayer = true }, new CombatTurnSlot { IsPlayer = true }];
+		var combat = CreateCombatService(new Random(14));
+
+		await combat.ExecutePlayerCombatAbilityAsync(session, AbilityIds.Defend);
+
+		Assert.Equal(1, session.Combat.CurrentTurnIndex);
+		Assert.True(session.Combat.HasDefendStanceActive());
+		Assert.Equal(1, session.Combat.AbilityCooldowns.GetRemaining(AbilityIds.Defend));
+		Assert.Contains(session.LogEntries, entry =>
+			entry.Text.Contains("defensive stance", StringComparison.OrdinalIgnoreCase));
 	}
 
 	[Fact]
@@ -489,7 +526,7 @@ public sealed class CombatServiceTests
 	}
 
 	[Fact]
-	public async Task ExecutePlayerDefend_WhenAlreadyDefending_LogsMessageAndDoesNotAdvance()
+	public async Task ExecutePlayerCombatAbility_DefendWhenAlreadyDefending_LogsMessageAndDoesNotAdvance()
 	{
 		var session = SessionWithWeaponCombat(null, null);
 		session.Player.GrantedAbilities.Add(new GrantedAbility { AbilityId = AbilityIds.Defend });
@@ -498,14 +535,14 @@ public sealed class CombatServiceTests
 		session.Combat.CurrentTurnIndex = 0;
 		var combat = CreateCombatService(new Random(14));
 
-		await combat.ExecutePlayerDefendAsync(session);
+		await combat.ExecutePlayerCombatAbilityAsync(session, AbilityIds.Defend);
 
 		Assert.Equal(0, session.Combat.CurrentTurnIndex);
 		Assert.Contains(session.LogEntries, l => l.Text.Contains("already defending", StringComparison.OrdinalIgnoreCase));
 	}
 
 	[Fact]
-	public async Task ExecutePlayerDefend_WhenOnCooldown_LogsMessageAndDoesNotAdvance()
+	public async Task ExecutePlayerCombatAbility_DefendWhenOnCooldown_LogsMessageAndDoesNotAdvance()
 	{
 		var session = SessionWithWeaponCombat(null, null);
 		session.Player.GrantedAbilities.Add(new GrantedAbility { AbilityId = AbilityIds.Defend });
@@ -514,7 +551,7 @@ public sealed class CombatServiceTests
 		session.Combat.CurrentTurnIndex = 0;
 		var combat = CreateCombatService(new Random(15));
 
-		await combat.ExecutePlayerDefendAsync(session);
+		await combat.ExecutePlayerCombatAbilityAsync(session, AbilityIds.Defend);
 
 		Assert.Equal(0, session.Combat.CurrentTurnIndex);
 		Assert.Contains(session.LogEntries, l => l.Text.Contains("cannot defend yet", StringComparison.OrdinalIgnoreCase));

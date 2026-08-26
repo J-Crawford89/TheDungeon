@@ -300,7 +300,7 @@ public sealed class GameUiCoordinator : IDisposable
 		if (mode == DungeonMode.Combat)
 		{
 			_commandPanel.ApplyPotionButtonState(_session.Player);
-			_commandPanel.ApplyCombatAbilityButtons(_session.Player, _session, _combatService);
+			_commandPanel.ApplyCombatAbilityButtons(_session, _combatService);
 		}
 
 		var inPlay = mode == DungeonMode.Exploration || mode == DungeonMode.Combat;
@@ -559,7 +559,7 @@ public sealed class GameUiCoordinator : IDisposable
 			await _combat.OnPotionPressedAsync();
 	}
 
-	public async Task OnDefendPressedAsync()
+	public async Task OnCombatAbilityPressedAsync(string abilityId)
 	{
 		if (_session.Phase != GamePlayPhase.InProgress)
 			return;
@@ -567,7 +567,7 @@ public sealed class GameUiCoordinator : IDisposable
 			return;
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
-		await _combat.OnDefendPressedAsync();
+		await _combat.OnCombatAbilityPressedAsync(abilityId);
 	}
 
 	public async Task OnDisarmPressedAsync()

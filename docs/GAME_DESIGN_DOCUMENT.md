@@ -218,4 +218,4 @@ Use this list to track unresolved product decisions (ordered loosely by impact):
 
 - [Technical Design Document](./TECHNICAL_DESIGN_DOCUMENT.md) — architecture, runtime, repositories, testing, ADRs.
 - [Loot, containers, and phased delivery](./LOOT_CONTAINERS_ROADMAP.md) — implementation roadmap for container-backed loot.
-- [Abilities: Godot editor setup](../Documentation/Abilities-Godot-setup.md) — operational wiring (not game design, but required to realize abilities in-editor).
+- [Combat ability registry routing](./TECHNICAL_DESIGN_DOCUMENT.md#combat-ability-registry-routing) — coded ability ownership, UI routing, and async execution boundaries.

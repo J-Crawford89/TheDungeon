@@ -137,7 +137,7 @@ public partial class MainUi : Control
 		_commandPanel.TakePressed += OnCommandTake;
 		_commandPanel.OpenPressed += OnCommandOpen;
 		_commandPanel.PotionPressed += OnCommandPotion;
-		_commandPanel.DefendPressed += OnCommandDefend;
+		_commandPanel.CombatAbilityPressed += OnCommandCombatAbility;
 		_commandPanel.DisarmPressed += OnCommandDisarm;
 		_commandPanel.TargetSelectCancelPressed += OnTargetSelectCancel;
 		_commandPanel.TargetSelectPicked += OnTargetSelectPicked;
@@ -206,7 +206,9 @@ public partial class MainUi : Control
 	private void OnCommandTake() => GodotAsyncEventHandler.Run(_coordinator.OnTakePressedAsync, "Take treasure");
 	private void OnCommandOpen() => GodotAsyncEventHandler.Run(_coordinator.OnOpenPressedAsync, "Open container");
 	private void OnCommandPotion() => GodotAsyncEventHandler.Run(_coordinator.OnPotionPressedAsync, "Use potion");
-	private void OnCommandDefend() => GodotAsyncEventHandler.Run(_coordinator.OnDefendPressedAsync, "Defend");
+	private void OnCommandCombatAbility(string abilityId) => GodotAsyncEventHandler.Run(
+		() => _coordinator.OnCombatAbilityPressedAsync(abilityId),
+		$"Use combat ability '{abilityId}'");
 	private void OnCommandDisarm() => GodotAsyncEventHandler.Run(_coordinator.OnDisarmPressedAsync, "Disarm trap");
 
 	private void OnTargetSelectCancel() => _coordinator.OnTargetSelectionCanceled();
@@ -276,7 +278,7 @@ public partial class MainUi : Control
 			_commandPanel.TakePressed -= OnCommandTake;
 			_commandPanel.OpenPressed -= OnCommandOpen;
 			_commandPanel.PotionPressed -= OnCommandPotion;
-			_commandPanel.DefendPressed -= OnCommandDefend;
+			_commandPanel.CombatAbilityPressed -= OnCommandCombatAbility;
 			_commandPanel.DisarmPressed -= OnCommandDisarm;
 			_commandPanel.TargetSelectCancelPressed -= OnTargetSelectCancel;
 			_commandPanel.TargetSelectPicked -= OnTargetSelectPicked;

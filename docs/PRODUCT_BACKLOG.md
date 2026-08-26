@@ -37,17 +37,6 @@ None open.
 
 ## Improvements
 
-### Improvement-003 — Coordinator owns HUD refresh (drop `UiRefreshFlags` plumbing)
-
-- **Type:** Improvement / UI architecture
-- **Priority:** P2
-- **Status:** Needs manual confirmation
-- **Depends on:** None
-- **Distinct from:** Feature-011 (AV juice / semantic presentation events). This item is about **who refreshes HUD panels**, not about hit flashes or screen shake.
-- **Desired behavior:** `GameUiCoordinator` (or a dedicated HUD subscriber) owns refresh. Presenters and services stop passing `UiRefreshFlags` through call chains; they raise or rely on **state events**, and the coordinator subscribes.
-- **Acceptance notes:** Combat, exploration, loot, and inventory still update the same panels; no presenter needs a `refreshHud` callback solely to push flags.
-- **Implementation note (2026-08-25):** `GameUiCoordinator` now owns full-HUD, targeting, map, combat-chrome, and game-over rendering. Combat/exploration presenters and loot/notebook adapters emit parameterless state-change notifications; resolved-roll and combat-turn sinks invoke or forward to coordinator-owned methods. `UiRefreshFlags`, region-bearing callbacks, and presenter refresh callbacks were removed. Automated coverage verifies notification guards/timing, move-before-combat ordering, async busy/fault/cancellation behavior, and sink forwarding; a full in-game HUD sweep remains before completion.
-
 ### Improvement-004 — Polish initiative overlay and strip presentation assets
 
 - **Type:** Improvement / combat UI polish
@@ -130,15 +119,6 @@ None open.
 - **Scope required:** Establish an event catalog and priority tiers; feedback ownership by UI region; animation interruption and queuing rules; synchronization with dice and narration; placeholder and final asset requirements; audio routing; reduced-motion, flash-intensity, screen-shake, and volume settings; and behavior when effects are disabled.
 - **Acceptance notes:** Core outcomes are understandable without relying only on the narrative log, simultaneous feedback remains readable, skipped or disabled effects cannot block gameplay, and presentation consistently reflects already-authoritative state.
 
-### Feature-012 — Drive coded combat abilities through `CombatAbilityEffectsRegistry`
-
-- **Type:** Feature / combat
-- **Priority:** P2
-- **Status:** Proposed
-- **Depends on:** None
-- **Notes:** The registry already exists; this cleanup pass only queries Defend `CanExecute` for the command panel. Remaining coded abilities should use the same lookup for visibility, enablement, and execution instead of duplicating cooldown/stance checks in UI.
-- **Acceptance notes:** Adding a registered ability does not require a new `CommandPanel` cooldown branch.
-
 ### Feature-013 — Gate healing on `RestoreHealthEffectDefinition`
 
 - **Type:** Feature / items
@@ -189,6 +169,29 @@ Unless a roll is explicitly one multi-die mechanic, presentation and state progr
 This principle should guide the eventual orchestration design for room entry, initiative, combat, harvesting, inspection, traps, containers, and other checks.
 
 ## Completed
+
+### Feature-012 — Drive coded combat abilities through `CombatAbilityEffectsRegistry`
+
+- **Type:** Feature / combat
+- **Priority:** P2
+- **Status:** Completed
+- **Completed:** 2026-08-26
+- **Depends on:** None
+- **Outcome:** Combat ability buttons dispatch an ability id through one `MainUi` → coordinator → presenter → `ICombatService` path. `CombatAbilityEffectsRegistry` delegates visibility, executability, rejection narration, and execution to the registered handler; `CommandPanel` only iterates authored ability-button bindings. Defend retains its existing stance, cooldown, narration, and awaited turn progression, and another registered ability no longer requires parallel UI or service branches.
+- **Verification:** 441 xUnit tests pass, including registry replacement/routing, hidden and unknown abilities, Defend policy and rejection cases, generic service/presenter routing, busy-state ordering, fault propagation, and cancellation cleanup. The Godot application builds with 0 warnings and 0 errors.
+- **Acceptance evidence:** The user confirmed the implemented generic combat-ability routing and requested that Feature-012 be marked complete.
+
+### Improvement-003 — Coordinator owns HUD refresh (drop `UiRefreshFlags` plumbing)
+
+- **Type:** Improvement / UI architecture
+- **Priority:** P2
+- **Status:** Completed
+- **Completed:** 2026-08-25
+- **Depends on:** None
+- **Distinct from:** Feature-011 (AV juice / semantic presentation events). This item is about **who refreshes HUD panels**, not about hit flashes or screen shake.
+- **Outcome:** `GameUiCoordinator` owns full-HUD, targeting, map, combat-chrome, and game-over rendering. Combat/exploration presenters and loot/notebook adapters emit parameterless state-change notifications; resolved-roll and combat-turn sinks invoke or forward to coordinator-owned methods. `UiRefreshFlags`, region-bearing callbacks, and presenter refresh callbacks were removed.
+- **Verification:** 427 xUnit tests pass, including notification guards and timing, move-before-combat ordering, async busy/fault/cancellation behavior, and sink forwarding. Both the isolated test project and Godot application build with 0 errors.
+- **Acceptance evidence:** The user confirmed the completed application sweep and requested that Improvement-003 be marked done.
 
 ### Improvement-002 — Add dice-rolling sound effects
 

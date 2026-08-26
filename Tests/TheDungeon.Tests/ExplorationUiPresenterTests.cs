@@ -22,12 +22,13 @@ public sealed class ExplorationUiPresenterTests
 	{
 		public Task<bool> TryBeginCombatIfHostileAsync(GameSessionState session, RoomCoord previousCoord, int floorLevel) => Task.FromResult(false);
 		public bool CanAcceptPlayerAction(GameSessionState session) => false;
+		public bool IsCombatAbilityVisible(GameSessionState session, string abilityId) => false;
 		public bool CanExecuteCombatAbility(GameSessionState session, string abilityId) => false;
 		public Task ExecutePlayerAttackAsync(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice) => Task.CompletedTask;
 		public Task ExecutePlayerFleeAsync(GameSessionState session) => Task.CompletedTask;
 		public Task ExecutePlayerTakeTreasureAsync(GameSessionState session, TargetPayload payload) => Task.CompletedTask;
 		public Task ExecutePlayerUseHealthPotionAsync(GameSessionState session) => Task.CompletedTask;
-		public Task ExecutePlayerDefendAsync(GameSessionState session) => Task.CompletedTask;
+		public Task ExecutePlayerCombatAbilityAsync(GameSessionState session, string abilityId) => Task.CompletedTask;
 		public Task ExecutePlayerDisarmTrapAsync(GameSessionState session, TargetPayload payload) => Task.CompletedTask;
 	}
 
@@ -54,12 +55,13 @@ public sealed class ExplorationUiPresenterTests
 		}
 
 		public bool CanAcceptPlayerAction(GameSessionState session) => false;
+		public bool IsCombatAbilityVisible(GameSessionState session, string abilityId) => false;
 		public bool CanExecuteCombatAbility(GameSessionState session, string abilityId) => false;
 		public Task ExecutePlayerAttackAsync(GameSessionState session, int livingMonsterOrdinal, PlayerAttackChoice attackChoice) => Task.CompletedTask;
 		public Task ExecutePlayerFleeAsync(GameSessionState session) => Task.CompletedTask;
 		public Task ExecutePlayerTakeTreasureAsync(GameSessionState session, TargetPayload payload) => Task.CompletedTask;
 		public Task ExecutePlayerUseHealthPotionAsync(GameSessionState session) => Task.CompletedTask;
-		public Task ExecutePlayerDefendAsync(GameSessionState session) => Task.CompletedTask;
+		public Task ExecutePlayerCombatAbilityAsync(GameSessionState session, string abilityId) => Task.CompletedTask;
 		public Task ExecutePlayerDisarmTrapAsync(GameSessionState session, TargetPayload payload) => Task.CompletedTask;
 	}
 

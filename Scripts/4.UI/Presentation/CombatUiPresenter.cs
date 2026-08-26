@@ -51,13 +51,13 @@ public sealed class CombatUiPresenter
 		await ExecuteAsync(() => _combatService.ExecutePlayerUseHealthPotionAsync(_session));
 	}
 
-	public async Task OnDefendPressedAsync()
+	public async Task OnCombatAbilityPressedAsync(string abilityId)
 	{
 		if (_session.Dungeon.DungeonMode != DungeonMode.Combat)
 			return;
 		if (!_combatService.CanAcceptPlayerAction(_session))
 			return;
-		await ExecuteAsync(() => _combatService.ExecutePlayerDefendAsync(_session));
+		await ExecuteAsync(() => _combatService.ExecutePlayerCombatAbilityAsync(_session, abilityId));
 	}
 
 	public async Task OnDisarmWithTargetAsync(TargetPayload payload)

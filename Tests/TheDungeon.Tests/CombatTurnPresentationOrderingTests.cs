@@ -74,6 +74,15 @@ public sealed class CombatTurnPresentationOrderingTests
 		}
 	}
 
+	private sealed class FixedResultTurnSink : ICombatTurnPresentationSink
+	{
+		private readonly Func<Task> _result;
+
+		public FixedResultTurnSink(Func<Task> result) => _result = result;
+
+		public Task PresentAsync(CombatTurnPresentationKind kind, CancellationToken ct = default) => _result();
+	}
+
 	private sealed class SequentialDiceRoll : IDiceRollRequestExecutor
 	{
 		private readonly Queue<DiceRollResult> _queue;
@@ -185,6 +194,63 @@ public sealed class CombatTurnPresentationOrderingTests
 
 		sink.Complete(0);
 		await action;
+	}
+
+	[Fact]
+	public async Task ExecutePlayerCombatAbilityAsync_PresentsAdvancedTurnBeforeMonsterActsAndKeepsBusyGuard()
+	{
+		var sink = new DeferredTurnSink();
+		var host = new CombatTurnPresentationHost { Sink = sink };
+		var combat = CreateCombatService(host);
+		var (session, _) = BuildCombatWithPlayerFirst();
+		session.Player.GrantedAbilities.Add(new GrantedAbility { AbilityId = AbilityIds.Defend });
+		var hpBefore = session.Player.CurrentHp;
+
+		var action = combat.ExecutePlayerCombatAbilityAsync(session, AbilityIds.Defend);
+		await sink.WaitForCallCountAsync(1);
+
+		Assert.False(action.IsCompleted);
+		Assert.True(combat.IsBusyResolvingAction);
+		Assert.False(combat.CanExecuteCombatAbility(session, AbilityIds.Defend));
+		Assert.True(session.Combat!.HasDefendStanceActive());
+		Assert.Equal(CombatTurnPresentationKind.ActiveTurnChanged, sink.Kinds[0]);
+		Assert.Equal(1, session.Combat.CurrentTurnIndex);
+		Assert.Equal(hpBefore, session.Player.CurrentHp);
+
+		sink.Complete(0);
+		await action;
+
+		Assert.False(combat.IsBusyResolvingAction);
+	}
+
+	[Fact]
+	public async Task ExecutePlayerCombatAbilityAsync_WhenTurnPresentationFaults_ReleasesBusyGuard()
+	{
+		var sink = new FixedResultTurnSink(() =>
+			Task.FromException(new InvalidOperationException("test presentation fault")));
+		var combat = CreateCombatService(new CombatTurnPresentationHost { Sink = sink });
+		var (session, _) = BuildCombatWithPlayerFirst();
+		session.Player.GrantedAbilities.Add(new GrantedAbility { AbilityId = AbilityIds.Defend });
+
+		await Assert.ThrowsAsync<InvalidOperationException>(() =>
+			combat.ExecutePlayerCombatAbilityAsync(session, AbilityIds.Defend));
+
+		Assert.False(combat.IsBusyResolvingAction);
+	}
+
+	[Fact]
+	public async Task ExecutePlayerCombatAbilityAsync_WhenTurnPresentationIsCanceled_ReleasesBusyGuard()
+	{
+		var sink = new FixedResultTurnSink(() =>
+			Task.FromCanceled(new CancellationToken(canceled: true)));
+		var combat = CreateCombatService(new CombatTurnPresentationHost { Sink = sink });
+		var (session, _) = BuildCombatWithPlayerFirst();
+		session.Player.GrantedAbilities.Add(new GrantedAbility { AbilityId = AbilityIds.Defend });
+
+		await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+			combat.ExecutePlayerCombatAbilityAsync(session, AbilityIds.Defend));
+
+		Assert.False(combat.IsBusyResolvingAction);
 	}
 
 	[Fact]

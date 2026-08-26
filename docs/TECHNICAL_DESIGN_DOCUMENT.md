@@ -207,6 +207,20 @@ Any gameplay or presentation operation that awaits dice, reactions, animation, o
 
 See ADR-0012 in the appendix.
 
+### Combat ability registry routing
+
+Coded player combat abilities use one ability-id path:
+
+`CommandPanel -> MainUi -> GameUiCoordinator -> CombatUiPresenter -> ICombatService.ExecutePlayerCombatAbilityAsync -> CombatAbilityEffectsRegistry -> IPlayerCombatAbilityHandler`
+
+- [`IPlayerCombatAbilityHandler`](../Scripts/3.Game/Combat/IPlayerCombatAbilityHandler.cs) owns ability-specific visibility, execution eligibility, rejection narration, and state mutation. Defend cooldown and stance rules do not leak into UI or `CombatService`.
+- [`CombatAbilityEffectsRegistry`](../Scripts/3.Game/Combat/CombatAbilityEffectsRegistry.cs) is the lookup and dispatch boundary. Unknown or hidden ability ids do not execute; a visible but currently unavailable ability delegates its rejection response to its handler.
+- [`CombatService`](../Scripts/3.Game/Services/CombatService.cs) owns the shared action guard and asynchronous turn orchestration. After a handler consumes the action and advances the turn, the service awaits active-turn presentation and automatic monster phases before releasing its busy state.
+- [`CommandPanel`](../Scenes/MainUI/CommandPanel.cs) keeps editor-authored button references in an ability-id binding collection. It renders each binding from registry-backed visibility and executability queries and emits one `CombatAbilityPressed(string abilityId)` event. Adding a binding does not add cooldown, stance, coordinator, presenter, or service branches.
+- This architecture does not imply a dynamically generated ability bar. New abilities may still require an authored button, targeting flow, content, and presentation work appropriate to that ability.
+
+See ADR-0014 in the appendix.
+
 ---
 
 ## 3D dice presentation
@@ -484,3 +498,12 @@ Player-facing summary: [Game Design Document — Combat and damage](./GAME_DESIG
 - **Lifecycle rule:** The coordinator and composition root explicitly unsubscribe from presenter, dungeon, loot, and notebook events during teardown.
 - **Distinct from:** Feature-011 semantic audiovisual reactions, which communicate gameplay meaning and may drive animation/audio. `StateChanged` carries no gameplay semantics.
 - **Companions:** ADR-0002 (coordinator/presenter UI), ADR-0010 (resolved-roll sequencing), ADR-0012 (async orchestration), and ADR-0011 (Godot-free `4.UI`).
+
+### ADR-0014: Registered combat abilities own their policy and execution
+
+- **Status:** Accepted
+- **Decision:** Coded player combat abilities are addressed by ability id through one generic UI, presenter, and service path. Each registered `IPlayerCombatAbilityHandler` owns its visibility, executability, rejection narration, and state mutation. `CombatAbilityEffectsRegistry` performs lookup and dispatch; `CombatService` retains shared busy-state and awaited turn orchestration.
+- **Rationale:** Ability-specific cooldown, stance, and rejection branches otherwise spread through `CommandPanel`, coordinators, presenters, and service methods. Central handler ownership lets another registered ability reuse the same routing without adding parallel execution APIs or UI policy branches.
+- **UI boundary:** Buttons remain editor-authored and are bound to ability ids in `CommandPanel`; this decision does not require dynamic button generation. The panel renders registry-backed state and emits only the selected id.
+- **Async boundary:** Handler mutation remains synchronous unless an ability later requires an asynchronous game dependency. Shared turn presentation and automatic monster processing remain awaited by `CombatService`, following ADR-0012.
+- **Companions:** ADR-0002 (coordinator/presenter UI), ADR-0012 (async orchestration), and ADR-0013 (coordinator-owned HUD refresh).

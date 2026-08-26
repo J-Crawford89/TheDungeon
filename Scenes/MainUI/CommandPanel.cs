@@ -26,6 +26,7 @@ public partial class CommandPanel : PanelContainer
 
 	private Control? _targetingButtonHost;
 	private Button[]? _targetingPickButtons;
+	private readonly Dictionary<string, Button> _combatAbilityButtons = new(StringComparer.Ordinal);
 
 	private static readonly Color TargetButtonHoverModulate = new(1.35f, 1.35f, 0.85f);
 
@@ -41,7 +42,7 @@ public partial class CommandPanel : PanelContainer
 	public event Action? TakePressed;
 	public event Action? OpenPressed;
 	public event Action? PotionPressed;
-	public event Action? DefendPressed;
+	public event Action<string>? CombatAbilityPressed;
 	public event Action? DisarmPressed;
 
 	public event Action? TargetSelectCancelPressed;
@@ -63,10 +64,17 @@ public partial class CommandPanel : PanelContainer
 		if (_openButton != null)
 			_openButton.Pressed += () => OpenPressed?.Invoke();
 		_potionButton.Pressed += () => PotionPressed?.Invoke();
-		if (_defendButton != null)
-			_defendButton.Pressed += () => DefendPressed?.Invoke();
+		RegisterCombatAbilityButton(AbilityIds.Defend, _defendButton);
 		if (_disarmButton != null)
 			_disarmButton.Pressed += () => DisarmPressed?.Invoke();
+	}
+
+	private void RegisterCombatAbilityButton(string abilityId, Button? button)
+	{
+		if (button == null)
+			return;
+		_combatAbilityButtons[abilityId] = button;
+		button.Pressed += () => CombatAbilityPressed?.Invoke(abilityId);
 	}
 
 	public bool IsInTargetSelectionMode => _targetingButtonHost != null;
@@ -155,8 +163,8 @@ public partial class CommandPanel : PanelContainer
 		_attackButton.Visible = combat;
 		_fleeButton.Visible = combat;
 		_potionButton.Visible = exploration || combat;
-		if (_defendButton != null)
-			_defendButton.Visible = combat;
+		foreach (var button in _combatAbilityButtons.Values)
+			button.Visible = combat;
 	}
 
 	public void ApplyTakeButtonVisible(bool visible)
@@ -191,8 +199,8 @@ public partial class CommandPanel : PanelContainer
 		if (_openButton != null)
 			_openButton.Disabled = disabled;
 		_potionButton.Disabled = disabled;
-		if (_defendButton != null)
-			_defendButton.Disabled = disabled;
+		foreach (var button in _combatAbilityButtons.Values)
+			button.Disabled = disabled;
 		if (_disarmButton != null)
 			_disarmButton.Disabled = disabled;
 	}
@@ -212,8 +220,8 @@ public partial class CommandPanel : PanelContainer
 		if (_openButton != null)
 			_openButton.Visible = false;
 		_potionButton.Visible = false;
-		if (_defendButton != null)
-			_defendButton.Visible = false;
+		foreach (var button in _combatAbilityButtons.Values)
+			button.Visible = false;
 		if (_disarmButton != null)
 			_disarmButton.Visible = false;
 	}
@@ -227,16 +235,14 @@ public partial class CommandPanel : PanelContainer
 	public void ApplyCombatItemButtons(PlayerState player) =>
 		ApplyPotionButtonState(player);
 
-	public void ApplyCombatAbilityButtons(PlayerState player, GameSessionState session, ICombatService combat)
+	public void ApplyCombatAbilityButtons(GameSessionState session, ICombatService combat)
 	{
-		if (_defendButton == null)
-			return;
-		var hasDefend = player.HasAbility(AbilityIds.Defend);
-		_defendButton.Visible = hasDefend;
-		if (!hasDefend)
-			return;
-		_defendButton.Disabled = !combat.CanAcceptPlayerAction(session) ||
-			!combat.CanExecuteCombatAbility(session, AbilityIds.Defend);
+		foreach (var (abilityId, button) in _combatAbilityButtons)
+		{
+			var visible = combat.IsCombatAbilityVisible(session, abilityId);
+			button.Visible = visible;
+			button.Disabled = !visible || !combat.CanExecuteCombatAbility(session, abilityId);
+		}
 	}
 
 	public void RenderFloorExitButtons(DungeonRoom? currentRoom, PlayerState? player)

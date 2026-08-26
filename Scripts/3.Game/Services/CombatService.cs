@@ -140,8 +140,11 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 	public bool CanAcceptPlayerAction(GameSessionState session)
 		=> !_isBusyResolvingAction && IsPlayerTurn(session);
 
+	public bool IsCombatAbilityVisible(GameSessionState session, string abilityId) =>
+		_combatAbilities.IsVisible(abilityId, session);
+
 	public bool CanExecuteCombatAbility(GameSessionState session, string abilityId) =>
-		_combatAbilities.CanExecute(abilityId, session);
+		CanAcceptPlayerAction(session) && _combatAbilities.CanExecute(abilityId, session);
 
 	bool ICombatTurnReadiness.IsPlayerTurn(GameSessionState session) => IsPlayerTurn(session);
 
@@ -397,11 +400,11 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 		}
 	}
 
-	public async Task ExecutePlayerDefendAsync(GameSessionState session)
+	public async Task ExecutePlayerCombatAbilityAsync(GameSessionState session, string abilityId)
 	{
 		if (!CanAcceptPlayerAction(session))
 			return;
-		if (!session.Player.HasAbility(AbilityIds.Defend))
+		if (!_combatAbilities.IsVisible(abilityId, session))
 			return;
 
 		_isBusyResolvingAction = true;
@@ -410,21 +413,12 @@ public sealed class CombatService : ICombatService, ICombatTurnReadiness
 
 		void Advance() => _turnLoop.AdvanceTurn(session);
 
-		if (_combatAbilities.TryExecute(AbilityIds.Defend, session, Advance))
+		if (_combatAbilities.TryExecute(abilityId, session, Advance))
 		{
 			await _turnLoop.PresentActiveTurnAsync(session);
 			await _turnLoop.ProcessAutomaticMonsterTurnsAsync(session);
 			return;
 		}
-
-		if (session.Combat is not { } c)
-			return;
-		if (c.HasDefendStanceActive())
-			session.AppendGameLog(_narrative.ForDefendAlreadyDefending());
-		else if (c.AbilityCooldowns.IsOnCooldown(AbilityIds.Defend))
-			session.AppendGameLog(_narrative.ForDefendOnCooldown());
-		else
-			session.AppendGameLog(_narrative.ForDefendCannotUse());
 		}
 		finally
 		{
