@@ -11,6 +11,20 @@ using System.Collections.Generic;
 public partial class DieVisualBody : RigidBody3D
 {
 	[Export] public DieFaceCalibration? Calibration { get; set; }
+	[Export] public MeshInstance3D? BodyMesh { get; set; }
+
+	public void ApplyBodyMaterial(Material? material)
+	{
+		if (material == null)
+			return;
+		if (BodyMesh == null)
+		{
+			GD.PushWarning($"{Name}: assign {nameof(BodyMesh)} to apply the dice-set body material.");
+			return;
+		}
+
+		BodyMesh.MaterialOverride = material;
+	}
 
 	public IReadOnlyList<System.Numerics.Vector3> GetConvexHullPoints()
 	{

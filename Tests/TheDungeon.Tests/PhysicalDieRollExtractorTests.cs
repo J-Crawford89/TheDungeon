@@ -29,6 +29,7 @@ public sealed class PhysicalDieRollExtractorTests
 			roll, new DiceRollRequest(), DieRollVisualKind.Player);
 
 		Assert.Equal(2, specs.Count);
+		Assert.All(specs, spec => Assert.Equal(DieRollVisualKind.Player, spec.Kind));
 		Assert.Equal(DieVisualRole.PercentileTens, specs[0].Role);
 		Assert.Equal(20, specs[0].FaceValue);
 		Assert.Equal(DieVisualRole.Standard, specs[1].Role);

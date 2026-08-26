@@ -1,3 +1,4 @@
+#nullable enable
 using Godot;
 using System.Collections.Generic;
 
@@ -6,7 +7,7 @@ public partial class DieVisualCatalogLibrary : Resource
 {
 	[Export] public Godot.Collections.Array<DieVisualCatalog> Catalogs { get; set; } = [];
 
-	public PackedScene? Resolve(DieRollVisualKind situation, DieType dieType, DieVisualRole role)
+	public DieVisualSelection? Resolve(DieRollVisualKind situation, DieType dieType, DieVisualRole role)
 	{
 		if (Catalogs == null)
 			return null;
@@ -14,9 +15,9 @@ public partial class DieVisualCatalogLibrary : Resource
 		{
 			if (catalog == null || catalog.Situation != situation)
 				continue;
-			var scene = catalog.Resolve(dieType, role);
-			if (scene != null)
-				return scene;
+			var selection = catalog.Resolve(dieType, role);
+			if (selection != null)
+				return selection;
 		}
 
 		return null;

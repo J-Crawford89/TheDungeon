@@ -127,12 +127,13 @@ Face = 20
 FaceOrientation = Quaternion(0, 0, 0.181421, 0.983405)
 metadata/_custom_type_script = "uid://dbtqualonrkmw"
 
-[node name="d20Root" unique_id=1434020238 node_paths=PackedStringArray("Calibration") instance=ExtResource("1_hbovu")]
+[node name="d20Root" unique_id=1434020238 node_paths=PackedStringArray("Calibration", "BodyMesh") instance=ExtResource("1_hbovu")]
 mass = 0.25
 linear_damp = 0.35
 angular_damp = 0.35
 script = ExtResource("2_iqd21")
 Calibration = NodePath("DieFaceCalibration")
+BodyMesh = NodePath("d20")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." index="1" unique_id=436109999]
 transform = Transform3D(1.01, 0, 0, 0, 1.01, 0, 0, 0, 1.01, 0, 0, 0)

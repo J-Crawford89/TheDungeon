@@ -445,8 +445,8 @@ public partial class DiceTestScene : Node3D
 		if (_spawnRoot == null || RollingDieScene == null || VisualCatalogLibrary == null)
 			return null;
 
-		var visual = VisualCatalogLibrary.Resolve(DieRollVisualKind.Player, preset.DieType, preset.Role);
-		if (visual == null)
+		var selection = VisualCatalogLibrary.Resolve(DieRollVisualKind.Player, preset.DieType, preset.Role);
+		if (selection == null)
 		{
 			GD.PushWarning($"No visual for {preset.Label}");
 			SetStatus($"No catalog visual for {preset.Label}.");
@@ -455,7 +455,7 @@ public partial class DiceTestScene : Node3D
 
 		var die = RollingDieScene.Instantiate<RollingDie>();
 		die.SpawnPosition = AllocateSpawnOffset();
-		die.SetVisual(visual);
+		die.SetVisual(selection.VisualScene, selection.BodyMaterial);
 		_spawnRoot.AddChild(die);
 		die.PlaceAtSpawn();
 		return die;

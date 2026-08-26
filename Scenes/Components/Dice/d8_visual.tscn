@@ -55,12 +55,13 @@ Face = 8
 FaceOrientation = Quaternion(-0.618237, 0, -0.618237, 0.485351)
 metadata/_custom_type_script = "uid://dbtqualonrkmw"
 
-[node name="d8Root" unique_id=1514276264 node_paths=PackedStringArray("Calibration") instance=ExtResource("1_cocre")]
+[node name="d8Root" unique_id=1514276264 node_paths=PackedStringArray("Calibration", "BodyMesh") instance=ExtResource("1_cocre")]
 mass = 0.25
 linear_damp = 0.35
 angular_damp = 0.35
 script = ExtResource("2_majae")
 Calibration = NodePath("DieFaceCalibration")
+BodyMesh = NodePath("d8")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." index="1" unique_id=850163240]
 transform = Transform3D(1.01, 0, 0, 0, 1.01, 0, 0, 0, 1.01, 0, 0, 0)

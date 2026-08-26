@@ -221,14 +221,14 @@ The reaction boundary is propagated through initiative, player and monster hit/d
 ### Scene model
 
 - **`RollingDie`**: `Node3D` wrapper (spawn offset, orchestration).
-- **`*_visual.tscn`**: root **[`DieVisualBody`](../Scenes/Components/Dice/DieVisualBody.cs)** (`RigidBody3D`) with mesh, **convex `CollisionShape3D`**, and an exported `Calibration` reference to its [`DieFaceCalibration`](../Scenes/Components/Dice/DieFaceCalibration.cs) child. Runtime child discovery is intentionally not used.
+- **`*_visual.tscn`**: root **[`DieVisualBody`](../Scenes/Components/Dice/DieVisualBody.cs)** (`RigidBody3D`) with mesh, **convex `CollisionShape3D`**, an exported `Calibration` reference to its [`DieFaceCalibration`](../Scenes/Components/Dice/DieFaceCalibration.cs) child, and an exported `BodyMesh` reference to the resin/body mesh that receives the dice-set material. Runtime child discovery is intentionally not used. Numeral meshes retain their authored material.
 - **No** nested `RigidBody3D` under another `RigidBody3D`. Containment uses **floor + [`DicePlayAreaWalls`](../Scenes/Components/Dice/DicePlayAreaWalls.cs)** (no post-roll teleport clamp).
 - **Walls**: [`DicePlayAreaWallLayout`](../Scripts/3.Game/Helpers/DicePlayAreaWallLayout.cs) creates all four sides with overlapping corners. `ShowDebugWallMeshes` adds translucent boxes matching collision dimensions for test-scene diagnosis; final-game walls remain invisible when false.
 
 ### Visual catalogs
 
-- [`DieVisualCatalog`](../Resources/DieVisualCatalog.cs): one **situation** (`DieRollVisualKind` — Player, Monster) + entries (`DieType`, `DieVisualRole`, `PackedScene`).
-- [`DieVisualCatalogLibrary`](../Resources/DieVisualCatalogLibrary.cs): array of catalogs; overlay resolves `(situation, dieType, role)`.
+- [`DieVisualCatalog`](../Resources/DieVisualCatalog.cs): one **situation** (`DieRollVisualKind` — Player, Monster), one catalog-level `BodyMaterial`, and entries (`DieType`, `DieVisualRole`, `PackedScene`). Keeping appearance on the catalog makes the player/monster defaults data-driven and leaves the catalog as the replacement seam for future selectable or unlockable dice sets.
+- [`DieVisualCatalogLibrary`](../Resources/DieVisualCatalogLibrary.cs): array of catalogs; overlay resolves `(situation, dieType, role)` to one [`DieVisualSelection`](../Resources/DieVisualSelection.cs) containing both the visual scene and its body material. A missing material preserves the imported model's original appearance.
 - d100 percentile tens may be keyed as `d10` + `PercentileTens` or `d100` + `PercentileTens` ([`DieVisualCatalogKeys`](../Scripts/3.Game/Helpers/DieVisualCatalogKeys.cs)).
 
 ### Face calibration (Quaternion, not Euler)
@@ -246,11 +246,11 @@ The cube-shaped d3 stores one calibration per value even though each value is pr
 ### Godot editor checklist (human-owned)
 
 1. **`RollingDie.tscn`**: root `Node3D`; remove generic sphere collider and baked visual children. The remaining exports are intentionally high-level: throw-speed range, roll-coupling range, maximum tumble jitter, predetermined surface grip, and post-roll display time. Internal bounds, damping, settling, and solver constants are not exposed on each wrapper.
-2. **Each `*_visual.tscn`**: root `RigidBody3D`; attach `DieVisualBody.cs`; assign its exported `Calibration` field to the existing `DieFaceCalibration` child; retain the convex collider and per-face `FaceOrientation` entries. Baseline: mass `0.25`, linear/angular damping `0.35`, collider scale `1.01`.
+2. **Each `*_visual.tscn`**: root `RigidBody3D`; attach `DieVisualBody.cs`; assign its exported `Calibration` field to the existing `DieFaceCalibration` child and `BodyMesh` to the imported resin/body mesh (`d3`, `d4`, `d6`, `d8`, `d10`, `d_percentile`, `d12`, or `d20`); retain the convex collider, numeral meshes, and per-face `FaceOrientation` entries. Baseline: mass `0.25`, linear/angular damping `0.35`, collider scale `1.01`.
 3. **Both dice floors**: use equivalent `PhysicsMaterial` settings so live/free rolls in the harness and production overlay behave alike. Baseline: friction `0.65`, bounce `0.20`. Predetermined rolls use the independent offscreen floor grip (`1.25`) and wall friction (`0.15`) described above.
 4. **`dice_roll_overlay`**: assign `RollingDieScene`, `DiceSpawnPath`, `CameraPath` (→ `DiceWorld/Camera3D`), `VisualCatalogLibrary`; add `DicePlayAreaWalls` under `DiceWorld`; tune wall half-extents to spawn bounds.
 5. **`main_ui.tscn`**: export `DiceRollOverlay` on `MainUi`.
-6. **Catalog `.tres`**: `PlayerDieVisualCatalog`, `MonsterDieVisualCatalog`, wrapped in `DieVisualCatalogLibrary`.
+6. **Catalog `.tres`**: [`PlayerDiceSet.tres`](../Content/Dice/PlayerDiceSet.tres) and [`MonsterDiceSet.tres`](../Content/Dice/MonsterDiceSet.tres), wrapped by [`BaseDiceSets.tres`](../Content/Dice/BaseDiceSets.tres). Assign the appropriate player or monster default dice material to each catalog's `BodyMaterial` field.
 7. **`dice_test_scene`**: wire script exports; remove baked `RollingDie` under spawn root; floor + walls + camera. The status panel reports launch speed, contact lever arm, roll coupling, release/contact slip, time-to-grip, initial/max spin, accumulated turns, upward-face changes, calibration/hull alignment, natural/displayed face, final face dot, duration, and whether the offscreen trajectory settled naturally. Multi-die gameplay batches also report Bepu contact points/steps/pairs, maximum approach/response, and the active shared-playback/avoidance modes.
 
 ### Test harness

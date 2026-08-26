@@ -269,10 +269,10 @@ public partial class DiceRollOverlay : Control
 		var die = RollingDieScene.Instantiate<RollingDie>();
 		die.SpawnPosition = spawnOffset;
 		die.SimulationBoundsHalfExtents = SpawnBoundsHalfExtents;
-		var visual = VisualCatalogLibrary?.Resolve(spec.Kind, spec.DieType, spec.Role);
-		if (visual == null)
+		var selection = VisualCatalogLibrary?.Resolve(spec.Kind, spec.DieType, spec.Role);
+		if (selection == null)
 			GD.PushWarning($"{nameof(DiceRollOverlay)}: no visual for {spec.Kind} {spec.DieType} {spec.Role}.");
-		die.SetVisual(visual);
+		die.SetVisual(selection?.VisualScene, selection?.BodyMaterial);
 		_spawnRoot!.AddChild(die);
 		_activeCount++;
 		UpdateOverlayVisibility();

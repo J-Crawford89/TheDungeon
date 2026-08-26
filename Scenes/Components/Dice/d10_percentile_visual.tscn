@@ -68,12 +68,13 @@ Face = 90
 FaceOrientation = Quaternion(-0.33948, 0, 0.467255, 0.816349)
 metadata/_custom_type_script = "uid://dbtqualonrkmw"
 
-[node name="dPercentileRoot" unique_id=1502442766 node_paths=PackedStringArray("Calibration") instance=ExtResource("1_tmse7")]
+[node name="dPercentileRoot" unique_id=1502442766 node_paths=PackedStringArray("Calibration", "BodyMesh") instance=ExtResource("1_tmse7")]
 mass = 0.25
 linear_damp = 0.35
 angular_damp = 0.35
 script = ExtResource("2_v7iag")
 Calibration = NodePath("DieFaceCalibration")
+BodyMesh = NodePath("d_percentile")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." index="1" unique_id=403626757]
 transform = Transform3D(1.01, 0, 0, 0, 1.01, 0, 0, 0, 1.01, 0, 0, 0)

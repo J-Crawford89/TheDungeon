@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="DieVisualCatalog" format=3 uid="uid://b2tr5vcrebhmg"]
 
+[ext_resource type="Material" uid="uid://cj305pjlqiti6" path="res://Assets/Materials/DefaultPlayerDiceMaterial.tres" id="1_jdnr3"]
 [ext_resource type="Script" uid="uid://hgngvu32y7r1" path="res://Resources/DieVisualCatalogEntry.cs" id="1_py7de"]
 [ext_resource type="Script" uid="uid://omcoscosycip" path="res://Resources/DieVisualCatalog.cs" id="1_yg2m2"]
 [ext_resource type="PackedScene" uid="uid://dcmucm7rq2syy" path="res://Scenes/Components/Dice/d3_visual.tscn" id="2_uvujm"]
@@ -62,5 +63,6 @@ metadata/_custom_type_script = "uid://hgngvu32y7r1"
 
 [resource]
 script = ExtResource("1_yg2m2")
+BodyMaterial = ExtResource("1_jdnr3")
 Entries = Array[ExtResource("1_py7de")]([SubResource("Resource_bmix5"), SubResource("Resource_kde22"), SubResource("Resource_chds5"), SubResource("Resource_3q0bo"), SubResource("Resource_c1tph"), SubResource("Resource_yoaly"), SubResource("Resource_vfbc6"), SubResource("Resource_v7g5f")])
 metadata/_custom_type_script = "uid://omcoscosycip"

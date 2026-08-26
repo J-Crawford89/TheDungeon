@@ -75,10 +75,11 @@ None open.
 
 - **Type:** Feature / visual identity
 - **Priority:** P2
-- **Status:** Proposed
+- **Status:** Needs manual confirmation
 - **Depends on:** None
 - **Desired behavior:** Player and monster dice use clearly distinct default colors. Preserve an extension point for future selectable or unlockable dice appearances.
 - **Acceptance notes:** Ownership is immediately legible during initiative and combat rolls, including multi-die events; color choices remain distinguishable under supported accessibility settings.
+- **Implementation note (2026-08-25):** C# presentation now resolves a catalog-owned body material alongside each player/monster die visual and applies it through an explicitly wired body-mesh reference without changing numeral materials, roll rules, physics, timing, or sequencing. Automated ownership propagation is covered; Godot Editor wiring and the visual/accessibility acceptance gate remain.
 
 ### Feature-003 — UI scaling
 

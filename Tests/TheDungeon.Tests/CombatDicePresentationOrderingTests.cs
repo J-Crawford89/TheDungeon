@@ -19,6 +19,7 @@ public sealed class CombatDicePresentationOrderingTests
 	{
 		private readonly object _gate = new();
 		private readonly List<TaskCompletionSource> _releases = [];
+		private readonly List<IReadOnlyList<PhysicalDieRollSpec>> _presentations = [];
 
 		public int CallCount
 		{
@@ -30,10 +31,16 @@ public sealed class CombatDicePresentationOrderingTests
 		}
 
 		public Task PresentDieAsync(PhysicalDieRollSpec die, DicePresentationProfile profile = DicePresentationProfile.Standard, CancellationToken ct = default) =>
-			Enqueue(ct);
+			Enqueue([die], ct);
 
 		public Task PresentDiceBatchAsync(IReadOnlyList<PhysicalDieRollSpec> dice, DicePresentationProfile profile = DicePresentationProfile.Standard, CancellationToken ct = default) =>
-			Enqueue(ct);
+			Enqueue(dice, ct);
+
+		public IReadOnlyList<PhysicalDieRollSpec> GetPresentation(int zeroBasedCallIndex)
+		{
+			lock (_gate)
+				return _presentations[zeroBasedCallIndex];
+		}
 
 		public async Task WaitForCallCountAsync(int expected)
 		{
@@ -58,13 +65,16 @@ public sealed class CombatDicePresentationOrderingTests
 			release.TrySetResult();
 		}
 
-		private Task Enqueue(CancellationToken ct)
+		private Task Enqueue(IReadOnlyList<PhysicalDieRollSpec> dice, CancellationToken ct)
 		{
 			var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 			if (ct.CanBeCanceled)
 				ct.Register(() => release.TrySetCanceled(ct));
 			lock (_gate)
+			{
+				_presentations.Add(dice.ToArray());
 				_releases.Add(release);
+			}
 			return release.Task;
 		}
 	}
@@ -136,6 +146,7 @@ public sealed class CombatDicePresentationOrderingTests
 		var action = combat.ExecutePlayerAttackAsync(session, 0, PlayerAttackChoice.Unarmed);
 		await presenter.WaitForCallCountAsync(1);
 
+		Assert.All(presenter.GetPresentation(0), die => Assert.Equal(DieRollVisualKind.Player, die.Kind));
 		Assert.Equal(hpBefore, monster.CurrentHp);
 		Assert.DoesNotContain(session.LogEntries, entry => entry.Kind == LogEntryKind.Roll);
 		Assert.False(combat.CanAcceptPlayerAction(session));
@@ -149,6 +160,7 @@ public sealed class CombatDicePresentationOrderingTests
 
 		reaction.Complete(0);
 		await presenter.WaitForCallCountAsync(2);
+		Assert.All(presenter.GetPresentation(1), die => Assert.Equal(DieRollVisualKind.Player, die.Kind));
 		presenter.Complete(1);
 		await reaction.WaitForCallCountAsync(2);
 
@@ -187,6 +199,7 @@ public sealed class CombatDicePresentationOrderingTests
 
 		var action = initiative.RollInitiativeOrderAsync(session, feature);
 		await presenter.WaitForCallCountAsync(1);
+		Assert.All(presenter.GetPresentation(0), die => Assert.Equal(DieRollVisualKind.Player, die.Kind));
 		presenter.Complete(0);
 		await reaction.WaitForCallCountAsync(1);
 
@@ -195,6 +208,7 @@ public sealed class CombatDicePresentationOrderingTests
 
 		reaction.Complete(0);
 		await presenter.WaitForCallCountAsync(2);
+		Assert.All(presenter.GetPresentation(1), die => Assert.Equal(DieRollVisualKind.Monster, die.Kind));
 		presenter.Complete(1);
 		await reaction.WaitForCallCountAsync(2);
 

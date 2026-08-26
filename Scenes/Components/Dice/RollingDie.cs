@@ -83,7 +83,7 @@ public partial class RollingDie : Node3D
 	public int LastVisiblePlaybackFrameCount { get; private set; }
 	public float LastDisplayedFaceDot { get; private set; }
 
-	public void SetVisual(PackedScene? visualScene)
+	public void SetVisual(PackedScene? visualScene, Material? bodyMaterial = null)
 	{
 		ClearVisual();
 		if (visualScene == null)
@@ -99,6 +99,7 @@ public partial class RollingDie : Node3D
 
 		_body = body;
 		AddChild(_body);
+		_body.ApplyBodyMaterial(bodyMaterial);
 		_body.Position = Vector3.Zero;
 		_body.ContinuousCd = true;
 		_body.ContactMonitor = true;
